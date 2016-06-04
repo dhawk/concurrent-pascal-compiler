@@ -38,9 +38,9 @@ The pic18f2520.inc file is a Concurrent Pascal include file which specifies iore
 The pic18f2520.xml file provides microcontroller specific information for the compiler such as SFR addresses.
 
 
-# General Purpose Register (GPR) Mapping
+# General Purpose Registers (GPRs) 
 
-GPRs are used as RAM and locations are assigned by the compiler.
+GPRs are used as RAM and locations are assigned by the compiler for variables, system types, stacks and internal kernel data structures.
 
 ## Non-Contiguous GPR Regions
 
@@ -51,7 +51,7 @@ A few PIC18s have non-contiguous GPR regions.  The current implementation of the
 Some PIC18x microcontrollers (e.g. USB controllers) have dual-ported GPRs.  This is not currently supported by the compiler but is something that will need to be addressed in the future.
 
 
-# Special Function Registers
+# Special Function Registers (SFRs)
 
 The microprocessor include file referenced by the $processor directive contain type definitions for the SFRs.  
 
@@ -89,9 +89,15 @@ ioreg
    BAUDCON: tBAUDCON at $FB8;
 ~~~
 
+There are also usually some additional overlaid fields taken from Microchip documentation such as the RCMT, RXCKP and SCKP fields above.
+
+## Combo SFR types
+
+Often there are adjacent groups of SFRs that can be treated as one type.  This can be for convenience and sometimes, when there are multiple such groups the combined type can be used for all.  The type can be handled as a parameter and one piece of code can be used for the multiple SFR groups.
+ 
 # EEPROM Support
 
-Many PIC18x microcontrollers have internal EEPROM.  The compiler currently supports up to 256 bytes of internal EEPROM.  External EEPROM is not currently supported.
+Many PIC18x microcontrollers have internal EEPROM.  The compiler currently supports up to 256 bytes of internal EEPROM.  
 
 # ROM Constants
 
@@ -117,7 +123,7 @@ The ieee_single type is provided for use in transmitting binary values from the 
 
 The following code fragment shows how to use an overlay variable to access the individual binary bytes of an ieee_single variable:
 
-```concurrentpascal
+~~~
 var
    r: real;
    o: overlay
@@ -134,7 +140,7 @@ begin
    o.r := r;
    transmit  o.b3..o.b0  to external computer
 end.
-```
+~~~
 
 Note that real and ieee_single types are little-endian as implemented in the PIC18x Concurrent Pascal compiler.
 

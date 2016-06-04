@@ -7,6 +7,15 @@
 
 # Site settings
 title: Concurrent Pascal for Microcontrollers
+sub-title: >
+             Cooperating Sequential Processes 
+             <ul>
+                 <li>Language supported</li>
+                 <li>Interrupt driven</li>
+                 <li>Multi-priority</li>
+                 <li>Monitors for inter-process communication</li>
+             </ul>
+repository_url: https://github.com/dhawk/concurrent-pascal-compiler 
 email: cp@davidhawk.us
 description: > # this means to ignore newlines until "baseurl:"
   Language Supported Interrupt Driven Multi-Priority Concurrent Processes
