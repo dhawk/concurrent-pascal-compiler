@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ComboTypes>
+   <ComboType TypeName="tAD" VarNameFormatString="AD" Reversed="false">
+         <SFRPattern>
+            <SFR regex="^ADCON2$"/>
+            <SFR regex="^ADCON1$"/>
+            <SFR regex="^ADCON0$"/>
+            <SFR regex="^ADRESL$"/>
+            <SFR regex="^ADRESH$"/>
+         </SFRPattern>
+   </ComboType>
+   <ComboType TypeName="tAD" VarNameFormatString="AD" Reversed="true">
+         <SFRPattern>
+            <SFR regex="^ADCON2$"/>
+            <SFR regex="^ADCON1$"/>
+            <SFR regex="^ADRESL$"/>
+            <SFR regex="^ADRESH$"/>
+         </SFRPattern>
+   </ComboType>
+   <ComboType TypeName="tADCHIT" VarNameFormatString="ADCHIT%s" Reversed="true">
+         <SFRPattern>
+            <SFR regex="^ADCHIT([0-9]+)L$"/>
+            <SFR regex="^ADCHIT([0-9]+)H$"/>
+         </SFRPattern>
+   </ComboType>
+   <ComboType TypeName="tADCHS" VarNameFormatString="ADCHS%s" Reversed="true">
+         <SFRPattern>
+            <SFR regex="^ADCHS([0-9]+)L$"/>
+            <SFR regex="^ADCHS([0-9]+)H$"/>
+         </SFRPattern>
+   </ComboType>
+   <ComboType TypeName="tADCON" VarNameFormatString="ADCON%s" Reversed="true">
+         <SFRPattern>
+            <SFR regex="^ADCON([0-9]+)L$"/>
+            <SFR regex="^ADCON([0-9]+)H$"/>
+         </SFRPattern>
+   </ComboType>
+   <ComboType TypeName="tADCSS" VarNameFormatString="ADCSS%s" Reversed="true">
+         <SFRPattern>
+            <SFR regex="^ADCSS([0-9]+)L$"/>
+            <SFR regex="^ADCSS([0-9]+)H$"/>
+         </SFRPattern>
+   </ComboType>
+   <ComboType TypeName="tADCTMUEN" VarNameFormatString="ADCTMUEN%s" Reversed="true">
+         <SFRPattern>
+            <SFR regex="^ADCTMUEN([0-9]+)L$"/>
+            <SFR regex="^ADCTMUEN([0-9]+)H$"/>
+         </SFRPattern>
+   </ComboType>
+   <ComboType TypeName="tANCON" VarNameFormatString="ANCON" Reversed="false">
+         <SFRPattern>
+            <SFR regex="^ANCON1$"/>
+            <SFR regex="^ANCON0$"/>
+         </SFRPattern>
+   </ComboType>
+   <ComboType TypeName="tB" VarNameFormatString="B%s" Reversed="false">
+         <SFRPattern>
+            <SFR regex="^B([0-9]+)CON$"/>
+            <SFR regex="^B([0-9]+)SIDH$"/>
+            <SFR regex="^B([0-9]+)SIDL$"/>
+            <SFR regex="^B([0-9]+)EIDH$"/>
+            <SFR regex="^B([0-9]+)EIDL$"/>
+            <SFR regex="^B([0-9]+)DLC$"/>
+            <SFR regex="^B([0-9]+)D0$"/>
+            <SFR regex="^B([0-9]+)D1$"/>
+            <SFR regex="^B([0-9]+)D2$"/>
+            <SFR regex="^B([0-9]+)D3$"/>
+            <SFR regex="^B([0-9]+)D4$"/>
+            <SFR regex="^B([0-9]+)D5$"/>
+            <SFR regex="^B([0-9]+)D6$"/>
+            <SFR regex="^B([0-9]+)D7$"/>
+         </SFRPattern>
+         <FieldNameFixup regex="^B46D77$" replacement="B46D77"/>
+         <FieldNameFixup regex="^B57D07$" replacement="B57D07"/>
+         <FieldNameFixup regex="^B57D23$" replacement="B57D23"/>
+   </ComboType>
+   <ComboType TypeName="tBAUDCON" VarNameFormatString="BAUDCON%s" Reversed="false">
+         <SFRPattern>
+            <SFR regex="^BAUDCON([0-9]+)$"/>
+         </SFRPattern>
+   </ComboType>
+   <ComboType TypeName="tBRGCON" VarNameFormatString="BRGCON" Reversed="false">
+         <SFRPattern>
+            <SFR regex="^BRGCON1$"/>
+            <SFR regex="^BRGCON2$"/>
+            <SFR regex="^BRGCON3$"/>
+         </SFRPattern>
+   </ComboType>
+   <ComboType TypeName="tCAN" VarNameFormatString="CAN%s" Reversed="false">
+         <SFRPattern>
+            <SFR regex="^CANSTAT()$"/>
+            <SFR regex="^CANCON()$"/>
+         </SFRPattern>
+         <SFRPattern>
+            <SFR regex="^CANSTAT_RO([0-9]+)$"/>
+            <SFR regex="^CANCON_RO([0-9]+)$"/>
+         </SFRPattern>
+         <FieldNameFixup regex="^ICODE2([012])$" replacement="ICODE%s"/>
+   </ComboType>
+   <ComboType TypeName="tCCP" VarNameFormatString="CCP%s" Reversed="true">
+         <SFRPattern>
+            <SFR regex="^CCP([0-9]+)CON$"/>
+            <SFR regex="^CCPR([0-9]+)L$"/>
+            <SFR regex="^CCPR([0-9]+)H$"/>
+         </SFRPattern>
+   </ComboType>
+   <ComboType TypeName="tCM" VarNameFormatString="CM%s" Reversed="false">
+         <SFRPattern>
+            <SFR regex="^CM([0-9]+)CON0$"/>
+            <SFR regex="^CM([0-9]+)CON1$"/>
+         </SFRPattern>
+         <FieldNameFixup regex="^(C[12]HYS)$" replacement="%s"/>
+         <FieldNameFixup regex="^(C[12]RSEL)$" replacement="%s"/>
+         <FieldNameFixup regex="^(C[12]SYNC)$" replacement="%s"/>
+         <FieldNameFixup regex="^(MC[12]OUT)$" replacement="%s"/>
+   </ComboType>
+   <ComboType TypeName="tCM" VarNameFormatString="CM%s" Reversed="true">
+         <SFRPattern>
+            <SFR regex="^CM([0-9]+)CON1$"/>
+            <SFR regex="^CM([0-9]+)CON0$"/>
+         </SFRPattern>
+         <FieldNameFixup regex="^(C[12]HYS)$" replacement="%s"/>
+         <FieldNameFixup regex="^(C[12]RSEL)$" replacement="%s"/>
+         <FieldNameFixup regex="^(C[12]SYNC)$" replacement="%s"/>
+         <FieldNameFixup regex="^(MC[12]OUT)$" replacement="%s"/>
+   </ComboType>
+   <ComboType TypeName="tECCP" VarNameFormatString="ECCP%s" Reversed="false">
+         <SFRPattern>
+            <SFR regex="^ECCP([0-9]+)AS$"/>
+            <SFR regex="^ECCP([0-9]+)DEL$"/>
+         </SFRPattern>
+   </ComboType>
+   <ComboType TypeName="tECCP" VarNameFormatString="ECCP%s" Reversed="false">
+         <SFRPattern>
+            <SFR regex="^ECCP([0-9]+)DEL$"/>
+            <SFR regex="^ECCP([0-9]+)AS$"/>
+         </SFRPattern>
+   </ComboType>
+   <ComboType TypeName="tPDC" VarNameFormatString="PDC%s" Reversed="false">
+         <SFRPattern>
+            <SFR regex="^PDC([0-9]+)H$"/>
+            <SFR regex="^PDC([0-9]+)L$"/>
+         </SFRPattern>
+   </ComboType>
+   <ComboType TypeName="tPMDIN" VarNameFormatString="PMDIN%s" Reversed="true">
+         <SFRPattern>
+            <SFR regex="^PMDIN([0-9]+)L$"/>
+            <SFR regex="^PMDIN([0-9]+)H$"/>
+         </SFRPattern>
+   </ComboType>
+   <ComboType TypeName="tPMDOUT" VarNameFormatString="PMDOUT%s" Reversed="true">
+         <SFRPattern>
+            <SFR regex="^PMDOUT([0-9]+)L$"/>
+            <SFR regex="^PMDOUT([0-9]+)H$"/>
+         </SFRPattern>
+   </ComboType>
+   <ComboType TypeName="tREFO" VarNameFormatString="REFO%s" Reversed="false">
+         <SFRPattern>
+            <SFR regex="^REFO([0-9]+)CON3$"/>
+            <SFR regex="^REFO([0-9]+)CON2$"/>
+            <SFR regex="^REFO([0-9]+)CON1$"/>
+            <SFR regex="^REFO([0-9]+)CON$"/>
+         </SFRPattern>
+   </ComboType>
+   <ComboType TypeName="tRXB" VarNameFormatString="RXB%s" Reversed="false">
+         <SFRPattern>
+            <SFR regex="^RXB([0-9]+)CON$"/>
+            <SFR regex="^RXB([0-9]+)SIDH$"/>
+            <SFR regex="^RXB([0-9]+)SIDL$"/>
+            <SFR regex="^RXB([0-9]+)EIDH$"/>
+            <SFR regex="^RXB([0-9]+)EIDL$"/>
+            <SFR regex="^RXB([0-9]+)DLC$"/>
+            <SFR regex="^RXB([0-9]+)D0$"/>
+            <SFR regex="^RXB([0-9]+)D1$"/>
+            <SFR regex="^RXB([0-9]+)D2$"/>
+            <SFR regex="^RXB([0-9]+)D3$"/>
+            <SFR regex="^RXB([0-9]+)D4$"/>
+            <SFR regex="^RXB([0-9]+)D5$"/>
+            <SFR regex="^RXB([0-9]+)D6$"/>
+            <SFR regex="^RXB([0-9]+)D7$"/>
+         </SFRPattern>
+   </ComboType>
+   <ComboType TypeName="tRXF" VarNameFormatString="RXF%s" Reversed="false">
+         <SFRPattern>
+            <SFR regex="^RXF([0-9]+)SIDH$"/>
+            <SFR regex="^RXF([0-9]+)SIDL$"/>
+            <SFR regex="^RXF([0-9]+)EIDH$"/>
+            <SFR regex="^RXF([0-9]+)EIDL$"/>
+         </SFRPattern>
+   </ComboType>
+   <ComboType TypeName="tRXFCON" VarNameFormatString="RXFCON%s" Reversed="false">
+         <SFRPattern>
+            <SFR regex="^RXFCON0()$"/>
+            <SFR regex="^RXFCON1()$"/>
+         </SFRPattern>
+   </ComboType>
+   <ComboType TypeName="tRXM" VarNameFormatString="RXM%s" Reversed="false">
+         <SFRPattern>
+            <SFR regex="^RXM([0-9]+)SIDH$"/>
+            <SFR regex="^RXM([0-9]+)SIDL$"/>
+            <SFR regex="^RXM([0-9]+)EIDH$"/>
+            <SFR regex="^RXM([0-9]+)EIDL$"/>
+         </SFRPattern>
+   </ComboType>
+   <ComboType TypeName="tSSPa" VarNameFormatString="SSPa%s" Reversed="false">
+         <SFRPattern>
+            <SFR regex="^SSP([0-9]+)CON2$"/>
+            <SFR regex="^SSP([0-9]+)CON1$"/>
+            <SFR regex="^SSP([0-9]+)STAT$"/>
+            <SFR regex="^SSP([0-9]+)ADD$"/>
+            <SFR regex="^SSP([0-9]+)BUF$"/>
+            <SFR regex="^SSP([0-9]+)MSK$"/>
+            <SFR regex="^SSP([0-9]+)CON3$"/>
+         </SFRPattern>
+   </ComboType>
+   <ComboType TypeName="tSSPb" VarNameFormatString="SSPb%s" Reversed="false">
+         <SFRPattern>
+            <SFR regex="^SSP([0-9]+)CON3$"/>
+            <SFR regex="^SSP([0-9]+)MSK$"/>
+            <SFR regex="^SSP([0-9]+)CON2$"/>
+            <SFR regex="^SSP([0-9]+)CON1$"/>
+            <SFR regex="^SSP([0-9]+)STAT$"/>
+            <SFR regex="^SSP([0-9]+)ADD$"/>
+            <SFR regex="^SSP([0-9]+)BUF$"/>
+         </SFRPattern>
+   </ComboType>
+   <ComboType TypeName="tSSPc" VarNameFormatString="SSPc%s" Reversed="false">
+         <SFRPattern>
+            <SFR regex="^SSP([0-9]+)CON2$"/>
+            <SFR regex="^SSP([0-9]+)CON1$"/>
+            <SFR regex="^SSP([0-9]+)STAT$"/>
+            <SFR regex="^SSP([0-9]+)ADD$"/>
+            <SFR regex="^SSP([0-9]+)BUF$"/>
+         </SFRPattern>
+   </ComboType>
+   <ComboType TypeName="tSSPd" VarNameFormatString="SSPd%s" Reversed="false">
+         <SFRPattern>
+            <SFR regex="^SSP([0-9]+)CON2$"/>
+            <SFR regex="^SSP([0-9]+)CON1$"/>
+            <SFR regex="^SSP([0-9]+)STAT$"/>
+         </SFRPattern>
+   </ComboType>
+   <ComboType TypeName="tSSPe" VarNameFormatString="SSPe%s" Reversed="false">
+         <SFRPattern>
+            <SFR regex="^SSP([0-9]+)CON2$"/>
+            <SFR regex="^SSP([0-9]+)CON1$"/>
+            <SFR regex="^SSP([0-9]+)STAT$"/>
+            <SFR regex="^SSP([0-9]+)ADD$"/>
+         </SFRPattern>
+   </ComboType>
+   <ComboType TypeName="tSSPf" VarNameFormatString="SSPf%s" Reversed="false">
+         <SFRPattern>
+            <SFR regex="^SSP([0-9]+)ADD$"/>
+            <SFR regex="^SSP([0-9]+)BUF$"/>
+         </SFRPattern>
+   </ComboType>
+   <ComboType TypeName="tSSPg" VarNameFormatString="SSPg%s" Reversed="false">
+         <SFRPattern>
+            <SFR regex="^SSP([0-9]+)MSK$"/>
+            <SFR regex="^SSP([0-9]+)CON2$"/>
+            <SFR regex="^SSP([0-9]+)CON1$"/>
+            <SFR regex="^SSP([0-9]+)STAT$"/>
+         </SFRPattern>
+   </ComboType>
+   <ComboType TypeName="tSSPh" VarNameFormatString="SSPh%s" Reversed="false">
+         <SFRPattern>
+            <SFR regex="^SSP([0-9]+)MSK$"/>
+            <SFR regex="^SSP([0-9]+)CON3$"/>
+         </SFRPattern>
+   </ComboType>
+   <ComboType TypeName="tTMR0" VarNameFormatString="TMR0" Reversed="true">
+         <SFRPattern>
+            <SFR regex="^T0CON$"/>
+            <SFR regex="^TMR0L$"/>
+            <SFR regex="^TMR0H$"/>
+         </SFRPattern>
+         <FieldNameFixup regex="^T0PS3$" replacement="T0PS3_"/>
+   </ComboType>
+   <ComboType TypeName="tTMR16" VarNameFormatString="TMR%s" Reversed="true">
+         <SFRPattern>
+            <SFR regex="^T([1-9]+[0-9]*)CON$"/>
+            <SFR regex="^TMR([0-9]+)L$"/>
+            <SFR regex="^TMR([0-9]+)H$"/>
+         </SFRPattern>
+         <FieldNameFixup regex="^RD163$" replacement="-"/>
+   </ComboType>
+   <ComboType TypeName="tTMR8" VarNameFormatString="TMR%s" Reversed="true">
+         <SFRPattern>
+            <SFR regex="^T([1-9][0-9]*)CON$"/>
+            <SFR regex="^PR([1-9][0-9]*)$"/>
+            <SFR regex="^TMR([1-9][0-9]*)$"/>
+         </SFRPattern>
+         <FieldNameFixup regex="^TMR[0-9]+$" replacement="TMRx"/>
+   </ComboType>
+   <ComboType TypeName="tTXB" VarNameFormatString="TXB%s" Reversed="false">
+         <SFRPattern>
+            <SFR regex="^TXB([0-9]+)CON$"/>
+            <SFR regex="^TXB([0-9]+)SIDH$"/>
+            <SFR regex="^TXB([0-9]+)SIDL$"/>
+            <SFR regex="^TXB([0-9]+)EIDH$"/>
+            <SFR regex="^TXB([0-9]+)EIDL$"/>
+            <SFR regex="^TXB([0-9]+)DLC$"/>
+            <SFR regex="^TXB([0-9]+)D0$"/>
+            <SFR regex="^TXB([0-9]+)D1$"/>
+            <SFR regex="^TXB([0-9]+)D2$"/>
+            <SFR regex="^TXB([0-9]+)D3$"/>
+            <SFR regex="^TXB([0-9]+)D4$"/>
+            <SFR regex="^TXB([0-9]+)D5$"/>
+            <SFR regex="^TXB([0-9]+)D6$"/>
+            <SFR regex="^TXB([0-9]+)D7$"/>
+         </SFRPattern>
+   </ComboType>
+</ComboTypes>
