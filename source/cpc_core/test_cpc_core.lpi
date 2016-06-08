@@ -161,7 +161,7 @@
     <Version Value="11"/>
     <PathDelim Value="\"/>
     <Target>
-      <Filename Value="..\..\bin\"/>
+      <Filename Value="..\..\bin\test_cpc_core"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="..\lib;..\lib\mparith;$(ProjOutDir)"/>
@@ -182,7 +182,6 @@
         <OverflowChecks Value="True"/>
         <StackChecks Value="True"/>
       </Checks>
-      <VerifyObjMethodCallValidity Value="True"/>
     </CodeGeneration>
     <Linking>
       <Options>
