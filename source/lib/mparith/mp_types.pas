@@ -1,10 +1,14 @@
 unit mp_types;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 {MPArith type definitions and constants}
 
 interface
 
-{$i STD.INC}
+{$i std.inc}
 
 {$ifdef HAS_ASSERT}
   {$C+}   {Turn assertions on for critical conditions in initialization}

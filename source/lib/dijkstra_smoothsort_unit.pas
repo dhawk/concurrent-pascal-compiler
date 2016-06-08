@@ -1,5 +1,10 @@
 
 unit dijkstra_smoothsort_unit;
+
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 //  Delphi implementation of Dijkstra's algorithm
 //  downloaded from http://en.wikibooks.org/wiki/Algorithm_Implementation/Sorting/Smoothsort on 5/18/2012
 //  minor modification to take an array of objects and comparison function, drh

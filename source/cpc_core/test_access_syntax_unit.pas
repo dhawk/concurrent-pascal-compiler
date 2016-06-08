@@ -1,5 +1,9 @@
 unit test_access_syntax_unit;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 interface
 
 procedure test_TAccess;

@@ -6,7 +6,8 @@ UNIT cpc_source_analysis_unit;
 
 INTERFACE
 
-uses cpc_multi_precision_integer_unit, Classes, System.SysUtils;
+uses
+   SysUtils, cpc_multi_precision_integer_unit, Classes;
 
 type
    TSourceLocation =

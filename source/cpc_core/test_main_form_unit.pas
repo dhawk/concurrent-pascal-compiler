@@ -424,6 +424,8 @@ procedure TMainForm.RunSelectedTestsButtonClick(Sender: TObject);
    end;
 
 INITIALIZATION
+   {$ifndef FPC}
    ReportMemoryLeaksOnShutdown := true;
+   {$endif}
 
 end.

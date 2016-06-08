@@ -630,8 +630,8 @@ procedure test_set_non_constant_expected
    end;
    
    
-   //============================
-   //  Constant Expression Tests
+//============================
+//  Constant Expression Tests
    
 procedure test_primary_constant_expressions 
    (create_expression: TTestGenerator

@@ -1,5 +1,9 @@
 unit test_statement_syntax_unit;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 interface
 
 procedure test_statements;

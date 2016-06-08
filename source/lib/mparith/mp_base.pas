@@ -1,5 +1,9 @@
 Unit mp_base;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 {Multi precision integer arithmetic basic routines}
 
 interface
@@ -8,7 +12,7 @@ interface
   {$X+} {needed for pchars/RESULT}
 {$endif}
 
-{$i STD.INC}
+{$i std.inc}
 
 {$ifdef BIT16}
   {$N+}
@@ -54,7 +58,7 @@ uses
                       Algebra, Version 2, 2008, from http://shoup.net/ntb/
                  [30] J. v. zur Gathen, J. Gerhard, Modern computer algebra, 2nd ed., 2003
                       http://math-www.uni-paderborn.de/mca/
-                 [33] C. Burnikel, J. Ziegler: Fast Recursive Division. MPI fÅr Informatik,
+                 [33] C. Burnikel, J. Ziegler: Fast Recursive Division. MPI f¬År Informatik,
                       Forschungsbericht MPI-I-98-1-022 (1998); available via
                       http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.47.565
                  [34] P. Zimmermann, Karatsuba Square Root, INRIA Research Report RR-3805;

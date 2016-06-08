@@ -1,7 +1,15 @@
 program test_cpc_core;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 uses
+{$IFnDEF FPC}
   FastMM4,
+{$ELSE}
+  Interfaces,
+{$ENDIF}
   Forms,
   cpc_access_unit in 'cpc_access_unit.pas',
   cpc_blocks_unit in 'cpc_blocks_unit.pas',
@@ -34,7 +42,9 @@ uses
 
 begin
   Application.Initialize;
-  Application.MainFormOnTaskbar := True;
+  {$ifndef FPC}
+    Application.MainFormOnTaskbar := True;
+  {$endif}
   Application.CreateForm(TMainForm, MainForm);
   Application.Run;
 end.

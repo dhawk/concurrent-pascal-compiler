@@ -1,5 +1,9 @@
 UNIT cpc_main_compiler_unit;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 INTERFACE
 
 uses

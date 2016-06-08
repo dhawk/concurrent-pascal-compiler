@@ -1,4 +1,4 @@
-﻿UNIT cpc_statements_unit;
+UNIT cpc_statements_unit;
 
 {$ifdef FPC}
 {$MODE Delphi}

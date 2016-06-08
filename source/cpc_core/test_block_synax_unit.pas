@@ -1,5 +1,9 @@
 unit test_block_synax_unit;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 interface
 
 procedure test_block_syntax_unit;

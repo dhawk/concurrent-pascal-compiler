@@ -1,5 +1,9 @@
 unit test_type_syntax_unit;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 interface
 
 uses

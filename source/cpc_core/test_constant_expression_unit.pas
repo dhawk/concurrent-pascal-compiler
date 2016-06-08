@@ -1,5 +1,9 @@
 unit test_constant_expression_unit;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 interface
 
 procedure test_constant_syntax_unit;

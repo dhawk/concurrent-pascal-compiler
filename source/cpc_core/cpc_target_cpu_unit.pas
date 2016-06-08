@@ -94,7 +94,7 @@ var
 IMPLEMENTATION
 
 uses
-  System.SysUtils;
+   SysUtils;
 
 constructor TTargetCPUBaseClass.Create (_processor_name: string);
    var

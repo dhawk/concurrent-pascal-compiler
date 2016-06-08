@@ -1,5 +1,9 @@
 unit test_multi_precision_integer_unit;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 interface
 
 procedure test_mp_math;
