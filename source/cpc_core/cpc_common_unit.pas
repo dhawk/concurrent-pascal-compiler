@@ -349,7 +349,7 @@ function err_char_value_outside_legal_range: string;
 // TRACING A DEFINITION OBJECT LIFETIME
 //    To trace the lifetime events of a definition object:
 //       - uncomment the DEFINITION_OBJNO_TRACE define below (remember to re-comment when problem is solved}
-//{$define DEFINITION_OBJNO_TRACE}
+{$define DEFINITION_OBJNO_TRACE}
 //       - set the ERROBJ constant to the obj_num of the object of interest
 const ERROBJ = 236;
 //       - for Delphi only: set name of logfile below
