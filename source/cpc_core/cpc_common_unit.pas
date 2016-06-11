@@ -345,9 +345,30 @@ function err_invalid_high_set_range_value: string;
 function err_set_member_value_outside_legal_range: string;
 function err_char_value_outside_legal_range: string;
 
+//============================================
+// TRACING A DEFINITION OBJECT LIFETIME
+//    To trace the lifetime events of a definition object:
+//       - uncomment the DEFINITION_OBJNO_TRACE define below (remember to re-comment when problem is solved}
+//{$define DEFINITION_OBJNO_TRACE}
+//       - set the ERROBJ constant to the obj_num of the object of interest
+const ERROBJ = 236;
+//       - for Delphi only: set name of logfile below
+const definition_objno_trace_log_file_name = 'c:\temp\cpc_del.txt';
+//       - for Lazarus only: set name of logfile
+//            set your program's command line parameters for --debug-log=<file>
+//               (In Lazarus: Run / Run Parameters / Command line parameters)
+//============================================
+
 IMPLEMENTATION
 
 uses
+  {$ifdef DEFINITION_OBJNO_TRACE}
+     {$ifdef FPC}
+  LazLogger,
+     {$else}
+  MadStackTrace,  // requires MacExcept to be installed in Delphi IDE (http://madshi.net)
+     {$endif}
+  {$endif}
   cpc_core_objects_unit;
 
 constructor compile_error.Create
@@ -385,23 +406,108 @@ destructor code_generation_error.Destroy;
 //  TReferenceCountedObject
 //==========================
 
+{$ifdef DEFINITION_OBJNO_TRACE}
+   {$ifdef FPC}
+
+procedure dump_stk;
+   var
+      I: Longint;
+      prevbp: Pointer;
+      CallerFrame,
+      CallerAddress,
+      bp: Pointer;
+   const
+      MaxDepth = 20;
+   begin
+      DebugLnEnter('---stk trace---');
+      bp := get_frame;
+      // This trick skip SendCallstack item
+      // bp:= get_caller_frame(get_frame);
+      try
+         prevbp := bp - 1;
+         I := 0;
+         while bp > prevbp do
+            begin
+               CallerAddress := get_caller_addr(bp);
+               CallerFrame := get_caller_frame(bp);
+               if (CallerAddress = nil) then
+                  Break;
+               DebugLn(BackTraceStrFunc(CallerAddress));
+               Inc(I);
+               if (I >= MaxDepth) or (CallerFrame = nil) then
+                  Break;
+               prevbp := bp;
+               bp := CallerFrame
+            end
+      except
+         { prevent endless dump if an exception occured }
+      end;
+      DebugLnExit ('---end stk trace---');
+   end;
+
+   {$else}   // Delphi
+
+var logfile: text;
+
+procedure dump_stk;
+   begin
+      writeln (logfile, '---stk trace---');
+      writeln (logfile, MadStackTrace.StackTrace);
+      writeln (logfile, '---end stk trace---');
+   end;
+
+   {$endif}
+{$endif}   // DEFINITION_OBJNO_TRACE
+
 constructor TReferenceCountedObject.Create;
    begin
       ref_count := 1;
       num_objects := num_objects + 1;
-      obj_num := num_objects
+      obj_num := num_objects;
+{$ifdef DEFINITION_OBJNO_TRACE}
+      if obj_num = ERROBJ then
+         begin
+   {$ifdef FPC}
+            DebugLn('created -> 1');
+   {$else}
+            writeln (logfile, 'created -> 1');
+   {$endif}
+            dump_stk
+         end
+{$endif}
    end;
 
 procedure TReferenceCountedObject.AddRef;
    begin
-      ref_count := ref_count + 1
+      ref_count := ref_count + 1;
+{$ifdef DEFINITION_OBJNO_TRACE}
+      if obj_num = ERROBJ then
+         begin
+   {$ifdef FPC}
+            DebugLn('addref ', IntToStr(ref_count-1), ' -> ', inttostr(ref_count));
+   {$else}
+            writeln(logfile, 'addref ', IntToStr(ref_count-1), ' -> ', inttostr(ref_count));
+   {$endif}
+            dump_stk
+        end
+{$endif}
    end;
 
 procedure TReferenceCountedObject.Release;
    begin
       if Self <> nil then
          begin
-         if ref_count<=0 then
+{$ifdef DEFINITION_OBJNO_TRACE}
+            if obj_num = ERROBJ then
+               begin
+   {$ifdef FPC}
+                  DebugLn('release ', inttostr(ref_count), ' -> ', inttostr(ref_count-1));
+   {$else}
+                  writeln(logfile, 'release ', inttostr(ref_count), ' -> ', inttostr(ref_count-1));
+   {$endif}
+                  dump_stk
+               end;
+{$endif}
             assert(ref_count > 0, 'release with 0 reference count');
             ref_count := ref_count - 1;
             if ref_count = 0 then
@@ -433,5 +539,16 @@ function err_char_value_outside_legal_range: string;
    begin
       result := format('char value outside legal range of %d..%d', [min_char, max_char])
    end;
+
+{$ifdef DEFINITION_OBJNO_TRACE}
+   {$ifndef FPC}
+INITIALIZATION
+   assignfile (logfile, definition_objno_trace_log_file_name);
+   rewrite (logfile);
+
+FINALIZATION
+   closefile (logfile);
+   {$endif}
+{$endif}   // DEFINITION_OBJNO_TRACE
 
 END.
