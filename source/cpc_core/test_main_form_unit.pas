@@ -1,10 +1,10 @@
-unit test_main_form_unit;
+UNIT test_main_form_unit;
 
 {$ifdef FPC}
 {$MODE Delphi}
 {$endif}
 
-interface
+INTERFACE
 
 uses
   SysUtils, Variants, Classes, Graphics, Controls, Forms,
@@ -71,7 +71,7 @@ procedure test_compile_error_generation
 
 procedure record_bad_test_result;
 
-implementation
+IMPLEMENTATION
 
 {$R *.dfm}
 
@@ -424,8 +424,8 @@ procedure TMainForm.RunSelectedTestsButtonClick(Sender: TObject);
    end;
 
 INITIALIZATION
-   {$ifndef FPC}
+{$ifndef FPC}
    ReportMemoryLeaksOnShutdown := true;
-   {$endif}
+{$endif}
 
-end.
+END.

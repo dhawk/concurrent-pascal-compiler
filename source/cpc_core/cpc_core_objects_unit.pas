@@ -1098,7 +1098,7 @@ procedure TBooleanDataType.CheckAssignmentCompatability
 constructor TEnumType.CreateFromSourceTokens;
    var
       id_idx: TIdentifierIdx;
-      enum_idx: integer;
+      enum_idx, i: integer;
       cexpr: TCExpression;
       enum_const: TConstant;
       prev_specified_value: int64;
@@ -1115,17 +1115,25 @@ constructor TEnumType.CreateFromSourceTokens;
       enum_idx := -1;
       prev_specified_value := 0;  // not used, but suppresses compiler warning
       repeat // once per enum constant
-         enum_idx := enum_idx + 1;
-         SetLength(enums, enum_idx + 1);
 
          if (enum_type_kind = sequential_value_enum_type)
             and
-            (enum_idx > 255) then
+            (enum_idx >= 255) then
             raise compile_error.Create(err_more_than_256_constants_in_enum);
 
          if not lex.token_is_identifier then
             raise compile_error.Create(err_identifier_expected);
+
          id_idx := lex.token.identifier_idx;
+         for i := 0 to enum_idx do
+            if enums[i].identifier_idx = id_idx then
+               raise compile_error.Create (err_identifier_already_defined);
+
+         if CurrentDefinitionTable.DefinedInCurrentScope (id_idx) then
+            raise compile_error.Create (err_identifier_already_defined);
+
+         enum_idx := enum_idx + 1;
+         SetLength(enums, enum_idx + 1);
          enums[enum_idx].identifier_idx := id_idx;
          enums[enum_idx].identifier_src_loc := lex.token.src_loc;
          lex.advance_token;
@@ -1169,13 +1177,6 @@ constructor TEnumType.CreateFromSourceTokens;
          if info.max_value.lt (enums[enum_idx].value) then
             info.max_value.AsInteger := enums[enum_idx].value;
 
-         enum_const := TConstant.CreateEnumConstant (Self, enums[enum_idx].value);
-         try
-            CurrentDefinitionTable.DefineForCurrentScope(id_idx, enum_const, enums[enum_idx].identifier_src_loc);
-         finally
-            enum_const.Release
-         end;
-
          if not lex.token_is_symbol(sym_right_parenthesis) then
             begin
                if not lex.token_is_symbol(sym_comma) then
@@ -1183,7 +1184,15 @@ constructor TEnumType.CreateFromSourceTokens;
                lex.advance_token
             end
       until lex.token_is_symbol(sym_right_parenthesis);
-      lex.advance_token
+      lex.advance_token;
+      // there must be no compile_error exceptions after this point
+
+      for enum_idx := 0 to Length(enums)-1 do
+         begin
+            enum_const := TConstant.CreateEnumConstant (Self, enums[enum_idx].value);
+            CurrentDefinitionTable.DefineForCurrentScope(enums[enum_idx].identifier_idx, enum_const, enums[enum_idx].identifier_src_loc);
+            enum_const.Release
+         end
    end;
 
 procedure TEnumType.CheckAssignmentCompatability

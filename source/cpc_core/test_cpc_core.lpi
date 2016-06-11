@@ -30,6 +30,7 @@
     <RunParams>
       <local>
         <FormatVersion Value="1"/>
+        <CommandLineParams Value="--debug-log=\temp\cpc_laz.txt"/>
       </local>
     </RunParams>
     <RequiredPackages Count="1">

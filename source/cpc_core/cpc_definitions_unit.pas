@@ -87,6 +87,7 @@ type
             );
          function get_current_definition: TDefinition;
          function get_global_definition: TDefinition;
+         function is_defined_in_current_scope (defining_scope: integer): boolean;
          procedure leave_scope
             (current_scope: integer
             );
@@ -138,6 +139,7 @@ type
              def: TDefinition
             );
          function GetDefinitionForIdentifier (id: string; should_exist: boolean): TDefinition;
+         function DefinedInCurrentScope (id_idx: TIdentifierIdx): boolean;
       end;
 
 var
@@ -281,6 +283,11 @@ procedure TCurrentDefinitionTable.DefineForCurrentScope
       identifiers[id_idx].define(def, current_scope, id_loc)
    end;
 
+function TCurrentDefinitionTable.DefinedInCurrentScope (id_idx: TIdentifierIdx): boolean;
+   begin
+      result := identifiers[id_idx].is_defined_in_current_scope (current_scope)
+   end;
+
 procedure TCurrentDefinitionTable.RedefineForCurrentScope
    (id_idx: TIdentifierIdx;
     def: TDefinition
@@ -372,6 +379,17 @@ procedure TDefStack.define
       stk[idx].definition := definition;
       definition.AddRef;
       stk[idx].defining_scope := defining_scope
+   end;
+
+function TDefStack.is_defined_in_current_scope (defining_scope: integer): boolean;
+   var
+      idx: integer;
+   begin
+      idx := Length(stk);
+      if (idx > 0) and (stk[idx - 1].defining_scope = defining_scope) then
+         result := true
+      else
+         result := false
    end;
 
 procedure TDefStack.redefine
