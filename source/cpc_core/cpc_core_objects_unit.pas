@@ -554,16 +554,13 @@ type
 function SetByte (constant: TConstant; byteno: cardinal): byte;
 function CreateTypeDenoterFromSourceTokens: TTypeDef;
 function CreateExpressionFromSourceTokens: TExpression;
-procedure check_for_write_access
-   (v: TVariable;
-    src_loc: TSourceLocation
-   );
+procedure check_for_write_access (v: TVariable; src_loc: TSourceLocation);
 
 
 IMPLEMENTATION
 
 uses Math, cpc_expressions_unit, cpc_common_unit, cpc_constant_expression_unit,
-  cpc_target_cpu_unit, cpc_blocks_unit, cpc_types_unit;
+  cpc_target_cpu_unit, cpc_types_unit;
 
 function SetByte (constant: TConstant; byteno: cardinal): byte;
    function bit_in_set (bitno: cardinal): boolean;
@@ -1124,6 +1121,7 @@ constructor TEnumType.CreateFromSourceTokens;
          if not lex.token_is_identifier then
             raise compile_error.Create(err_identifier_expected);
 
+         // check for (a,b,a)
          id_idx := lex.token.identifier_idx;
          for i := 0 to enum_idx do
             if enums[i].identifier_idx = id_idx then
@@ -1187,12 +1185,17 @@ constructor TEnumType.CreateFromSourceTokens;
       lex.advance_token;
       // there must be no compile_error exceptions after this point
 
-      for enum_idx := 0 to Length(enums)-1 do
-         begin
-            enum_const := TConstant.CreateEnumConstant (Self, enums[enum_idx].value);
-            CurrentDefinitionTable.DefineForCurrentScope(enums[enum_idx].identifier_idx, enum_const, enums[enum_idx].identifier_src_loc);
-            enum_const.Release
-         end
+      try
+         for enum_idx := 0 to Length(enums)-1 do
+            begin
+               enum_const := TConstant.CreateEnumConstant (Self, enums[enum_idx].value);
+               CurrentDefinitionTable.DefineForCurrentScope(enums[enum_idx].identifier_idx, enum_const, enums[enum_idx].identifier_src_loc);
+               enum_const.Release
+            end
+      except
+         on e: compile_error do
+            assert (false, 'check for this error in above loop: ' + e.Message)
+      end
    end;
 
 procedure TEnumType.CheckAssignmentCompatability

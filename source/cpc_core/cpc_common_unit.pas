@@ -344,12 +344,13 @@ function err_invalid_low_set_range_value: string;
 function err_invalid_high_set_range_value: string;
 function err_set_member_value_outside_legal_range: string;
 function err_char_value_outside_legal_range: string;
+function refcount_log_enabled: boolean;
 
 //============================================
 // TRACING A DEFINITION OBJECT LIFETIME
 //    To trace the lifetime events of a definition object:
 //       - uncomment the DEFINITION_OBJNO_TRACE define below (remember to re-comment when problem is solved}
-{$define DEFINITION_OBJNO_TRACE}
+//{$define DEFINITION_OBJNO_TRACE}
 //       - set the ERROBJ constant to the obj_num of the object of interest
 const ERROBJ = 236;
 //       - for Delphi only: set name of logfile below
@@ -362,14 +363,14 @@ const definition_objno_trace_log_file_name = 'c:\temp\cpc_del.txt';
 IMPLEMENTATION
 
 uses
-  {$ifdef DEFINITION_OBJNO_TRACE}
-     {$ifdef FPC}
-  LazLogger,
-     {$else}
-  MadStackTrace,  // requires MacExcept to be installed in Delphi IDE (http://madshi.net)
-     {$endif}
-  {$endif}
-  cpc_core_objects_unit;
+{$ifdef DEFINITION_OBJNO_TRACE}
+   {$ifdef FPC}
+   LazLogger,
+   {$else}
+   MadStackTrace,  // requires MacExcept to be installed in Delphi IDE (http://madshi.net)
+   {$endif}
+{$endif}
+   cpc_core_objects_unit;
 
 constructor compile_error.Create
    (error_msg: string
@@ -515,6 +516,14 @@ procedure TReferenceCountedObject.Release;
          end
    end;
 
+function refcount_log_enabled: boolean;
+   begin
+{$ifdef DEFINITION_OBJNO_TRACE}
+      result := true
+{$else}
+      result := false
+{$endif}
+   end;
 
 //==========================
 //  Error Message Functions

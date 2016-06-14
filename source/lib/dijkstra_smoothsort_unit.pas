@@ -1,4 +1,3 @@
-
 unit dijkstra_smoothsort_unit;
 
 {$IFDEF FPC}
