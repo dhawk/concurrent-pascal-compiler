@@ -81,20 +81,31 @@ object AboutCreditFrame: TAboutCreditFrame
       BevelEdges = []
       BevelInner = bvNone
       Lines.Strings = (
-        'Memo1'
-        'and more..'
-        'a'
-        'sdf'
-        'adsf'
-        'asdf'
-        'asdf'
-        'asdf'
-        'asdf'
-        'asdf'
-        'asdf'
-        'asdf'
-        'asdf'
-        'xy')
+        'Third-party Software Utilized in Concurrent Pascal'
+        ''
+        'Balanced Binary Trees'
+        'Nicklaus Wirth'
+        'Algorithmen und Datenstrukturen, p 250'
+        'Fixed By Giacomo Policicchio'
+        'pgiacomo@tiscalinet.it'
+        '----------------------------------------------------'
+        'FastMM4 - Fast Memory Manager'
+        'Pierre le Riche.'
+        'https://github.com/pleriche/FastMM4'
+        '----------------------------------------------------'
+        'LibXmlParser'
+        'Stefan Heymann'
+        'www.destructor.de'
+        '----------------------------------------------------'
+        'MPArith - multi precision integer arithmetic'
+        'Wolfgang Ehrhardt'
+        'http://wolfgang-ehrhardt.de'
+        '----------------------------------------------------'
+        'SmoothSort'
+        'Edsger Dijkstra'
+        'http://en.wikibooks.org/wiki/Algorithm_Implement'
+        'ation/Sorting/Smoothsort'
+        '----------------------------------------------------')
       ReadOnly = True
       ScrollBars = ssVertical
       TabOrder = 1
