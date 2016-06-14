@@ -420,6 +420,13 @@ procedure TMainForm.RunSelectedTestsButtonClick(Sender: TObject);
       if CheckBox9.Checked then
          test_TAccess;
 
+      total_tests_run := total_tests_run + 1;
+      if refcount_log_enabled then
+         begin
+            record_bad_test_result;
+            display ('DEFINITION_OBJNO_TRACE still defined in cpc_common_unit.pas')
+         end;
+
       Memo.Lines.Add (IntToStr(total_tests_run) + ' tests run, ' + IntToStr (tests_failed) + ' failed')
    end;
 

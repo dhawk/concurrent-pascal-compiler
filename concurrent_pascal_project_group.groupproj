@@ -1,0 +1,60 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{FFEED58A-48DF-42AE-AA7E-E4FF40681B49}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="source\cpc_core\test_cpc_core.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="source\pic18x\config_bit_editor\pic18x_config_bit_editor.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="source\pic18x\cpc_pic18x.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="test_cpc_core">
+        <MSBuild Projects="source\cpc_core\test_cpc_core.dproj"/>
+    </Target>
+    <Target Name="test_cpc_core:Clean">
+        <MSBuild Projects="source\cpc_core\test_cpc_core.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="test_cpc_core:Make">
+        <MSBuild Projects="source\cpc_core\test_cpc_core.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="pic18x_config_bit_editor">
+        <MSBuild Projects="source\pic18x\config_bit_editor\pic18x_config_bit_editor.dproj"/>
+    </Target>
+    <Target Name="pic18x_config_bit_editor:Clean">
+        <MSBuild Projects="source\pic18x\config_bit_editor\pic18x_config_bit_editor.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="pic18x_config_bit_editor:Make">
+        <MSBuild Projects="source\pic18x\config_bit_editor\pic18x_config_bit_editor.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="cpc_pic18x">
+        <MSBuild Projects="source\pic18x\cpc_pic18x.dproj"/>
+    </Target>
+    <Target Name="cpc_pic18x:Clean">
+        <MSBuild Projects="source\pic18x\cpc_pic18x.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="cpc_pic18x:Make">
+        <MSBuild Projects="source\pic18x\cpc_pic18x.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="test_cpc_core;pic18x_config_bit_editor;cpc_pic18x"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="test_cpc_core:Clean;pic18x_config_bit_editor:Clean;cpc_pic18x:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="test_cpc_core:Make;pic18x_config_bit_editor:Make;cpc_pic18x:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>

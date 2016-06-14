@@ -38,7 +38,7 @@ type
 
 IMPLEMENTATION
 
-uses SysUtils, cpc_target_cpu_unit, cpc_common_unit, cpc_blocks_unit;
+uses SysUtils, cpc_target_cpu_unit, cpc_common_unit;
 
 procedure TCompilation.run_compiler (ReadinSource: TProc; Generator: TDefinitionGenerator; ResultsListing: TStrings);
    var

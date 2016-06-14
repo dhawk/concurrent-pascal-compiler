@@ -148,7 +148,7 @@ var
 
 IMPLEMENTATION
 
-uses SysUtils, cpc_target_cpu_unit, cpc_blocks_unit;
+uses SysUtils, cpc_target_cpu_unit;
 
 //===============
 //  TDefinition
