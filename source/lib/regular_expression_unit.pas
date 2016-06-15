@@ -31,6 +31,7 @@ type
             override;
       end;
 
+
 IMPLEMENTATION
 
 constructor t_regular_expression.Create (reg_expr: string);
