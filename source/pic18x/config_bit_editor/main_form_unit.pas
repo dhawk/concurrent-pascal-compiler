@@ -32,7 +32,7 @@ type
          Memo: TMemo;
          SaveDialog: TSaveDialog;
          OpenDialog: TOpenDialog;
-         MainMenu1: TMainMenu;
+         MainMenu: TMainMenu;
          FileMainMenu: TMenuItem;
          FileNewMenuItem: TMenuItem;
          FileOpenMenuItem: TMenuItem;
@@ -40,14 +40,15 @@ type
          FileSaveMenuItem: TMenuItem;
          FileMenuSeparator: TMenuItem;
          ExitMenuItem: TMenuItem;
-    AboutMainMenuItem: TMenuItem;
+         AboutMainMenuItem: TMenuItem;
          procedure UpdateConfigConstantDisplay(Sender: TObject);
          procedure FileOpenMenuItemClick(Sender: TObject);
          procedure FileSaveAsMenuItemClick(Sender: TObject);
          procedure FileNewMenuItemClick(Sender: TObject);
          procedure FileSaveMenuItemClick(Sender: TObject);
          procedure ExitMenuItemClick(Sender: TObject);
-    procedure AboutMainMenuItemClick(Sender: TObject);
+         procedure AboutMainMenuItemClick(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
       private
          pic: string;
          include_file_name: string;
@@ -113,7 +114,7 @@ var
                            end
                   end
          end;
-   loading_configbits: boolean;
+   loading_file: boolean;
    xml_file_directory: string;
 
 function IntValue (s: string): integer;
@@ -141,47 +142,6 @@ function ProgramGenerator: TDefinition;
    begin
       result := TProgram.CreateFromSourceTokens
    end;
-
-{$ifdef FPC}
-function SelectFolder (var dir: string; caption: string): boolean;
-   var
-      SelectDirectoryDialog: TSelectDirectoryDialog;
-   begin
-      SelectDirectoryDialog := TSelectDirectoryDialog.Create (nil);
-      result := false;
-      SelectDirectoryDialog.FileName := dir;
-      if SelectDirectoryDialog.Execute then
-         begin
-            dir := SelectDirectoryDialog.FileName;
-            result := true
-         end;
-      SelectDirectoryDialog.Free
-   end;
-{$ELSE}
-function SelectFolder (var dir: string; caption: string): boolean;
-   var
-      OpenDialog: TFileOpenDialog;
-   begin
-      if Win32MajorVersion >= 6
-      then  // vista+
-         begin
-            OpenDialog := TFileOpenDialog.Create(MainForm);
-            OpenDialog.Options := OpenDialog.Options + [fdoPickFolders];
-            OpenDialog.Title := caption;
-            opendialog.DefaultFolder := dir;
-            if OpenDialog.Execute then
-               begin
-                  dir := OpenDialog.FileName;
-                  result := true
-               end
-            else
-               result := false;
-            OpenDialog.Free
-         end
-      else  // xp
-         result := SelectDirectory (caption, '', dir, [sdNewUI, sdNewFolder])
-   end;
-{$ENDIF}
 
 function TMainForm.show_config_field_in_dialog: boolean;
    begin
@@ -363,7 +323,7 @@ procedure TMainForm.XmlScannerEmptyTag(Sender: TObject; TagName: String; Attribu
 
 procedure TMainForm.set_caption;
    begin
-      Caption := std_caption + ' - ' + config_bits_constant_name(pic) + '.inc';
+      Caption := std_caption + ' - ' + ExtractFileName (include_file_name);
       if dirty then
          Caption := Caption + '*'
    end;
@@ -379,7 +339,7 @@ procedure TMainForm.UpdateConfigConstantDisplay(Sender: TObject);
       s: string;
       byte_idx, field_idx, value_idx: integer;
    begin
-      if loading_configbits
+      if loading_file
       then exit;
 
       Memo.Clear;
@@ -460,7 +420,7 @@ procedure TMainForm.load_pic_configbits_info (pic: string);
       radiobutton_count := -1;
       y := 0;
 
-      loading_configbits := true;
+      loading_file := true;
       while PageControl.PageCount > 1 do
          PageControl.Pages[1].Free;
       xmlscanner := TXmlScanner.Create (self);
@@ -469,7 +429,7 @@ procedure TMainForm.load_pic_configbits_info (pic: string);
       XmlScanner.Filename := xml_file_directory + pic + '.xml';
       XmlScanner.Execute;
       xmlscanner.free;
-      loading_configbits := false
+      loading_file := false
    end;
 
 procedure TMainForm.FileNewMenuItemClick(Sender: TObject);
@@ -480,6 +440,7 @@ procedure TMainForm.FileNewMenuItemClick(Sender: TObject);
             load_pic_configbits_info (Pic18xSelectionDialog.SelectedPIC);
             UpdateConfigConstantDisplay (nil);
             dirty := false;
+            include_file_name := config_bits_constant_name(pic) + '.inc';   // a suggested name...
             set_caption;
             FileSaveAsMenuItem.Enabled := true
          end
@@ -503,113 +464,112 @@ procedure TMainForm.FileOpenMenuItemClick(Sender: TObject);
       s: string;
       regex: t_regular_expression;
    begin
-      regex := t_regular_expression.Create (' ([^ _]+)_configuration_bits: ');
-      try
-         if OpenDialog.Execute then
-            begin
-               pic := '';
-               AssignFile (f, OpenDialog.FileName);
-               Reset (f);
-               while not eof (f) do
-                  begin
-                     readln (f, s);
-                     if regex.Matches(s) then
-                        pic := UpperCase(regex.Match(1))
-                  end;
-               CloseFile(f);
-               if pic = '' then
-                  begin
-                     ShowMessage ('Invalid config bits include file');
-                     exit
-                  end;
-               if not FileExists (xml_file_directory + pic + '.xml') then
-                  begin
-                     ShowMessage (pic + ' is unsupported');
-                     exit
-                  end;
+      if OpenDialog.Execute then
+         begin
+            // quick check - this file should contain a pic config bit constant generated by this program
+            AssignFile (f, OpenDialog.FileName);
+            Reset (f);
+            pic := '';
+            regex := t_regular_expression.Create (' ([^ _]+)_configuration_bits: ');
+            while not eof (f) do
+               begin
+                  readln (f, s);
+                  if regex.Matches(s) then
+                     pic := UpperCase(regex.Match(1))
+               end;
+            regex.Free;
+            regex := nil;
+            CloseFile(f);
+            if pic = '' then
+               begin
+                  ShowMessage ('Invalid config bits include file');
+                  exit
+               end;
+            if not FileExists (xml_file_directory + pic + '.xml') then
+               begin
+                  ShowMessage (pic + ' is unsupported');
+                  exit
+               end;
 
-               include_file_name := OpenDialog.FileName;
-               FileSaveMenuItem.Enabled := true;
-               FileSaveAsMenuItem.Enabled := true;
+            include_file_name := OpenDialog.FileName;
+            FileSaveMenuItem.Enabled := true;
+            FileSaveAsMenuItem.Enabled := true;
 
-               load_pic_configbits_info (pic);
+            load_pic_configbits_info (pic);
 
-               src := TStringList.Create;
-               results := TStringList.Create;
-               src.Add ('{$processor ''' + pic + '''}');
-               src.Add ('{$include ''' + include_file_name + '''}');
-               src.Add ('var i: uint8;');
-               src.Add ('begin');
-               // the following nested loop processing order must be same as similar loop below
-               for i := 1 to PageControl.PageCount-1 do
-                  begin
-                     tabsheet := PageControl.Pages[i];
-                     assert ((tabsheet.ControlCount = 1) and (tabsheet.Controls[0] is TScrollBox));
-                     scrollbox := TScrollBox(tabsheet.Controls[0]);
-                     for j := 0 to scrollbox.ControlCount-1 do
-                        begin
-                           assert (scrollbox.Controls[j] is TGroupBox);
-                           groupbox := TGroupBox(scrollbox.Controls[j]);
-                           field_name := groupbox.Caption;
-                           assert (Pos(' - ', field_name) > 0);
-                           field_name := Copy (field_name, 1, Pos(' - ',field_name)-1);
-                           src.Add (format ('   i := ord(%s_configuration_bits.%s.%s);', [pic, tabsheet.Caption, field_name]))
-                        end;
-                  end;
-               src.Add ('end.');
+            src := TStringList.Create;
+            results := TStringList.Create;
+            src.Add ('{$processor ''' + pic + '''}');
+            src.Add ('{$include ''' + include_file_name + '''}');
+            src.Add ('var i: uint8;');
+            src.Add ('begin');
+            // the following nested loop processing order must be same as similar loop below
+            for i := 1 to PageControl.PageCount-1 do
+               begin
+                  tabsheet := PageControl.Pages[i];
+                  assert ((tabsheet.ControlCount = 1) and (tabsheet.Controls[0] is TScrollBox));
+                  scrollbox := TScrollBox(tabsheet.Controls[0]);
+                  for j := 0 to scrollbox.ControlCount-1 do
+                     begin
+                        assert (scrollbox.Controls[j] is TGroupBox);
+                        groupbox := TGroupBox(scrollbox.Controls[j]);
+                        field_name := groupbox.Caption;
+                        assert (Pos(' - ', field_name) > 0);
+                        field_name := Copy (field_name, 1, Pos(' - ',field_name)-1);
+                        src.Add (format ('   i := ord(%s_configuration_bits.%s.%s);', [pic, tabsheet.Caption, field_name]))
+                     end;
+               end;
+            src.Add ('end.');
 
-               compilation := TCompilation.CreateFromStrings (src, ProgramGenerator, results);
-               assert (compilation.compiled_object.definition_kind = program_definition);
-               prog := TProgram(compilation.compiled_object);
-               assert (prog.initial_statement.definition_kind = statement_definition);
-               stmts := TStatement(prog.initial_statement);
-               assert (stmts.statement_kind = statement_list);
-               stmt_list := TStatementList(stmts);
+            compilation := TCompilation.CreateFromStrings (src, ProgramGenerator, results);
+            assert (compilation.compiled_object.definition_kind = program_definition);
+            prog := TProgram(compilation.compiled_object);
+            assert (prog.initial_statement.definition_kind = statement_definition);
+            stmts := TStatement(prog.initial_statement);
+            assert (stmts.statement_kind = statement_list);
+            stmt_list := TStatementList(stmts);
 
-               assert (stmt_list[0].statement_kind = assignment_statement);
-               assignment_stmt := TAssignmentStatement(stmt_list[0]);
-               assert (assignment_stmt.expression.contains_integer_constant);
-               const_expr_value := assignment_stmt.expression.ordinal_constant_value;
+            assert (stmt_list[0].statement_kind = assignment_statement);
+            assignment_stmt := TAssignmentStatement(stmt_list[0]);
+            assert (assignment_stmt.expression.contains_integer_constant);
+            const_expr_value := assignment_stmt.expression.ordinal_constant_value;
 
-               stmt_idx := 0;
-               // the following nested loop processing order must be same as similar loop above
-               for i := 1 to PageControl.PageCount-1 do
-                  begin
-                     tabsheet := PageControl.Pages[i];
-                     assert ((tabsheet.ControlCount = 1) and (tabsheet.Controls[0] is TScrollBox));
-                     scrollbox := TScrollBox(tabsheet.Controls[0]);
-                     for j := 0 to scrollbox.ControlCount-1 do
-                        begin
-                           assert (scrollbox.Controls[j] is TGroupBox);
-                           groupbox := TGroupBox (scrollbox.Controls[j]);
+            stmt_idx := 0;
+            // the following nested loop processing order must be same as similar loop above
+            for i := 1 to PageControl.PageCount-1 do
+               begin
+                  tabsheet := PageControl.Pages[i];
+                  assert ((tabsheet.ControlCount = 1) and (tabsheet.Controls[0] is TScrollBox));
+                  scrollbox := TScrollBox(tabsheet.Controls[0]);
+                  for j := 0 to scrollbox.ControlCount-1 do
+                     begin
+                        assert (scrollbox.Controls[j] is TGroupBox);
+                        groupbox := TGroupBox (scrollbox.Controls[j]);
 
-                           assert (stmt_list[stmt_idx].statement_kind = assignment_statement);
-                           assignment_stmt := TAssignmentStatement(stmt_list[stmt_idx]);
-                           assert (assignment_stmt.expression.contains_integer_constant);
-                           const_expr_value := assignment_stmt.expression.ordinal_constant_value;
+                        assert (stmt_list[stmt_idx].statement_kind = assignment_statement);
+                        assignment_stmt := TAssignmentStatement(stmt_list[stmt_idx]);
+                        assert (assignment_stmt.expression.contains_integer_constant);
+                        const_expr_value := assignment_stmt.expression.ordinal_constant_value;
 
-                           for k := 0 to groupbox.ControlCount-1 do
-                              begin
-                                 assert (groupbox.Controls[k] is TRadioButtonWithValue);
-                                 radiobutton := TRadioButtonWithValue(groupbox.Controls[k]);
-                                 if radiobutton.value = const_expr_value then
-                                    radiobutton.Checked := true
-                              end;
+                        for k := 0 to groupbox.ControlCount-1 do
+                           begin
+                              assert (groupbox.Controls[k] is TRadioButtonWithValue);
+                              radiobutton := TRadioButtonWithValue(groupbox.Controls[k]);
+                              if radiobutton.value = const_expr_value then
+                                 radiobutton.Checked := true
+                           end;
 
-                           stmt_idx := stmt_idx + 1
-                        end;
-                  end;
+                        stmt_idx := stmt_idx + 1
+                     end;
+               end;
 
-               compilation.Free;
-               results.Free;
-               src.Free;
+            compilation.Free;
+            results.Free;
+            src.Free;
 
-               dirty := false;
-               set_caption
-            end
-      finally
-         regex.Free
-      end
+            dirty := false;
+            set_caption
+         end
    end;
 
 procedure TMainForm.FileSaveMenuItemClick(Sender: TObject);
@@ -619,14 +579,19 @@ procedure TMainForm.FileSaveMenuItemClick(Sender: TObject);
       set_caption
    end;
 
-procedure TMainForm.FileSaveAsMenuItemClick(Sender: TObject);
-   var
-      dir: string;
+procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
    begin
-      dir := '';
-      if SelectFolder (dir, 'Select Folder to save ' + config_bits_constant_name(pic) + '.inc') then
+      if dirty then
+         if MessageDlg ('File has been changed - discard changes and close?', mtConfirmation, [mbYes, mbCancel], 0) = mrCancel then
+            CanClose := false
+   end;
+
+procedure TMainForm.FileSaveAsMenuItemClick(Sender: TObject);
+   begin
+      SaveDialog.FileName := include_file_name;
+      if SaveDialog.Execute then
          begin
-            include_file_name := IncludeTrailingPathDelimiter(dir) + config_bits_constant_name(pic) + '.inc';
+            include_file_name := SaveDialog.FileName;
             FileSaveMenuItem.Enabled := true;
             Memo.Lines.SaveToFile (include_file_name);
             dirty := false;

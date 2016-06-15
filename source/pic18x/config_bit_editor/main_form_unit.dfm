@@ -10,8 +10,9 @@ object MainForm: TMainForm
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  Menu = MainMenu1
+  Menu = MainMenu
   OldCreateOrder = False
+  OnCloseQuery = FormCloseQuery
   DesignSize = (
     1028
     493)
@@ -50,16 +51,15 @@ object MainForm: TMainForm
     end
   end
   object SaveDialog: TSaveDialog
-    Left = 176
-    Top = 32
+    Left = 248
   end
   object OpenDialog: TOpenDialog
-    Filter = '*_config_bits.inc'
-    Left = 368
-    Top = 40
+    Filter = 'Include files (*.inc)|*.inc'
+    Title = 'Open PIC18x Configuration Bits Include File'
+    Left = 184
   end
-  object MainMenu1: TMainMenu
-    Left = 56
+  object MainMenu: TMainMenu
+    Left = 120
     object FileMainMenu: TMenuItem
       Caption = 'File'
       object FileNewMenuItem: TMenuItem
