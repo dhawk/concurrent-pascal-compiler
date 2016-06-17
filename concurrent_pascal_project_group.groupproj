@@ -12,6 +12,9 @@
         <Projects Include="source\pic18x\cpc_pic18x.dproj">
             <Dependencies/>
         </Projects>
+        <Projects Include="source\pic18x\test_cpc_pic18x.dproj">
+            <Dependencies/>
+        </Projects>
     </ItemGroup>
     <ProjectExtensions>
         <Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -47,14 +50,23 @@
     <Target Name="cpc_pic18x:Make">
         <MSBuild Projects="source\pic18x\cpc_pic18x.dproj" Targets="Make"/>
     </Target>
+    <Target Name="test_cpc_pic18x">
+        <MSBuild Projects="source\pic18x\test_cpc_pic18x.dproj"/>
+    </Target>
+    <Target Name="test_cpc_pic18x:Clean">
+        <MSBuild Projects="source\pic18x\test_cpc_pic18x.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="test_cpc_pic18x:Make">
+        <MSBuild Projects="source\pic18x\test_cpc_pic18x.dproj" Targets="Make"/>
+    </Target>
     <Target Name="Build">
-        <CallTarget Targets="test_cpc_core;pic18x_config_bit_editor;cpc_pic18x"/>
+        <CallTarget Targets="test_cpc_core;pic18x_config_bit_editor;cpc_pic18x;test_cpc_pic18x"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="test_cpc_core:Clean;pic18x_config_bit_editor:Clean;cpc_pic18x:Clean"/>
+        <CallTarget Targets="test_cpc_core:Clean;pic18x_config_bit_editor:Clean;cpc_pic18x:Clean;test_cpc_pic18x:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="test_cpc_core:Make;pic18x_config_bit_editor:Make;cpc_pic18x:Make"/>
+        <CallTarget Targets="test_cpc_core:Make;pic18x_config_bit_editor:Make;cpc_pic18x:Make;test_cpc_pic18x:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>
