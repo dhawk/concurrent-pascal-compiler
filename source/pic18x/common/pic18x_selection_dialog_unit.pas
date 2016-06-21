@@ -7,8 +7,12 @@ UNIT pic18x_selection_dialog_unit;
 INTERFACE
 
 uses
-   Windows,
-   Messages,
+{$IFnDEF FPC}
+  Windows,
+{$ELSE}
+  LCLIntf, LCLType, LMessages,
+{$ENDIF}
+  Messages,
    SysUtils,
    Variants,
    Classes,

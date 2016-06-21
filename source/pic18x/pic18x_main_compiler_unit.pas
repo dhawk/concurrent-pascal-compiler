@@ -1,5 +1,9 @@
 UNIT pic18x_main_compiler_unit;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 INTERFACE
 
 uses
@@ -14,7 +18,7 @@ IMPLEMENTATION
 
 uses
   pic18x_macro_instructions_unit, pic18x_instructions_unit,
-  cpc_target_cpu_unit, pic18x_blocks_unit, System.SysUtils, pic18x_cpu_unit;
+  cpc_target_cpu_unit, pic18x_blocks_unit, SysUtils, pic18x_cpu_unit;
 
 function ProgramGenerator: TDefinition;
    var

@@ -1,12 +1,16 @@
 unit BTypes;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 {Common basic type definitions}
 
 
 interface
 
 
-{$i STD.INC}
+{$i std.inc}
 
 (*************************************************************************
 

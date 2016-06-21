@@ -1,9 +1,18 @@
 unit about_credit_frame_unit;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes,
+{$IFnDEF FPC}
+  Windows,
+{$ELSE}
+  LCLIntf, LCLType, LMessages,
+{$ENDIF}
+  Messages, SysUtils, Variants, Classes,
   Graphics, Controls, Forms, Dialogs, StdCtrls, ExtCtrls;
 
 type

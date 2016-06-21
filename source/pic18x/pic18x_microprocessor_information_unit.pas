@@ -1,5 +1,9 @@
 UNIT pic18x_microprocessor_information_unit;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 INTERFACE
 
 uses
@@ -86,7 +90,7 @@ type
          constructor CreateWithDefaults;
          procedure validate_pic18_ioreg_address (name: string; addr, size: integer; src_loc: TSourceLocation);
          function SFR_Name (sfr_addr: integer): string;
-         function SFR_Address (sfr_name: string): integer;
+         function SFR_Address (_sfr_name: string): integer;
          function IsReversedType (typ: string): boolean;
          destructor Destroy;
             override;
@@ -261,10 +265,10 @@ procedure tSFREntry.copy (ToA: TBalancedTreeEntry);
       tSFREntry(ToA).name := name
    end;
 
-function t_pic_info.SFR_Address (sfr_name: string): integer;    // slow!
+function t_pic_info.SFR_Address (_sfr_name: string): integer;    // slow!
    procedure search (e: tSFREntry);
       begin
-         if sfr_name = e.name then
+         if _sfr_name = e.name then
             result := e.addr
          else
             begin

@@ -6,7 +6,7 @@ Project : All Projects processing XML documents
 ===============================================================================================
 Subject : XML parser for Delphi's VCL toolbar
 ===============================================================================================
-Dipl.-Ing. (FH) Stefan Heymann, Softwaresysteme, Tübingen, Germany
+Dipl.-Ing. (FH) Stefan Heymann, Softwaresysteme, TÃ¼bingen, Germany
 ===============================================================================================
 Date        Author Changes
 -----------------------------------------------------------------------------------------------
@@ -27,6 +27,10 @@ Date        Author Changes
 *)
 
 UNIT LibXmlComps;
+
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
 
 INTERFACE
 

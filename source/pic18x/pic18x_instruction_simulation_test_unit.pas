@@ -1,5 +1,9 @@
 UNIT pic18x_instruction_simulation_test_unit;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 INTERFACE
 
 procedure run_instruction_simulation_tests;

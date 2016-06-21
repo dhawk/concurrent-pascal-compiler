@@ -1,5 +1,9 @@
 UNIT pic18x_assignment_statement_unit;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 INTERFACE
 
 uses
@@ -29,8 +33,8 @@ uses
    pic18x_access_unit, cpc_expressions_unit, pic18x_types_unit,
    cpc_definitions_unit, pic18x_run_time_error_check_unit,
    pic18x_kernel_unit, pic18x_floating_point_unit, pic18x_expressions_unit,
-   cpc_target_cpu_unit, cpc_multi_precision_integer_unit, System.Math,
-   System.SysUtils, pic18x_microprocessor_information_unit;
+   cpc_target_cpu_unit, cpc_multi_precision_integer_unit, Math,
+   SysUtils, pic18x_microprocessor_information_unit;
 
 
 constructor TPIC18x_AssignmentStatement.Create (_assignee: TAccess; _expression: TExpression; _src_loc: TSourceLocation);
@@ -394,18 +398,18 @@ type
          destination_address: integer;
          Value: integer;
          Position: integer;
-         constructor Create (Access: TAccess; _Value: integer; _Position: integer);
+         constructor Create (_Access: TAccess; _Value: integer; _Position: integer);
          function generate_code_segment: TInstruction;
             override;
       end;
 
-constructor TSetSingleBitFromConstantInPackedRecordField.Create (Access: TAccess; _Value: integer; _Position: integer);
+constructor TSetSingleBitFromConstantInPackedRecordField.Create (_Access: TAccess; _Value: integer; _Position: integer);
    begin
       destination_mode := dest_mode;
       destination_address := dest_addr;
       Value := _Value;
       Position := _Position;
-      inherited Create (Access, true, 0, 0, 'assign single bit from constant')
+      inherited Create (_Access, true, 0, 0, 'assign single bit from constant')
    end;
 
 function TSetSingleBitFromConstantInPackedRecordField.generate_code_segment: TInstruction;
@@ -433,17 +437,17 @@ type
          destination_mode: tdest_mode;
          destination_address: integer;
          Position: integer;
-         constructor Create (Access: TAccess; _Position: integer);
+         constructor Create (_Access: TAccess; _Position: integer);
          function generate_code_segment: TInstruction;
             override;
       end;
 
-constructor TSetSingleBitFromTOSInPackedRecordField.Create (Access: TAccess; _Position: integer);
+constructor TSetSingleBitFromTOSInPackedRecordField.Create (_Access: TAccess; _Position: integer);
    begin
       destination_mode := dest_mode;
       destination_address := dest_addr;
       Position := _Position;
-      inherited Create (Access, true, 0, 1, 'assign single bit from constant')
+      inherited Create (_Access, true, 0, 1, 'assign single bit from constant')
    end;
 
 function TSetSingleBitFromTOSInPackedRecordField.generate_code_segment: TInstruction;
@@ -468,12 +472,12 @@ type
          destination_mode: tdest_mode;
          destination_address: integer;
          Span, Position, Width, Value: integer;
-         constructor Create (Access: TAccess; _Span, _Position, _Width, _Value: integer);
+         constructor Create (_Access: TAccess; _Span, _Position, _Width, _Value: integer);
          function generate_code_segment: TInstruction;
             override;
       end;
 
-constructor TSetMultiBitFieldFromConstantInPackedRecordField.Create (Access: TAccess; _Span, _Position, _Width, _Value: integer);
+constructor TSetMultiBitFieldFromConstantInPackedRecordField.Create (_Access: TAccess; _Span, _Position, _Width, _Value: integer);
    begin
       destination_mode := dest_mode;
       destination_address := dest_addr;
@@ -481,7 +485,7 @@ constructor TSetMultiBitFieldFromConstantInPackedRecordField.Create (Access: TAc
       Position := _Position;
       Width := _Width;
       Value := _Value;
-      inherited Create (Access, false, 0, 0, 'assign multi bits from constant')
+      inherited Create (_Access, false, 0, 0, 'assign multi bits from constant')
    end;
 
 function TSetMultiBitFieldFromConstantInPackedRecordField.generate_code_segment: TInstruction;
@@ -545,17 +549,17 @@ type
          destination_mode: tdest_mode;
          destination_address: integer;
          Span: integer;
-         constructor Create (Access: TAccess; _Span: integer);
+         constructor Create (_Access: TAccess; _Span: integer);
          function generate_code_segment: TInstruction;
             override;
       end;
 
-constructor TSetMultiBitFieldFromTOSInPackedRecordField.Create (Access: TAccess; _Span: integer);
+constructor TSetMultiBitFieldFromTOSInPackedRecordField.Create (_Access: TAccess; _Span: integer);
    begin
       destination_mode := dest_mode;
       destination_address := dest_addr;
       Span := _Span;
-      inherited Create (Access, false, 0, Span, 'assign multi bits from tos')
+      inherited Create (_Access, false, 0, Span, 'assign multi bits from tos')
    end;
 
 function TSetMultiBitFieldFromTOSInPackedRecordField.generate_code_segment: TInstruction;

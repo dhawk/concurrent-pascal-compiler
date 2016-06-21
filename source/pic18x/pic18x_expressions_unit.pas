@@ -41,9 +41,6 @@ type
          function Generate (param1, param2: integer): integer;
             override;
       end;
-   TPIC18x_TParamList =
-      class (TParamList)
-      end;
    TPIC18x_PredFunctionPrimary =
       class (TPredFunctionPrimary)
          function Generate (param1, param2: integer): integer;

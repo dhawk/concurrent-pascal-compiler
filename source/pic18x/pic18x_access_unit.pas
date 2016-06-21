@@ -307,7 +307,17 @@ function TPIC18x_Access.add_simple_indexed_offset2 (ptr: TPointer; i: integer): 
 
 function TPIC18x_Access.tos_relative_with_variable_address: integer;
    begin
-      result := StackUsageCounter.Current - TPIC18x_WithStatement(TWithVariable(path_start).with_statement).address
+      result := 0;  // suppress compiler warning
+      case path_start.definition_kind of
+         with_property_definition:
+            result := StackUsageCounter.Current - TPIC18x_WithStatement(TWithProperty(path_start).with_statement).address;
+         with_routine_definition:
+            result := StackUsageCounter.Current - TPIC18x_WithStatement(TWithRoutine(path_start).with_statement).address;
+         with_variable_definition:
+            result := StackUsageCounter.Current - TPIC18x_WithStatement(TWithVariable(path_start).with_statement).address
+      else
+         assert (false)
+      end
    end;
 
 procedure TPIC18x_Access.add_total_indexed_offsets (ptr_size: integer);

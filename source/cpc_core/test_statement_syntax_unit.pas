@@ -94,8 +94,8 @@ procedure test_if_statement;
 procedure test_while_statement;
    begin
       display('testing WHILE statement');
-      test_only_for_successful_compilation('begin loop while true repeat; loop repeat end.');
-      test_only_for_successful_compilation('procedure x; begin end; begin loop while true; x repeat; loop repeat end.');
+      test_only_for_successful_compilation('begin loop while true repeat; cycle repeat end.');
+      test_only_for_successful_compilation('procedure x; begin end; begin loop while true; x repeat; cycle repeat end.');
       test_compile_error_generation('begin loop while repeat end.', err_boolean_expression_expected, 'repeat end.');
       test_compile_error_generation('begin while end.', err_while_not_allowed_here, 'while end.');
    end;
@@ -103,8 +103,8 @@ procedure test_while_statement;
 procedure test_until_statement;
    begin
       display('testing WHILE statement');
-      test_only_for_successful_compilation('begin loop until true repeat; loop repeat end.');
-      test_only_for_successful_compilation('procedure x; begin end; begin loop until true; x repeat; loop repeat end.');
+      test_only_for_successful_compilation('begin loop until true repeat; cycle repeat end.');
+      test_only_for_successful_compilation('procedure x; begin end; begin loop until true; x repeat; cycle repeat end.');
       test_compile_error_generation('begin loop until repeat end.', err_boolean_expression_expected, 'repeat end.');
       test_compile_error_generation('begin until end.', err_until_not_allowed_here, 'until end.');
    end;
@@ -112,17 +112,22 @@ procedure test_until_statement;
 procedure test_loop_statement;
    begin
       display('testing LOOP statement');
-      test_only_for_successful_compilation('begin loop repeat end.');
-      test_only_for_successful_compilation('procedure x; begin end; begin loop x repeat; x end.');
-      test_only_for_successful_compilation('procedure x; begin end; begin loop x; repeat; x end.');
-      test_only_for_successful_compilation('procedure x; begin end; begin loop x;x repeat; x end.');
+      test_compile_error_generation ('begin loop repeat end.', err_no_loop_exit_defined, 'repeat');
+   end;
+
+procedure test_cycle_statement;
+   begin
+      display('testing CYCLE statement');
+      test_only_for_successful_compilation('procedure x; begin end; begin cycle x repeat; x end.');
+      test_only_for_successful_compilation('procedure x; begin end; begin cycle x; repeat; x end.');
+      test_only_for_successful_compilation('procedure x; begin end; begin cycle x;x repeat; x end.');
    end;
 
 procedure test_exitloop_statement;
    begin
       display('testing exitloop statement');
-      test_only_for_successful_compilation('begin loop exitloop repeat; loop repeat end.');
-      test_only_for_successful_compilation('begin loop exitloop if true repeat; loop repeat end.');
+      test_only_for_successful_compilation('begin loop exitloop repeat; cycle repeat end.');
+      test_only_for_successful_compilation('begin loop exitloop if true repeat; cycle repeat end.');
       test_compile_error_generation('begin exitloop end.', err_exitloop_only_allowed_inside_loop, 'exitloop end.');
       test_compile_error_generation('begin loop exitloop if repeat end.', err_boolean_expression_expected, 'repeat end.');
    end;
@@ -130,8 +135,8 @@ procedure test_exitloop_statement;
 procedure test_reloop_statement;
    begin
       display('testing reloop statement');
-      test_only_for_successful_compilation('begin loop reloop repeat; loop repeat end.');
-      test_only_for_successful_compilation('begin loop reloop if true repeat; loop repeat end.');
+      test_only_for_successful_compilation('begin loop reloop; until false repeat; cycle repeat end.');
+      test_only_for_successful_compilation('begin loop reloop if true; until false repeat; cycle repeat end.');
       test_compile_error_generation('begin reloop end.', err_reloop_only_allowed_inside_loop, 'reloop end.');
       test_compile_error_generation('begin loop reloop if repeat end.', err_boolean_expression_expected, 'repeat end.');
    end;
@@ -192,26 +197,26 @@ procedure test_init_statement;
       test_compile_error_generation('var i: interrupt priority 1; function signalled: boolean; begin end; begin end;' +
                                     'p: process priority 1;' +
                                     '  var m2: monitor var q: queue; begin delay (q) end;' +
-                                    '  begin init m2; loop await interrupt repeat end interrupt i;' +
+                                    '  begin init m2; cycle await interrupt repeat end interrupt i;' +
                                     'begin init p end.',
                                     err_cant_call_delay_from_an_interrupt_process,
-                                    'm2; loop'
+                                    'm2; cycle'
                                    );
       test_compile_error_generation('var i: interrupt priority 1; function signalled: boolean; begin end; begin end;' +
                                     'p: process priority 1;' +
                                     '  var m1: monitor var q: queue; function entry f: int8; begin delay(q) end; begin end;' +
                                     '  var m2: monitor (i: int8); begin end;' +
-                                    '  begin init m2 (m1.f); loop await interrupt repeat end interrupt i;' +
+                                    '  begin init m2 (m1.f); cycle await interrupt repeat end interrupt i;' +
                                     'begin init p end.',
                                     err_cant_call_delay_from_an_interrupt_process,
-                                    'm1.f); loop'
+                                    'm1.f); cycle'
                                    );
       test_compile_error_generation('var i: interrupt priority 1; function signalled: boolean; begin end; begin end;' +
                                     'p: process priority 1;' +
                                     '  type tm1 = monitor var q: queue; function entry fd: int8; begin delay(q) end; begin end;' +
                                     '  var m1: array[1..3] of tm1;' +
                                     '  var m2: monitor (m: tm1); begin end;' +
-                                    '  begin init m2 (m1[m1[1].fd]); loop await interrupt repeat end interrupt i;' +
+                                    '  begin init m2 (m1[m1[1].fd]); cycle await interrupt repeat end interrupt i;' +
                                     'begin init p end.',
                                     err_cant_call_delay_from_an_interrupt_process,
                                     'm1[m1[1].fd]'
@@ -224,7 +229,7 @@ procedure test_init_statement;
                                      err_variable_not_initialized,
                                      'm.p end.'
                                     );
-      test_compile_error_generation ('type tm=monitor var b: boolean; procedure entry p; begin end; begin b := true end; var p: process (m: tm); priority 0; begin loop m.p repeat end; m: tm; begin init p (m); end.',
+      test_compile_error_generation ('type tm=monitor var b: boolean; procedure entry p; begin end; begin b := true end; var p: process (m: tm); priority 0; begin cycle m.p repeat end; m: tm; begin init p (m); end.',
                                      err_variable_not_initialized,
                                      'm); end.'
                                     );
@@ -335,7 +340,7 @@ procedure test_await_statement;
    begin
       display('testing await statement');
 
-      test_only_for_successful_compilation('type tp=process priority 1; begin loop await interrupt repeat end; begin end.');
+      test_only_for_successful_compilation('type tp=process priority 1; begin cycle await interrupt repeat end; begin end.');
       test_compile_error_generation ('begin await interrupt end.', err_await_interrupt_statement_must_be_in_process_code, 'await interrupt end.')
    end;
 
@@ -356,6 +361,7 @@ procedure test_statements;
       test_if_statement;
       test_while_statement;
       test_until_statement;
+      test_cycle_statement;
       test_loop_statement;
       test_exitloop_statement;
       test_reloop_statement;

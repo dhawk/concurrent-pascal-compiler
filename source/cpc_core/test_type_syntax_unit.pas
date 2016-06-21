@@ -521,7 +521,7 @@ procedure test_TOverlayType;
       test_compile_error_generation('type tov=overlay a: int8; q: queue; end; begin end.', err_overlay_may_not_contain_queue_variables, 'queue; end; begin end.');
       test_compile_error_generation('type tov=overlay a: int8; c: class begin end end; begin end.', err_overlay_may_not_contain_class_variables, 'class begin end end; begin end.');
       test_compile_error_generation('type tov=overlay a: int8; m: monitor begin end begin end.', err_overlay_may_not_contain_monitor_variables, 'monitor begin end begin end.');
-      test_compile_error_generation('type tov=overlay a: int8; p: process priority 0; begin loop repeat end end; begin end.', err_overlay_may_not_contain_process_variables, 'process priority 0; begin loop repeat end end; begin end.');
+      test_compile_error_generation('type tov=overlay a: int8; p: process priority 0; begin cycle repeat end end; begin end.', err_overlay_may_not_contain_process_variables, 'process priority 0; begin cycle repeat end end; begin end.');
       test_compile_error_generation('type t=overlay packed record X: uint8; end; packed record X: uint8; end end;begin end.', format (err_duplicate_overlay_name, ['X']), 'packed record X: uint8; end end;begin end.');
       test_compile_error_generation('ioreg x: overlay i: int8 end;', err_ioreg_overlaid_variables_must_all_be_packed_records, 'overlay i: int8 end;');
       test_compile_error_generation('ioreg t: overlay packed record x: uint8 end; packed record y: uint1 end; end at 1000;begin end.', err_invalid_total_ioregister_width, 'overlay');

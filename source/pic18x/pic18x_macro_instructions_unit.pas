@@ -1,5 +1,9 @@
 UNIT pic18x_macro_instructions_unit;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 INTERFACE
 
 uses
@@ -80,7 +84,7 @@ type
             override;
          procedure append (instr: TInstruction);
          procedure replace (_idx: integer; new_instr: TInstruction);
-         function instr_idx (rom_addr: integer): integer;
+         function instr_idx (_rom_addr: integer): integer;
          procedure Clear;
          function hex_code: THexArray;
             override;
@@ -311,7 +315,7 @@ type
          procedure AssignEEPROMAddresses;
          procedure AssignConfigByteAddresses;
          function NumberOfInstructions: integer;
-         function ReadByte (rom_addr: integer): byte;
+         function ReadByte (_rom_addr: integer): byte;
          procedure Execute;
             reintroduce;
          function AssemblyCode (pc: integer): string;
@@ -325,7 +329,7 @@ type
          procedure StopRecordingInlineCode;
          procedure AppendInlineCode (var _inline_code: TInstructionArray);
          function Mark: integer;
-         procedure RestoreToMark (mark: integer);
+         procedure RestoreToMark (_mark: integer);
       private
          recording_inline_code: boolean;
          inline_code: PInstructionArray;
@@ -345,7 +349,7 @@ uses
    test_pic18x_simulator_unit,
 {$endif}
    pic18x_microprocessor_information_unit,
-   System.SysUtils, cpc_target_cpu_unit, pic18x_cpu_unit;
+   SysUtils, cpc_target_cpu_unit, pic18x_cpu_unit;
 
 procedure set_absolute (addr, value: integer);
    begin
@@ -502,7 +506,7 @@ procedure TMacroInstruction.set_rom_addr (addr: integer);
 
 function TMacroInstruction.hex_code: THexArray;
    var
-      i,j,idx: integer;
+      i,j,_idx: integer;
       hex: THexArray;
    begin
       for i := 0 to Length(instr_arr)-1 do
@@ -510,19 +514,19 @@ function TMacroInstruction.hex_code: THexArray;
             hex := instr_arr[i].hex_code;
             for j := 0 to Length(hex)-1 do
                begin
-                  idx := Length(result);
-                  SetLength(result, idx+1);
-                  result[idx] := hex[j]
+                  _idx := Length(result);
+                  SetLength(result, _idx+1);
+                  result[_idx] := hex[j]
                end;
             SetLength(hex, 0)
          end;
       assert (Length(result) = size)
    end;
 
-function TMacroInstruction.instr_idx (rom_addr: integer): integer;
+function TMacroInstruction.instr_idx (_rom_addr: integer): integer;
    begin
       for result := 0 to Length(instr_arr)-1 do
-         if (instr_arr[result].rom_addr <= rom_addr) and (rom_addr < (instr_arr[result].rom_addr + instr_arr[result].size)) then
+         if (instr_arr[result].rom_addr <= _rom_addr) and (_rom_addr < (instr_arr[result].rom_addr + instr_arr[result].size)) then
             exit;
       result := -1;  // to suppress compiler warning
       assert (false)  // rom_addr out of range
@@ -1319,27 +1323,27 @@ function TProgramCode.Mark: integer;
       result := Length(instr_arr)
    end;
 
-procedure TProgramCode.RestoreToMark (mark: integer);
+procedure TProgramCode.RestoreToMark (_mark: integer);
    var
       i,j: integer;
    begin
       // save discarded instructions - they may be call instructions to a subroutine
-      for i := mark to Length(instr_arr)-1 do
+      for i := _mark to Length(instr_arr)-1 do
          begin
             j := Length(DiscardedInstructions);
             SetLength (DiscardedInstructions, j+1);
             DiscardedInstructions[j] := instr_arr[i]
          end;
-      SetLength (instr_arr, mark)
+      SetLength (instr_arr, _mark)
    end;
 
-function TProgramCode.ReadByte (rom_addr: integer): byte;
+function TProgramCode.ReadByte (_rom_addr: integer): byte;
    var
-      idx: integer;
+      _idx: integer;
    begin
-      idx := instr_idx(rom_addr);
-      assert ((instr_arr[idx].rom_addr <= rom_addr) and (rom_addr < (instr_arr[idx].rom_addr + instr_arr[idx].size)));
-      result := instr_arr[idx].hex_code[(rom_addr - instr_arr[idx].rom_addr)]
+      _idx := instr_idx(_rom_addr);
+      assert ((instr_arr[_idx].rom_addr <= _rom_addr) and (_rom_addr < (instr_arr[_idx].rom_addr + instr_arr[_idx].size)));
+      result := instr_arr[_idx].hex_code[(_rom_addr - instr_arr[_idx].rom_addr)]
    end;
 
 procedure TProgramCode.Execute;
@@ -1360,7 +1364,7 @@ procedure TProgramCode.WriteHexFile (fn: string);
       i,j: integer;
       chksum: integer;
       instr_hex: THexArray;
-      rom_addr, ulba, offset: cardinal;
+      _rom_addr, ulba, offset: cardinal;
       current_hex_file_ulba: cardinal;
    procedure write_hex_byte (b: byte);
       begin
@@ -1370,8 +1374,8 @@ procedure TProgramCode.WriteHexFile (fn: string);
       end;
    procedure update_ulba;
       begin
-         ulba := rom_addr shr 16;
-         offset := rom_addr and $ffff;
+         ulba := _rom_addr shr 16;
+         offset := _rom_addr and $ffff;
          if ulba <> current_hex_file_ulba then
             begin
                chksum := 0;
@@ -1396,7 +1400,7 @@ procedure TProgramCode.WriteHexFile (fn: string);
             instr_hex := instr_arr[i].hex_code;
             if Length(instr_hex) > 0 then
                begin
-                  rom_addr := instr_arr[i].rom_addr;
+                  _rom_addr := instr_arr[i].rom_addr;
                   while Length(instr_hex) >= 255 do
                      begin
                         update_ulba;
@@ -1410,7 +1414,7 @@ procedure TProgramCode.WriteHexFile (fn: string);
                            write_hex_byte(instr_hex[j]);
                         write_hex_byte ((-chksum) and $ff);
                         writeln (f);
-                        rom_addr := rom_addr + 255;
+                        _rom_addr := _rom_addr + 255;
                         instr_hex := Copy (instr_hex, 255, maxint)
                      end;
                   update_ulba;

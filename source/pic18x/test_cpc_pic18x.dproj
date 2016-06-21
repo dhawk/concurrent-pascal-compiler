@@ -58,6 +58,7 @@
         <DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
+        <DCC_UnitSearchPath>..\lib\htmlviewer;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <DCC_DcuOutput>..\..\obj\test_cpc_pic18x\</DCC_DcuOutput>
         <DCC_MapFile>3</DCC_MapFile>
         <DCC_Namespace>winapi;$(DCC_Namespace)</DCC_Namespace>
@@ -108,7 +109,6 @@
         <DCCReference Include="pic18x_kernel_unit.pas"/>
         <DCCReference Include="pic18x_string_unit.pas"/>
         <DCCReference Include="test_pic18x_kernel_unit.pas"/>
-        <DCCReference Include="..\lib\delphidabbler\UWebBrowserWrapper.pas"/>
         <DCCReference Include="pic18x_assignment_statement_unit.pas"/>
         <DCCReference Include="common\pic18x_common_unit.pas"/>
         <DCCReference Include="pic18x_main_compiler_unit.pas"/>
@@ -167,7 +167,6 @@
                     <VersionInfoKeys Name="Comments"/>
                 </VersionInfoKeys>
                 <Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k180.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\dclofficexp180.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
                 </Excluded_Packages>
             </Delphi.Personality>

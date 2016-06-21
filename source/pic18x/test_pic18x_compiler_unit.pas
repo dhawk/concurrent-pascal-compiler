@@ -1,5 +1,9 @@
 UNIT test_pic18x_compiler_unit;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 INTERFACE
 
 procedure RunTests;
@@ -8,7 +12,7 @@ IMPLEMENTATION
 
 uses
    test_pic18x_compiler_main_form_unit, pic18x_run_time_error_check_unit,
-   pic18x_instructions_unit, pic18x_statements_unit, System.SysUtils;
+   pic18x_instructions_unit, pic18x_statements_unit, SysUtils;
 
 procedure test1;
    // constant assignment and sign extension for constants
@@ -977,7 +981,7 @@ procedure test38;    // if, loop
       add ('      i6 := i6 - 1;');
       add ('      i := i - 1');
       add ('   repeat;');
-      add ('   loop');
+      add ('   cycle');
       add ('   repeat');
       add ('end.');
       start_test (38);
@@ -6749,8 +6753,8 @@ procedure test134;
 procedure test135;   // test includes
    begin
       add ('type');
-      add ('{$include ''include_test1/c2.inc''}');
-      add ('{$include ''include_test1/c3.inc''}');
+      add ('{$include ''include_test1\c2.inc''}');
+      add ('{$include ''include_test1\c3.inc''}');
       add ('var');
       add (' c1: tc1;');
       add (' c2: tc2;');
@@ -6899,6 +6903,7 @@ procedure RunTests;
       test133;
       test134;
       test135;
+      MainForm.TestResultsMemo.Lines.Add ('all tests done')
    end;
 
 END.

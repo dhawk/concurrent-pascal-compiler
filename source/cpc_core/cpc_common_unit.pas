@@ -86,7 +86,7 @@ const
    err_expression_expected = 'expression expected';
    err_expression_value_outside_legal_range = 'expression value outside legal range';
    err_field_identifier_expected = 'field identifier expected';
-   err_final_loop_statement_must_be_empty = 'final loop statement must be empty';
+   err_final_cycle_statement_must_be_empty = 'final cycle statement must be empty';
    err_final_period__expected = 'final "." of program expected';
    err_first_subrange_value_greater_than_last_subrange_value = ' first subrange value greater than last subrange value';
    err_for_loop_control_variable_must_be_local_variable = 'for loop control variable must be a local variable';
@@ -145,7 +145,7 @@ const
    err_ioregister_not_allowed = 'ioregister not allowed';
    err_ioregister_packed_record_enums_must_be_specified = 'invalid ioregister type: packed record''s enum values must be fully specified';
    err_ioregisters_must_be_declared_at_global_level = 'ioregisters must be declared at global level';
-   err_last_statement_of_process_must_be_infinite_loop = 'the last statement of a process block must be an infinite loop';
+   err_last_statement_of_process_must_be_cycle_repeat = 'the last statement of a process block must be a cycle/repeat statment';
    err_left_and_right_operand_types_dont_agree = 'operand types don''t agree';
    err_left_bracket_expected = '"[" expected';
    err_left_element_must_be_ordinal = 'left element must be ordinal';
@@ -199,7 +199,6 @@ const
    err_procedures_not_allowed_in_interrupt_definitions = 'procedures not allowed in interrupt definitions';
    err_process_priority_must_be_matched_to_interrupt_priority = 'process priority must be matched to interrupt priority';
    err_process_variable_not_allowed_here = 'process variable not allowed here';
-   err_process_infinite_loop_cannot_terminate = 'process infinite loop cannot terminate';
    err_processor_does_not_support_eeprom = 'this processor does not have eeprom';
    err_properties_not_allowed_in_interrupt_definitions = 'properties not allowed in interrupt definitions';
    err_properties_not_allowed_in_processes = 'properties not allowed in processes';
@@ -209,6 +208,7 @@ const
    err_property_must_be_marked_entry = 'property must be marked entry';
    err_property_must_be_simple_type = 'property must be simple type';
    err_property_or_routine_identifier_expected = 'property or routine identifier expected';
+   err_no_loop_exit_defined = 'no loop exit defined (need while, until or exitloop statement)';
    err_property_setter_already_defined = 'property setter already defined';
    err_queue_param_must_be_var = 'queue param must be passed as var';
    err_queue_parameters_only_allowed_in_monitor_local_routines = 'queue parameters only allowed in monitor local routines';
@@ -223,6 +223,7 @@ const
    err_record_or_class_or_monitor_variable_expected = 'record, overlay, class or monitor variable expected';
    err_recursive_call_not_allowed = 'recusive call not allowed';
    err_recursive_include_file = 'recursive include file';
+   err_recycle_only_allowed_inside_cycle = 'recycle only allowed inside cycle';
    err_reloop_only_allowed_inside_loop = '"reloop" only allowed inside loop';
    err_while_only_allowed_inside_loop = '"while" only allowed inside loop';
    err_until_only_allowed_inside_loop = '"until" only allowed inside loop';

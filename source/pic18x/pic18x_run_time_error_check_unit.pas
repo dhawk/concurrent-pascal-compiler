@@ -1,5 +1,9 @@
 UNIT pic18x_run_time_error_check_unit;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 INTERFACE
 
 uses cpc_core_objects_unit, cpc_source_analysis_unit,

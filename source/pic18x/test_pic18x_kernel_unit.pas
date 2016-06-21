@@ -1,9 +1,13 @@
 UNIT test_pic18x_kernel_unit;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 INTERFACE
 
 uses
-   System.Classes, pic18x_instructions_unit;
+   Classes, pic18x_instructions_unit;
 
 var
    GenerateKernelTestCoverageMap: boolean;
@@ -23,7 +27,7 @@ procedure run_kernel_tests;
 IMPLEMENTATIOn
 
 uses
-  pic18x_kernel_unit, pic18x_blocks_unit, cpc_blocks_unit, System.SysUtils,
+  pic18x_kernel_unit, pic18x_blocks_unit, cpc_blocks_unit, SysUtils,
   pic18x_core_objects_unit, cpc_core_objects_unit, test_pic18x_simulator_unit,
   test_pic18x_compiler_main_form_unit;
 

@@ -217,7 +217,7 @@ type
             override;
          procedure MarkAsReachable;
             override;
-         function FinalStatementIsEmptyLoopStatement: boolean;
+         function FinalStatementIsEmptyCycleStatement: boolean;
          procedure global_declarations_examination_hook;
             virtual;
       end;
@@ -278,7 +278,6 @@ procedure check_for_valid_ioreg_type (typedef: TTypeDef; typedef_src_loc: TSourc
             result := b
       end;
    begin
-      overlay_width := 0;  // suppress compiler warning
       case typedef.type_kind of
          packed_record_type:
             begin
@@ -1708,13 +1707,9 @@ constructor TSystemType.CreateFromSourceTokens;
             begin
                if (Length (TStatementList(initial_statement).stmts) = 0)
                   or
-                  (TStatementList(initial_statement).stmts[Length(TStatementList(initial_statement).stmts)-1].statement_kind <> loop_statement)
+                  (TStatementList(initial_statement).stmts[Length (TStatementList(initial_statement).stmts)-1].statement_kind <> cycle_statement)
                then
-                  raise compile_error.Create (err_last_statement_of_process_must_be_infinite_loop);
-
-               if not TLoopStatement(TStatementList(initial_statement).stmts[Length(TStatementList(initial_statement).stmts)-1]).first_exit_src_loc.NullSourceLocation then
-                  raise compile_error.Create (err_process_infinite_loop_cannot_terminate, TLoopStatement(TStatementList(initial_statement).stmts[Length(TStatementList(initial_statement).stmts)-1]).first_exit_src_loc);
-
+                  raise compile_error.Create (err_last_statement_of_process_must_be_cycle_repeat);
 
                if interrupt_process then
                   begin
@@ -1874,7 +1869,7 @@ constructor TProgram.CreateFromSourceTokens;
       gr: TRoutine;
       in_preamble: boolean;
       scope_count: integer;
-      final_loop_stmt: TLoopStatement;
+      final_cycle_stmt: TCycleStatement;
    begin
       scope_count := 0;
       the_program := Self;
@@ -1957,12 +1952,12 @@ constructor TProgram.CreateFromSourceTokens;
 
          if (Length(TStatementList(initial_statement).stmts) > 0)
             and
-            (TStatementList(initial_statement).stmts[Length(TStatementList(initial_statement).stmts)-1].statement_kind = loop_statement) then
+            (TStatementList(initial_statement).stmts[Length(TStatementList(initial_statement).stmts)-1].statement_kind = cycle_statement) then
             begin
-               final_loop_stmt := TLoopStatement (TStatementList(initial_statement).stmts[Length(TStatementList(initial_statement).stmts)-1]);
-               if Length(final_loop_stmt.statement_list.stmts) > 0 then
-                  raise compile_error.Create (err_final_loop_statement_must_be_empty, final_loop_stmt.statement_list.stmt[0].src_loc);
-               final_loop_stmt.is_empty_loop_at_end_of_program_initial_statement := true
+               final_cycle_stmt := TCycleStatement (TStatementList(initial_statement).stmts[Length(TStatementList(initial_statement).stmts)-1]);
+               if Length(final_cycle_stmt.statement_list.stmts) > 0 then
+                  raise compile_error.Create (err_final_cycle_statement_must_be_empty, final_cycle_stmt.statement_list.stmt[0].src_loc);
+               final_cycle_stmt.is_empty_loop_at_end_of_program_initial_statement := true
             end;
 
          // assign monitor priorities
@@ -2002,14 +1997,14 @@ procedure TProgram.MarkAsReachable;
       initial_statement.MarkAsReachable
    end;
 
-function TProgram.FinalStatementIsEmptyLoopStatement: boolean;
+function TProgram.FinalStatementIsEmptyCycleStatement: boolean;
    var
       len: integer;
    begin
       len := Length(TStatementList(initial_statement).stmts);
       result := (len > 0)
                 and
-                (TStatementList(initial_statement)[len-1].statement_kind = loop_statement)
+                (TStatementList(initial_statement)[len-1].statement_kind = cycle_statement)
    end;
 
 procedure TProgram.global_declarations_examination_hook;

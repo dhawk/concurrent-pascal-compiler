@@ -63,6 +63,11 @@ function TTestCPU.TContinueStatement_CreateFromSourceTokens: TContinueStatement;
       result := TContinueStatement.CreateFromSourceTokens
    end;
 
+function TTestCPU.TCycleStatement_CreateFromSourceTokens: TCycleStatement;
+   begin
+      result := TCycleStatement.CreateFromSourceTokens
+   end;
+
 function TTestCPU.TDataItemList_Create: TDataItemList;
    begin
       result := TDataItemList.Create
@@ -136,6 +141,11 @@ function TTestCPU.TProgram_CreateFromSourceTokens: TProgram;
 function TTestCPU.TProperty_CreateFromSourceTokens (cntxt: TDefinition): TProperty;
    begin
       result := TProperty.CreateFromSourceTokens (cntxt)
+   end;
+
+function TTestCPU.TReCycleStatement_CreateFromSourceTokens: TReCycleStatement;
+   begin
+      result := TReCycleStatement.CreateFromSourceTokens
    end;
 
 function TTestCPU.TRelationalExpression_CreateFromSourceTokens: TRelationalExpression;

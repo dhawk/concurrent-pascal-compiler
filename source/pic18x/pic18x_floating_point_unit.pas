@@ -1,5 +1,13 @@
 UNIT pic18x_floating_point_unit;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
+{$IFDEF FPC}
+{$MODESWITCH ADVANCEDRECORDS}
+{$ENDIF}
+
 INTERFACE
 
 uses pic18x_instructions_unit, cpc_core_objects_unit, cpc_source_analysis_unit,

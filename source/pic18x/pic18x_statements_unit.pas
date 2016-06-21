@@ -35,6 +35,14 @@ type
             override;
       end;
 
+   TPIC18x_CycleStatement =
+      class (TCycleStatement)
+         start_loop_label: TInstruction;
+         initial_stack_level: integer;
+         function Generate (param1, param2: integer): integer;
+            override;
+      end;
+
    TPIC18x_ExitLoopStatement =
       class (TExitLoopStatement)
          function Generate (param1, param2: integer): integer;
@@ -64,6 +72,12 @@ type
          initial_stack_level: integer;
          start_loop_label: TInstruction;
          end_loop: TBranchTarget;
+         function Generate (param1, param2: integer): integer;
+            override;
+      end;
+
+   TPIC18x_ReCycleStatement =
+      class (TReCycleStatement)
          function Generate (param1, param2: integer): integer;
             override;
       end;
@@ -512,6 +526,25 @@ function TPIC18x_CaseStatement.Generate (param1, param2: integer): integer;
 function TPIC18x_CaseStatement.create_case_entry (_case_stmt: TCaseStatement; _labeled_statement_idx, _first_of_range, _last_of_range: integer): TCaseStatement.TCaseLabelRangeEntry;
    begin
       result := TPIC18x_CaseEntry.create (_case_stmt, _labeled_statement_idx, _first_of_range, _last_of_range)
+   end;
+
+function TPIC18x_CycleStatement.Generate (param1, param2: integer): integer;
+   begin
+      result := 0;  // to suppress compiler warning
+      case param1 of
+         GenerateCode:
+            if not is_empty_loop_at_end_of_program_initial_statement then
+               begin
+                  TSourceSyncPoint.Create (src_loc);
+                  start_loop_label := TAssemblyLabel.Create;
+                  initial_stack_level := StackUsageCounter.Current;
+                  statement_list.Generate (GenerateCode, 0);
+                  TSourceSyncPoint.Create (repeat_token_src_loc);
+                  TGOTOMacro.Create.dest := start_loop_label
+               end;
+      else
+         assert (false, 'TPIC18x_CycleStatement.Generate(' + IntToStr(param1) + ') not implemented')
+      end
    end;
 
 function TPIC18x_ExitLoopStatement.Generate (param1, param2: integer): integer;
@@ -1174,20 +1207,17 @@ function TPIC18x_LoopStatement.Generate (param1, param2: integer): integer;
       case param1 of
          GenerateCode:
             begin
-               if not is_empty_loop_at_end_of_program_initial_statement then
-                  begin
-                     end_loop := TBranchTarget.Create;
-                     TSourceSyncPoint.Create (src_loc);
-                     start_loop_label := TAssemblyLabel.Create;
-                     initial_stack_level := StackUsageCounter.Current;
-                     statement_list.Generate (GenerateCode, 0);
-                     TSourceSyncPoint.Create (repeat_token_src_loc);
-                     TGOTOMacro.Create.dest := start_loop_label;
-                     end_loop.target_label := TAssemblyLabel.Create;
-                     end_loop.set_client_destinations;
-                     end_loop.Free;
-                     end_loop := nil
-                  end
+               end_loop := TBranchTarget.Create;
+               TSourceSyncPoint.Create (src_loc);
+               start_loop_label := TAssemblyLabel.Create;
+               initial_stack_level := StackUsageCounter.Current;
+               statement_list.Generate (GenerateCode, 0);
+               TSourceSyncPoint.Create (repeat_token_src_loc);
+               TGOTOMacro.Create.dest := start_loop_label;
+               end_loop.target_label := TAssemblyLabel.Create;
+               end_loop.set_client_destinations;
+               end_loop.Free;
+               end_loop := nil
             end;
       else
          assert (false, 'TPIC18x_LoopStatement.Generate(' + IntToStr(param1) + ') not implemented')
@@ -1221,6 +1251,36 @@ function TPIC18x_ReLoopStatement.Generate (param1, param2: integer): integer;
             end;
       else
          assert (false, 'TPIC18x_ReLoopStatement.Generate(' + IntToStr(param1) + ') not implemented')
+      end
+   end;
+
+function TPIC18x_ReCycleStatement.Generate (param1, param2: integer): integer;
+   var
+      br: TInstruction;
+   begin
+      result := 0;  // to suppress compiler warning
+      case param1 of
+         GenerateCode:
+            begin
+               TSourceSyncPoint.Create (src_loc);
+               if recycle_condition = nil then
+                  begin
+                     if StackUsageCounter.Current > TPIC18x_CycleStatement (containing_cycle_stmt).initial_stack_level then
+                        TPIC18x_ADDFSR.Create (2, StackUsageCounter.Current - TPIC18x_CycleStatement (containing_cycle_stmt).initial_stack_level);
+                     TGOTOMacro.Create.dest := TPIC18x_CycleStatement (containing_cycle_stmt).start_loop_label
+                  end
+               else if StackUsageCounter.Current = TPIC18x_CycleStatement (containing_cycle_stmt).initial_stack_level then
+                  GenerateCodeForConditionalBranch (recycle_condition, true).dest := TPIC18x_CycleStatement (containing_cycle_stmt).start_loop_label
+               else
+                  begin
+                     br := GenerateCodeForConditionalBranch (recycle_condition, false);
+                     TPIC18x_ADDFSR.Create (2, StackUsageCounter.Current - TPIC18x_CycleStatement (containing_cycle_stmt).initial_stack_level);
+                     TGOTOMacro.Create.dest := TPIC18x_CycleStatement (containing_cycle_stmt).start_loop_label;
+                     br.dest := TAssemblyLabel.Create
+                  end
+            end;
+      else
+         assert (false, 'TPIC18x_ReCycleStatement.Generate(' + IntToStr(param1) + ') not implemented')
       end
    end;
 

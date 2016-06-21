@@ -441,8 +441,15 @@ function TPIC18x_Routine.Generate (param1, param2: integer): integer;
                      addr := addr + ram_ptr_size     // this ptr
                   end;
 
-               if TSystemType(context).system_type_kind <> interrupt_system_type then
-                  addr := addr + pc_size;               // return address
+               case context.definition_kind of
+                  program_definition:
+                     addr := addr + pc_size;               // return address
+                  type_definition:
+                     if TSystemType(context).system_type_kind <> interrupt_system_type then
+                        addr := addr + pc_size;               // return address
+               else
+                  assert (false)
+               end;
 
                if function_result <> nil then
                   begin
@@ -458,12 +465,17 @@ function TPIC18x_Routine.Generate (param1, param2: integer): integer;
                current_block := self;
                StackUsageCounter.Clear;
 
-               if TSystemType(context).system_type_kind = interrupt_system_type then
+               if (context.definition_kind = type_definition)
+                  and
+                  (TSystemType(context).system_type_kind = interrupt_system_type)
+               then
                   ProgramCode.StartRecordingInlineCode (inline_code)
                else
                   entry_point_label := TAssemblyLabel.Create;
 
-               if (TSystemType(context).system_type_kind = monitor_system_type)
+               if (context.definition_kind = type_definition)
+                  and
+                  (TSystemType(context).system_type_kind = monitor_system_type)
                   and
                   entry
                then
@@ -492,7 +504,9 @@ function TPIC18x_Routine.Generate (param1, param2: integer): integer;
                   if param_size > 0 then
                      adjust_fsr (pFSR2, param_size).annotation := 'pop parameters';
 
-               if (TSystemType(context).system_type_kind = monitor_system_type)
+               if (context.definition_kind = type_definition)
+                  and
+                  (TSystemType(context).system_type_kind = monitor_system_type)
                   and
                   entry
                then
@@ -512,7 +526,10 @@ function TPIC18x_Routine.Generate (param1, param2: integer): integer;
                            TPIC18x_MOVFF.Create (PREINC2, this_ptrL)
                         end;
 
-                     if TSystemType(context).system_type_kind = interrupt_system_type then
+                     if (context.definition_kind = type_definition)
+                        and
+                        (TSystemType(context).system_type_kind = interrupt_system_type)
+                     then
                         ProgramCode.StopRecordingInlineCode
                      else
                         begin

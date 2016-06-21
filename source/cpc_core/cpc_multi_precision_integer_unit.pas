@@ -200,7 +200,7 @@ function TMultiPrecisionInteger.get_unsigned: TLargestPascalSupportedUnsigned;
       s := mp_adecimal(mpi);
       result := 0;
       for i := 1 to Length(s)
-      do result := (result * 10) + ord (s[i]) - ord('0')
+      do result := (result*10) + ord(s[i]) - ord('0')
    end;
 
 function TMultiPrecisionInteger.get_real: real;

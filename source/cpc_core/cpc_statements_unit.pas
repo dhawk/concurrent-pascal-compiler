@@ -17,12 +17,14 @@ type
        await_statement,
        case_statement,
        continue_statement,
+       cycle_statement,
        delay_statement,
        exitloop_statement,
        for_statement,
        if_statement,
        init_statement,
        loop_statement,
+       recycle_statement,
        reloop_statement,
        routine_call_statement,
        statement_list,
@@ -132,6 +134,22 @@ type
             override;
       end;
 
+   TCycleStatement =
+      class(TStatement)
+         statement_list: TStatementList;
+         repeat_token_src_loc: TSourceLocation;
+         is_empty_loop_at_end_of_program_initial_statement: boolean;
+         constructor CreateFromSourceTokens;
+         destructor Destroy;
+            override;
+         procedure MarkAsReachable;
+            override;
+         function CheckForProhibitedDelayCall (err_msg: string): boolean;
+            override;
+      private
+         function termination_test: boolean;
+      end;
+
    TDelayStatement =
       class(TStatement)
          queue_access: TAccess;
@@ -223,7 +241,7 @@ type
          statement_list: TStatementList;
          repeat_token_src_loc: TSourceLocation;
          first_exit_src_loc: TSourceLocation;
-         is_empty_loop_at_end_of_program_initial_statement: boolean;
+         possible_loop_exit_declared: boolean;
          constructor CreateFromSourceTokens;
          destructor Destroy;
             override;
@@ -233,6 +251,19 @@ type
             override;
       private
          function termination_test: boolean;
+      end;
+
+   TReCycleStatement =
+      class(TStatement)
+         containing_cycle_stmt: TCycleStatement;
+         recycle_condition: TExpression;
+         constructor CreateFromSourceTokens;
+         destructor Destroy;
+            override;
+         procedure MarkAsReachable;
+            override;
+         function CheckForProhibitedDelayCall (err_msg: string): boolean;
+            override;
       end;
 
    TReLoopStatement =
@@ -391,6 +422,7 @@ uses
    dijkstra_smoothsort_unit, cpc_multi_precision_integer_unit;
 
 var
+   CycleStatementStack: TDefinitionStack;
    LoopStatementStack: TDefinitionStack;
    temp: TMultiPrecisionInteger;
 
@@ -450,10 +482,14 @@ function process_statement_from_source_tokens (while_and_until_allowed: boolean)
             result := target_cpu.TExitLoopStatement_CreateFromSourceTokens
          else if lex.token_is_reserved_word(rw_reloop) then
             result := target_cpu.TReLoopStatement_CreateFromSourceTokens
+         else if lex.token_is_reserved_word(rw_recycle) then
+            result := target_cpu.TReCycleStatement_CreateFromSourceTokens
          else if lex.token_is_reserved_word(rw_with) then
             result := target_cpu.TWithStatement_CreateFromSourceTokens
          else if lex.token_is_reserved_word(rw_continue) then
             result := target_cpu.TContinueStatement_CreateFromSourceTokens
+         else if lex.token_is_reserved_word(rw_cycle) then
+            result := target_cpu.TCycleStatement_CreateFromSourceTokens
          else if lex.token_is_reserved_word(rw_delay) then
             result := target_cpu.TDelayStatement_CreateFromSourceTokens
          else if lex.token_is_reserved_word(rw_init) then
@@ -1004,9 +1040,63 @@ procedure TContinueStatement.MarkAsReachable;
       queue_access.MarkAsReachable
    end;
 
+//=================
+// TCycleStatement
 
-// ==================
-// TDelayStatement
+constructor TCycleStatement.CreateFromSourceTokens;
+   begin
+      inherited Create(cycle_statement);
+      CycleStatementStack.push(Self);
+      try
+         assert(lex.token_is_reserved_word(rw_cycle));
+         src_loc := lex.token.src_loc;
+         lex.advance_token;
+
+         statement_list :=
+            target_cpu.TStatementList_CreateFromSourceTokens(termination_test, err_semicolon_or_repeat_expected, false);
+
+         if not lex.token_is_reserved_word(rw_repeat) then
+            raise compile_error.Create(err_repeat_expected);
+         repeat_token_src_loc := lex.token.src_loc;
+         lex.advance_token;
+      finally
+         CycleStatementStack.pop
+      end
+   end;
+
+destructor TCycleStatement.Destroy;
+   begin
+      statement_list.Release
+   end;
+
+procedure TCycleStatement.MarkAsReachable;
+   begin
+      inherited;
+      statement_list.MarkAsReachable
+   end;
+
+function TCycleStatement.CheckForProhibitedDelayCall (err_msg: string): boolean;
+   begin
+      result := statement_list.CheckForProhibitedDelayCall (err_msg)
+   end;
+
+function TCycleStatement.termination_test: boolean;
+   begin
+      result := lex.token_is_reserved_word(rw_repeat);
+      if result then
+         case lex.next_token.token_kind of
+            reserved_word_token:
+               result := lex.next_token.rw in [rw_end, rw_else, rw_otherwise, rw_until, rw_repeat];
+            symbol_token:
+               result := lex.next_token.symbol = sym_semicolon;
+         else
+            result := false
+         end
+   end;
+
+
+// =================
+//  TDelayStatement
 
 constructor TDelayStatement.CreateFromSourceTokens;
    var
@@ -1066,6 +1156,7 @@ constructor TExitLoopStatement.CreateFromSourceTokens;
       if LoopStatementStack.tos = nil then
          raise compile_error.Create(err_exitloop_only_allowed_inside_loop);
       containing_loop_statement := TLoopStatement(LoopStatementStack.tos);
+      containing_loop_statement.possible_loop_exit_declared := true;
 
       assert(lex.token_is_reserved_word(rw_exitloop));
       lex.advance_token;
@@ -1456,6 +1547,49 @@ function TInitStatement.CheckForProhibitedDelayCall (err_msg: string): boolean;
 
 
 // ====================
+// TReCycleStatment
+
+constructor TReCycleStatement.CreateFromSourceTokens;
+   begin
+      inherited Create(recycle_statement);
+
+      if CycleStatementStack.tos = nil then
+         raise compile_error.Create(err_recycle_only_allowed_inside_cycle);
+      containing_cycle_stmt := TCycleStatement(CycleStatementStack.tos);
+
+      assert(lex.token_is_reserved_word(rw_recycle));
+      lex.advance_token;
+
+      if lex.token_is_reserved_word(rw_if) then
+         begin
+            lex.advance_token;
+
+            recycle_condition := CreateBooleanExpressionFromSourceTokens
+         end
+   end;
+
+destructor TReCycleStatement.Destroy;
+   begin
+      recycle_condition.Release
+   end;
+
+procedure TReCycleStatement.MarkAsReachable;
+   begin
+      inherited;
+      if recycle_condition <> nil then
+         recycle_condition.MarkAsReachable
+   end;
+
+function TReCycleStatement.CheckForProhibitedDelayCall (err_msg: string): boolean;
+   begin
+      if recycle_condition = nil then
+         result := false
+      else
+         result := recycle_condition.CheckForProhibitedDelayCall (err_msg)
+   end;
+
+
+// ====================
 // TReLoopStatment
 
 constructor TReLoopStatement.CreateFromSourceTokens;
@@ -1572,6 +1706,7 @@ constructor TWhileStatement.CreateFromSourceTokens;
       if LoopStatementStack.tos = nil then
          raise compile_error.Create(err_while_only_allowed_inside_loop);
       containing_loop_statement := TLoopStatement(LoopStatementStack.tos);
+      containing_loop_statement.possible_loop_exit_declared := true;
       if containing_loop_statement.first_exit_src_loc.NullSourceLocation then
          containing_loop_statement.first_exit_src_loc := src_loc;
       lex.advance_token;
@@ -1607,6 +1742,7 @@ constructor TUntilStatement.CreateFromSourceTokens;
       if LoopStatementStack.tos = nil then
          raise compile_error.Create(err_until_only_allowed_inside_loop);
       containing_loop_statement := TLoopStatement(LoopStatementStack.tos);
+      containing_loop_statement.possible_loop_exit_declared := true;
       if containing_loop_statement.first_exit_src_loc.NullSourceLocation then
          containing_loop_statement.first_exit_src_loc := src_loc;
       lex.advance_token;
@@ -1930,7 +2066,10 @@ constructor TLoopStatement.CreateFromSourceTokens;
          if not lex.token_is_reserved_word(rw_repeat) then
             raise compile_error.Create(err_repeat_expected);
          repeat_token_src_loc := lex.token.src_loc;
-         lex.advance_token
+         lex.advance_token;
+
+         if not possible_loop_exit_declared then
+            raise compile_error.Create (err_no_loop_exit_defined, repeat_token_src_loc)
       finally
          LoopStatementStack.pop
       end
@@ -2103,10 +2242,12 @@ function TStatementList.CheckForProhibitedDelayCall (err_msg: string): boolean;
 
 INITIALIZATION
    LoopStatementStack := TDefinitionStack.Create;
+   CycleStatementStack := TDefinitionStack.Create;
    temp := TMultiPrecisionInteger.Create;
 
 FINALIZATION
    LoopStatementStack.Free;
+   CycleStatementStack.Free;
    temp.Free;
 
 END.

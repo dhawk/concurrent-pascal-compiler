@@ -5,7 +5,11 @@ program test_cpc_pic18x;
 {$ENDIF}
 
 uses
+  {$IFDEF FPC}
+  Interfaces,
+  {$ELSE}
   FastMM4,
+  {$ENDIF}
   Forms,
   test_pic18x_compiler_main_form_unit in 'test_pic18x_compiler_main_form_unit.pas' {MainForm},
   test_pic18x_compiler_unit in 'test_pic18x_compiler_unit.pas',
@@ -46,7 +50,6 @@ uses
   pic18x_kernel_unit in 'pic18x_kernel_unit.pas',
   pic18x_string_unit in 'pic18x_string_unit.pas',
   test_pic18x_kernel_unit in 'test_pic18x_kernel_unit.pas',
-  UWebBrowserWrapper in '..\lib\delphidabbler\UWebBrowserWrapper.pas',
   pic18x_assignment_statement_unit in 'pic18x_assignment_statement_unit.pas',
   pic18x_common_unit in 'common\pic18x_common_unit.pas',
   pic18x_main_compiler_unit in 'pic18x_main_compiler_unit.pas';

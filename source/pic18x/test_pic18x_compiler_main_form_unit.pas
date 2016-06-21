@@ -8,28 +8,24 @@ INTERFACE
 
 uses
 {$ifdef FPC}
+   LCLType, LMessages,
    LCLIntf, LResources,
+{$ELSE}
+   Windows,
 {$endif}
    SysUtils, Classes, ComCtrls,
    pic18x_statements_unit, pic18x_blocks_unit, cpc_definitions_unit,
-   Vcl.OleCtrls, SHDocVw, Vcl.Samples.Spin, Vcl.Controls, Vcl.StdCtrls,
-   Vcl.Forms, Winapi.Messages, Winapi.Windows, Vcl.ExtCtrls;
+   Spin, Controls, StdCtrls,
+   Forms, Messages, ExtCtrls, htmlview;
 
 type
    TMainForm =
       class(TForm)
          Button3: TButton;
-         WebBrowser: TWebBrowser;
          SrcToClipboardForTestButton: TButton;
          SrcToClipboardButton: TButton;
          Button1: TButton;
-         procedure Button3Click(Sender: TObject);
-         procedure SrcToClipboardForTestButtonClick(Sender: TObject);
-         procedure SrcToClipboardButtonClick(Sender: TObject);
-         procedure Button1Click(Sender: TObject);
-      public
-         number_of_tests: integer;
-      published
+         KernelTestWebbrowserBasePanel: TPanel;
          PageControl1: TPageControl;
          TabSheet1: TTabSheet;
          TabSheet2: TTabSheet;
@@ -54,11 +50,18 @@ type
          procedure CompileMemoButtonClick
             (Sender: TObject
             );
-         procedure FormActivate(Sender: TObject);
          procedure TestSimulatorButtonClick(Sender: TObject);
          procedure TestCompilerButtonClick(Sender: TObject);
          procedure RunButtonClick(Sender: TObject);
          procedure CleanupTestSrcButtonClick(Sender: TObject);
+         procedure Button3Click(Sender: TObject);
+         procedure SrcToClipboardForTestButtonClick(Sender: TObject);
+         procedure SrcToClipboardButtonClick(Sender: TObject);
+         procedure Button1Click(Sender: TObject);
+         procedure FormCreate(Sender: TObject);
+      public
+         number_of_tests: integer;
+         kernel_test_result_html_viewer: THtmlViewer;
       end;
 
 var
@@ -88,15 +91,13 @@ procedure error (s: string);
 
 IMPLEMENTATION
 
-{$ifndef FPC}
 {$R *.dfm}
-{$endif}
 
 uses
    cpc_target_cpu_unit, pic18x_instruction_simulation_test_unit, cpc_main_compiler_unit, pic18x_kernel_unit,
    cpc_multi_precision_integer_unit, pic18x_cpu_unit, test_pic18x_compiler_unit, test_pic18x_kernel_unit,
    pic18x_instructions_unit, test_pic18x_simulator_unit, pic18x_macro_instructions_unit, pic18x_multiply_divide_unit,
-   pic18x_microprocessor_information_unit, pic18x_run_time_error_check_unit, cpc_source_analysis_unit, UWebBrowserWrapper,
+   pic18x_microprocessor_information_unit, pic18x_run_time_error_check_unit, cpc_source_analysis_unit,
    cpc_common_unit, ClipBrd, pic18x_main_compiler_unit;
 
 
@@ -185,9 +186,7 @@ procedure start_test (testno: integer);
       compilation := TCompilation.CreateFromStrings (src, ProgramGenerator, listing);
       test_program := TPIC18x_Program(compilation.compiled_object);
       if compilation.compilation_result <> compiled_ok then
-         begin
-            error ('*** failed to compile ***')
-         end
+         error ('*** failed to compile ***')
       else
          begin
             test_program := TPIC18x_Program(compilation.compiled_object);
@@ -456,7 +455,6 @@ procedure TMainForm.Button1Click(Sender: TObject);
 
 procedure TMainForm.Button3Click(Sender: TObject);
    var
-      w: TWebBrowserWrapper;
       i: integer;
       s: string;
       untested: boolean;
@@ -467,8 +465,8 @@ procedure TMainForm.Button3Click(Sender: TObject);
       number_of_errors := 0;
       run_kernel_tests;
       TestResultsMemo.Lines.Add (format ('%d tests run, %d errors', [number_of_tests, number_of_errors]));
-      w := TWebBrowserWrapper.Create (WebBrowser);
-      s := '<font face="courier new">';
+      s := '<body bgcolor="#FFFFFF">';
+      s := s + '<font face="courier new">';
       for i := 1 to Length(KernelInstructions)-1
       do begin
             untested := (KernelInstructions[i].execution_count = 0)
@@ -490,10 +488,10 @@ procedure TMainForm.Button3Click(Sender: TObject);
                s := s + '</font>'
          end;
       s := s + '</font>';
-      w.LoadFromString (s);
-      w.Free;
+      s := s + '</body>';
       GenerateKernelTestCoverageMap := false;
-      SetLength (KernelInstructions, 0)
+      SetLength (KernelInstructions, 0);
+      kernel_test_result_html_viewer.LoadFromString (s)
    end;
 
 procedure TMainForm.SrcToClipboardForTestButtonClick(Sender: TObject);
@@ -538,17 +536,13 @@ procedure TMainForm.TestSimulatorButtonClick(Sender: TObject);
    end;
 
 procedure TMainForm.TestCompilerButtonClick(Sender: TObject);
-   var
-      w: TWebBrowserWrapper;
    begin
-      w := TWebBrowserWrapper.Create (WebBrowser);
-      w.NavigateToURL('about:blank');
-      w.Free;
+      TestResultsMemo.Lines.Add (format ('%d tests run, %d errors', [number_of_tests, number_of_errors]));
+      kernel_test_result_html_viewer.LoadFromString ('<body bgcolor="#FFFFFF"></body>');
       TestResultsMemo.Clear;
       number_of_tests := 0;
       number_of_errors := 0;
-      RunTests;
-      TestResultsMemo.Lines.Add (format ('%d tests run, %d errors', [number_of_tests, number_of_errors]))
+      RunTests
    end;
 
 procedure TMainForm.CompileMemoButtonClick
@@ -569,7 +563,7 @@ procedure TMainForm.CompileMemoButtonClick
       if compilation_result = compile_error_in_source then
          begin
             Memo.SetFocus;
-            Memo.SelStart := Memo.Perform (EM_LINEINDEX, compilation.compiler_error_source_location.line_no-1, 0) + compilation.compiler_error_source_location.line_idx-1;
+ //           Memo.SelStart := Memo.Perform (EM_LINEINDEX, compilation.compiler_error_source_location.line_no-1, 0) + compilation.compiler_error_source_location.line_idx-1;
             Memo.SelLength := 0;
             Memo.Perform (EM_SCROLLCARET, 0, 0)
          end;
@@ -641,7 +635,6 @@ procedure TMainForm.RunButtonClick(Sender: TObject);
                   else
                      trace_status := trace_status + 'C';
 
-
                   TraceMemo.Lines.Add (format ('%6.6X  %s  %2.2X  %s', [trace_pc, trace_assembly, cpu.w, trace_status]));
                end;
             error_pc := (cpu.ram[error_logU] shl 16) + (cpu.ram[error_logH] shl 8) + cpu.ram[error_logL];
@@ -662,17 +655,18 @@ procedure TMainForm.RunButtonClick(Sender: TObject);
       pic_info_Free
    end;
 
-procedure TMainForm.FormActivate(Sender: TObject);
+procedure TMainForm.FormCreate(Sender: TObject);
    begin
-      PageControl1.ActivePageIndex := 0
+      kernel_test_result_html_viewer := THtmlViewer.Create (self);
+      kernel_test_result_html_viewer.Align := alClient;
+      kernel_test_result_html_viewer.Parent := KernelTestWebbrowserBasePanel;
+      kernel_test_result_html_viewer.LoadFromString ('<body bgcolor="#FFFFFF"></body>');
+      PageControl1.ActivePageIndex := 0;
+      SetCurrentDir (ExtractFilePath(ParamStr(0)) + 'pic18x' + PathDelim + 'compiler_test_cases')
    end;
 
 INITIALIZATION
    src := TStringList.Create;
-
-{$ifdef FPC}
-{$i compiler_test_main_form_unit.lrs}
-{$endif}
 
 FINALIZATION
    src.Free

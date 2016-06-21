@@ -86,6 +86,7 @@ type
        rw_chr,
        rw_class,
        rw_continue,
+       rw_cycle,
        rw_delay,
        rw_div,
        rw_do,
@@ -121,7 +122,7 @@ type
        rw_process,
        rw_property,
        rw_record,
-       rw_recover,
+       rw_recycle,
        rw_reloop,
        rw_repeat,
        rw_round,
@@ -575,13 +576,13 @@ procedure handle_compiler_directive (source_idx: integer);
       line := Trim (Line);
 
       if is_include_directive(line) then
-         try
-            full_path_fn := ExpandFileName (IncludeTrailingPathDelimiter(current_dir) + extract_quoted_compiler_directive_parameter (include_directive, line, 'file', src_location));  // will convert relative path to absolute path
+         try  // see if it a relative file path to current directory
+            full_path_fn := ExpandFileName (current_dir + extract_quoted_compiler_directive_parameter (include_directive, line, 'file', src_location));  // will convert relative path to absolute path
             read_in_file(full_path_fn, false, src_location)
          except
             on EFileDoesntExist do
-               try
-                  full_path_fn := extract_quoted_compiler_directive_parameter (include_directive, line, 'file', src_location);  // try absolute path
+               try  // see if it is an absolute path file name
+                  full_path_fn := extract_quoted_compiler_directive_parameter (include_directive, line, 'file', src_location);
                   read_in_file(full_path_fn, false, src_location)
                except
                   on EFileDoesntExist do
@@ -772,6 +773,8 @@ function reserved_word_to_string
             result := 'const';
          rw_continue:
             result := 'continue';
+         rw_cycle:
+            result := 'cycle';
          rw_delay:
             result := 'delay';
          rw_div:
@@ -848,8 +851,8 @@ function reserved_word_to_string
             result := 'property';
          rw_record:
             result := 'record';
-         rw_recover:
-            result := 'recover';
+         rw_recycle:
+            result := 'recycle';
          rw_reloop:
             result := 'reloop';
          rw_repeat:
@@ -961,14 +964,14 @@ procedure TLexicalAnalysis.ReadInSourceFile (source_file_name: string);
 
 procedure TLexicalAnalysis.ReadInTestCase (line: string);
    begin
-      current_dir := ExpandFileName(IncludeTrailingPathDelimiter(ExtractFilePath (ParamStr(0))) + target_cpu.src_directory_relative_to_bin);  // will convert relative path to absolute path
+      current_dir := IncludeTrailingPathDelimiter(GetCurrentDir);
       first_non_preamble_source_idx := Length(source);
       read_in_source_for_test_case (line)
    end;
 
 procedure TLexicalAnalysis.ReadInTestCase (lines: TStrings);
    begin
-      current_dir := ExpandFileName(IncludeTrailingPathDelimiter(ExtractFilePath (ParamStr(0))) + target_cpu.src_directory_relative_to_bin);  // will convert relative path to absolute path
+      current_dir := IncludeTrailingPathDelimiter(GetCurrentDir);
       first_non_preamble_source_idx := Length(source);
       read_in_source_for_test_case (lines)
    end;

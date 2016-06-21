@@ -1,5 +1,9 @@
 UNIT pic18x_instructions_unit;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 INTERFACE
 
 uses
@@ -1225,7 +1229,7 @@ type
                              _is_single_instruction: boolean;
                              stack_push_count: integer;
                              stack_pop_count: integer;
-                             annotation: string
+                             _annotation: string
                             );
          function always_inline_regardless_of_priority: boolean;
             override;
@@ -1363,13 +1367,13 @@ constructor TPossibleIORegOperationCodeSegment.Create (_access: TDefinition;
                                                        _is_single_instruction: boolean;
                                                        stack_push_count: integer;
                                                        stack_pop_count: integer;
-                                                       annotation: string
+                                                       _annotation: string
                                                       );
    begin
       access := _access;
       access.AddRef;
       access_is_via_a_single_instruction := _is_single_instruction;
-      inherited Create (stack_push_count, stack_pop_count, annotation)
+      inherited Create (stack_push_count, stack_pop_count, _annotation)
    end;
 
 function TPossibleIORegOperationCodeSegment.do_code_generation: TInstruction;
@@ -2190,7 +2194,7 @@ constructor TPIC18x_byte_oriented_operations_fda.Create (_mnemonic: string; _opc
       sets_z_status := _sets_z_status
    end;
 
-function TPIC18x_byte_oriented_operations_fda.loads_w_and_z;
+function TPIC18x_byte_oriented_operations_fda.loads_w_and_z: boolean;
    begin
       result := (sets_z_status)
                 and

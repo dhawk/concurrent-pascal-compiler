@@ -1,9 +1,18 @@
 UNIT about_box_unit;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 INTERFACE
 
 uses
-   Windows, SysUtils, Classes, Graphics,
+{$IFnDEF FPC}
+  Windows,
+{$ELSE}
+  LCLIntf, LCLType, LMessages,
+{$ENDIF}
+  SysUtils, Classes, Graphics,
 {$IFDEF FPC}
 {$ELSE}
    Vcl.Imaging.GIFImg,

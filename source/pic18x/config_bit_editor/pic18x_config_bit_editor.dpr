@@ -1,5 +1,9 @@
 program pic18x_config_bit_editor;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 uses
   {$IFDEF FPC}
   Interfaces,

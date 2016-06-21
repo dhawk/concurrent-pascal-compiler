@@ -124,6 +124,8 @@ type
             override;
          function TContinueStatement_CreateFromSourceTokens: TContinueStatement;
             override;
+         function TCycleStatement_CreateFromSourceTokens: TCycleStatement;
+            override;
          function TDataItemList_Create: TDataItemList;
             override;
          function TDelayStatement_CreateFromSourceTokens: TDelayStatement;
@@ -157,6 +159,8 @@ type
          function TProperty_CreateFromSourceTokens (cntxt: TDefinition): TProperty;
             override;
          function TRelationalExpression_CreateFromSourceTokens: TRelationalExpression;
+            override;
+         function TReCycleStatement_CreateFromSourceTokens: TReCycleStatement;
             override;
          function TReLoopStatement_CreateFromSourceTokens: TReLoopStatement;
             override;
@@ -558,6 +562,11 @@ function TPIC18x_CPU.TContinueStatement_CreateFromSourceTokens: TContinueStateme
       result := TPIC18x_ContinueStatement.CreateFromSourceTokens
    end;
 
+function TPIC18x_CPU.TCycleStatement_CreateFromSourceTokens: TCycleStatement;
+   begin
+      result := TPIC18x_CycleStatement.CreateFromSourceTokens
+   end;
+
 function TPIC18x_CPU.TDelayStatement_CreateFromSourceTokens: TDelayStatement;
    begin
       result := TPIC18x_DelayStatement.CreateFromSourceTokens
@@ -607,12 +616,12 @@ function TPIC18x_CPU.TNotPrimary_CreateFromSourceTokens: TNotPrimary;
 
 function TPIC18x_CPU.TParamList_CreateFromSourceTokens (context: TParamListContext): TParamList;
    begin
-      result := TPIC18x_TParamList.CreateFromSourceTokens (context)
+      result := TPIC18x_ParamList.CreateFromSourceTokens (context)
    end;
 
 function TPIC18x_CPU.TParamList_CreatePropertyPseudoParamList (property_id: TIdentifierIdx; property_id_src_loc: TSourceLocation; property_typdef: TTypeDef): TParamList;
    begin
-      result := TPIC18x_TParamList.CreatePropertyPseudoParamList (property_id, property_id_src_loc, property_typdef)
+      result := TPIC18x_ParamList.CreatePropertyPseudoParamList (property_id, property_id_src_loc, property_typdef)
    end;
 
 function TPIC18x_CPU.TTypeInfo_Create (_info: TTypeInfo): TTypeInfo;
@@ -638,6 +647,11 @@ function TPIC18x_CPU.TProperty_CreateFromSourceTokens (cntxt: TDefinition): TPro
 function TPIC18x_CPU.TRelationalExpression_CreateFromSourceTokens: TRelationalExpression;
    begin
       result := TPIC18x_RelationalExpression.CreateFromSourceTokens
+   end;
+
+function TPIC18x_CPU.TReCycleStatement_CreateFromSourceTokens: TReCycleStatement;
+   begin
+      result := TPIC18x_ReCycleStatement.CreateFromSourceTokens
    end;
 
 function TPIC18x_CPU.TReLoopStatement_CreateFromSourceTokens: TReLoopStatement;

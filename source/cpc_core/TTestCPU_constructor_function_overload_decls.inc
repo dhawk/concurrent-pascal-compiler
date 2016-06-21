@@ -24,6 +24,8 @@
             override;
          function TContinueStatement_CreateFromSourceTokens: TContinueStatement;
             override;
+         function TCycleStatement_CreateFromSourceTokens: TCycleStatement;
+            override;
          function TDataItemList_Create: TDataItemList;
             override;
          function TDelayStatement_CreateFromSourceTokens: TDelayStatement;
@@ -55,6 +57,8 @@
          function TProperty_CreateFromSourceTokens (cntxt: TDefinition): TProperty;
             override;
          function TRelationalExpression_CreateFromSourceTokens: TRelationalExpression;
+            override;
+         function TReCycleStatement_CreateFromSourceTokens: TReCycleStatement;
             override;
          function TReLoopStatement_CreateFromSourceTokens: TReLoopStatement;
             override;

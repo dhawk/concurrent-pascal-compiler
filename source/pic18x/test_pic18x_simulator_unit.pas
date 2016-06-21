@@ -1,5 +1,9 @@
 UNIT test_pic18x_simulator_unit;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 INTERFACE
 
 uses pic18x_instructions_unit, cpc_common_unit, pic18x_microprocessor_information_unit;
@@ -163,17 +167,17 @@ constructor TIndirect_FSR.Create (_name: string; _kind: TIndirect_FSR_Kind; _get
 procedure TIndirect_FSR.set_value (b: byte);
    begin
       if kind = plusw then
-         cpu.ram[fsr_getfunc + int8(cpu.w)] := b
+         cpu.ram[integer(fsr_getfunc) + int8(cpu.w)] := b
       else
-         cpu.ram[fsr_getfunc] := b
+         cpu.ram[integer(fsr_getfunc)] := b
    end;
 
 function TIndirect_FSR.get_value: byte;
    begin
       if kind = plusw then
-         result := cpu.ram[fsr_getfunc + int8(cpu.w)]
+         result := cpu.ram[integer(fsr_getfunc) + int8(cpu.w)]
       else
-         result := cpu.ram[fsr_getfunc]
+         result := cpu.ram[integer(fsr_getfunc)]
    end;
 
 procedure TEECON1.set_value (b: byte);

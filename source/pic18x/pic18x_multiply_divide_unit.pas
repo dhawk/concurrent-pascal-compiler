@@ -1,5 +1,9 @@
 UNIT pic18x_multiply_divide_unit;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 INTERFACE
 
 uses SysUtils, cpc_common_unit, pic18x_core_objects_unit;
@@ -100,7 +104,7 @@ function mult_annotation (result_size: integer; a_info, b_info: TIntegerInfo): s
       result := result + IntToStr(b_info.size) + '@[1]'
    end;
 
-function div_annotation (operator: string; result_size, abits, a_addr, bbits: integer): string;
+function div_annotation (_operator: string; result_size, abits, a_addr, bbits: integer): string;
    var
       a_size, b_size: integer;
    begin
@@ -113,7 +117,7 @@ function div_annotation (operator: string; result_size, abits, a_addr, bbits: in
          result := result + 'tos*s'
       else
          result := result + 'tos*u';
-      result := result + format ('%d:%d@[%d] %s ', [a_size, abs(abits), a_addr, operator]);
+      result := result + format ('%d:%d@[%d] %s ', [a_size, abs(abits), a_addr, _operator]);
 
       if bbits < 0 then
          result := result + 'tos*s'
@@ -448,7 +452,7 @@ procedure generate_negation_code (addr: array of integer; size: integer);
 
 
 //   Division/remainder code based on Assembly Macros by:
-//      Copyright © 2004 Ben J. Jackson <ben@ben.com>
+//      Copyright Â© 2004 Ben J. Jackson <ben@ben.com>
 //      May be freely used, modified and distributed,
 //      provided this notice remains intact.  This software
 //      is provided "as is" without express or implied warranty.
@@ -1161,7 +1165,7 @@ procedure GenerateMathRoutines;
             TAssemblySourceBlankLine.Create;
             TAssemblyComment.Create ('------------------------------------------------------------------------------------------');
             TAssemblyComment.Create ('The following integer division/remainder subroutines were derived from assembly macros by:');
-            TAssemblyComment.Create ('   Copyright © 2004 Ben J. Jackson <ben@ben.com>');
+            TAssemblyComment.Create ('   Copyright Â© 2004 Ben J. Jackson <ben@ben.com>');
             TAssemblyComment.Create ('   May be freely used, modified and distributed, provided this notice remains intact.');
             TAssemblyComment.Create ('   This software is provided "as is" without express or implied warranty.');
             TAssemblyComment.Create ('------------------------------------------------------------------------------------------');

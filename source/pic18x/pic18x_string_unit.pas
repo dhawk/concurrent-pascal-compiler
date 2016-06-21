@@ -1,5 +1,9 @@
 UNIT pic18x_string_unit;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 INTERFACE
 
 uses cpc_source_analysis_unit, pic18x_instructions_unit;
@@ -1509,7 +1513,6 @@ procedure TAppendROMStrToEEPROMStr.generate_subroutine_code;
       count       = 1;
       dest_limitL = 2;
       dest_baseL  = 3;
-      pop_count   = 3;
    var
       loop: TInstruction;
       bz: TPIC18x_BZ;
@@ -1584,7 +1587,6 @@ procedure TAppendEEPROMStrToEEPROMStr.generate_subroutine_code;
       count       = 1;
       dest_limitL = 2;
       dest_baseL  = 3;
-      pop_count   = 3;
    var
       loop: TInstruction;
       bz: TPIC18x_BZ;
@@ -2377,7 +2379,6 @@ procedure TStrPosOfRAMStrInRAMStr.generate_subroutine_code;
       strH = 5;
       strL = 6;
       result = 7;
-      pop_count = 6;
    var
       exit_label: TBranchTarget;
       iter_loop: TInstruction;
@@ -2451,7 +2452,6 @@ procedure TStrPosOfROMStrInRAMStr.generate_subroutine_code;
       strH = 5;
       strL = 6;
       result = 7;
-      pop_count = 6;
    var
       exit_label: TBranchTarget;
       iter_loop: TInstruction;
@@ -2527,7 +2527,6 @@ procedure TStrPosOfEEPROMStrInRAMStr.generate_subroutine_code;
       strH = 4;
       strL = 5;
       result = 6;
-      pop_count = 5;
    var
       exit_label: TBranchTarget;
       iter_loop: TInstruction;
@@ -2602,7 +2601,6 @@ procedure TStrPosOfRAMStrInROMStr.generate_subroutine_code;
       strH = 5;
       strL = 6;
       result = 7;
-      pop_count = 6;
    var
       exit_label: TBranchTarget;
       iter_loop: TInstruction;
@@ -2677,7 +2675,6 @@ procedure TStrPosOfEEPROMStrInROMStr.generate_subroutine_code;
       strH = 4;
       strL = 5;
       result = 6;
-      pop_count = 5;
    var
       exit_label: TBranchTarget;
       iter_loop: TInstruction;

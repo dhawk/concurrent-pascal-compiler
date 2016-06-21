@@ -12,7 +12,7 @@ object MainForm: TMainForm
   Font.Style = []
   OldCreateOrder = False
   Position = poScreenCenter
-  OnActivate = FormActivate
+  OnCreate = FormCreate
   DesignSize = (
     1212
     775)
@@ -23,11 +23,15 @@ object MainForm: TMainForm
     Top = 8
     Width = 1180
     Height = 745
-    ActivePage = TabSheet3
+    ActivePage = TabSheet4
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 0
     object TabSheet1: TTabSheet
       Caption = 'Source'
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         1172
         717)
@@ -144,6 +148,10 @@ object MainForm: TMainForm
     object TabSheet2: TTabSheet
       Caption = 'Assembly'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         1172
         717)
@@ -167,6 +175,10 @@ object MainForm: TMainForm
     object TabSheet3: TTabSheet
       Caption = 'Trace'
       ImageIndex = 4
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Label2: TLabel
         Left = 27
         Top = 27
@@ -251,19 +263,19 @@ object MainForm: TMainForm
         TabOrder = 3
         OnClick = Button3Click
       end
-      object WebBrowser: TWebBrowser
+      object KernelTestWebbrowserBasePanel: TPanel
         Left = 32
         Top = 288
         Width = 1121
         Height = 361
         Anchors = [akLeft, akTop, akRight, akBottom]
+        BevelInner = bvRaised
+        BevelOuter = bvLowered
+        BevelWidth = 2
+        BorderWidth = 1
+        Caption = 'KernelTestWebbrowserBasePanel'
+        UseDockManager = False
         TabOrder = 4
-        ControlData = {
-          4C000000DC7300004F2500000000000000000000000000000000000000000000
-          000000004C000000000000000000000001000000E0D057007335CF11AE690800
-          2B2E126208000000000000004C0000000114020000000000C000000000000046
-          8000000000000000000000000000000000000000000000000000000000000000
-          00000000000000000100000000000000000000000000000000000000}
       end
     end
   end

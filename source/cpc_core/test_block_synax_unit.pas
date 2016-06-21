@@ -89,7 +89,7 @@ procedure test_TSystemType;
       test_only_for_successful_compilation('type c=monitor begin end; begin end.');
       test_only_for_successful_compilation('type c=monitor var q: queue; begin end; begin end.');
       test_only_for_successful_compilation('type c=class begin end; begin end.');
-      test_only_for_successful_compilation('type c=process priority 0; begin loop repeat end; begin end.');
+      test_only_for_successful_compilation('type c=process priority 0; begin cycle repeat end; begin end.');
       test_only_for_successful_compilation('type c=monitor type b=boolean; procedure x; begin end; begin end; begin end.');
       test_only_for_successful_compilation('type c=class procedure entry x; begin end; begin end; begin end.');
       test_only_for_successful_compilation('type c=monitor procedure entry x; begin end; begin end; begin end.');
@@ -118,17 +118,17 @@ procedure test_TSystemType;
       test_compile_error_generation('type p=process priority 10; begin...', err_invalid_process_priority, '10; begin...');
       test_compile_error_generation('type p=process priority 5 begin...', err_semicolon_expected, 'begin...');
 
-      test_only_for_successful_compilation('var i: interrupt priority 1; function signalled: boolean; begin end; begin end; p: process priority 1; begin loop await interrupt repeat end interrupt i; begin end.');
-      test_compile_error_generation('var i: interrupt priority 1; function signalled: boolean; begin end; begin end; p: process priority 0; begin loop await interrupt repeat end interrupt i; begin end.',
+      test_only_for_successful_compilation('var i: interrupt priority 1; function signalled: boolean; begin end; begin end; p: process priority 1; begin cycle await interrupt repeat end interrupt i; begin end.');
+      test_compile_error_generation('var i: interrupt priority 1; function signalled: boolean; begin end; begin end; p: process priority 0; begin cycle await interrupt repeat end interrupt i; begin end.',
                                     err_interrupt_process_priority_not_positive,
                                     'await'
                                    );
-      test_compile_error_generation('var i: interrupt priority 1; function signalled: boolean; begin end; begin end; p: process priority 1; begin loop repeat end interrupt i; begin end.',
+      test_compile_error_generation('var i: interrupt priority 1; function signalled: boolean; begin end; begin end; p: process priority 1; begin cycle repeat end interrupt i; begin end.',
                                     err_positive_priority_process_must_call_await_interrupt,
                                     'process'
                                    );
-      test_only_for_successful_compilation('var i: interrupt priority 4; function signalled: boolean; begin end; begin end; p: process priority 4; begin loop await interrupt repeat end interrupt i; begin end.');
-      test_compile_error_generation('var i: interrupt priority 4; function signalled: boolean; begin end; begin end; p: process priority 3; begin loop await interrupt repeat end interrupt i; begin end.',
+      test_only_for_successful_compilation('var i: interrupt priority 4; function signalled: boolean; begin end; begin end; p: process priority 4; begin cycle await interrupt repeat end interrupt i; begin end.');
+      test_compile_error_generation('var i: interrupt priority 4; function signalled: boolean; begin end; begin end; p: process priority 3; begin cycle await interrupt repeat end interrupt i; begin end.',
                                     err_process_priority_must_be_matched_to_interrupt_priority,
                                     'i; begin end.'
                                    );
@@ -179,7 +179,7 @@ procedure test_TParamList;
       test_only_for_successful_compilation('type tr=record i,j: int8 end; tm=monitor var i: tr; procedure p (var i: tr); begin end; begin p(i) end; begin end.');
       test_only_for_successful_compilation('type tr=record i,j: int8 end; tm=monitor rom i: tr = (i=5,j=6); procedure p (rom i: tr); begin end; begin p(i) end; begin end.');
       test_only_for_successful_compilation('type tio=packed record a: 0..255 end; procedure p(ioreg io: tio); begin end; ioreg io: tio at 1500; begin p(io) end.');
-      test_only_for_successful_compilation('type tp=process priority 0; begin loop repeat end; procedure pr (p: tp); begin end; var p: tp; begin init p; pr(p) end.');
+      test_only_for_successful_compilation('type tp=process priority 0; begin cycle repeat end; procedure pr (p: tp); begin end; var p: tp; begin init p; pr(p) end.');
 
       // anonymous overlay params
       test_only_for_successful_compilation('type tr=record i: int8 end; procedure p (r: tr); begin end; var o: overlay tr end; begin p(o) end.');
@@ -314,8 +314,8 @@ procedure test_interrupt;
                                      'interrupt'
                                     );
 
-      test_only_for_successful_compilation ('type ti=interrupt priority 1; function signalled: boolean; begin end; begin end; tp=process (i: ti); priority 1; begin loop await interrupt repeat end; var i: ti; p: tp interrupt i; begin init p (i) end.');
-      test_compile_error_generation ('type tp=process priority 1; begin loop await interrupt repeat end; var i: interrupt priority 1; function signalled: boolean; begin end; begin end; p1: tp interrupt i; p2: tp interrupt i; begin end.',
+      test_only_for_successful_compilation ('type ti=interrupt priority 1; function signalled: boolean; begin end; begin end; tp=process (i: ti); priority 1; begin cycle await interrupt repeat end; var i: ti; p: tp interrupt i; begin init p (i) end.');
+      test_compile_error_generation ('type tp=process priority 1; begin cycle await interrupt repeat end; var i: interrupt priority 1; function signalled: boolean; begin end; begin end; p1: tp interrupt i; p2: tp interrupt i; begin end.',
                                      err_interrupt_variable_already_assigned_to_another_process,
                                      'i; begin end.'
                                     );

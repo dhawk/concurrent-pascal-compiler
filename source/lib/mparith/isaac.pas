@@ -1,5 +1,9 @@
 unit ISAAC;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 {Bob Jenkins' public domain random number generator ISAAC}
 
 interface

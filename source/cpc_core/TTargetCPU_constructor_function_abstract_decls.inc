@@ -24,6 +24,8 @@
             virtual; abstract;
          function TContinueStatement_CreateFromSourceTokens: TContinueStatement;
             virtual; abstract;
+         function TCycleStatement_CreateFromSourceTokens: TCycleStatement;
+            virtual; abstract;
          function TDataItemList_Create: TDataItemList;
             virtual; abstract;
          function TDelayStatement_CreateFromSourceTokens: TDelayStatement;
@@ -55,6 +57,8 @@
          function TProperty_CreateFromSourceTokens (cntxt: TDefinition): TProperty;
             virtual; abstract;
          function TRelationalExpression_CreateFromSourceTokens: TRelationalExpression;
+            virtual; abstract;
+         function TReCycleStatement_CreateFromSourceTokens: TReCycleStatement;
             virtual; abstract;
          function TReLoopStatement_CreateFromSourceTokens: TReLoopStatement;
             virtual; abstract;

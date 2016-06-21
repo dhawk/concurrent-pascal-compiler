@@ -1,10 +1,14 @@
 unit mp_prng;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 {MP interface to (C)PRNG, functions for PRNG generation}
 
 interface
 
-{$i STD.INC}
+{$i std.inc}
 
 uses mp_types;
 
