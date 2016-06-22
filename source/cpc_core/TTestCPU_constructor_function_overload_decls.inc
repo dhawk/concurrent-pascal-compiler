@@ -54,7 +54,7 @@
             override;
          function TProgram_CreateFromSourceTokens: TProgram;
             override;
-         function TProperty_CreateFromSourceTokens (cntxt: TDefinition): TProperty;
+         function TProperty_CreateFromSourceTokens (cntxt: TDefinition; entry_property: boolean): TProperty;
             override;
          function TRelationalExpression_CreateFromSourceTokens: TRelationalExpression;
             override;
@@ -64,7 +64,7 @@
             override;
          function TRoundFunctionPrimary_CreateFromSourceTokens: TRoundFunctionPrimary;
             override;
-         function TRoutine_CreateFromSourceTokens (cntxt: TDefinition): TRoutine;
+         function TRoutine_CreateFromSourceTokens (cntxt: TDefinition; entry_routine: boolean): TRoutine;
             override;
          function TRoutine_CreatePropertyGetterFromSourceTokens (cntxt: TDefinition; entre: boolean; property_id: TIdentifierIdx; property_id_src_loc: TSourceLocation; property_typdef: TTypeDef): TRoutine;
             override;

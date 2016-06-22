@@ -94,7 +94,6 @@ type
        rw_else,
        rw_empty,
        rw_end,
-       rw_entry,
        rw_exitloop,
        rw_false,
        rw_function,
@@ -121,6 +120,7 @@ type
        rw_procedure,
        rw_process,
        rw_property,
+       rw_public,
        rw_record,
        rw_recycle,
        rw_reloop,
@@ -798,8 +798,6 @@ function reserved_word_to_string
             result := 'empty';
          rw_end:
             result := 'end';
-         rw_entry:
-            result := 'entry';
          rw_exitloop:
             result := 'exitloop';
          rw_false:
@@ -856,6 +854,8 @@ function reserved_word_to_string
             result := 'process';
          rw_property:
             result := 'property';
+         rw_public:
+            result := 'public';
          rw_record:
             result := 'record';
          rw_recycle:

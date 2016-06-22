@@ -93,7 +93,7 @@ type
 
    TRoutineKind =
       (standalone_routine,
-       system_type_routine,
+       system_type_local_routine,
        class_entry_routine,
        monitor_entry_routine,
        interrupt_signalled_routine
@@ -117,7 +117,8 @@ type
          definition_complete: boolean;
          statement_list: TDefinition;   // actually TStatementList
          constructor CreateFromSourceTokens
-            (cntxt: TDefinition
+            (cntxt: TDefinition;
+             entry_routine: boolean
             );
          constructor CreatePropertySetterFromSourceTokens
             (cntxt: TDefinition;
@@ -152,7 +153,8 @@ type
          typedef_src_loc: TSourceLocation;
          set_proc, get_func: TRoutine;
          constructor CreateFromSourceTokens
-            (cntxt: TDefinition
+            (cntxt: TDefinition;
+             entry_property: boolean
             );
          destructor Destroy;
             override;
@@ -1176,12 +1178,13 @@ procedure TDataItemList.AddFromSourceTokens (context: TDefinition);
 // ===========
 
 constructor TRoutine.CreateFromSourceTokens
-   (cntxt: TDefinition
+   (cntxt: TDefinition;
+    entry_routine: boolean
    );
    var
-      routine_kind:
-         (procedure_kind,
-          function_kind
+      routine_type:
+         (procedure_routine,
+          function_routine
          );
       typedef: TTypeDef;
       typedef_src_loc: TSourceLocation;
@@ -1189,6 +1192,7 @@ constructor TRoutine.CreateFromSourceTokens
    begin
       inherited Create(routine_definition);
       context := cntxt;
+      entry := entry_routine;
       header_only :=
          (lex.token.in_preamble)
          and
@@ -1208,22 +1212,10 @@ constructor TRoutine.CreateFromSourceTokens
          // PROCEDURE or FUNCTION keyword
          assert(lex.token_is_reserved_word([rw_procedure, rw_function]));
          if lex.token_is_reserved_word(rw_procedure) then
-            routine_kind := procedure_kind
+            routine_type := procedure_routine
          else
-            routine_kind := function_kind;
+            routine_type := function_routine;
          lex.advance_token;
-
-         // ENTRY modifier
-         entry := false;
-         if lex.token_is_reserved_word(rw_entry) then
-            begin
-               if context.definition_kind = program_definition then
-                  raise compile_error.Create(err_entry_routines_may_only_be_declared_for_monitors_and_classes);
-               if TSystemType(context).system_type_kind = process_system_type then
-                  raise compile_error.Create(err_entry_routines_may_only_be_declared_for_monitors_and_classes);
-               entry := true;
-               lex.advance_token
-            end;
 
          // ROUTINE NAME
          if not lex.token_is_identifier then
@@ -1232,7 +1224,7 @@ constructor TRoutine.CreateFromSourceTokens
          routine_id_src_loc := lex.token.src_loc;
 
          CurrentDefinitionTable.DefineForCurrentScope(lex.token.identifier_idx, Self, lex.token.src_loc);
-         if routine_kind = function_kind then
+         if routine_type = function_routine then
             begin
                function_result := target_cpu.TVariable_CreateForLaterDefinition(symbol_id('result'), Self);    // old: lex.token.identifier_idx
                CurrentDefinitionTable.DefineForCurrentScope(symbol_id('result'), function_result, lex.token.src_loc)
@@ -1245,30 +1237,51 @@ constructor TRoutine.CreateFromSourceTokens
             or
             (context.definition_kind = program_definition)
          then
-            parameter_context := standalone_routine_param_list
+            begin
+               routine_kind := standalone_routine;
+               parameter_context := standalone_routine_param_list
+            end
          else // system type
             case TSystemType(context).system_type_kind of
                process_system_type:
-                  parameter_context := process_local_routine_param_list;
+                  begin
+                     routine_kind := system_type_local_routine;
+                     parameter_context := process_local_routine_param_list
+                  end;
                monitor_system_type:
                   if entry then
-                     parameter_context := monitor_entry_routine_param_list
+                     begin
+                        routine_kind := monitor_entry_routine;
+                        parameter_context := monitor_entry_routine_param_list
+                     end
                   else
-                     parameter_context := monitor_local_routine_param_list;
+                     begin
+                        routine_kind := system_type_local_routine;
+                        parameter_context := monitor_local_routine_param_list
+                     end;
                class_system_type:
                   if entry then
-                     parameter_context := class_entry_routine_param_list
+                     begin
+                        routine_kind := class_entry_routine;
+                        parameter_context := class_entry_routine_param_list
+                     end
                   else
-                     parameter_context := class_local_routine_param_list;
+                     begin
+                        routine_kind := system_type_local_routine;
+                        parameter_context := class_local_routine_param_list
+                     end;
                interrupt_system_type:
-                  parameter_context := class_local_routine_param_list;  // irrelevent since parameter list will be empty
+                  begin
+                     routine_kind := interrupt_signalled_routine;
+                     parameter_context := class_local_routine_param_list  // irrelevent since parameter list will be empty
+                  end;
             else
                assert(false)
             end;
          parameter_definitions := target_cpu.TParamList_CreateFromSourceTokens(parameter_context);
 
          // FUNCTION RESULT
-         if routine_kind = function_kind then
+         if routine_type = function_routine then
             begin
                if not lex.token_is_symbol(sym_colon) then
                   raise compile_error.Create(err_colon_expected);
@@ -1332,6 +1345,23 @@ constructor TRoutine.CreatePropertySetterFromSourceTokens
       context := cntxt;
       entry := entre;
 
+      case TSystemType(context).system_type_kind of
+         process_system_type:
+            routine_kind := system_type_local_routine;
+         monitor_system_type:
+            if entry then
+               routine_kind := monitor_entry_routine
+            else
+               routine_kind := system_type_local_routine;
+         class_system_type:
+            if entry then
+               routine_kind := class_entry_routine
+            else
+               routine_kind := system_type_local_routine;
+      else
+         assert (false)
+      end;
+
       assert(lex.token_is_reserved_word(rw_set));
       lex.advance_token;
 
@@ -1366,6 +1396,24 @@ constructor TRoutine.CreatePropertyGetterFromSourceTokens
       BlockStack.push(Self);
       context := cntxt;
       entry := entre;
+
+      case TSystemType(context).system_type_kind of
+         process_system_type:
+            routine_kind := system_type_local_routine;
+         monitor_system_type:
+            if entry then
+               routine_kind := monitor_entry_routine
+            else
+               routine_kind := system_type_local_routine;
+         class_system_type:
+            if entry then
+               routine_kind := class_entry_routine
+            else
+               routine_kind := system_type_local_routine;
+      else
+         assert (false)
+      end;
+
       try
          assert(lex.token_is_reserved_word(rw_get));
          lex.advance_token;
@@ -1373,6 +1421,7 @@ constructor TRoutine.CreatePropertyGetterFromSourceTokens
          if not lex.token_is_symbol(sym_colon) then
             raise compile_error.Create(err_colon_expected);
          lex.advance_token;
+
 
          CurrentDefinitionTable.EnterNewScope;
 
@@ -1465,23 +1514,17 @@ function TRoutine.CheckForProhibitedDelayCall (err_msg: string): boolean;
 // ============
 
 constructor TProperty.CreateFromSourceTokens
-   (cntxt: TDefinition
+   (cntxt: TDefinition;
+    entry_property: boolean
    );
    var
       property_id_src_loc: TSourceLocation;
    begin
       inherited Create(property_definition);
+      entry := entry_property;
 
       assert(lex.token_is_reserved_word(rw_property));
       lex.advance_token;
-
-      // ENTRY modifier
-      entry := false;
-      if lex.token_is_reserved_word(rw_entry) then
-         begin
-            entry := true;
-            lex.advance_token
-         end;
 
       if not lex.token_is_identifier then
          raise compile_error.Create(err_identifier_expected);
@@ -1552,9 +1595,11 @@ constructor TSystemType.CreateFromSourceTokens;
       routine: TRoutine;
       i: integer;
       priority_value: TCExpression;
+      public_section_found: boolean;
    begin
       inherited Create(system_type);
       src_loc := lex.token.src_loc;
+      public_section_found := false;
 
       priority := target_cpu.initial_process_priority;
 
@@ -1641,6 +1686,7 @@ constructor TSystemType.CreateFromSourceTokens;
                lex.advance_token
             end;
 
+         // process private section
          while lex.token_is_reserved_word([rw_const, rw_type, rw_rom, rw_eeprom, rw_var, rw_property, rw_procedure, rw_function, rw_ioreg]) do
             case lex.token.rw of
                rw_const:
@@ -1668,7 +1714,7 @@ constructor TSystemType.CreateFromSourceTokens;
                      if system_type_kind = interrupt_system_type then
                         raise compile_error.Create(err_properties_not_allowed_in_interrupt_definitions);
 
-                     prop := target_cpu.TProperty_CreateFromSourceTokens(Self);
+                     prop := target_cpu.TProperty_CreateFromSourceTokens(Self, false);
                      i := Length(properties);
                      SetLength(properties, i + 1);
                      properties[i] := prop
@@ -1678,7 +1724,7 @@ constructor TSystemType.CreateFromSourceTokens;
                   begin
                      if system_type_kind = interrupt_system_type then
                         check_interrupt_routine_signature;
-                     routine := target_cpu.TRoutine_CreateFromSourceTokens(Self);
+                     routine := target_cpu.TRoutine_CreateFromSourceTokens(Self, false);
 
                      CurrentDefinitionTable.DefineForCurrentScope(routine.routine_id_idx, routine, routine.routine_id_src_loc);
                      i := Length(routines);
@@ -1687,6 +1733,38 @@ constructor TSystemType.CreateFromSourceTokens;
                   end;
             else
                assert (false)
+            end;
+
+         if lex.token_is_reserved_word(rw_public) then
+            begin
+               if system_type_kind in [process_system_type, interrupt_system_type] then
+                  raise compile_error.Create (err_public_only_allowed_in_classes_and_monitors);
+               lex.advance_token;
+
+               while lex.token_is_reserved_word([rw_property, rw_procedure, rw_function]) do
+                  case lex.token.rw of
+                     rw_property:
+                        begin
+                           public_section_found := true;
+                           prop := target_cpu.TProperty_CreateFromSourceTokens(Self, true);
+                           i := Length(properties);
+                           SetLength(properties, i + 1);
+                           properties[i] := prop
+                        end;
+                     rw_procedure,
+                     rw_function:
+                        begin
+                           public_section_found := true;
+                           routine := target_cpu.TRoutine_CreateFromSourceTokens(Self, true);
+
+                           CurrentDefinitionTable.DefineForCurrentScope(routine.routine_id_idx, routine, routine.routine_id_src_loc);
+                           i := Length(routines);
+                           SetLength(routines, i + 1);
+                           routines[i] := routine
+                        end;
+                  else
+                     assert (false)
+                  end
             end;
 
          last_var_declaration_src_loc := lex.previous_token_src_loc;
@@ -1720,7 +1798,10 @@ constructor TSystemType.CreateFromSourceTokens;
                assert (parameters.Length = 0);
                if Length(routines) <> 1 then
                   raise compile_error.Create (err_interrupt_definition_must_implement_signalled_function, src_loc);
-            end;
+            end
+         else  { class or monitor }
+            if not public_section_found then
+               raise compile_error.Create (err_no_public_procedures_functions_or_properties_defined, src_loc);
 
          block_end_src_loc := lex.token.src_loc;
          lex.advance_token;
@@ -1900,7 +1981,7 @@ constructor TProgram.CreateFromSourceTokens;
                   ioregisters.AddFromSourceTokens (nil)
                else if lex.token_is_reserved_word([rw_procedure, rw_function]) then
                   begin
-                     gr := target_cpu.TRoutine_CreateFromSourceTokens(Self);
+                     gr := target_cpu.TRoutine_CreateFromSourceTokens(Self, false);
                      CurrentDefinitionTable.DefineForCurrentScope(gr.routine_id_idx, gr, gr.routine_id_src_loc);
                      if not gr.header_only then
                         begin

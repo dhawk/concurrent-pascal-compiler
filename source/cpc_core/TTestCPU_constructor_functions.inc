@@ -138,9 +138,9 @@ function TTestCPU.TProgram_CreateFromSourceTokens: TProgram;
       result := TProgram.CreateFromSourceTokens
    end;
 
-function TTestCPU.TProperty_CreateFromSourceTokens (cntxt: TDefinition): TProperty;
+function TTestCPU.TProperty_CreateFromSourceTokens (cntxt: TDefinition; entry_property: boolean): TProperty;
    begin
-      result := TProperty.CreateFromSourceTokens (cntxt)
+      result := TProperty.CreateFromSourceTokens (cntxt, entry_property)
    end;
 
 function TTestCPU.TReCycleStatement_CreateFromSourceTokens: TReCycleStatement;
@@ -163,9 +163,9 @@ function TTestCPU.TRoundFunctionPrimary_CreateFromSourceTokens: TRoundFunctionPr
       result := TRoundFunctionPrimary.CreateFromSourceTokens
    end;
 
-function TTestCPU.TRoutine_CreateFromSourceTokens (cntxt: TDefinition): TRoutine;
+function TTestCPU.TRoutine_CreateFromSourceTokens (cntxt: TDefinition; entry_routine: boolean): TRoutine;
    begin
-      result := TRoutine.CreateFromSourceTokens (cntxt)
+      result := TRoutine.CreateFromSourceTokens (cntxt, entry_routine)
    end;
 
 function TTestCPU.TRoutine_CreatePropertyGetterFromSourceTokens (cntxt: TDefinition; entre: boolean; property_id: TIdentifierIdx; property_id_src_loc: TSourceLocation; property_typdef: TTypeDef): TRoutine;

@@ -82,7 +82,7 @@ procedure test_integer_type;
 
       // test expression assignment compat
       test_only_for_successful_compilation('procedure x; var i: int8; begin i := -128 end; begin end.');
-      test_only_for_successful_compilation('type t1 = class procedure entry x; begin end; begin end; var c: t1; begin c.x end.');
+      test_only_for_successful_compilation('type t1 = class public procedure x; begin end; begin end; var c: t1; begin c.x end.');
       test_only_for_successful_compilation('procedure x; var i: int8; begin i := 127 end; begin end.');
       test_compile_error_generation('procedure x; var i: int8; begin i := true end; begin end.', err_integer_expression_expected, 'true end; begin end.');
       test_compile_error_generation('procedure x; var i: int8; begin i := -129 end; begin end.', err_expression_value_outside_legal_range, '-129 end; begin end.');
@@ -519,8 +519,8 @@ procedure test_TOverlayType;
 
       test_only_for_successful_compilation('type tov=overlay a: int8; b: boolean; end; begin end.');
       test_compile_error_generation('type tov=overlay a: int8; q: queue; end; begin end.', err_overlay_may_not_contain_queue_variables, 'queue; end; begin end.');
-      test_compile_error_generation('type tov=overlay a: int8; c: class begin end end; begin end.', err_overlay_may_not_contain_class_variables, 'class begin end end; begin end.');
-      test_compile_error_generation('type tov=overlay a: int8; m: monitor begin end begin end.', err_overlay_may_not_contain_monitor_variables, 'monitor begin end begin end.');
+      test_compile_error_generation('type tov=overlay a: int8; c: class public procedure p; begin end; begin end end; begin end.', err_overlay_may_not_contain_class_variables, 'class');
+      test_compile_error_generation('type tov=overlay a: int8; m: monitor public procedure p; begin end; begin end begin end.', err_overlay_may_not_contain_monitor_variables, 'monitor');
       test_compile_error_generation('type tov=overlay a: int8; p: process priority 0; begin cycle repeat end end; begin end.', err_overlay_may_not_contain_process_variables, 'process priority 0; begin cycle repeat end end; begin end.');
       test_compile_error_generation('type t=overlay packed record X: uint8; end; packed record X: uint8; end end;begin end.', format (err_duplicate_overlay_name, ['X']), 'packed record X: uint8; end end;begin end.');
       test_compile_error_generation('ioreg x: overlay i: int8 end;', err_ioreg_overlaid_variables_must_all_be_packed_records, 'overlay i: int8 end;');

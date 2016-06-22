@@ -136,7 +136,7 @@ function create_test_fragment_from_source_tokens: TDefinition;
                   _fragment_varlist.vars.AddFromSourceTokens (nil);
                if lex.token_is_reserved_word([rw_procedure, rw_function]) then
                   begin
-                     gr := target_cpu.TRoutine_CreateFromSourceTokens (nil);
+                     gr := target_cpu.TRoutine_CreateFromSourceTokens (nil, false);
                      CurrentDefinitionTable.DefineForCurrentScope(gr.routine_id_idx, gr, gr.routine_id_src_loc);
                      i := Length(_global_routines);
                      SetLength (_global_routines, i+1);

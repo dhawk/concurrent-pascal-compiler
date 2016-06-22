@@ -88,8 +88,6 @@ procedure TTestSystemType.check_interrupt_routine_signature;
       if lex.token_is_reserved_word(rw_procedure) then
          raise compile_error.Create(err_procedures_not_allowed_in_interrupt_definitions);
       lex.advance_token;
-      if lex.token_is_reserved_word (rw_entry) then
-         raise compile_error.Create (err_entry_routines_may_only_be_declared_for_monitors_and_classes);
       if (not lex.token_is_identifier)
          or
          (LowerCase (lex.identifiers[lex.token.identifier_idx]) <> 'signalled') then

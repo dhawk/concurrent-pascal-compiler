@@ -14,6 +14,7 @@ const
    err_ambiguous_first_index_base_type_for_anonymous_array = 'ambiguous first index base type for anonymous array';
    err_an_instance_of_this_interrupt_type_already_exists = 'an instance of this interrupt type already exists';
    err_array_may_not_contain_process_variables = 'array may not contain process variables';
+   err_cant_call_public_routine_of_same_monitor_type_here = 'can''t call public routine of same monitor type here';
    err_assignment_operator_expected = '":=" expected';
    err_at_expected = '"at" expected';
    err_at_only_allowed_for_ioregisters = '"at" only allowed for ioregisters';
@@ -74,8 +75,8 @@ const
    err_empty_file = 'source file is empty or contains no program source';
    err_empty_overlay_not_allowed = 'empty overlay not allowed';
    err_end_expected = '"end" expected';
+   err_public_only_allowed_in_classes_and_monitors = '"public" only allowed in classes and monitors';
    err_end_of_source_expected = 'unexpected tokens after final "." of program';
-   err_entry_routines_may_only_be_declared_for_monitors_and_classes = 'entry routines may only be declared for monitors and classes';
    err_enum_constant_expected = 'enum constant expected';
    err_enum_expression_expected = 'enum expression expected';
    err_enum_value_expected = 'enum value expected';
@@ -85,6 +86,7 @@ const
    err_expression_contains_constant_outside_allowable_range = 'expression contains constant outside allowable range of set';
    err_expression_expected = 'expression expected';
    err_expression_value_outside_legal_range = 'expression value outside legal range';
+   err_no_public_procedures_functions_or_properties_defined = 'no public procedures functions or properties defined';
    err_field_identifier_expected = 'field identifier expected';
    err_final_cycle_statement_must_be_empty = 'final cycle statement must be empty';
    err_final_period__expected = 'final "." of program expected';

@@ -54,7 +54,7 @@
             virtual; abstract;
          function TProgram_CreateFromSourceTokens: TProgram;
             virtual; abstract;
-         function TProperty_CreateFromSourceTokens (cntxt: TDefinition): TProperty;
+         function TProperty_CreateFromSourceTokens (cntxt: TDefinition; entry_property: boolean): TProperty;
             virtual; abstract;
          function TRelationalExpression_CreateFromSourceTokens: TRelationalExpression;
             virtual; abstract;
@@ -64,7 +64,7 @@
             virtual; abstract;
          function TRoundFunctionPrimary_CreateFromSourceTokens: TRoundFunctionPrimary;
             virtual; abstract;
-         function TRoutine_CreateFromSourceTokens (cntxt: TDefinition): TRoutine;
+         function TRoutine_CreateFromSourceTokens (cntxt: TDefinition; entry_routine: boolean): TRoutine;
             virtual; abstract;
          function TRoutine_CreatePropertyGetterFromSourceTokens (cntxt: TDefinition; entre: boolean; property_id: TIdentifierIdx; property_id_src_loc: TSourceLocation; property_typdef: TTypeDef): TRoutine;
             virtual; abstract;

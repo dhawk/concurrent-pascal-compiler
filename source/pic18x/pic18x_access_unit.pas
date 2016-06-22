@@ -974,202 +974,211 @@ procedure TPIC18x_Access.Generate_Load_Ptr2_Code (ptr: TPointer; offset: integer
                   SetLength (annotation, i)
                end;
 
-            case path_start.definition_kind of
-               variable_definition:
-                  case base_variable.address_mode of
-                     absolute_address_mode:
-                        begin
-                           total_offset := base_variable.address + total_fixed_offsets + offset;
-                           case ptr of
-                              pTHIS,
-                              pTBLPTR:
-                                 begin
-                                    case lsb(total_offset) of
-                                       0: TPIC18x_CLRF.Create (ptrL(ptr), ram_access_mode(ptr)).annotation := annotation;
-                                     255: TPIC18x_SETF.Create (ptrL(ptr), ram_access_mode(ptr)).annotation := annotation;
-                                    else
-                                       TPIC18x_MOVLW.Create (lsb(total_offset)).annotation := annotation;
-                                       TPIC18x_MOVWF.Create (ptrL(ptr), ram_access_mode(ptr))
-                                    end;
-                                    case msb(total_offset) of
-                                       0: TPIC18x_CLRF.Create (ptrH(ptr), ram_access_mode(ptr));
-                                     255: TPIC18x_SETF.Create (ptrH(ptr), ram_access_mode(ptr));
-                                    else
-                                       TPIC18x_MOVLW.Create (msb(total_offset));
-                                       TPIC18x_MOVWF.Create (ptrH(ptr), ram_access_mode(ptr))
-                                    end
-                                 end;
-                              pFSR0,
-                              pFSR1:
-                                 TPIC18x_LFSR.Create (fsr(ptr), total_offset).annotation := annotation;
-                           else
-                              assert (false)
-                           end
-                        end;
-                     system_type_address_mode:
-                        begin
-                           total_offset := base_variable.address + total_fixed_offsets + offset;
-                           if total_offset = 0 then
-                              begin
-                                 if ptr <> pTHIS then
-                                    begin
-                                       TPIC18x_MOVFF.Create (this_ptrL, ptrL(ptr)).annotation := annotation;
-                                       TPIC18x_MOVFF.Create (this_ptrH, ptrH(ptr))
-                                    end
-                              end
-                           else  // total_offset <> 0
+            if path_start = nil then
+               begin   // must be self: self.routine or self.property
+                  if ptr <> pTHIS then
+                     begin
+                        TPIC18x_MOVFF.Create (ptrL(pTHIS), ptrL(ptr));
+                        TPIC18x_MOVFF.Create (ptrH(pTHIS), ptrH(ptr))
+                     end
+               end
+            else
+               case path_start.definition_kind of
+                  variable_definition:
+                     case base_variable.address_mode of
+                        absolute_address_mode:
+                           begin
+                              total_offset := base_variable.address + total_fixed_offsets + offset;
                               case ptr of
-                                 pFSR0,
-                                 pFSR1:
-                                    begin
-                                       TPIC18x_MOVFF.Create (this_ptrL, ptrL(ptr)).annotation := annotation;
-                                       TPIC18x_MOVFF.Create (this_ptrH, ptrH(ptr));
-                                       adjust_fsr (ptr, total_offset)
-                                    end;
-                                 pTHIS:
-                                    begin
-                                       TPIC18x_MOVLW.Create (lsb(total_offset)).annotation := annotation;
-                                       TPIC18x_ADDWF.Create (this_ptrL, dest_f, bank_mode);
-                                       TPIC18x_MOVLW.Create (msb(total_offset));
-                                       TPIC18x_ADDWFC.Create (this_ptrH, dest_f, bank_mode)
-                                    end;
-                                 pTBLPTR:
-                                    begin
-                                       TPIC18x_MOVLW.Create (lsb(total_offset)).annotation := annotation;
-                                       TPIC18x_ADDWF.Create (this_ptrL, dest_w, bank_mode);
-                                       TPIC18x_MOVWF.Create (TBLPTRL, ram_access_mode(ptr));
-                                       TPIC18x_MOVLW.Create (msb(total_offset));
-                                       TPIC18x_ADDWFC.Create (this_ptrH, dest_w, bank_mode);
-                                       TPIC18x_MOVWF.Create (TBLPTRH, ram_access_mode(ptr))
-                                    end;
-                              else
-                                 assert (false)
-                              end
-                        end;
-                     system_type_indirect_address_mode:
-                        begin
-                           total_offset := total_fixed_offsets + offset;
-                           if ptr = pFSR1 then
-                              temp_ptr := pFSR0
-                           else
-                              temp_ptr := pFSR1;
-                           TPIC18x_MOVFF.Create (this_ptrH, ptrH(temp_ptr)).annotation := annotation;
-                           TPIC18x_MOVFF.Create (this_ptrL, ptrL(temp_ptr));
-                           adjust_fsr (temp_ptr, base_variable.address);
-                           if total_offset = 0 then
-                              begin
-                                 TPIC18x_MOVFF.Create (postinc(temp_ptr), ptrH(ptr));
-                                 TPIC18x_MOVFF.Create (postinc(temp_ptr), ptrL(ptr))
-                              end
-                           else  // total_offset <> 0
-                              case ptr of
-                                 pFSR0,
-                                 pFSR1:
-                                    begin
-                                       TPIC18x_MOVFF.Create (postinc(temp_ptr), ptrH(ptr));
-                                       TPIC18x_MOVFF.Create (postinc(temp_ptr), ptrL(ptr));
-                                       adjust_fsr (ptr, total_offset)
-                                    end;
                                  pTHIS,
                                  pTBLPTR:
                                     begin
-                                       TPIC18x_MOVFF.Create (postinc(temp_ptr), ptrH(ptr));
-                                       TPIC18x_MOVLW.Create (lsb(total_offset));
-                                       TPIC18x_ADDWF.Create (postinc(temp_ptr), dest_w, access_mode);
-                                       TPIC18x_MOVWF.Create (ptrL(ptr), ram_access_mode(ptr));
-                                       TPIC18x_MOVLW.Create (msb(total_offset));
-                                       TPIC18x_ADDWFC.Create (ptrH(ptr), dest_f, ram_access_mode(ptr))
+                                       case lsb(total_offset) of
+                                          0: TPIC18x_CLRF.Create (ptrL(ptr), ram_access_mode(ptr)).annotation := annotation;
+                                        255: TPIC18x_SETF.Create (ptrL(ptr), ram_access_mode(ptr)).annotation := annotation;
+                                       else
+                                          TPIC18x_MOVLW.Create (lsb(total_offset)).annotation := annotation;
+                                          TPIC18x_MOVWF.Create (ptrL(ptr), ram_access_mode(ptr))
+                                       end;
+                                       case msb(total_offset) of
+                                          0: TPIC18x_CLRF.Create (ptrH(ptr), ram_access_mode(ptr));
+                                        255: TPIC18x_SETF.Create (ptrH(ptr), ram_access_mode(ptr));
+                                       else
+                                          TPIC18x_MOVLW.Create (msb(total_offset));
+                                          TPIC18x_MOVWF.Create (ptrH(ptr), ram_access_mode(ptr))
+                                       end
                                     end;
+                                 pFSR0,
+                                 pFSR1:
+                                    TPIC18x_LFSR.Create (fsr(ptr), total_offset).annotation := annotation;
                               else
                                  assert (false)
                               end
-                        end;
-                     local_address_mode:
-                        load_ptr (pFSR2, base_variable.address + total_fixed_offsets + offset + StackUsageCounter.Current, ptr);
-                     local_indirect_address_mode:
-                        begin
-                           total_offset := total_fixed_offsets + offset;
-                           if total_offset = 0 then
-                              if base_variable.address+StackUsageCounter.Current+1 <= $5F then
+                           end;
+                        system_type_address_mode:
+                           begin
+                              total_offset := base_variable.address + total_fixed_offsets + offset;
+                              if total_offset = 0 then
                                  begin
-                                    TPIC18x_MOVF.Create (base_variable.address+StackUsageCounter.Current+1, dest_w, access_mode).annotation := annotation;
-                                    TPIC18x_MOVWF.Create (ptrL(ptr), ram_access_mode(ptr));
-                                    TPIC18x_MOVF.Create (base_variable.address+StackUsageCounter.Current, dest_w, access_mode);
-                                    TPIC18x_MOVWF.Create (ptrH(ptr), ram_access_mode(ptr))
+                                    if ptr <> pTHIS then
+                                       begin
+                                          TPIC18x_MOVFF.Create (this_ptrL, ptrL(ptr)).annotation := annotation;
+                                          TPIC18x_MOVFF.Create (this_ptrH, ptrH(ptr))
+                                       end
                                  end
-                              else  // base_variable.address+StackUsageCounter.Current+1 > $5F
+                              else  // total_offset <> 0
+                                 case ptr of
+                                    pFSR0,
+                                    pFSR1:
+                                       begin
+                                          TPIC18x_MOVFF.Create (this_ptrL, ptrL(ptr)).annotation := annotation;
+                                          TPIC18x_MOVFF.Create (this_ptrH, ptrH(ptr));
+                                          adjust_fsr (ptr, total_offset)
+                                       end;
+                                    pTHIS:
+                                       begin
+                                          TPIC18x_MOVLW.Create (lsb(total_offset)).annotation := annotation;
+                                          TPIC18x_ADDWF.Create (this_ptrL, dest_f, bank_mode);
+                                          TPIC18x_MOVLW.Create (msb(total_offset));
+                                          TPIC18x_ADDWFC.Create (this_ptrH, dest_f, bank_mode)
+                                       end;
+                                    pTBLPTR:
+                                       begin
+                                          TPIC18x_MOVLW.Create (lsb(total_offset)).annotation := annotation;
+                                          TPIC18x_ADDWF.Create (this_ptrL, dest_w, bank_mode);
+                                          TPIC18x_MOVWF.Create (TBLPTRL, ram_access_mode(ptr));
+                                          TPIC18x_MOVLW.Create (msb(total_offset));
+                                          TPIC18x_ADDWFC.Create (this_ptrH, dest_w, bank_mode);
+                                          TPIC18x_MOVWF.Create (TBLPTRH, ram_access_mode(ptr))
+                                       end;
+                                 else
+                                    assert (false)
+                                 end
+                           end;
+                        system_type_indirect_address_mode:
+                           begin
+                              total_offset := total_fixed_offsets + offset;
+                              if ptr = pFSR1 then
+                                 temp_ptr := pFSR0
+                              else
+                                 temp_ptr := pFSR1;
+                              TPIC18x_MOVFF.Create (this_ptrH, ptrH(temp_ptr)).annotation := annotation;
+                              TPIC18x_MOVFF.Create (this_ptrL, ptrL(temp_ptr));
+                              adjust_fsr (temp_ptr, base_variable.address);
+                              if total_offset = 0 then
                                  begin
-                                    if ptr = pFSR0 then
-                                       temp_ptr := pFSR1
-                                    else
-                                       temp_ptr := pFSR0;
-                                    load_ptr (pFSR2, base_variable.address+StackUsageCounter.Current, temp_ptr).annotation := annotation;
-                                    case temp_ptr of
-                                       pFSR0:
-                                          begin
-                                             TPIC18x_MOVFF.Create (POSTINC0, ptrH(ptr));
-                                             TPIC18x_MOVFF.Create (POSTINC0, ptrL(ptr))
-                                          end;
-                                       pFSR1:
-                                          begin
-                                             TPIC18x_MOVFF.Create (POSTINC1, ptrH(ptr));
-                                             TPIC18x_MOVFF.Create (POSTINC1, ptrL(ptr))
-                                          end;
-                                    else
-                                       assert (false)
+                                    TPIC18x_MOVFF.Create (postinc(temp_ptr), ptrH(ptr));
+                                    TPIC18x_MOVFF.Create (postinc(temp_ptr), ptrL(ptr))
+                                 end
+                              else  // total_offset <> 0
+                                 case ptr of
+                                    pFSR0,
+                                    pFSR1:
+                                       begin
+                                          TPIC18x_MOVFF.Create (postinc(temp_ptr), ptrH(ptr));
+                                          TPIC18x_MOVFF.Create (postinc(temp_ptr), ptrL(ptr));
+                                          adjust_fsr (ptr, total_offset)
+                                       end;
+                                    pTHIS,
+                                    pTBLPTR:
+                                       begin
+                                          TPIC18x_MOVFF.Create (postinc(temp_ptr), ptrH(ptr));
+                                          TPIC18x_MOVLW.Create (lsb(total_offset));
+                                          TPIC18x_ADDWF.Create (postinc(temp_ptr), dest_w, access_mode);
+                                          TPIC18x_MOVWF.Create (ptrL(ptr), ram_access_mode(ptr));
+                                          TPIC18x_MOVLW.Create (msb(total_offset));
+                                          TPIC18x_ADDWFC.Create (ptrH(ptr), dest_f, ram_access_mode(ptr))
+                                       end;
+                                 else
+                                    assert (false)
+                                 end
+                           end;
+                        local_address_mode:
+                           load_ptr (pFSR2, base_variable.address + total_fixed_offsets + offset + StackUsageCounter.Current, ptr);
+                        local_indirect_address_mode:
+                           begin
+                              total_offset := total_fixed_offsets + offset;
+                              if total_offset = 0 then
+                                 if base_variable.address+StackUsageCounter.Current+1 <= $5F then
+                                    begin
+                                       TPIC18x_MOVF.Create (base_variable.address+StackUsageCounter.Current+1, dest_w, access_mode).annotation := annotation;
+                                       TPIC18x_MOVWF.Create (ptrL(ptr), ram_access_mode(ptr));
+                                       TPIC18x_MOVF.Create (base_variable.address+StackUsageCounter.Current, dest_w, access_mode);
+                                       TPIC18x_MOVWF.Create (ptrH(ptr), ram_access_mode(ptr))
                                     end
-                                 end
-                           else  // total_offset <> 0
-                              if base_variable.address+StackUsageCounter.Current+1 <= $5F then
-                                 begin
-                                    TPIC18x_MOVLW.Create (lsb(total_offset)).annotation := annotation;
-                                    TPIC18x_ADDWF.Create (base_variable.address+StackUsageCounter.Current+1, dest_w, access_mode);
-                                    TPIC18x_MOVWF.Create (ptrL(ptr), ram_access_mode(ptr));
-                                    TPIC18x_MOVLW.Create (msb(total_offset));
-                                    TPIC18x_ADDWFC.Create (base_variable.address+StackUsageCounter.Current, dest_w, access_mode);
-                                    TPIC18x_MOVWF.Create (ptrH(ptr), ram_access_mode(ptr))
-                                 end
-                              else  // base_variable.address+StackUsageCounter.Current+1 > $5F
-                                 begin
-                                    if ptr = pFSR0 then
-                                       temp_ptr := pFSR1
-                                    else
-                                       temp_ptr := pFSR0;
-                                    TPIC18x_MOVLW.Create (lsb(base_variable.address+StackUsageCounter.Current)).annotation := annotation;
-                                    TPIC18x_ADDWF.Create (FSR2L, dest_w, access_mode);
-                                    TPIC18x_MOVWF.Create (ptrL(temp_ptr), access_mode);
-                                    TPIC18x_MOVLW.Create (msb(base_variable.address+StackUsageCounter.Current));
-                                    TPIC18x_ADDWFC.Create (FSR2H, dest_w, access_mode);
-                                    TPIC18x_MOVWF.Create (ptrH(temp_ptr), access_mode);
-                                    case temp_ptr of
-                                       pFSR0:
-                                          begin
-                                             TPIC18x_ADDFSR.Create (0, 1);
-                                             TPIC18x_MOVLW.Create (lsb(total_offset));
-                                             TPIC18x_ADDWF.Create (POSTDEC0, dest_w, access_mode);
-                                             TPIC18x_MOVWF.Create (ptrL(ptr), ram_access_mode(ptr));
-                                             TPIC18x_MOVLW.Create (msb(total_offset));
-                                             TPIC18x_ADDWFC.Create (POSTDEC0, dest_w, access_mode);
-                                             TPIC18x_MOVWF.Create (ptrH(ptr), ram_access_mode(ptr))
-                                          end;
-                                       pFSR1:
-                                          begin
-                                             TPIC18x_ADDFSR.Create (1, 1);
-                                             TPIC18x_MOVLW.Create (lsb(total_offset));
-                                             TPIC18x_ADDWF.Create (POSTDEC1, dest_w, access_mode);
-                                             TPIC18x_MOVWF.Create (ptrL(ptr), ram_access_mode(ptr));
-                                             TPIC18x_MOVLW.Create (msb(total_offset));
-                                             TPIC18x_ADDWFC.Create (POSTDEC1, dest_w, access_mode);
-                                             TPIC18x_MOVWF.Create (ptrH(ptr), ram_access_mode(ptr))
-                                          end;
-                                    else
-                                       assert (false)
+                                 else  // base_variable.address+StackUsageCounter.Current+1 > $5F
+                                    begin
+                                       if ptr = pFSR0 then
+                                          temp_ptr := pFSR1
+                                       else
+                                          temp_ptr := pFSR0;
+                                       load_ptr (pFSR2, base_variable.address+StackUsageCounter.Current, temp_ptr).annotation := annotation;
+                                       case temp_ptr of
+                                          pFSR0:
+                                             begin
+                                                TPIC18x_MOVFF.Create (POSTINC0, ptrH(ptr));
+                                                TPIC18x_MOVFF.Create (POSTINC0, ptrL(ptr))
+                                             end;
+                                          pFSR1:
+                                             begin
+                                                TPIC18x_MOVFF.Create (POSTINC1, ptrH(ptr));
+                                                TPIC18x_MOVFF.Create (POSTINC1, ptrL(ptr))
+                                             end;
+                                       else
+                                          assert (false)
+                                       end
                                     end
-                                 end
-                        end;
-                  else
-                     assert (false)
-                  end;
+                              else  // total_offset <> 0
+                                 if base_variable.address+StackUsageCounter.Current+1 <= $5F then
+                                    begin
+                                       TPIC18x_MOVLW.Create (lsb(total_offset)).annotation := annotation;
+                                       TPIC18x_ADDWF.Create (base_variable.address+StackUsageCounter.Current+1, dest_w, access_mode);
+                                       TPIC18x_MOVWF.Create (ptrL(ptr), ram_access_mode(ptr));
+                                       TPIC18x_MOVLW.Create (msb(total_offset));
+                                       TPIC18x_ADDWFC.Create (base_variable.address+StackUsageCounter.Current, dest_w, access_mode);
+                                       TPIC18x_MOVWF.Create (ptrH(ptr), ram_access_mode(ptr))
+                                    end
+                                 else  // base_variable.address+StackUsageCounter.Current+1 > $5F
+                                    begin
+                                       if ptr = pFSR0 then
+                                          temp_ptr := pFSR1
+                                       else
+                                          temp_ptr := pFSR0;
+                                       TPIC18x_MOVLW.Create (lsb(base_variable.address+StackUsageCounter.Current)).annotation := annotation;
+                                       TPIC18x_ADDWF.Create (FSR2L, dest_w, access_mode);
+                                       TPIC18x_MOVWF.Create (ptrL(temp_ptr), access_mode);
+                                       TPIC18x_MOVLW.Create (msb(base_variable.address+StackUsageCounter.Current));
+                                       TPIC18x_ADDWFC.Create (FSR2H, dest_w, access_mode);
+                                       TPIC18x_MOVWF.Create (ptrH(temp_ptr), access_mode);
+                                       case temp_ptr of
+                                          pFSR0:
+                                             begin
+                                                TPIC18x_ADDFSR.Create (0, 1);
+                                                TPIC18x_MOVLW.Create (lsb(total_offset));
+                                                TPIC18x_ADDWF.Create (POSTDEC0, dest_w, access_mode);
+                                                TPIC18x_MOVWF.Create (ptrL(ptr), ram_access_mode(ptr));
+                                                TPIC18x_MOVLW.Create (msb(total_offset));
+                                                TPIC18x_ADDWFC.Create (POSTDEC0, dest_w, access_mode);
+                                                TPIC18x_MOVWF.Create (ptrH(ptr), ram_access_mode(ptr))
+                                             end;
+                                          pFSR1:
+                                             begin
+                                                TPIC18x_ADDFSR.Create (1, 1);
+                                                TPIC18x_MOVLW.Create (lsb(total_offset));
+                                                TPIC18x_ADDWF.Create (POSTDEC1, dest_w, access_mode);
+                                                TPIC18x_MOVWF.Create (ptrL(ptr), ram_access_mode(ptr));
+                                                TPIC18x_MOVLW.Create (msb(total_offset));
+                                                TPIC18x_ADDWFC.Create (POSTDEC1, dest_w, access_mode);
+                                                TPIC18x_MOVWF.Create (ptrH(ptr), ram_access_mode(ptr))
+                                             end;
+                                       else
+                                          assert (false)
+                                       end
+                                    end
+                           end;
+                     else
+                        assert (false)
+                     end;
 
                   with_variable_definition:
                      begin

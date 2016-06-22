@@ -105,7 +105,7 @@ type
    TAccess =
       class(TDefinition)
          base_variable: TVariable; // nil for constants, self.property
-         path_start: TDefinition; // TVariable, TWithVariable, TWithRoutine, TWithProperty; or nil for constants, self.property
+         path_start: TDefinition; // TVariable, TWithVariable, TWithRoutine, TWithProperty; or nil for constants, self.routine, self.property
          path: array of TAccessPathElement;
          node_access_kind: TAccessKind;
          node_typedef: TTypeDef;  // valid for variables, functions, properties and structured constants; nil for procedures or simple constants

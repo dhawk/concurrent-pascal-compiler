@@ -156,7 +156,7 @@ type
             override;
          function TProgram_CreateFromSourceTokens: TProgram;
             override;
-         function TProperty_CreateFromSourceTokens (cntxt: TDefinition): TProperty;
+         function TProperty_CreateFromSourceTokens (cntxt: TDefinition; entry_property: boolean): TProperty;
             override;
          function TRelationalExpression_CreateFromSourceTokens: TRelationalExpression;
             override;
@@ -166,7 +166,7 @@ type
             override;
          function TRoundFunctionPrimary_CreateFromSourceTokens: TRoundFunctionPrimary;
             override;
-         function TRoutine_CreateFromSourceTokens (cntxt: TDefinition): TRoutine;
+         function TRoutine_CreateFromSourceTokens (cntxt: TDefinition; entry_routine: boolean): TRoutine;
             override;
          function TRoutine_CreatePropertyGetterFromSourceTokens (cntxt: TDefinition; entre: boolean; property_id: TIdentifierIdx; property_id_src_loc: TSourceLocation; property_typdef: TTypeDef): TRoutine;
             override;
@@ -639,9 +639,9 @@ function TPIC18x_CPU.TProgram_CreateFromSourceTokens: TProgram;
       result := TPIC18x_Program.CreateFromSourceTokens
    end;
 
-function TPIC18x_CPU.TProperty_CreateFromSourceTokens (cntxt: TDefinition): TProperty;
+function TPIC18x_CPU.TProperty_CreateFromSourceTokens (cntxt: TDefinition; entry_property: boolean): TProperty;
    begin
-      result := TPIC18x_Property.CreateFromSourceTokens (cntxt)
+      result := TPIC18x_Property.CreateFromSourceTokens (cntxt, entry_property)
    end;
 
 function TPIC18x_CPU.TRelationalExpression_CreateFromSourceTokens: TRelationalExpression;
@@ -669,9 +669,9 @@ function TPIC18x_CPU.TRoundFunctionPrimary_CreateFromSourceTokens: TRoundFunctio
          end
    end;
 
-function TPIC18x_CPU.TRoutine_CreateFromSourceTokens (cntxt: TDefinition): TRoutine;
+function TPIC18x_CPU.TRoutine_CreateFromSourceTokens (cntxt: TDefinition; entry_routine: boolean): TRoutine;
    begin
-      result := TPIC18x_Routine.CreateFromSourceTokens (cntxt)
+      result := TPIC18x_Routine.CreateFromSourceTokens (cntxt, entry_routine)
    end;
 
 function TPIC18x_CPU.TRoutine_CreatePropertyGetterFromSourceTokens (cntxt: TDefinition; entre: boolean; property_id: TIdentifierIdx; property_id_src_loc: TSourceLocation; property_typdef: TTypeDef): TRoutine;

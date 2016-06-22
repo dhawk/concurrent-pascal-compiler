@@ -24,7 +24,7 @@ type
        if_statement,
        init_statement,
        loop_statement,
-       recycle_statement,
+       err_cant_call_public_routine_from_same_type,
        reloop_statement,
        routine_call_statement,
        statement_list,
@@ -1554,7 +1554,7 @@ function TInitStatement.CheckForProhibitedDelayCall (err_msg: string): boolean;
 
 constructor TReCycleStatement.CreateFromSourceTokens;
    begin
-      inherited Create(recycle_statement);
+      inherited Create(err_cant_call_public_routine_from_same_type);
 
       if CycleStatementStack.tos = nil then
          raise compile_error.Create(err_recycle_only_allowed_inside_cycle);
@@ -1640,6 +1640,7 @@ function TReLoopStatement.CheckForProhibitedDelayCall (err_msg: string): boolean
 constructor TRoutineCallStatement.CreateFromSourceTokens
    (acc: TAccess
    );
+var d: TDefinition;
    begin
       inherited Create(routine_call_statement);
       access := acc;
@@ -1660,6 +1661,23 @@ constructor TRoutineCallStatement.CreateFromSourceTokens
          begin
             if not access.node_routine.definition_complete then
                raise compile_error.Create (err_recursive_call_not_allowed, access.node_id_src_loc);
+
+            if (access.node_routine.routine_kind = monitor_entry_routine) then
+               case BlockStack.tos.definition_kind of
+                  routine_definition:
+                     if TRoutine(BlockStack.tos).context = access.node_routine.context then
+                        raise compile_error.Create (err_cant_call_public_routine_of_same_monitor_type_here, access.src_loc);
+                  type_definition:
+                     begin
+                        assert (TTypeDef(BlockStack.tos).type_kind = system_type);
+                        if BlockStack.tos = access.node_routine.context then
+                           raise compile_error.Create (err_cant_call_public_routine_of_same_monitor_type_here, access.src_loc)
+                     end;
+                  program_definition:
+                     ;
+               else
+                  assert (false)
+               end;
 
             if not access.node_routine.parameter_definitions.Empty then
                actual_parameters := access.node_routine.AssembleAndCheckCallerParameterListFromSourceTokens

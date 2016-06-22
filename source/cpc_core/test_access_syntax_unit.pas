@@ -118,9 +118,9 @@ procedure test_TAccess;
       test_access_classification('var v: packed record i: 0..255 end; begin v.i end', variable_access);
       test_access_classification('procedure p; begin end; begin p end.', procedure_access);
       test_access_classification('function f: int8; begin end; begin f end.', function_access);
-      test_access_classification('type tc = class procedure entry p; begin end; begin end; var c: tc; begin c.p end.', procedure_access);
-      test_access_classification('type tc = class function entry f: int8; begin end; begin end; var c: tc; begin c.f end.', function_access);
-      test_access_classification('type tc = class property entry p: int8; set: begin end; begin end; var c: tc; begin c.p end.', property_access);
+      test_access_classification('type tc = class public procedure p; begin end; begin end; var c: tc; begin c.p end.', procedure_access);
+      test_access_classification('type tc = class public function f: int8; begin end; begin end; var c: tc; begin c.f end.', function_access);
+      test_access_classification('type tc = class public property p: int8; set: begin end; begin end; var c: tc; begin c.p end.', property_access);
 
       test_access_classification('const c=5; begin c end.', constant_access);
       test_access_classification('type tc=record i,j: int8 end; const c:tc=(i=5,j=8); begin c.i end', structured_constant_access);
@@ -144,9 +144,9 @@ procedure test_TAccess;
       test_only_for_successful_compilation('procedure p; var v: array [1..2] of int8; begin v[2] := 4 end; begin end.');
       test_only_for_successful_compilation('procedure p; var v: array [1..2, 3..4] of boolean; begin v[2,4] := false end; begin end.');
       test_only_for_successful_compilation('procedure p; var v: array [1..2, 3..4] of record b: boolean; end; begin v[2,4].b := false end; begin end.');
-      test_only_for_successful_compilation('type tc=class property entry i: int8; set: begin end; begin end; var c: tc; begin c.i := 5 end.');
-      test_only_for_successful_compilation('type tc=class procedure entry p; begin end; begin end; var c: tc; begin c.p end.');
-      test_only_for_successful_compilation('type tc=class procedure entry p; begin end; begin end; var c: tc; begin with c do p end.');
+      test_only_for_successful_compilation('type tc=class public property i: int8; set: begin end; begin end; var c: tc; begin c.i := 5 end.');
+      test_only_for_successful_compilation('type tc=class public procedure p; begin end; begin end; var c: tc; begin c.p end.');
+      test_only_for_successful_compilation('type tc=class public procedure p; begin end; begin end; var c: tc; begin with c do p end.');
       test_only_for_successful_compilation('type tr=record i,j: int8 end; var r: tr; begin r := tr:(i=4,j=6) end.');
 
       test_only_for_successful_compilation('const c:int8 = 9; var i:int8; begin i := c end.');
@@ -156,10 +156,10 @@ procedure test_TAccess;
       test_only_for_successful_compilation('const c: boolean=false; var v: boolean; begin v := c end.');
       test_only_for_successful_compilation('type ts=set of 5..10; const c:ts=[5,9]; var v:ts; begin v := c end.');
 
-      test_compile_error_generation('type tc=class property entry i: int8; begin end; var c: tc; begin c.i := 5 end.', err_property_has_no_setter, 'i := 5 end.');
-      test_compile_error_generation('type tc=class property entry i: int8; begin end; var c: tc; begin with c do i := 5 end.', err_property_has_no_setter, 'i := 5 end.');
+      test_compile_error_generation('type tc=class public property i: int8; begin end; var c: tc; begin c.i := 5 end.', err_property_has_no_setter, 'i := 5 end.');
+      test_compile_error_generation('type tc=class public property i: int8; begin end; var c: tc; begin with c do i := 5 end.', err_property_has_no_setter, 'i := 5 end.');
       test_compile_error_generation('type t=int8; function f1 (var i: int8): int8; begin end; procedure p2; var i: int8; begin i := f1(t) end; begin end.', err_colon_expected_for_anonymous_structured_constant, ') end; begin end.');
-      test_compile_error_generation('type tm=monitor begin end; var m: monitor (mm: tm); begin init m end; begin end.', err_incomplete_type_definition_for_variable, 'm end; begin end.');
+      test_compile_error_generation('type tm=monitor public procedure p; begin end; begin end; var m: monitor (mm: tm); begin init m end; begin end.', err_incomplete_type_definition_for_variable, 'm end; begin end.');
 
 
       // test overlay anonymous array access

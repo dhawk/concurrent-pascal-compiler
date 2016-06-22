@@ -27,10 +27,9 @@ procedure test_TRoutine;
       test_only_for_successful_compilation('procedure x; var a,b: boolean; begin end; begin end.');
       test_only_for_successful_compilation('procedure x; var a: boolean;var b: boolean; begin end; begin end.');
       test_only_for_successful_compilation('procedure x; type t=int8; const c=5; var a: boolean;var b: t; begin end; begin end.');
-      test_only_for_successful_compilation('type tc=monitor procedure p (var q: queue); begin end; begin end; begin end.');
+      test_only_for_successful_compilation('type tc=monitor procedure p (var q: queue); begin end; public procedure p2; begin end; begin end; begin end.');
 
       test_compile_error_generation('procedure x; var x: boolean; begin end; begin end.', err_identifier_already_defined, 'x: boolean; begin end; begin end.');
-      test_compile_error_generation('procedure entry x; begin end; begin end.', err_entry_routines_may_only_be_declared_for_monitors_and_classes, 'entry x; begin end; begin end.');
       test_compile_error_generation('procedure begin); begin end; begin end.', err_identifier_expected, 'begin); begin end; begin end.');
       test_compile_error_generation('procedure x (begin); begin end; begin end.', err_identifier_expected, 'begin); begin end; begin end.');
       test_compile_error_generation('procedure x (a,begin); begin end; begin end.', err_identifier_expected, 'begin); begin end; begin end.');
@@ -47,19 +46,19 @@ procedure test_TRoutine;
       test_only_for_successful_compilation('type tio=packed record a: 0..255 end; procedure x (rom io: tio); begin end; begin end.');
       test_only_for_successful_compilation('type tio=packed record a: 0..255 end; procedure x (eeprom io: tio); begin end; begin end.');
       test_only_for_successful_compilation('type tio=packed record a: 0..255 end; procedure x (io: tio); begin end; begin end.');
-      test_compile_error_generation('type tc=monitor procedure p (q: queue); begin end; begin end; begin end.', err_queue_param_must_be_var, 'queue); begin end; begin end; begin end.');
+      test_compile_error_generation('type tc=monitor procedure p (q: queue); begin end; public procedure p2; begin end; begin end; begin end.', err_queue_param_must_be_var, 'queue');
 
       test_only_for_successful_compilation('function f: int8; begin end; procedure p; var i: int8; begin i := f end; begin end.');
       test_only_for_successful_compilation('function f (var i: int8; c: char): int8; begin end; procedure p; var i: int8; begin i := f (i, ''a'') end; begin end.');
-      test_only_for_successful_compilation('type ct=class property entry i: int8; get: begin end; begin end; var c:ct; i: int8; begin i := c.i end.');
+      test_only_for_successful_compilation('type ct=class public property i: int8; get: begin end; begin end; var c:ct; i: int8; begin i := c.i end.');
       test_only_for_successful_compilation('function f(var i: int8): int8; begin end; procedure p; var r: record ii: int8 end; i: int8; begin with r do i := f (ii) end; begin end.');
       test_only_for_successful_compilation('function f(var i: int8): int8; begin end; procedure p; var r: record rr: record ii: int8 end end; i: int8; begin with r do with rr do i := f (ii) end; begin end.');
 
       test_compile_error_generation('function f: int8; begin end; procedure p; var i: int8; begin i := f() end; begin end', err_function_has_no_parameters, '() end; begin end');
-      test_compile_error_generation('type ct=class procedure entry proc; begin end; begin end; function p2 (var i:int8): int8; begin end; var c: ct; i: int8; begin i := p2(c.proc) end', err_routine_cant_be_used_as_parameter_here, 'proc) end');
-      test_compile_error_generation('type ct=class procedure entry proc; begin end; begin end; function p2 (var i:int8): int8; begin end; var c: ct; i: int8; begin with c do i := p2(proc) end', err_routine_cant_be_used_as_parameter_here, 'proc) end');
-      test_compile_error_generation('type ct=class function entry f: int8; begin end; begin end; function p2 (var i:int8): int8; begin end; var c: ct; i: int8; begin i := p2(c.f) end.', err_routine_cant_be_used_as_parameter_here, 'f) end.');
-      test_compile_error_generation('type ct=class function entry f: int8; begin end; begin end; function p2 (var i:int8): int8; begin end; var c: ct; i: int8; begin with c do i := p2(f) end.', err_routine_cant_be_used_as_parameter_here, 'f) end.');
+      test_compile_error_generation('type ct=class public procedure proc; begin end; begin end; function p2 (var i:int8): int8; begin end; var c: ct; i: int8; begin i := p2(c.proc) end', err_routine_cant_be_used_as_parameter_here, 'proc) end');
+      test_compile_error_generation('type ct=class public procedure proc; begin end; begin end; function p2 (var i:int8): int8; begin end; var c: ct; i: int8; begin with c do i := p2(proc) end', err_routine_cant_be_used_as_parameter_here, 'proc) end');
+      test_compile_error_generation('type ct=class public function f: int8; begin end; begin end; function p2 (var i:int8): int8; begin end; var c: ct; i: int8; begin i := p2(c.f) end.', err_routine_cant_be_used_as_parameter_here, 'f) end.');
+      test_compile_error_generation('type ct=class public function f: int8; begin end; begin end; function p2 (var i:int8): int8; begin end; var c: ct; i: int8; begin with c do i := p2(f) end.', err_routine_cant_be_used_as_parameter_here, 'f) end.');
       test_compile_error_generation('function f (rom i: int8): int8; begin end; procedure p2; var i: int8; begin i := f (i) end; begin end.', err_rom_constant_expected, 'i) end; begin end.');
       test_compile_error_generation('function f (eeprom i: int8): int8; begin end; procedure p2; var i: int8; begin i := f (i) end; begin end.', err_eeprom_variable_expected, 'i) end; begin end.');
 
@@ -70,42 +69,38 @@ procedure test_TRoutine;
 procedure test_TProperty;
    begin
       display('testing TProperty');
-      test_only_for_successful_compilation('type m=monitor property i: boolean; begin end; begin end.');
-      test_only_for_successful_compilation('type m=monitor property i: boolean; set: begin end; begin end; begin end.');
-      test_only_for_successful_compilation('type m=monitor property i: boolean; get: begin end; begin end; begin end.');
-      test_only_for_successful_compilation('type m=monitor property i: boolean; set: begin end; get: begin end; begin end; begin end.');
-      test_only_for_successful_compilation('type m=monitor property entry i: boolean; set: begin end; get: begin end; begin end; begin end.');
+      test_only_for_successful_compilation('type m=monitor public property i: boolean; begin end; begin end.');
+      test_only_for_successful_compilation('type m=monitor public property i: boolean; set: begin end; begin end; begin end.');
+      test_only_for_successful_compilation('type m=monitor public property i: boolean; get: begin end; begin end; begin end.');
+      test_only_for_successful_compilation('type m=monitor public property i: boolean; set: begin end; get: begin end; begin end; begin end.');
+      test_only_for_successful_compilation('type m=monitor public property i: boolean; set: begin end; get: begin end; begin end; begin end.');
 
-      test_compile_error_generation('type m=monitor property begin end; set: begin end; begin end; begin end.', err_identifier_expected, 'begin end; set: begin end; begin end; begin end.');
-      test_compile_error_generation('type m=monitor property entry i: boolean; set: begin end; set: begin end; begin end; begin end.', err_property_setter_already_defined, 'set: begin end; begin end; begin end.');
-      test_compile_error_generation('type m=monitor property i boolean; begin end; begin end.', err_colon_expected, 'boolean; begin end; begin end.');
-      test_compile_error_generation('type m=monitor property i: begin end; begin end.', err_type_definition_expected, 'begin end; begin end.');
-      test_compile_error_generation('type m=monitor property i: boolean begin end; begin end.', err_semicolon_expected, 'begin end; begin end.');
+      test_compile_error_generation('type m=monitor public property begin end; set: begin end; begin end; begin end.', err_identifier_expected, 'begin end; set: begin end; begin end; begin end.');
+      test_compile_error_generation('type m=monitor public property i: boolean; set: begin end; set: begin end; begin end; begin end.', err_property_setter_already_defined, 'set: begin end; begin end; begin end.');
+      test_compile_error_generation('type m=monitor public property i boolean; begin end; begin end.', err_colon_expected, 'boolean; begin end; begin end.');
+      test_compile_error_generation('type m=monitor public property i: begin end; begin end.', err_type_definition_expected, 'begin end; begin end.');
+      test_compile_error_generation('type m=monitor public property i: boolean begin end; begin end.', err_semicolon_expected, 'begin end; begin end.');
    end;
 
 procedure test_TSystemType;
    begin
       display('testing TSystemType');
-      test_only_for_successful_compilation('type c=monitor begin end; begin end.');
-      test_only_for_successful_compilation('type c=monitor var q: queue; begin end; begin end.');
-      test_only_for_successful_compilation('type c=class begin end; begin end.');
       test_only_for_successful_compilation('type c=process priority 0; begin cycle repeat end; begin end.');
-      test_only_for_successful_compilation('type c=monitor type b=boolean; procedure x; begin end; begin end; begin end.');
-      test_only_for_successful_compilation('type c=class procedure entry x; begin end; begin end; begin end.');
-      test_only_for_successful_compilation('type c=monitor procedure entry x; begin end; begin end; begin end.');
-      test_only_for_successful_compilation('type c1=monitor procedure p1; begin end; procedure p2; begin end; begin end; c2=monitor procedure p1; begin end; procedure p2; begin end; begin end; begin end.');
-      test_only_for_successful_compilation('type ta=array[1..3] of queue; type tr=record a: ta end; m=monitor var r: tr; begin end; begin end.');
-      test_only_for_successful_compilation('type tio=packed record a: 0..255 end; m=monitor(ioreg io: tio); begin end; begin end.');
-      test_only_for_successful_compilation('type c=monitor eeprom i: int8; r: real; begin end; begin end.');
+      test_only_for_successful_compilation('type c=monitor type b=boolean; public procedure x; begin end; begin end; begin end.');
+      test_only_for_successful_compilation('type c=class public procedure x; begin end; begin end; begin end.');
+      test_only_for_successful_compilation('type c=monitor public procedure x; begin end; begin end; begin end.');
+      test_only_for_successful_compilation('type c1=monitor procedure p1; begin end; public procedure p2; begin end; begin end; c2=monitor procedure p1; begin end; public procedure p2; begin end; begin end; begin end.');
+      test_only_for_successful_compilation('type ta=array[1..3] of queue; type tr=record a: ta end; m=monitor var r: tr; public procedure p; begin end; begin end; begin end.');
+      test_only_for_successful_compilation('type tio=packed record a: 0..255 end; m=monitor(ioreg io: tio); public procedure p; begin end; begin end; begin end.');
+      test_only_for_successful_compilation('type c=monitor eeprom i: int8; r: real; public procedure p; begin end; begin end; begin end.');
 
-      test_compile_error_generation('type tc=class (i:int8); begin end; var c: tc; var ii: int8; begin ii := c.i end.', err_property_or_routine_identifier_expected, 'i end.');
-      test_compile_error_generation('type tc=class var i:int8; begin end; var c: tc; var ii: int8; begin ii := c.i end.', err_system_type_variables_are_private_to_the_system_type, 'i end.');
+      test_compile_error_generation('type tc=class (i:int8); public procedure p; begin end; begin end; var c: tc; var ii: int8; begin ii := c.i end.', err_property_or_routine_identifier_expected, 'i end.');
+      test_compile_error_generation('type tc=class var i:int8; public procedure p; begin end;begin end; var c: tc; var ii: int8; begin ii := c.i end.', err_system_type_variables_are_private_to_the_system_type, 'i end.');
 
-      test_only_for_successful_compilation('type tio=packed record a: 0..255 end; m=monitor(rom io: tio); begin end; begin end.');
-      test_compile_error_generation('type m=monitor (m1: m); begin end; begin end.', err_self_referential_type, 'm); begin end; begin end.');
+      test_only_for_successful_compilation('type tio=packed record a: 0..255 end; m=monitor(rom io: tio); public procedure p; begin end; begin end; begin end.');
+      test_compile_error_generation('type m=monitor (m1: m);public procedure p; begin end;  begin end; begin end.', err_self_referential_type, 'm);');
       test_compile_error_generation('type tc=class procedure p; var c: tc; begin end; begin end; begin end.', err_self_referential_type, 'tc; begin end; begin end; begin end.');
       test_compile_error_generation('type tc=class (c: tc); begin end; begin end.', err_self_referential_type, 'tc); begin end; begin end.');
-      test_compile_error_generation('type c=process priority 1; procedure entry x; begin end; begin end; begin end.', err_entry_routines_may_only_be_declared_for_monitors_and_classes, 'entry x; begin end; begin end; begin end.');
       test_compile_error_generation('type c=process priority 1; property x: integer; begin end; begin end.', err_properties_not_allowed_in_processes, 'property x: integer; begin end; begin end.');
 
       test_compile_error_generation('type c=class var q: queue; begin end; begin end.', err_queue_variables_may_only_be_declared_in_the_permanent_variables_of_a_monitor, 'queue; begin end; begin end.');
@@ -146,7 +141,7 @@ procedure test_TProgram;
                                            'rom c:tc = (i=5, r=3.2);' + 'procedure p;' + 'var i: int8; r: real;' +
                                            'begin i := c.i; r := c.r end;' + 'begin end.');
       test_compile_error_generation('eeprom i: int8; begin end.', err_eeprom_variables_only_allowed_as_system_type_permanent_variables, 'eeprom i: int8; begin end.');
-      test_compile_error_generation('var m: monitor var q: queue; procedure entry p; begin delay(q) end; begin end;' +
+      test_compile_error_generation('var m: monitor var q: queue; public procedure p; begin delay(q) end; begin end;' +
                                     'begin m.p end.',
                                     err_cant_call_delay_from_initial_process,
                                     'p end.'
@@ -157,27 +152,27 @@ procedure test_TParamList;
    begin
       display('testing TParamList');
       // with and without parameter lists:
-      test_only_for_successful_compilation('type mt=monitor procedure p; begin end; begin end; var m: mt; begin init m,m end.');
-      test_only_for_successful_compilation('type mt=monitor (i: int8); procedure p; begin end; begin end; var m: mt; begin init m(5) end.');
+      test_only_for_successful_compilation('type mt=monitor public procedure p; begin end; begin end; var m: mt; begin init m,m end.');
+      test_only_for_successful_compilation('type mt=monitor (i: int8); public procedure p; begin end; begin end; var m: mt; begin init m(5) end.');
 
       // all legal system type init param lists, declaration and call
-      test_only_for_successful_compilation('type tc=class begin end; tm=class (c: tc); begin end; begin end.');
-      test_only_for_successful_compilation('type tc=class (r: real); begin end; var c: tc; begin init c(4.2) end.');
-      test_only_for_successful_compilation('type tc=class (r: real); begin end; var c: tc; r: real; begin init c(r) end.');
-      test_only_for_successful_compilation('type tc=class (r: real); begin end; rom r: real = 5.2; var c: tc; begin init c(r) end.');
-      test_only_for_successful_compilation('type tc=class (rom r: real); begin end; rom r: real = 5.2; var c: tc; begin init c(r) end.');
-      test_only_for_successful_compilation('type tc1=class begin end; tc2=class(c:tc1); begin end; var c1: tc1; c2: tc2; begin init c2(c1) end.');
-      test_only_for_successful_compilation('type tr=record i,j: int8 end; tc=class(r:tr); begin end; var r: tr; c: tc; begin init c(r) end.');
-      test_only_for_successful_compilation('type tr=record i,j: int8 end; tc=class(rom r: tr); begin end; rom r: tr=(i=5,j=6); var c: tc; begin init c(r) end.');
-      test_only_for_successful_compilation('type tio=packed record a: 0..255 end; tc=class (ioreg io: tio); begin end; ioreg io: tio at 1500; var c: tc; begin init c (io) end.');
+      test_only_for_successful_compilation('type tc=class public procedure p; begin end; begin end; tm=class (c: tc); public procedure p; begin end; begin end; begin end.');
+      test_only_for_successful_compilation('type tc=class (r: real); public procedure p; begin end; begin end; var c: tc; begin init c(4.2) end.');
+      test_only_for_successful_compilation('type tc=class (r: real); public procedure p; begin end; begin end; var c: tc; r: real; begin init c(r) end.');
+      test_only_for_successful_compilation('type tc=class (r: real);public procedure p; begin end;  begin end; rom r: real = 5.2; var c: tc; begin init c(r) end.');
+      test_only_for_successful_compilation('type tc=class (rom r: real); public procedure p; begin end;  begin end; rom r: real = 5.2; var c: tc; begin init c(r) end.');
+      test_only_for_successful_compilation('type tc1=class public procedure p; begin end; begin end; tc2=class(c:tc1); public procedure p; begin end; begin end; var c1: tc1; c2: tc2; begin init c2(c1) end.');
+      test_only_for_successful_compilation('type tr=record i,j: int8 end; tc=class(r:tr); public procedure p; begin end; begin end; var r: tr; c: tc; begin init c(r) end.');
+      test_only_for_successful_compilation('type tr=record i,j: int8 end; tc=class(rom r: tr); public procedure p; begin end; begin end; rom r: tr=(i=5,j=6); var c: tc; begin init c(r) end.');
+      test_only_for_successful_compilation('type tio=packed record a: 0..255 end; tc=class (ioreg io: tio); public procedure p; begin end; begin end; ioreg io: tio at 1500; var c: tc; begin init c (io) end.');
 
       // all legal routine param lists, decl and call
       test_only_for_successful_compilation('procedure p (i: int16; r: real); begin end; begin p (5, 2.3) end.');
       test_only_for_successful_compilation('procedure p (var i1: int8; rom i2: int8); begin end; rom i2:int8 = 5; var i1: int8; begin p (i1, i2) end.');
-      test_only_for_successful_compilation('type tm=monitor eeprom i: int8; procedure p (eeprom i: int8); begin end; begin p(i) end; begin end.');
-      test_only_for_successful_compilation('type tr=record i,j: int8 end; tm=monitor eeprom i: tr; procedure p (eeprom i: tr); begin end; begin p(i) end; begin end.');
-      test_only_for_successful_compilation('type tr=record i,j: int8 end; tm=monitor var i: tr; procedure p (var i: tr); begin end; begin p(i) end; begin end.');
-      test_only_for_successful_compilation('type tr=record i,j: int8 end; tm=monitor rom i: tr = (i=5,j=6); procedure p (rom i: tr); begin end; begin p(i) end; begin end.');
+      test_only_for_successful_compilation('type tm=monitor eeprom i: int8; procedure p (eeprom i: int8); begin end; public procedure p1; begin end; begin p(i) end; begin end.');
+      test_only_for_successful_compilation('type tr=record i,j: int8 end; tm=monitor eeprom i: tr; procedure p (eeprom i: tr); begin end; public procedure p1; begin end; begin p(i) end; begin end.');
+      test_only_for_successful_compilation('type tr=record i,j: int8 end; tm=monitor var i: tr; procedure p (var i: tr); begin end; public procedure p2; begin end; begin p(i) end; begin end.');
+      test_only_for_successful_compilation('type tr=record i,j: int8 end; tm=monitor rom i: tr = (i=5,j=6); procedure p (rom i: tr); begin end; public procedure p2; begin end; begin p(i) end; begin end.');
       test_only_for_successful_compilation('type tio=packed record a: 0..255 end; procedure p(ioreg io: tio); begin end; ioreg io: tio at 1500; begin p(io) end.');
       test_only_for_successful_compilation('type tp=process priority 0; begin cycle repeat end; procedure pr (p: tp); begin end; var p: tp; begin init p; pr(p) end.');
 
@@ -185,23 +180,23 @@ procedure test_TParamList;
       test_only_for_successful_compilation('type tr=record i: int8 end; procedure p (r: tr); begin end; var o: overlay tr end; begin p(o) end.');
 
       // test parameter list declaration
-      test_compile_error_generation('type mt=monitor (eeprom e: int8); begin end; begin end.', err_eeprom_parameters_not_allowed_here, 'eeprom e: int8); begin end; begin end.');
-      test_compile_error_generation('type mt=monitor (var e: int8); begin end; begin end.', err_var_parameters_not_allowed_here, 'var e: int8); begin end; begin end.');
+      test_compile_error_generation('type mt=monitor (eeprom e: int8); public procedure p; begin end;  begin end; begin end.', err_eeprom_parameters_not_allowed_here, 'eeprom e: int8');
+      test_compile_error_generation('type mt=monitor (var e: int8); public procedure p; begin end;  begin end; begin end.', err_var_parameters_not_allowed_here, 'var e: int8);');
       test_compile_error_generation('procedure p (var i: int8); begin end; procedure p2 (i: int8); begin p(i) end; begin end.', err_cannot_change_constant_parameter, 'i) end; begin end.');
-      test_compile_error_generation('type tc=class begin end; tm=monitor (c: tc); begin end; begin end.', err_class_type_not_allowed, 'tc); begin end; begin end.');
-      test_compile_error_generation('type tc=class begin end; tm=process (c: tc) priority 1; begin end; begin end.', err_class_type_not_allowed, 'tc) priority 1; begin end; begin end.');
-      test_compile_error_generation('type tc=class begin end; tm=process (c tc) priority 1; begin end; begin end.', err_colon_expected, 'tc) priority 1; begin end; begin end.');
-      test_compile_error_generation('type tc=class(q: queue); begin end; begin end.', err_queue_parameters_only_allowed_in_monitor_local_routines, 'queue); begin end; begin end.');
-      test_compile_error_generation('type tm=monitor procedure p (q: queue); begin end; begin end; begin end.', err_queue_param_must_be_var, 'queue); begin end; begin end; begin end.');
+      test_compile_error_generation('type tc=class public procedure p; begin end; begin end; tm=monitor (c: tc); begin end; begin end.', err_class_type_not_allowed, 'tc); begin end; begin end.');
+      test_compile_error_generation('type tc=class public procedure p; begin end; begin end; tm=process (c: tc) priority 1; begin end; begin end.', err_class_type_not_allowed, 'tc) priority 1; begin end; begin end.');
+      test_compile_error_generation('type tc=class public procedure p; begin end; begin end; tm=process (c tc) priority 1; begin end; begin end.', err_colon_expected, 'tc) priority 1; begin end; begin end.');
+      test_compile_error_generation('type tc=class(q: queue); procedure p; begin end; begin end; begin end.', err_queue_parameters_only_allowed_in_monitor_local_routines, 'queue);');
+      test_compile_error_generation('type tm=monitor procedure p (q: queue); public procedure p2; begin end; begin end; begin end; begin end.', err_queue_param_must_be_var, 'queue);');
       test_only_for_successful_compilation('type tio=packed record a: 0..255 end; procedure p(io: tio); begin end; begin end.');
       test_compile_error_generation('procedure p (ioreg i: int8); begin end; begin end.', err_packed_record_type_expected, 'int8); begin end; begin end.');
-      test_compile_error_generation('type tc=class begin end; procedure p(var c: tc); begin end; begin end.', err_system_type_parameter_must_be_constant_parameter, 'tc); begin end; begin end.');
+      test_compile_error_generation('type tc=class public procedure p; begin end; begin end; procedure p(var c: tc); begin end; begin end.', err_system_type_parameter_must_be_constant_parameter, 'tc); begin end; begin end.');
 
       // test parsing of parameter assembly
-      test_compile_error_generation('type mt=monitor procedure p; begin end; begin end; var m: mt; begin init m (5) end.', err_no_parameters_expected, '(5) end.');
-      test_compile_error_generation('type mt=monitor (i: int8); procedure p; begin end; begin end; var m: mt; begin init m end.', err_left_parenthesis_expected, 'end.');
+      test_compile_error_generation('type mt=monitor public procedure p; begin end; begin end; var m: mt; begin init m (5) end.', err_no_parameters_expected, '(5) end.');
+      test_compile_error_generation('type mt=monitor (i: int8); public procedure p; begin end; begin end; var m: mt; begin init m end.', err_left_parenthesis_expected, 'end.');
       test_compile_error_generation('function f: int8; begin end; procedure p (var i: int8); begin end; begin p (f) end.', err_routine_cant_be_used_as_parameter_here, 'f) end.');
-      test_compile_error_generation('type mt=monitor property entry i: int8; get: begin end; begin end; procedure p (var i: int8); begin end; var m: mt; begin p(m.i) end.', err_property_cant_be_used_as_parameter_here, 'i) end.');
+      test_compile_error_generation('type mt=monitor public property i: int8; get: begin end; begin end; procedure p (var i: int8); begin end; var m: mt; begin p(m.i) end.', err_property_cant_be_used_as_parameter_here, 'i) end.');
       test_compile_error_generation('const c:boolean=true; procedure p(var i: int8); begin end; begin p (c) end.', err_constant_cant_be_used_as_parameter_here, 'c) end.');
       test_compile_error_generation('procedure p1(var i: int8); begin end; procedure p2 (i: int8); begin p1 (i) end; begin end.', err_cannot_change_constant_parameter, 'i) end; begin end.');
       test_compile_error_generation('rom i:int8 = 5; procedure p(var j: int8); begin end; begin p(i) end.', err_cannot_change_rom_constant, 'i) end.');
@@ -223,11 +218,11 @@ procedure test_TVARList;
       test_only_for_successful_compilation('var t: int8 := 5; begin end.');
 
       test_compile_error_generation('var t: int8 at 5; begin end.', err_at_only_allowed_for_ioregisters, 'at 5; begin end.');
-      test_compile_error_generation('type mt=monitor begin end; type mt2=monitor eeprom m: mt; begin end; begin end.', err_system_type_variable_must_be_ram, 'mt; begin end; begin end.');
-      test_compile_error_generation('type mt=monitor begin end; rom m: mt=...', err_illegal_type_for_rom_constant, 'mt=...');
-      test_compile_error_generation('type tm=monitor begin end; procedure p; var m: tm; begin end; begin end.', err_monitor_variable_not_allowed_as_routine_local_variable, 'tm; begin end; begin end.');
+      test_compile_error_generation('type mt=monitor public procedure p; begin end; begin end; type mt2=monitor eeprom m: mt; begin end; begin end.', err_system_type_variable_must_be_ram, 'mt; begin end; begin end.');
+      test_compile_error_generation('type mt=monitor public procedure p; begin end; begin end; rom m: mt=...', err_illegal_type_for_rom_constant, 'mt=...');
+      test_compile_error_generation('type tm=monitor public procedure p; begin end; begin end; procedure p; var m: tm; begin end; begin end.', err_monitor_variable_not_allowed_as_routine_local_variable, 'tm; begin end; begin end.');
 
-      test_compile_error_generation('type tm=monitor eeprom q: queue; begin end; begin end.', err_queue_type_not_allowed_here, 'queue; begin end; begin end.');
+      test_compile_error_generation('type tm=monitor eeprom q: queue; public procedure p; begin end; begin end; begin end.', err_queue_type_not_allowed_here, 'queue;');
    end;
 
 procedure test_TIORegisterList;
@@ -284,10 +279,6 @@ procedure test_interrupt;
       test_compile_error_generation ('type ti=interrupt priority 1; procedure x',
                                      err_procedures_not_allowed_in_interrupt_definitions,
                                      'procedure x'
-                                    );
-      test_compile_error_generation ('type ti=interrupt priority 1; function entry signalled: boolean; begin end; function x',
-                                     err_entry_routines_may_only_be_declared_for_monitors_and_classes,
-                                     'entry'
                                     );
       test_compile_error_generation ('type ti=interrupt priority 1; function x',
                                      err_signalled_function_required,
