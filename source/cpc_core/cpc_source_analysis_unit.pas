@@ -241,9 +241,7 @@ var
    current_dir: string;
 
 function non_printable_char (c: char): boolean;
-function reserved_word_to_string
-   (rw: TReservedWordEnum
-   ): string;
+function reserved_word_to_string (rw: TReservedWordEnum): string;
 
 procedure output_source_line (st: TStrings; addr, s: string);
 procedure append_source_up_to (st: TStrings; src_loc: TSourceLocation);
@@ -252,7 +250,7 @@ function caret (idx: integer): string;
 function extract_quoted_compiler_directive_parameter (compiler_directive, simplified_line, param_name: string; src_location: TSourceLocation): string;
 procedure read_in_file (full_path_fn: string; compiler_directives_allowed: boolean; src_location: TSourceLocation);
 procedure add_line_to_source (line: string; file_list_idx, line_no: integer; var in_preamble: boolean);
-
+function symbol_id (symbol: string): integer;
 
 IMPLEMENTATION
 
@@ -302,6 +300,15 @@ type
 var
    symbol_table: TSymbolTable;
    first_non_preamble_source_idx: integer;
+
+function symbol_id (symbol: string): integer;
+   var
+      symbol_item: TSymbolInfo;
+   begin
+      symbol_item := symbol_table.find_symbol_table_entry(symbol);
+      assert (symbol_item.token_kind = identifier_token);
+      result := symbol_item.id
+   end;
 
 procedure TSymbolTable.add_reserved_word
    (word: String;
@@ -1291,7 +1298,10 @@ procedure TLexicalAnalysis.DoLexicalAnalysis;
          put_real_constant(real_constant);
       end;
 
-   begin
+   begin    // DoLexicalAnalysis
+      // pre-load "result" in symbol table as an identifier
+      define_identifier ('result');
+
       integer_constant := TMultiPrecisionInteger.Create;
       try
          for source_idx := 0 to length(source) - 1 do
@@ -1467,7 +1477,7 @@ procedure TLexicalAnalysis.DoLexicalAnalysis;
       finally
          integer_constant.Free
       end
-   end;
+   end;    // DoLexicalAnalysis
 
 destructor TLexicalAnalysis.Destroy;
    var

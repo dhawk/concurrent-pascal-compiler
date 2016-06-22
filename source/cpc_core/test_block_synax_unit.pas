@@ -331,14 +331,14 @@ procedure test_global_var_access_rules;
       // ioreg are accessible from interrupt type routines & init and also in program init
       test_only_for_successful_compilation ('ioreg io: packed record flag: 0..1; x: 0..127 end at 1000;'
                                                + 'type tinterrupt = interrupt priority 1;'
-                                               + 'function signalled: boolean; begin signalled := io.flag = 1 end;'
+                                               + 'function signalled: boolean; begin result := io.flag = 1 end;'
                                                + 'begin if io.flag = 2 then end;'
                                                + 'begin if io.flag = 4 then end.'
                                            );
       // global vars are not accessible from interrupt routines
       test_compile_error_generation ('var i: int8;'
                                          + 'type tinterrupt = interrupt priority 1;'
-                                         + 'function signalled: boolean; begin signalled := i = 1 end;',  // in routine
+                                         + 'function signalled: boolean; begin result := i = 1 end;',  // in routine
                                       err_global_variable_not_accessible_here,
                                      'i = 1'
                                     );

@@ -165,7 +165,7 @@ procedure test_assignment_statement;
       test_compile_error_generation('type tc=class eeprom es: string [10]; property p: string; set: begin end; begin p := es end; begin end.', err_eeprom_string_cannot_be_assigned_to_a_property, 'es end; begin end.');
       test_compile_error_generation('rom r: string[3] = ''abc''; type tc=class property p: string; set: begin end; begin p := r end; begin end.', err_rom_string_cannot_be_assigned_to_a_property, 'r end; begin end.');
       test_compile_error_generation('type tc=class eeprom es: string [10]; property p: string; set: begin end; begin p := ''asdf'' end; begin end.', err_constant_string_cannot_be_assigned_to_a_property, '''asdf'' end; begin end.');
-      test_compile_error_generation('function f: string; begin f := ''asdf'' end; type tc=class property p: string; set: begin end; begin p := f end; begin end.', err_string_function_result_cannot_be_assigned_to_a_property, 'f end; begin end.');
+      test_compile_error_generation('function f: string; begin result := ''asdf'' end; type tc=class property p: string; set: begin end; begin p := f end; begin end.', err_string_function_result_cannot_be_assigned_to_a_property, 'f end; begin end.');
    end;
 
 procedure test_continue_statement;

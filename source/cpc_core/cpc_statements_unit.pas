@@ -508,7 +508,10 @@ function process_statement_from_source_tokens (while_and_until_allowed: boolean)
                      result := target_cpu.TAssignmentStatement_CreateFromSourceTokens(access);
                   function_access:
                      try
-                        raise compile_error.Create(err_function_cannot_be_called_without_using_function_result, access.src_loc)
+                        if not access.node_routine.definition_complete then
+                           raise compile_error.Create (err_recursive_call_not_allowed_use_result_instead, access.node_id_src_loc)
+                        else
+                           raise compile_error.Create(err_function_cannot_be_called_without_using_function_result, access.src_loc)
                      finally
                         access.Release
                      end;

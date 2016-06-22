@@ -1179,7 +1179,7 @@ constructor TRoutine.CreateFromSourceTokens
    (cntxt: TDefinition
    );
    var
-      result_kind:
+      routine_kind:
          (procedure_kind,
           function_kind
          );
@@ -1208,9 +1208,9 @@ constructor TRoutine.CreateFromSourceTokens
          // PROCEDURE or FUNCTION keyword
          assert(lex.token_is_reserved_word([rw_procedure, rw_function]));
          if lex.token_is_reserved_word(rw_procedure) then
-            result_kind := procedure_kind
+            routine_kind := procedure_kind
          else
-            result_kind := function_kind;
+            routine_kind := function_kind;
          lex.advance_token;
 
          // ENTRY modifier
@@ -1231,17 +1231,12 @@ constructor TRoutine.CreateFromSourceTokens
          routine_id_idx := lex.token.identifier_idx;
          routine_id_src_loc := lex.token.src_loc;
 
-         case result_kind of
-            function_kind:
-               begin
-                  function_result := target_cpu.TVariable_CreateForLaterDefinition(lex.token.identifier_idx, Self);
-                  CurrentDefinitionTable.DefineForCurrentScope(lex.token.identifier_idx, function_result, lex.token.src_loc)
-               end;
-            procedure_kind:
-               CurrentDefinitionTable.DefineForCurrentScope(lex.token.identifier_idx, Self, lex.token.src_loc);
-            else
-               assert(false)
-         end;
+         CurrentDefinitionTable.DefineForCurrentScope(lex.token.identifier_idx, Self, lex.token.src_loc);
+         if routine_kind = function_kind then
+            begin
+               function_result := target_cpu.TVariable_CreateForLaterDefinition(symbol_id('result'), Self);    // old: lex.token.identifier_idx
+               CurrentDefinitionTable.DefineForCurrentScope(symbol_id('result'), function_result, lex.token.src_loc)
+            end;
          lex.advance_token;
 
          // PARAMETER LIST
@@ -1273,7 +1268,7 @@ constructor TRoutine.CreateFromSourceTokens
          parameter_definitions := target_cpu.TParamList_CreateFromSourceTokens(parameter_context);
 
          // FUNCTION RESULT
-         if result_kind = function_kind then
+         if routine_kind = function_kind then
             begin
                if not lex.token_is_symbol(sym_colon) then
                   raise compile_error.Create(err_colon_expected);

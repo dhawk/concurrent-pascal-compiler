@@ -222,6 +222,7 @@ const
    err_record_may_not_contain_process_variables = 'record may not contain process variables';
    err_record_or_class_or_monitor_variable_expected = 'record, overlay, class or monitor variable expected';
    err_recursive_call_not_allowed = 'recusive call not allowed';
+   err_recursive_call_not_allowed_use_result_instead = 'recursive call not allowed (use "result" instead?)';
    err_recursive_include_file = 'recursive include file';
    err_recycle_only_allowed_inside_cycle = 'recycle only allowed inside cycle';
    err_reloop_only_allowed_inside_loop = '"reloop" only allowed inside loop';
