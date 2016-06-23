@@ -21,6 +21,12 @@ procedure test_routine_call_statement;
       test_compile_error_generation('procedure x; begin end; begin x() end.', err_procedure_has_no_parameters, '() end.');
    end;
 
+procedure test_assert_statement;
+   begin
+      display('testing assert statement');
+      test_only_for_successful_compilation('begin assert (true, ''msg'') end.')
+   end;
+
 procedure test_if_statement;
    var
       p: TProgram;
@@ -374,6 +380,7 @@ procedure test_statements;
       test_case_statement;
       test_await_statement;
       test_string_attribute_routines;
+      test_assert_statement;
       display('')
    end;
 

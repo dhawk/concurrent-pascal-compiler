@@ -6799,6 +6799,79 @@ procedure test135;   // test includes
       conclude_test
    end;
 
+procedure test136;  // asserts
+   begin
+      add ('var');
+      add (' err0,err3,err6,err9,err12,err15: uint24;');
+      add (' err18,err21: uint24;');
+      add (' err24,err27,err30,err33,err36: uint24;');
+      add (' err39,err42,err45,err48,err51,err54: uint24;');
+      add (' err57,err60,err63,err66: uint24;');
+      add (' err69,err72: uint24;');
+      add (' b: boolean;');
+      add (' i: int8;');
+      add (' i0: uint1;');
+      add ('begin');
+      add ('  assert (true, ''x'');');
+      add ('  err0 := ErrorCode;');
+      add ('');
+      add ('  assert (false, ''asdf'');');
+      add ('  err3 := ErrorCode;');
+      add ('');
+      add ('  b := true;');
+      add ('  assert (b, ''xy'');');
+      add ('  err6 := ErrorCode;');
+      add ('');
+      add ('  b := false;');
+      add ('  assert (b, ''xy2'');');
+      add ('  err9 := ErrorCode;');
+      add ('');
+      add ('  i := 5;');
+      add ('  assert (i >= 5, ''r'');');
+      add ('  err12 := ErrorCode;');
+      add ('  assert (i > 5, ''x'');');
+      add ('  err15 := ErrorCode;');
+      add ('');
+      add ('  i0 := 1;');
+      add ('  assert (i0 = 1, ''as'');');
+      add ('  err18 := ErrorCode;');
+      add ('  assert (i0 > 0, ''io'');');
+      add ('  err21 := ErrorCode;');
+      add ('  assert (i0 < 1, ''iu'');');
+      add ('  err24 := ErrorCode;');
+      add ('  assert (i0 = 0, ''re'');');
+      add ('  err27 := ErrorCode;');
+      add ('');
+      add ('  assert (1 = i0, ''as'');');
+      add ('  err30 := ErrorCode;');
+      add ('  assert (0 < i0, ''io'');');
+      add ('  err33 := ErrorCode;');
+      add ('  assert (1 > i0, ''iu'');');
+      add ('  err36 := ErrorCode;');
+      add ('  assert (0 = i0, ''re'');');
+      add ('  err39 := ErrorCode;');
+      add ('end.');
+      start_test (136);
+      test_abs_value (0, 0, 0, 0);
+      test_run_time_error_detected (3, 'assertion failed: asdf');
+      test_abs_value (6, 0, 0, 0);
+      test_run_time_error_detected (9, 'assertion failed: xy2');
+      test_abs_value (12, 0, 0, 0);
+      test_run_time_error_detected (15, 'assertion failed: x');
+
+      test_abs_value (18, 0, 0, 0);
+      test_abs_value (21, 0, 0, 0);
+      test_run_time_error_detected (24, 'assertion failed: iu');
+      test_run_time_error_detected (27, 'assertion failed: re');
+
+      test_abs_value (30, 0, 0, 0);
+      test_abs_value (33, 0, 0, 0);
+      test_run_time_error_detected (36, 'assertion failed: iu');
+      test_run_time_error_detected (39, 'assertion failed: re');
+
+      conclude_test
+   end;
+
 procedure RunTests;
    begin
       test1;
@@ -6936,6 +7009,7 @@ procedure RunTests;
       test133;
       test134;
       test135;
+      test136;
       MainForm.TestResultsMemo.Lines.Add ('all tests done')
    end;
 

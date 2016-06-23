@@ -116,24 +116,6 @@ type
             override;
       end;
 
-   TBranchOnTOSFalseMacro =
-      class (TMacroInstruction)
-         constructor Create;
-         procedure set_dest (d: TInstruction);
-            override;
-         procedure recalculate_size (var changed: boolean);
-            override;
-      end;
-
-   TBranchOnTOSTrueMacro =
-      class (TMacroInstruction)
-         constructor Create;
-         procedure set_dest (d: TInstruction);
-            override;
-         procedure recalculate_size (var changed: boolean);
-            override;
-      end;
-
    TBranchOnZeroStatusMacro =
       class (TMacroInstruction)
          constructor Create;
@@ -609,62 +591,6 @@ procedure TCallMacro.set_dest (d: TInstruction);
       f_dest := d;
       d.assembler_label_required := true;
       instr_arr[0].dest := d
-   end;
-
-constructor TBranchOnTOSFalseMacro.Create;
-   begin
-      inherited Create;
-      append (TPIC18x_BTFSS.Create(PREINC2, 0, access_mode));
-      append (TPIC18x_BRA.Create);
-      size := 4
-   end;
-
-procedure TBranchOnTOSFalseMacro.recalculate_size (var changed: boolean);
-   begin
-      if (size = 4)
-         and
-         (not TPIC18x_BRA(instr_arr[1]).in_range) then
-         begin
-            replace (1, TPIC18x_GOTO.Create);
-            instr_arr[1].dest := f_dest;
-            size := 6;
-            changed := true
-         end
-   end;
-
-procedure TBranchOnTOSFalseMacro.set_dest (d: TInstruction);
-   begin
-      f_dest := d;
-      d.assembler_label_required := true;
-      instr_arr[1].dest := d
-   end;
-
-constructor TBranchOnTOSTrueMacro.Create;
-   begin
-      inherited Create;
-      append (TPIC18x_BTFSC.Create(PREINC2, 0, access_mode));
-      append (TPIC18x_BRA.Create);
-      size := 4
-   end;
-
-procedure TBranchOnTOSTrueMacro.recalculate_size (var changed: boolean);
-   begin
-      if (size = 4)
-         and
-         (not TPIC18x_BRA(instr_arr[1]).in_range) then
-         begin
-            replace (1, TPIC18x_GOTO.Create);
-            instr_arr[1].dest := f_dest;
-            size := 6;
-            changed := true
-         end
-   end;
-
-procedure TBranchOnTOSTrueMacro.set_dest (d: TInstruction);
-   begin
-      f_dest := d;
-      d.assembler_label_required := true;
-      instr_arr[1].dest := d
    end;
 
 constructor TBranchOnNegativeStatusMacro.Create;

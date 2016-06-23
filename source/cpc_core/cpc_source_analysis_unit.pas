@@ -79,6 +79,7 @@ type
        rw_abs,
        rw_and,
        rw_array,
+       rw_assert,
        rw_at,
        rw_await,
        rw_begin,
@@ -764,6 +765,8 @@ function reserved_word_to_string
             result := 'and';
          rw_array:
             result := 'array';
+         rw_assert:
+            result := 'assert';
          rw_at:
             result := 'at';
          rw_await:

@@ -13,7 +13,8 @@ uses
 
 type
    TStatementKind =
-      (assignment_statement,
+      (assert_statement,
+       assignment_statement,
        await_statement,
        case_statement,
        continue_statement,
@@ -41,6 +42,20 @@ type
          constructor Create
             (k: TStatementKind
             );
+      end;
+
+   TAssertStatement =
+      class(TStatement)
+         boolean_expression: TExpression;
+         end_src_loc: TSourceLocation;
+         assertion_message: string;
+         constructor CreateFromSourceTokens;
+         destructor Destroy;
+            override;
+         procedure MarkAsReachable;
+            override;
+         function CheckForProhibitedDelayCall (err_msg: string): boolean;
+            override;
       end;
 
    TAssignmentStatement =
@@ -500,6 +515,8 @@ function process_statement_from_source_tokens (while_and_until_allowed: boolean)
             result := target_cpu.TCaseStatement_CreateFromSourceTokens
          else if lex.token_is_reserved_word(rw_await) then
             result := target_cpu.TAwaitInterruptStatement_CreateFromSourceTokens
+         else if lex.token_is_reserved_word(rw_assert) then
+            result := target_cpu.TAssertStatement_CreateFromSourceTokens
          else if lex.token_is_identifier then
             begin // either procedure call or left side of assignment statement
                access := target_cpu.TAccess_CreateFromSourceTokens;
@@ -558,6 +575,58 @@ constructor TStatement.Create
       statement_kind := k
    end;
 
+//===================
+//  TAssertStatement
+
+constructor TAssertStatement.CreateFromSourceTokens;
+   var
+      cexpr: TCExpression;
+   begin
+      inherited Create(assert_statement);
+      assert(lex.token_is_reserved_word(rw_assert));
+      lex.advance_token;
+
+      if not lex.token_is_symbol(sym_left_parenthesis) then
+         raise compile_error.Create(err_left_parenthesis_expected);
+      lex.advance_token;
+
+      boolean_expression := CreateBooleanExpressionFromSourceTokens;
+
+      if not lex.token_is_symbol(sym_comma) then
+         raise compile_error.Create(err_comma_expected);
+      lex.advance_token;
+
+      cexpr := nil;
+      try
+         cexpr := TCExpression.CreateFromSourceTokens;
+         if cexpr.constant_kind <> string_constant then
+            raise compile_error.Create (err_string_expected, cexpr.src_loc);
+         assertion_message := cexpr.s
+      finally
+         cexpr.Free
+      end;
+
+      if not lex.token_is_symbol(sym_right_parenthesis) then
+         raise compile_error.Create(err_right_parenthesis_expected);
+      end_src_loc := lex.token.src_loc;
+      lex.advance_token
+   end;
+
+destructor TAssertStatement.Destroy;
+   begin
+      boolean_expression.Release;
+      inherited
+   end;
+
+procedure TAssertStatement.MarkAsReachable;
+   begin
+      boolean_expression.MarkAsReachable
+   end;
+
+function TAssertStatement.CheckForProhibitedDelayCall (err_msg: string): boolean;
+   begin
+      result := boolean_expression.CheckForProhibitedDelayCall (err_msg)
+   end;
 
 // =======================
 // TAssignmentStatement
@@ -1640,7 +1709,6 @@ function TReLoopStatement.CheckForProhibitedDelayCall (err_msg: string): boolean
 constructor TRoutineCallStatement.CreateFromSourceTokens
    (acc: TAccess
    );
-var d: TDefinition;
    begin
       inherited Create(routine_call_statement);
       access := acc;

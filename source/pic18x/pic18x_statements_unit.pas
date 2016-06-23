@@ -17,6 +17,12 @@ uses
    pic18x_instructions_unit;
 
 type
+   TPIC18x_AssertStatement =
+      class (TAssertStatement)
+         function Generate (param1, param2: integer): integer;
+            override;
+      end;
+
    TPIC18x_CaseStatement =
       class (TCaseStatement)
       private type
@@ -160,16 +166,15 @@ uses
 var
    expression_lower_fence, expression_upper_fence, temp: TMultiPrecisionInteger;
 
-function generate_bit_test_conditional_branch_code (access: TPIC18x_Access;  bit_sense: boolean): TInstruction;
-   // generates branch if bit = bit_sense code
-   // result is the branch instruction for filling in destination field later
-   procedure gen_skip_instruction (addr, bit_position: integer; mode: TPIC18x_RAM_Access_Mode);
-      begin
-         case bit_sense of
-            false: TPIC18x_BTFSS.Create (addr, bit_position, mode);
-            true:  TPIC18x_BTFSC.Create (addr, bit_position, mode);
-         end
-      end;
+procedure gen_skip_instruction (bit_sense: boolean; addr, bit_position: integer; mode: TPIC18x_RAM_Access_Mode);
+   begin
+      case bit_sense of
+         true:  TPIC18x_BTFSS.Create (addr, bit_position, mode);
+         false: TPIC18x_BTFSC.Create (addr, bit_position, mode);
+      end
+   end;
+
+procedure generate_bit_test_skip_code (access: TPIC18x_Access;  bit_sense: boolean);
    var
       typinfo: TPIC18x_TypeInfo;
       offset: integer;
@@ -188,46 +193,58 @@ function generate_bit_test_conditional_branch_code (access: TPIC18x_Access;  bit
       typinfo := TPIC18x_TypeInfo(access.node_typedef.info);
       if access.absolute_address_with_no_indexing_required_mode then
          if access.absolute_address (offset) < 256 then
-            gen_skip_instruction (access.absolute_address (offset),
+            gen_skip_instruction (bit_sense,
+                                  access.absolute_address (offset),
                                   bit_num,
                                   bank_mode
                                  )
          else
-            gen_skip_instruction (access.absolute_address (offset),
+            gen_skip_instruction (bit_sense,
+                                  access.absolute_address (offset),
                                   bit_num,
                                   access_mode
                                  )
       else if access.near_stack_address_with_no_indexing_required_mode6 (offset) then
-         gen_skip_instruction (access.near_stack_address(offset),
+         gen_skip_instruction (bit_sense,
+                               access.near_stack_address(offset),
                                bit_num,
                                access_mode
                               )
       else
          begin
             access.Generate_Load_Ptr2_Code (pFSR1, typinfo.Size-1+Offset);
-            gen_skip_instruction (INDF1,
+            gen_skip_instruction (bit_sense,
+                                  INDF1,
                                   bit_num,
                                   access_mode
                                  )
          end;
+   end;
+
+function generate_bit_test_conditional_branch_code (access: TPIC18x_Access;  bit_sense: boolean): TInstruction;
+   // generates code to branch if bit = bit_sense
+   // result is the branch instruction for filling in destination field later
+   begin
+      generate_bit_test_skip_code (access, not bit_sense);
       result := TGOTOMacro.Create
+   end;
+
+function can_be_evaluated_with_simple_bit_test (access: TPIC18x_Access): boolean;
+   begin
+      result := (access.node_is_in_data_address_space)
+                and
+                (access.node_typedef.info.PackedSizeInBits = 1)
+                and
+                (not ((access.base_variable.descriptor = rw_ioreg)
+                      and
+                      (TPIC18x_TypeInfo(access.base_variable.typedef.info).is_in_alternate_shared_address_space)
+                     )
+                )
    end;
 
 function GenerateCodeForConditionalBranch (boolean_expression: TExpression; branch_on_sense: boolean): TInstruction;
    // result is branch instruction, result.dest is to be filled in later
 
-   function can_be_evaluated_with_simple_bit_test (access: TPIC18x_Access): boolean;
-      begin
-         result := (access.node_is_in_data_address_space)
-                   and
-                   (access.node_typedef.info.PackedSizeInBits = 1)
-                   and
-                   (not ((access.base_variable.descriptor = rw_ioreg)
-                         and
-                         (TPIC18x_TypeInfo(access.base_variable.typedef.info).is_in_alternate_shared_address_space)
-                        )
-                   )
-      end;
    var
       rel_exp: TPIC18x_RelationalExpression;
       access: TPIC18x_Access;
@@ -358,10 +375,183 @@ function GenerateCodeForConditionalBranch (boolean_expression: TExpression; bran
       // if no exit by now, then full evaluation required
       boolean_expression.Generate (GenerateCode, 1);
       if branch_on_sense then
-         result := TBranchOnTOSTrueMacro.Create
+         TPIC18x_BTFSC.Create(PREINC2, 0, access_mode)
       else
-         result := TBranchOnTOSFalseMacro.Create;
+         TPIC18x_BTFSS.Create(PREINC2, 0, access_mode);
+      StackUsageCounter.Pop(1);
+      result := TGotoMacro.Create
+   end;
+
+procedure GenerateCodeForConditionalSkip (boolean_expression: TExpression; skip_sense: boolean);
+   var
+      rel_exp: TPIC18x_RelationalExpression;
+      access: TPIC18x_Access;
+   begin
+      if boolean_expression is TPIC18x_VariableAccessPrimary then
+         begin
+            access := TPIC18x_Access (TPIC18x_VariableAccessPrimary(boolean_expression).access);
+            if can_be_evaluated_with_simple_bit_test (access) then
+               begin
+                  generate_bit_test_skip_code (access, skip_sense);
+                  exit
+               end
+         end;
+
+      if boolean_expression is TPIC18x_RelationalExpression then
+         begin
+            rel_exp := TPIC18x_RelationalExpression(boolean_expression);
+
+            if (rel_exp.left_simple_expression is TPIC18x_VariableAccessPrimary)
+               and
+               (rel_exp.right_simple_expression.contains_constant)
+               and
+               (rel_exp.relop <> relop_in)
+            then
+               begin
+                  access := TPIC18x_Access (TPIC18x_VariableAccessPrimary (rel_exp.left_simple_expression).access);
+                  if can_be_evaluated_with_simple_bit_test (access) then
+                     case rel_exp.right_simple_expression.constant.AsOrdinal of
+                        0: case rel_exp.relop of
+                              relop_equals,
+                              relop_le:
+                                 begin
+                                    generate_bit_test_skip_code (access, not skip_sense);
+                                    exit
+                                 end;
+                              relop_notequals,
+                              relop_gt:
+                                 begin
+                                    generate_bit_test_skip_code (access, skip_sense);
+                                    exit
+                                 end;
+                              relop_lt,
+                              relop_ge:
+                                 assert (false);  // should have been optimized out
+                           else
+                              assert (false)
+                           end;
+
+                        1: case rel_exp.relop of
+                              relop_equals,
+                              relop_ge:
+                                 begin
+                                    generate_bit_test_skip_code (access, skip_sense);
+                                    exit
+                                 end;
+                              relop_notequals,
+                              relop_lt:
+                                 begin
+                                    generate_bit_test_skip_code (access, not skip_sense);
+                                    exit
+                                 end;
+                              relop_le,
+                              relop_gt:
+                                 assert (false);  // should have been optimized out
+                           else
+                              assert (false)
+                           end;
+                     else
+                        assert (false)
+                     end
+               end;
+
+            if (rel_exp.right_simple_expression is TPIC18x_VariableAccessPrimary)
+               and
+               (rel_exp.left_simple_expression.contains_constant)
+               and
+               (rel_exp.relop <> relop_in)
+            then
+               begin
+                  access := TPIC18x_Access (TPIC18x_VariableAccessPrimary (rel_exp.right_simple_expression).access);
+                  if can_be_evaluated_with_simple_bit_test (access) then
+                     case rel_exp.left_simple_expression.constant.AsOrdinal of
+                        0: case rel_exp.relop of
+                              relop_equals,
+                              relop_ge:
+                                 begin
+                                    generate_bit_test_skip_code (access, not skip_sense);
+                                    exit
+                                 end;
+                              relop_notequals,
+                              relop_lt:
+                                 begin
+                                    generate_bit_test_skip_code (access, skip_sense);
+                                    exit
+                                 end;
+                              relop_gt,
+                              relop_le:
+                                 assert (false);  // should have been optimized out
+                           else
+                              assert (false)
+                           end;
+
+                        1: case rel_exp.relop of
+                              relop_equals,
+                              relop_le:
+                                 begin
+                                    generate_bit_test_skip_code (access, skip_sense);
+                                    exit
+                                 end;
+                              relop_notequals,
+                              relop_gt:
+                                 begin
+                                    generate_bit_test_skip_code (access, not skip_sense);
+                                    exit
+                                 end;
+                              relop_lt,
+                              relop_ge:
+                                 assert (false);  // should have been optimized out
+                           else
+                              assert (false)
+                           end;
+                     else
+                        assert (false)
+                     end
+               end
+         end;
+
+      // if no exit by now, then full evaluation required
+      boolean_expression.Generate (GenerateCode, 1);
+      gen_skip_instruction (skip_sense, PREINC2, 0, access_mode);
       StackUsageCounter.Pop(1)
+   end;
+
+//==========================
+//  TPIC18x_AssertStatement
+
+function TPIC18x_AssertStatement.Generate (param1, param2: integer): integer;
+   var
+      lbl: TInstruction;
+   begin
+      result := 0;  // to suppress compiler warning
+      case param1 of
+         GenerateCode:
+            begin
+               TSourceSyncPoint.Create (end_src_loc);
+               if boolean_expression.contains_constant then
+                  case boolean_expression.boolean_constant_value of
+                     true:
+                        {do nothing};
+                     false:
+                        begin
+                           set_errorcode_routine.Call;
+                           lbl := TAssemblyLabel.Create;
+                           lbl.annotation := '';
+                           RecordRunTimeErrorLocation (lbl, 'assertion failed: ' + assertion_message, src_loc)
+                        end
+                  end
+               else
+                  begin
+                     GenerateCodeForConditionalSkip (boolean_expression, true);
+                     set_errorcode_routine.Call;
+                     lbl := TAssemblyLabel.Create;
+                     lbl.annotation := '';
+                     RecordRunTimeErrorLocation (lbl, 'assertion failed: ' + assertion_message, src_loc)
+                  end;
+            end;
+      else
+         assert (false, 'TPIC18x_AssertStatement.Generate(' + IntToStr(param1) + ') not implemented')
+      end
    end;
 
 function TPIC18x_CaseStatement.TPIC18x_CaseEntry.GenerateCode: TInstruction;

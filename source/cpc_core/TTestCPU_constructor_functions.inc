@@ -13,6 +13,11 @@ function TTestCPU.TAccess_CreateFromVariable (v: TVariable): TAccess;
       result := TAccess.CreateFromVariable (v)
    end;
 
+function TTestCPU.TAssertStatement_CreateFromSourceTokens: TAssertStatement;
+   begin
+      result := TAssertStatement.CreateFromSourceTokens
+   end;
+
 function TTestCPU.TAssignmentStatement_CreateFromSourceTokens (acc: TAccess): TAssignmentStatement;
    begin
       result := TAssignmentStatement.CreateFromSourceTokens (acc)

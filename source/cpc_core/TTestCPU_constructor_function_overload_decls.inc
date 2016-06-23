@@ -6,6 +6,8 @@
             override;
          function TAssignmentStatement_CreateFromSourceTokens (acc: TAccess): TAssignmentStatement;
             override;
+         function TAssertStatement_CreateFromSourceTokens: TAssertStatement;
+            override;
          function TAwaitInterruptStatement_CreateFromSourceTokens: TAwaitInterruptStatement;
             override;
          function TCaseStatement_CreateFromSourceTokens: TCaseStatement;

@@ -104,6 +104,8 @@ type
             override;
          function TAccess_CreateFromVariable (v: TVariable): TAccess;
             override;
+         function TAssertStatement_CreateFromSourceTokens: TAssertStatement;
+            override;
          function TAssignmentStatement_CreateFromSourceTokens (acc: TAccess): TAssignmentStatement;
             override;
          function TAwaitInterruptStatement_CreateFromSourceTokens: TAwaitInterruptStatement;
@@ -508,6 +510,11 @@ function TPIC18x_CPU.TAccess_CreateFromSourceTokens: TAccess;
 function TPIC18x_CPU.TAccess_CreateFromVariable (v: TVariable): TAccess;
    begin
       result := TPIC18x_Access.CreateFromVariable (v)
+   end;
+
+function TPIC18x_CPU.TAssertStatement_CreateFromSourceTokens: TAssertStatement;
+   begin
+      result := TPIC18x_AssertStatement.CreateFromSourceTokens
    end;
 
 function TPIC18x_CPU.TAssignmentStatement_CreateFromSourceTokens (acc: TAccess): TAssignmentStatement;

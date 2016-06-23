@@ -8,6 +8,8 @@
             virtual; abstract;
          function TAwaitInterruptStatement_CreateFromSourceTokens: TAwaitInterruptStatement;
             virtual; abstract;
+         function TAssertStatement_CreateFromSourceTokens: TAssertStatement;
+            virtual; abstract;
          function TCaseStatement_CreateFromSourceTokens: TCaseStatement;
             virtual; abstract;
          function TChrTypeConversionPrimary_CreateFromSourceTokens: TChrTypeConversionPrimary;
