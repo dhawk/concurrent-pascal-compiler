@@ -520,8 +520,6 @@ procedure GenerateCodeForConditionalSkip (boolean_expression: TExpression; skip_
 //  TPIC18x_AssertStatement
 
 function TPIC18x_AssertStatement.Generate (param1, param2: integer): integer;
-   var
-      lbl: TInstruction;
    begin
       result := 0;  // to suppress compiler warning
       case param1 of
@@ -535,18 +533,14 @@ function TPIC18x_AssertStatement.Generate (param1, param2: integer): integer;
                      false:
                         begin
                            set_errorcode_routine.Call;
-                           lbl := TAssemblyLabel.Create;
-                           lbl.annotation := '';
-                           RecordRunTimeErrorLocation (lbl, 'assertion failed: ' + assertion_message, src_loc)
+                           RecordRunTimeErrorLocation (TAssemblyLabel.Create, 'assertion failed: ' + assertion_message, src_loc)
                         end
                   end
                else
                   begin
                      GenerateCodeForConditionalSkip (boolean_expression, true);
                      set_errorcode_routine.Call;
-                     lbl := TAssemblyLabel.Create;
-                     lbl.annotation := '';
-                     RecordRunTimeErrorLocation (lbl, 'assertion failed: ' + assertion_message, src_loc)
+                     RecordRunTimeErrorLocation (TAssemblyLabel.Create, 'assertion failed: ' + assertion_message, src_loc)
                   end;
             end;
       else
@@ -1480,28 +1474,8 @@ constructor TPIC18x_RoutineCallStatement.CreateFromSourceTokens (acc: TAccess);
    begin
       inherited Create(routine_call_statement);
       access := acc;
-      if (access.node_routine = TPIC18x_CPU(target_cpu).SetError) then
-         begin  // do parsing for non-standard parameter list.
-                // msg is a constant string not placed in code, only in error file
-            if not lex.token_is_symbol(sym_left_parenthesis) then
-               raise compile_error.Create(err_left_parenthesis_expected);
-            lex.advance_token;
-
-            cexpr := TCExpression.CreateFromSourceTokens;
-            try
-               if cexpr.constant_kind <> string_constant then
-                  raise compile_error.Create (err_string_expected, cexpr.src_loc);
-               error_message := cexpr.s
-            finally
-               cexpr.Release
-            end;
-
-            if not lex.token_is_symbol(sym_right_parenthesis) then
-               raise compile_error.Create(err_right_parenthesis_expected);
-            lex.advance_token
-         end
       {$ifdef INCLUDE_SIMULATION}
-      else if(access.node_routine = TPIC18x_CPU(target_cpu).Test) then
+      if(access.node_routine = TPIC18x_CPU(target_cpu).Test) then
          begin  // do parsing for non-standard parameter list.
                 // msg is a constant string not placed in code, only in error file
             if not lex.token_is_symbol(sym_left_parenthesis) then
@@ -1534,8 +1508,8 @@ constructor TPIC18x_RoutineCallStatement.CreateFromSourceTokens (acc: TAccess);
                raise compile_error.Create(err_right_parenthesis_expected);
             lex.advance_token
          end
-      {$endif}
       else
+      {$endif}
          inherited
    end;
 
@@ -1861,11 +1835,6 @@ function TPIC18x_RoutineCallStatement.Generate (param1, param2: integer): intege
                   generate_strappend_code
                else if access.node_routine = TPIC18x_CPU(target_cpu).ClearWatchdogTimer then
                   TPIC18x_CLRWDT.Create
-               else if access.node_routine = TPIC18x_CPU(target_cpu).SetError then
-                  begin
-                     set_errorcode_routine.call;
-                     RecordRunTimeErrorLocation (TAssemblyLabel.Create, error_message, src_loc)
-                  end
                else if reset_TMR_cycle_procedure_idx > -1 then
                   generate_reset_TMR_cycle_code
                {$ifdef INCLUDE_SIMULATION}

@@ -42,7 +42,6 @@ type
          procedure append_config_byte (b: byte; byte_no: integer; path, value: string; initialization_unnecessary: boolean);
       public
          ClearWatchdogTimer: TRoutine;
-         SetError: TRoutine;
          ErrorCode: TRoutine;
          Round24, Round32: TRoutine;
          Trunc24, Trunc32: TRoutine;
@@ -314,7 +313,6 @@ function TPIC18x_CPU.preamble: TStringList;
    begin
       result := TStringList.Create;
       result.Add ('procedure ClearWatchdogTimer;');
-      result.Add ('procedure SetError;');
       result.Add ('function ErrorCode: uint24;');
       result.Add ('function Round24 (r: real): int24;');
       result.Add ('function Round32 (r: real): int32;');
@@ -331,8 +329,6 @@ procedure TPIC18x_CPU.process_preamble;
    begin
       ClearWatchdogTimer := TRoutine (CurrentDefinitionTable.GetDefinitionForIdentifier ('ClearWatchdogTimer', true));
       ClearWatchdogTimer.AddRef;
-      SetError := TRoutine (CurrentDefinitionTable.GetDefinitionForIdentifier ('SetError', true));
-      SetError.AddRef;
       ErrorCode := TRoutine (CurrentDefinitionTable.GetDefinitionForIdentifier ('ErrorCode', true));
       ErrorCode.AddRef;
       Round24 := TRoutine (CurrentDefinitionTable.GetDefinitionForIdentifier ('Round24', true));
@@ -362,8 +358,6 @@ procedure TPIC18x_CPU.release_preamble;
    begin
       ClearWatchdogTimer.Release;
       ClearWatchdogTimer := nil;
-      SetError.Release;
-      SetError := nil;
       ErrorCode.Release;
       ErrorCode := nil;
       Round24.Release;
