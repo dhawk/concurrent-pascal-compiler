@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <ComboTypes>
-   <ComboType TypeName="tAD" VarNameFormatString="AD" Reversed="false">
+   <ComboType TypeName="tAD" VarNameFormatString="AD" Reversed="true">
          <SFRPattern>
             <SFR regex="^ADCON2$"/>
             <SFR regex="^ADCON1$"/>

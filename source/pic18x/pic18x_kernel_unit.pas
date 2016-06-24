@@ -844,7 +844,7 @@ procedure generate_dispatch_code;
          end;
       TPIC18x_BRA.Create.dest := lbl;    // this is only needed for the MPLAB simulator which steps out of SLEEP
 {$else}
-      if prog.FinalStatementIsEmptyLoopStatement then
+      if prog.FinalStatementIsEmptyCycleStatement then
          begin
             TSourceLine.Create ('         goto *');
             lbl := TPIC18x_BRA.Create;

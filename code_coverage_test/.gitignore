@@ -1,3 +1,4 @@
-results/
+core_results/
+pic18x_results/
 *.log
 *.exe
