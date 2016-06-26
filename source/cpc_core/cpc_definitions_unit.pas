@@ -88,9 +88,7 @@ type
          function get_current_definition: TDefinition;
          function get_global_definition: TDefinition;
          function is_defined_in_current_scope (defining_scope: integer): boolean;
-         procedure leave_scope
-            (current_scope: integer
-            );
+         procedure leave_scope (current_scope: integer);
          procedure ReleaseDefinitions;
       private
          stk:
@@ -318,7 +316,7 @@ function TCurrentDefinitionTable.GetDefinitionForIdentifier (id: string; should_
       for i := 0 to Length(lex.identifiers)-1 do
          if (LowerCase (id) = LowerCase (lex.identifiers[i]))
             and
-            (true   )
+            (true)
          then
             begin
                result := Self[i];
@@ -373,7 +371,10 @@ procedure TDefStack.define
       idx: integer;
    begin
       idx := Length(stk);
-      if (idx > 0) and (stk[idx - 1].defining_scope = defining_scope) then
+      if (idx > 0)
+         and
+         (stk[idx - 1].defining_scope = defining_scope)
+      then
          raise compile_error.Create(err_identifier_already_defined, def_src_loc);
       SetLength(stk, idx + 1);
       stk[idx].definition := definition;
@@ -386,7 +387,10 @@ function TDefStack.is_defined_in_current_scope (defining_scope: integer): boolea
       idx: integer;
    begin
       idx := Length(stk);
-      if (idx > 0) and (stk[idx - 1].defining_scope = defining_scope) then
+      if (idx > 0)
+         and
+         (stk[idx-1].defining_scope = defining_scope)
+      then
          result := true
       else
          result := false
@@ -430,7 +434,10 @@ procedure TDefStack.leave_scope
       idx: integer;
    begin
       idx := Length(stk) - 1;
-      if (idx >= 0) and (stk[idx].defining_scope = current_scope) then
+      if (idx >= 0)
+         and
+         (stk[idx].defining_scope = current_scope)
+      then
          begin
             stk[idx].definition.Release;
             SetLength(stk, idx)

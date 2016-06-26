@@ -470,6 +470,34 @@ constructor TParamList.CreateFromSourceTokens
          lex.advance_token
       end;
 
+   function CreateParamTypeDenoterFromSourceTokens: TTypeDef;
+      begin
+         if (lex.token_is_identifier)
+            and
+            (CurrentDefinitionTable[lex.token.identifier_idx].definition_kind = type_definition)
+         then
+            begin
+               result := TTypeDef(CurrentDefinitionTable[lex.token.identifier_idx]);
+               if not result.definition_complete then
+                  raise compile_error.Create(err_self_referential_type);
+               result.AddRef;
+               lex.advance_token
+            end
+         else // new definition
+            begin
+               if lex.token_is_reserved_word(rw_string) then
+                  result := TStringType.CreateFromSourceTokens
+               else
+                  try
+                     result := TSubRangeType.CreateFromSourceTokens
+                  except
+                     on e: EDefinitelyNotASubRange do
+                        raise compile_error.Create(err_type_definition_expected, e.src_loc)
+                  end
+            end;
+         assert(result.IsTypeDefinition)
+      end;
+
    var
       i: integer;
       typedef: TTypeDef;
@@ -554,7 +582,7 @@ constructor TParamList.CreateFromSourceTokens
                lex.advance_token;
 
                typedef_src_loc := lex.token.src_loc;
-               typedef := CreateTypeDenoterFromSourceTokens;
+               typedef := CreateParamTypeDenoterFromSourceTokens;
                try
                   if (typedef.type_kind = system_type) and (param_descriptor <> rw_const) then
                      raise compile_error.Create(err_system_type_parameter_must_be_constant_parameter, typedef_src_loc);
@@ -1593,7 +1621,7 @@ constructor TSystemType.CreateFromSourceTokens;
    var
       prop: TProperty;
       routine: TRoutine;
-      i: integer;
+      i, j: integer;
       priority_value: TCExpression;
       public_section_found: boolean;
    begin
@@ -1809,7 +1837,13 @@ constructor TSystemType.CreateFromSourceTokens;
          AddSelfToCodeBlockList   // code part
       finally
          CurrentDefinitionTable.ExitScope;
-         BlockStack.pop
+         BlockStack.pop;
+
+//         for i := 0 to Length(routines)-1 do
+//            if routines[i].entry then
+//               for j := 0 to Length(routines[i].parameter_definitions)-1 do
+//                  if routines[i].parameter_definitions[j].typedef.
+
       end;
 
       MarkTypeDefinitionAsComplete
