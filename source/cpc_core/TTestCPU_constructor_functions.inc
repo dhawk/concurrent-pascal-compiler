@@ -123,9 +123,9 @@ function TTestCPU.TNotPrimary_CreateFromSourceTokens: TNotPrimary;
       result := TNotPrimary.CreateFromSourceTokens
    end;
 
-function TTestCPU.TParamList_CreateFromSourceTokens (context: TParamListContext): TParamList;
+function TTestCPU.TParamList_CreateFromSourceTokens (context: TParamListContext; max_scope: integer): TParamList;
    begin
-      result := TParamList.CreateFromSourceTokens (context)
+      result := TParamList.CreateFromSourceTokens (context, max_scope)
    end;
 
 function TTestCPU.TParamList_CreatePropertyPseudoParamList (property_id: TIdentifierIdx; property_id_src_loc: TSourceLocation; property_typdef: TTypeDef): TParamList;

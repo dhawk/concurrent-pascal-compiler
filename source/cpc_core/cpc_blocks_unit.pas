@@ -39,7 +39,8 @@ type
          property default_anonymous[idx: integer]: TVariable read get_definition write set_definition; default;
          property Length: integer read get_length write set_length;
          constructor CreateFromSourceTokens
-            (context: TParamListContext
+            (context: TParamListContext;
+             max_scope: integer
             );
          constructor CreatePropertyPseudoParamList
             (property_id_idx: TIdentifierIdx;
@@ -171,6 +172,7 @@ type
       class(TTypeDef)
          system_type_kind: TSystemTypeKind;
          parameters: TParamList;
+         initial_scope: integer;
          priority: integer; // meaningful for processes, monitors and interrupts, but not classes
          interrupt_process: boolean;
          interrupt_base_type: TDefinition;
@@ -449,7 +451,8 @@ procedure process_rom_constant_definition_part;
 //  TParamList
 
 constructor TParamList.CreateFromSourceTokens
-   (context: TParamListContext
+   (context: TParamListContext;
+    max_scope: integer
    );
    var
       var_count: integer;
@@ -470,8 +473,64 @@ constructor TParamList.CreateFromSourceTokens
          lex.advance_token
       end;
 
-   function CreateParamTypeDenoterFromSourceTokens: TTypeDef;
-      begin
+   function CreateParamTypeDenoterFromSourceTokens (param_descriptor: TVariableDescriptor): TTypeDef;
+
+      function typedef_accessible_by_public_routine_caller (typedef: TTypeDef): boolean;
+         begin   // typedef_accessible_by_public_routine_caller
+            result := true;   // set result for typedef.defining_scope < max_scope
+            if typedef.defining_scope >= max_scope then
+               case typedef.type_kind of
+                  basic_data_type:
+                     case TBasicDataType(typedef).basic_data_type_kind of
+                        ordinal_data_type:
+                           case TOrdinalDataType(typedef).ordinal_kind of
+                              empty_set_ordinal_base_unknown,
+                              ordinal_base_is_integer,
+                              ordinal_base_is_char,
+                              ordinal_base_is_bool:
+                                 result := true;
+                              ordinal_base_is_enum:
+                                 result := TOrdinalDataType(typedef).enum_typedef.defining_scope < max_scope;
+                           else
+                              assert (false)
+                           end;
+                        floating_point_data_type:
+                           result := true;
+                     else
+                        assert (false)
+                     end;
+                  set_type:
+                     case TSetType(typedef).ordinal_kind of
+                        empty_set_ordinal_base_unknown,
+                        ordinal_base_is_integer,
+                        ordinal_base_is_char,
+                        ordinal_base_is_bool:
+                           result := true;
+                        ordinal_base_is_enum:
+                           result := TSetType(typedef).enum_typedef.defining_scope < max_scope;
+                     else
+                        assert (false)
+                     end;
+                  string_type:
+                     result := true;
+                  array_type,
+                  queue_type,
+                  record_type,
+                  system_type,
+                  packed_record_type,
+                  incomplete_type,
+                  overlay_type:
+                     result := false;
+               else
+                  assert (false)
+               end
+         end;    // typedef_accessible_by_public_routine_caller
+
+      var
+         src_loc: TSourceLocation;
+      begin    // CreateParamTypeDenoterFromSourceTokens
+         src_loc := lex.token.src_loc;
+         result := nil;  // suppress compiler warning
          if (lex.token_is_identifier)
             and
             (CurrentDefinitionTable[lex.token.identifier_idx].definition_kind = type_definition)
@@ -480,23 +539,102 @@ constructor TParamList.CreateFromSourceTokens
                result := TTypeDef(CurrentDefinitionTable[lex.token.identifier_idx]);
                if not result.definition_complete then
                   raise compile_error.Create(err_self_referential_type);
+               if not typedef_accessible_by_public_routine_caller(result) then
+                  raise compile_error.Create (err_local_type_not_accessible_to_caller_of_public_routine, src_loc);
                result.AddRef;
                lex.advance_token
             end
-         else // new definition
+         else // new anonymous type definition
             begin
                if lex.token_is_reserved_word(rw_string) then
-                  result := TStringType.CreateFromSourceTokens
+                  case param_descriptor of
+                     rw_const:
+                        result := TStringType.CreateFromSourceTokens;
+                     rw_eeprom,
+                     rw_rom,
+                     rw_var:
+                        begin
+                           result := TStringType.Create (-1);
+                           lex.advance_token;
+                           if lex.token_is_symbol (sym_left_bracket) then
+                              begin
+                                 result.Release;
+                                 case param_descriptor of
+                                    rw_eeprom:
+                                       raise compile_error.Create (err_string_dimension_not_allowed_for_eeprom_string_parameter);
+                                    rw_rom:
+                                       raise compile_error.Create (err_string_dimension_not_allowed_for_rom_string_parameter);
+                                    rw_var:
+                                       raise compile_error.Create (err_string_dimension_not_allowed_for_var_string_parameter);
+                                 else
+                                    assert (false)
+                                 end
+                              end
+                        end;
+                     rw_ioreg:
+                        result := TStringType.Create (-1);  // will generate a "packed record or overlay type expected" compile error later
+                  else
+                     assert (false)
+                  end
+               else if lex.token_is_reserved_word(rw_set) then
+                  case param_descriptor of
+                     rw_const:
+                        begin
+                           result := TSetType.CreateFromSourceTokens;
+                           if (TSetType(result).ordinal_kind = ordinal_base_is_enum)
+                              and
+                              (not typedef_accessible_by_public_routine_caller(TSetType(result).enum_typedef))
+                           then
+                              begin
+                                 result.Release;
+                                 raise compile_error.Create (err_local_type_not_accessible_to_caller_of_public_routine, src_loc);
+                              end
+                        end;
+                     rw_eeprom,
+                     rw_rom,
+                     rw_var:
+                        raise compile_error.Create (err_anonymous_type_can_only_be_a_constant_parameter);
+                     rw_ioreg:
+                        result := TStringType.Create (-1);  // throw-away type, will generate a "packed record or overlay type expected" compile error later
+                  else
+                     assert (false)
+                  end
                else
-                  try
-                     result := TSubRangeType.CreateFromSourceTokens
-                  except
-                     on e: EDefinitelyNotASubRange do
-                        raise compile_error.Create(err_type_definition_expected, e.src_loc)
+                  begin
+                     try
+                        result := TSubRangeType.CreateFromSourceTokens;
+                     except
+                        on e: EDefinitelyNotASubRange do
+                           raise compile_error.Create(err_type_definition_expected, e.src_loc)
+                     end;
+                     try
+                        case param_descriptor of
+                           rw_const:
+                              if (TSubRangeType(result).ordinal_kind = ordinal_base_is_enum)
+                                 and
+                                 (not typedef_accessible_by_public_routine_caller(TSubRangeType(result).enum_typedef))
+                              then
+                                 raise compile_error.Create (err_local_type_not_accessible_to_caller_of_public_routine, src_loc);
+                           rw_eeprom,
+                           rw_rom,
+                           rw_var:
+                              raise compile_error.Create (err_anonymous_type_can_only_be_a_constant_parameter, src_loc);
+                           rw_ioreg:
+                              ; // will generate a "packed record or overlay type expected" compile error later
+                        else
+                           assert (false)
+                        end
+                     except
+                        on e: compile_error do
+                           begin
+                              result.Release;
+                              raise
+                           end
+                     end
                   end
             end;
          assert(result.IsTypeDefinition)
-      end;
+      end;     // CreateParamTypeDenoterFromSourceTokens
 
    var
       i: integer;
@@ -582,7 +720,7 @@ constructor TParamList.CreateFromSourceTokens
                lex.advance_token;
 
                typedef_src_loc := lex.token.src_loc;
-               typedef := CreateParamTypeDenoterFromSourceTokens;
+               typedef := CreateParamTypeDenoterFromSourceTokens (param_descriptor);
                try
                   if (typedef.type_kind = system_type) and (param_descriptor <> rw_const) then
                      raise compile_error.Create(err_system_type_parameter_must_be_constant_parameter, typedef_src_loc);
@@ -1217,6 +1355,7 @@ constructor TRoutine.CreateFromSourceTokens
       typedef: TTypeDef;
       typedef_src_loc: TSourceLocation;
       parameter_context: TParamListContext;
+      max_scope: integer;
    begin
       inherited Create(routine_definition);
       context := cntxt;
@@ -1261,6 +1400,7 @@ constructor TRoutine.CreateFromSourceTokens
 
          // PARAMETER LIST
          parameter_context := process_local_routine_param_list;  // only to suppress warning
+         max_scope := maxint;
          if (context = nil) // test cases
             or
             (context.definition_kind = program_definition)
@@ -1280,7 +1420,8 @@ constructor TRoutine.CreateFromSourceTokens
                   if entry then
                      begin
                         routine_kind := monitor_entry_routine;
-                        parameter_context := monitor_entry_routine_param_list
+                        parameter_context := monitor_entry_routine_param_list;
+                        max_scope := TSystemType(context).initial_scope
                      end
                   else
                      begin
@@ -1291,7 +1432,8 @@ constructor TRoutine.CreateFromSourceTokens
                   if entry then
                      begin
                         routine_kind := class_entry_routine;
-                        parameter_context := class_entry_routine_param_list
+                        parameter_context := class_entry_routine_param_list;
+                        max_scope := TSystemType(context).initial_scope
                      end
                   else
                      begin
@@ -1306,7 +1448,7 @@ constructor TRoutine.CreateFromSourceTokens
             else
                assert(false)
             end;
-         parameter_definitions := target_cpu.TParamList_CreateFromSourceTokens(parameter_context);
+         parameter_definitions := target_cpu.TParamList_CreateFromSourceTokens(parameter_context, max_scope);
 
          // FUNCTION RESULT
          if routine_type = function_routine then
@@ -1621,7 +1763,7 @@ constructor TSystemType.CreateFromSourceTokens;
    var
       prop: TProperty;
       routine: TRoutine;
-      i, j: integer;
+      i: integer;
       priority_value: TCExpression;
       public_section_found: boolean;
    begin
@@ -1632,6 +1774,8 @@ constructor TSystemType.CreateFromSourceTokens;
       priority := target_cpu.initial_process_priority;
 
       BlockStack.push(Self);
+      CurrentDefinitionTable.EnterNewScope;
+      initial_scope := CurrentDefinitionTable.current_scope;
 
       initial_statement := target_cpu.TStatementList_Create;
 
@@ -1650,8 +1794,6 @@ constructor TSystemType.CreateFromSourceTokens;
       end;
       lex.advance_token;
 
-      CurrentDefinitionTable.EnterNewScope;
-
       try
          permanent_ram_vars := target_cpu.TDataItemList_Create;
          if system_type_kind = interrupt_system_type then
@@ -1666,16 +1808,16 @@ constructor TSystemType.CreateFromSourceTokens;
 
          case system_type_kind of
             class_system_type:
-               parameters := target_cpu.TParamList_CreateFromSourceTokens(class_init_param_list);
+               parameters := target_cpu.TParamList_CreateFromSourceTokens(class_init_param_list, maxint);
             monitor_system_type:
-               parameters := target_cpu.TParamList_CreateFromSourceTokens(monitor_init_param_list);
+               parameters := target_cpu.TParamList_CreateFromSourceTokens(monitor_init_param_list, maxint);
             process_system_type:
-               parameters := target_cpu.TParamList_CreateFromSourceTokens(process_init_param_list);
+               parameters := target_cpu.TParamList_CreateFromSourceTokens(process_init_param_list, maxint);
             interrupt_system_type:
                begin
                   if lex.token_is_symbol (sym_left_parenthesis) then
                      raise compile_error.Create (err_paramters_for_interrupt_definition_not_allowed);
-                  parameters := target_cpu.TParamList_CreateFromSourceTokens(process_init_param_list)  // context irrelevent since parameter list not allowed
+                  parameters := target_cpu.TParamList_CreateFromSourceTokens(process_init_param_list, maxint)  // context irrelevent since parameter list not allowed
                end;
          else
             assert(false)
@@ -1837,13 +1979,7 @@ constructor TSystemType.CreateFromSourceTokens;
          AddSelfToCodeBlockList   // code part
       finally
          CurrentDefinitionTable.ExitScope;
-         BlockStack.pop;
-
-//         for i := 0 to Length(routines)-1 do
-//            if routines[i].entry then
-//               for j := 0 to Length(routines[i].parameter_definitions)-1 do
-//                  if routines[i].parameter_definitions[j].typedef.
-
+         BlockStack.pop
       end;
 
       MarkTypeDefinitionAsComplete

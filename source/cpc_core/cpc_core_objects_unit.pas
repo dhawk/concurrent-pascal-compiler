@@ -79,6 +79,7 @@ type
       public
          definition_complete: boolean;
          name: string;
+         defining_scope: integer;
          property type_kind: TTypeKind read f_type_kind write set_type_kind;
          constructor Create
             (kind: TTypeKind
@@ -747,7 +748,11 @@ constructor TTypeDef.Create
    );
    begin
       inherited Create(type_definition);
-      type_kind := kind
+      type_kind := kind;
+      if CurrentDefinitionTable = nil then
+         defining_scope := -1
+      else
+         defining_scope := CurrentDefinitionTable.current_scope
    end;
 
 function TTypeDef.info: TTypeInfo;

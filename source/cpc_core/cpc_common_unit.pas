@@ -96,6 +96,8 @@ const
    err_function_has_no_parameters = 'function has no parameters';
    err_function_result_must_be_simple_type = 'function result must be simple type';
    err_global_variable_not_accessible_here = 'global variable not accessible here';
+   err_local_type_not_accessible_to_caller_of_public_routine = 'local type not accessible to caller of public routine';
+   err_anonymous_type_can_only_be_a_constant_parameter = 'anonymous type can only be a constant parameter';
    err_greater_than_expected = '">" expected';
    err_identifier_already_defined = 'identifier already defined in this scope';
    err_identifier_expected = 'identifier expected';
@@ -306,6 +308,9 @@ const
    err_write_only_property = 'property is write-only ("get" not defined)';
    err_wrong_enum_type = 'wrong enum type';
    err_wrong_type = 'wrong type';
+   err_string_dimension_not_allowed_for_rom_string_parameter = 'string dimension not allowed for rom string parameter';
+   err_string_dimension_not_allowed_for_eeprom_string_parameter = 'string dimension not allowed for eeprom string parameter';
+   err_string_dimension_not_allowed_for_var_string_parameter = 'string dimension not allowed for var string parameter';
 
 type
    compile_error =

@@ -147,7 +147,7 @@ type
             override;
          function TNotPrimary_CreateFromSourceTokens: TNotPrimary;
             override;
-         function TParamList_CreateFromSourceTokens (context: TParamListContext): TParamList;
+         function TParamList_CreateFromSourceTokens (context: TParamListContext; max_scope: integer): TParamList;
             override;
          function TParamList_CreatePropertyPseudoParamList (property_id: TIdentifierIdx; property_id_src_loc: TSourceLocation; property_typdef: TTypeDef): TParamList;
             override;
@@ -615,9 +615,9 @@ function TPIC18x_CPU.TNotPrimary_CreateFromSourceTokens: TNotPrimary;
       result := TPIC18x_NotPrimary.CreateFromSourceTokens
    end;
 
-function TPIC18x_CPU.TParamList_CreateFromSourceTokens (context: TParamListContext): TParamList;
+function TPIC18x_CPU.TParamList_CreateFromSourceTokens (context: TParamListContext; max_scope: integer): TParamList;
    begin
-      result := TPIC18x_ParamList.CreateFromSourceTokens (context)
+      result := TPIC18x_ParamList.CreateFromSourceTokens (context, max_scope)
    end;
 
 function TPIC18x_CPU.TParamList_CreatePropertyPseudoParamList (property_id: TIdentifierIdx; property_id_src_loc: TSourceLocation; property_typdef: TTypeDef): TParamList;

@@ -114,12 +114,13 @@ type
             end;
       private var
          identifiers: array of TDefStack;  // index is TIdentifierIdx
-         next_scope, current_scope: integer;
+         next_scope: integer;
          scope_stack: TScopeStack;
          function get
             (i: TIdentifierIdx
             ): TDefinition;
       public
+         current_scope: integer;
          constructor Create;
          destructor Destroy;
             override;

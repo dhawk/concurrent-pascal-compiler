@@ -48,7 +48,7 @@
             override;
          function TNotPrimary_CreateFromSourceTokens: TNotPrimary;
             override;
-         function TParamList_CreateFromSourceTokens (context: TParamListContext): TParamList;
+         function TParamList_CreateFromSourceTokens (context: TParamListContext; max_scope: integer): TParamList;
             override;
          function TParamList_CreatePropertyPseudoParamList (property_id: TIdentifierIdx; property_id_src_loc: TSourceLocation; property_typdef: TTypeDef): TParamList;
             override;

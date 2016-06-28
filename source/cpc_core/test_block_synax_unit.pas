@@ -348,6 +348,60 @@ procedure test_global_var_access_rules;
                                     );
    end;
 
+procedure test_param_type_rules;
+   begin
+      display ('testing param type rules');
+      test_only_for_successful_compilation ('type tt=record i: int8 end; tc=class public procedure p (t: tt); begin end; begin end; begin end.');
+      test_compile_error_generation ('type tc=class type tt=record i: int8 end; public procedure p (t: tt);',
+                                     err_local_type_not_accessible_to_caller_of_public_routine,
+                                     'tt);');
+      test_only_for_successful_compilation ('procedure p (s: string[10]); begin end; begin end.');
+      test_compile_error_generation ('procedure p(var s: string[',
+                                     err_string_dimension_not_allowed_for_var_string_parameter,
+                                     '[');
+      test_compile_error_generation ('procedure p(rom s: string[',
+                                     err_string_dimension_not_allowed_for_rom_string_parameter,
+                                     '[');
+      test_compile_error_generation ('type tc=class procedure p (eeprom s: string[',
+                                     err_string_dimension_not_allowed_for_eeprom_string_parameter,
+                                     '[');
+      test_compile_error_generation ('procedure p (ioreg s: string',
+                                     err_packed_record_type_expected,
+                                     'string');
+      test_only_for_successful_compilation ('procedure p (s: set of 0..3); begin end; begin end.');
+      test_only_for_successful_compilation ('type te=(ea,eb,ec);tc=class public procedure p (s: set of te); begin end; begin end; begin end.');
+      test_compile_error_generation ('type tc=class type te=(ea,eb,ec); public procedure p (s: set of te); begin end; begin end; begin end.',
+                                     err_local_type_not_accessible_to_caller_of_public_routine,
+                                     'set of te');
+      test_compile_error_generation ('type te=(ea,eb,ec,ed);procedure p (var s: set of te); begin end;var ss: set of te;begin p (ss)end.',
+                                     err_anonymous_type_can_only_be_a_constant_parameter,
+                                     'set of te');
+      test_compile_error_generation ('type te=(ea,eb,ec,ed);procedure p (ioreg s: set of te); begin end;var ss: set of te;begin p (ss)end.',
+                                     err_packed_record_type_expected,
+                                     'set of te');
+      test_only_for_successful_compilation ('procedure p (i: 10..13); begin end; begin p(10) end.');
+      test_only_for_successful_compilation ('type te=(ea,eb,ec,ed,ee);procedure p (e: eb..ed); begin end; begin p(ec) end.');
+      test_compile_error_generation ('type te=(ea,eb,ec,ed,ee);procedure p (var e: eb..ed); begin end; begin p(ec) end.',
+                                     err_anonymous_type_can_only_be_a_constant_parameter,
+                                     'eb..ed);');
+      test_compile_error_generation ('type te=(ea,eb,ec,ed,ee);procedure p (ioreg e: eb..ed); begin end; begin p(ec) end.',
+                                     err_packed_record_type_expected,
+                                     'eb..ed);');
+      test_compile_error_generation ('procedure p (s: begin',
+                                     err_type_definition_expected,
+                                     'begin');
+      test_compile_error_generation ('type tc=class type te=(ea,eb,ec,ed); public procedure p(e: eb..ec); begin end; begin end; begin end.',
+                                     err_local_type_not_accessible_to_caller_of_public_routine,
+                                     'eb..ec); begin');
+      test_only_for_successful_compilation ('type te=(ea,eb,ec,ed); tc=class public procedure p(e: eb..ec); begin end; begin end; begin end.');
+      test_only_for_successful_compilation ('type tc=class type tr=real; public procedure p (r: tr); begin end; begin end; begin end.');
+      test_only_for_successful_compilation ('type tc=class type tc=char; public procedure p (c: tc); begin end; begin end; begin end.');
+      test_only_for_successful_compilation ('type tc=class type ts=string[10]; public procedure p (s: ts); begin end; begin end; begin end.');
+      test_only_for_successful_compilation ('type tc=class type ts=set of 5..10; public procedure p (s: ts); begin end; begin end; var c: tc; begin c.p([6]) end.');
+      test_only_for_successful_compilation ('type te=(ea,eb,ec,ed); tc=class type tee=eb..ec; public procedure p (e: set of tee); begin end; begin end; var c: tc; begin c.p([eb,ec]) end.');
+      test_only_for_successful_compilation ('type te=(ea,eb,ec,ed); tc=class type tee=set of eb..ec; public procedure p (e: tee); begin end; begin end; var c: tc; begin c.p([eb,ec]) end.');
+   end;
+
 procedure test_block_syntax_unit;
    begin
       display ('=========================');
@@ -362,6 +416,7 @@ procedure test_block_syntax_unit;
       test_TIORegisterList;
       test_interrupt;
       test_global_var_access_rules;
+      test_param_type_rules;
       display('')
    end;
 

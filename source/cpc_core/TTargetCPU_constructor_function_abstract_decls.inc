@@ -48,7 +48,7 @@
             virtual; abstract;
          function TNotPrimary_CreateFromSourceTokens: TNotPrimary;
             virtual; abstract;
-         function TParamList_CreateFromSourceTokens (context: TParamListContext): TParamList;
+         function TParamList_CreateFromSourceTokens (context: TParamListContext; max_scope: integer): TParamList;
             virtual; abstract;
          function TParamList_CreatePropertyPseudoParamList (property_id: TIdentifierIdx; property_id_src_loc: TSourceLocation; property_typdef: TTypeDef): TParamList;
             virtual; abstract;
