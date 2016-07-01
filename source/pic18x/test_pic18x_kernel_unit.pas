@@ -29,7 +29,7 @@ IMPLEMENTATIOn
 uses
   pic18x_kernel_unit, pic18x_blocks_unit, cpc_blocks_unit, SysUtils,
   pic18x_core_objects_unit, cpc_core_objects_unit, test_pic18x_simulator_unit,
-  test_pic18x_compiler_main_form_unit;
+  test_pic18x_compiler_main_form_unit, cpc_common_unit;
 
 procedure construct_kernel_test (nop: TPIC18x_NOP; tokens: TStringList);
 

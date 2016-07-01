@@ -4,6 +4,8 @@
             override;
          function TAccess_CreateFromVariable (v: TVariable): TAccess;
             override;
+         function TAssertStatement_CreateFromSourceTokens: TAssertStatement;
+            override;
          function TAssignmentStatement_CreateFromSourceTokens (acc: TAccess): TAssignmentStatement;
             override;
          function TAwaitInterruptStatement_CreateFromSourceTokens: TAwaitInterruptStatement;
@@ -23,6 +25,10 @@
          function TConstantPrimary_CreateFromStructuredConstantAccess (acc: TAccess): TConstantPrimary;
             override;
          function TContinueStatement_CreateFromSourceTokens: TContinueStatement;
+            override;
+         function TCycleStatement_CreateFromSourceTokens: TCycleStatement;
+            override;
+         function TReCycleStatement_CreateFromSourceTokens: TReCycleStatement;
             override;
          function TDataItemList_Create: TDataItemList;
             override;
@@ -44,7 +50,7 @@
             override;
          function TNotPrimary_CreateFromSourceTokens: TNotPrimary;
             override;
-         function TParamList_CreateFromSourceTokens (context: TParamListContext): TParamList;
+         function TParamList_CreateFromSourceTokens (context: TParamListContext; max_scope: integer): TParamList;
             override;
          function TParamList_CreatePropertyPseudoParamList (property_id: TIdentifierIdx; property_id_src_loc: TSourceLocation; property_typdef: TTypeDef): TParamList;
             override;
@@ -52,7 +58,7 @@
             override;
          function TProgram_CreateFromSourceTokens: TProgram;
             override;
-         function TProperty_CreateFromSourceTokens (cntxt: TDefinition): TProperty;
+         function TProperty_CreateFromSourceTokens (cntxt: TDefinition; entry_property: boolean): TProperty;
             override;
          function TRelationalExpression_CreateFromSourceTokens: TRelationalExpression;
             override;
@@ -60,7 +66,7 @@
             override;
          function TRoundFunctionPrimary_CreateFromSourceTokens: TRoundFunctionPrimary;
             override;
-         function TRoutine_CreateFromSourceTokens (cntxt: TDefinition): TRoutine;
+         function TRoutine_CreateFromSourceTokens (cntxt: TDefinition; entry_routine: boolean): TRoutine;
             override;
          function TRoutine_CreatePropertyGetterFromSourceTokens (cntxt: TDefinition; entre: boolean; property_id: TIdentifierIdx; property_id_src_loc: TSourceLocation; property_typdef: TTypeDef): TRoutine;
             override;

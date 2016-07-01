@@ -99,7 +99,7 @@ function TPIC18x_Variable.get_addr: integer;
       if is_anonymous_rom_string then
          result := TPIC18x_CPU(target_cpu).anonymous_string_constant_rom_addr (anonymous_rom_string)
       else
-         result := inherited
+         result := inherited get_addr
    end;
 
 function TPIC18x_TypeInfo.calculate_ordinal_size: integer;

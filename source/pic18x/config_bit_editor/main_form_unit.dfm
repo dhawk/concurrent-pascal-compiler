@@ -28,6 +28,10 @@ object MainForm: TMainForm
     TabOrder = 0
     object Main: TTabSheet
       Caption = 'Main'
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         1004
         448)

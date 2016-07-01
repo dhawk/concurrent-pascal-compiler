@@ -23,15 +23,11 @@ object MainForm: TMainForm
     Top = 8
     Width = 1180
     Height = 745
-    ActivePage = TabSheet4
+    ActivePage = TabSheet3
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 0
     object TabSheet1: TTabSheet
       Caption = 'Source'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         1172
         717)
@@ -135,23 +131,10 @@ object MainForm: TMainForm
         TabOrder = 7
         OnClick = SrcToClipboardButtonClick
       end
-      object Button1: TButton
-        Left = 320
-        Top = 688
-        Width = 75
-        Height = 25
-        Caption = 'Button1'
-        TabOrder = 8
-        OnClick = Button1Click
-      end
     end
     object TabSheet2: TTabSheet
       Caption = 'Assembly'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         1172
         717)
@@ -175,10 +158,6 @@ object MainForm: TMainForm
     object TabSheet3: TTabSheet
       Caption = 'Trace'
       ImageIndex = 4
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Label2: TLabel
         Left = 27
         Top = 27

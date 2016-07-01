@@ -411,7 +411,6 @@ function generate_multiply (result_size: integer; a_info, b_info: TIntegerInfo):
 //   ;
 
 procedure generate_negation_code (addr, size: integer);
-   overload;
    var
       i: integer;
    begin
@@ -430,8 +429,7 @@ procedure generate_negation_code (addr, size: integer);
          end
    end;
 
-procedure generate_negation_code (addr: array of integer; size: integer);
-   overload;
+procedure generate_negation_code_arr (addr: array of integer; size: integer);
    var
       i: integer;
    begin
@@ -845,7 +843,7 @@ function generate_remainder (abits, bbits: integer; result_size: integer): TInst
                      end
                   else
                      TPIC18x_BTFSC.Create (b_addr[0], 7, access_mode);  // it will only be 1 instr
-                  generate_negation_code (b_addr, b_size);
+                  generate_negation_code_arr (b_addr, b_size);
                   if bra <> nil then
                      bra.dest := TAssemblyLabel.Create
                end;

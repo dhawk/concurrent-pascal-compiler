@@ -1,5 +1,9 @@
 program cpc_pic18x;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 {$APPTYPE CONSOLE}
 
 {$R *.res}
@@ -46,7 +50,8 @@ uses
    pic18x_statements_unit in 'pic18x_statements_unit.pas',
    pic18x_string_unit in 'pic18x_string_unit.pas',
    pic18x_term_expression_unit in 'pic18x_term_expression_unit.pas',
-   pic18x_types_unit in 'pic18x_types_unit.pas', System.Classes,
+   pic18x_types_unit in 'pic18x_types_unit.pas',
+   Classes,
    SysUtils;
 
 var
@@ -77,3 +82,4 @@ begin
          Writeln(E.ClassName, ': ', E.Message)
    end
 end.
+

@@ -1469,12 +1469,14 @@ function TPIC18x_ReCycleStatement.Generate (param1, param2: integer): integer;
    end;
 
 constructor TPIC18x_RoutineCallStatement.CreateFromSourceTokens (acc: TAccess);
+{$ifdef INCLUDE_SIMULATION}
    var
       cexpr: TCExpression;
+{$endif}
    begin
       inherited Create(routine_call_statement);
       access := acc;
-      {$ifdef INCLUDE_SIMULATION}
+{$ifdef INCLUDE_SIMULATION}
       if(access.node_routine = TPIC18x_CPU(target_cpu).Test) then
          begin  // do parsing for non-standard parameter list.
                 // msg is a constant string not placed in code, only in error file
@@ -1509,7 +1511,7 @@ constructor TPIC18x_RoutineCallStatement.CreateFromSourceTokens (acc: TAccess);
             lex.advance_token
          end
       else
-      {$endif}
+{$endif}
          inherited
    end;
 

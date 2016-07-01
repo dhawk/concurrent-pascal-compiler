@@ -15,7 +15,7 @@ uses
   SysUtils, Classes, Graphics,
 {$IFDEF FPC}
 {$ELSE}
-   Vcl.Imaging.GIFImg,
+   GIFImg,
 {$ENDIF}
    Forms, Controls, StdCtrls, Buttons, ExtCtrls, about_credit_frame_unit;
 

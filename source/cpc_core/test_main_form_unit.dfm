@@ -1,6 +1,6 @@
 object MainForm: TMainForm
-  Left = 0
-  Top = 0
+  Left = 149
+  Top = 219
   Caption = 'Concurrent Pascal Compiler Core Syntax Analysis Test'
   ClientHeight = 511
   ClientWidth = 1039
@@ -10,7 +10,7 @@ object MainForm: TMainForm
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
+  OldCreateOrder = True
   DesignSize = (
     1039
     511)
@@ -71,8 +71,8 @@ object MainForm: TMainForm
   object CheckBox2: TCheckBox
     Left = 904
     Top = 55
-    Width = 97
-    Height = 17
+    Width = 69
+    Height = 19
     Anchors = [akTop, akRight]
     Caption = 'Constants'
     TabOrder = 4
@@ -80,8 +80,8 @@ object MainForm: TMainForm
   object CheckBox3: TCheckBox
     Left = 904
     Top = 78
-    Width = 97
-    Height = 17
+    Width = 49
+    Height = 19
     Anchors = [akTop, akRight]
     Caption = 'Types'
     TabOrder = 5
@@ -89,8 +89,8 @@ object MainForm: TMainForm
   object CheckBox4: TCheckBox
     Left = 904
     Top = 101
-    Width = 97
-    Height = 17
+    Width = 43
+    Height = 19
     Anchors = [akTop, akRight]
     Caption = 'Data'
     TabOrder = 6
@@ -98,8 +98,8 @@ object MainForm: TMainForm
   object CheckBox5: TCheckBox
     Left = 904
     Top = 123
-    Width = 97
-    Height = 17
+    Width = 61
+    Height = 19
     Anchors = [akTop, akRight]
     Caption = 'MP Math'
     TabOrder = 7
@@ -107,8 +107,8 @@ object MainForm: TMainForm
   object CheckBox6: TCheckBox
     Left = 904
     Top = 146
-    Width = 97
-    Height = 17
+    Width = 75
+    Height = 19
     Anchors = [akTop, akRight]
     Caption = 'Statements'
     TabOrder = 8
@@ -116,68 +116,68 @@ object MainForm: TMainForm
   object CheckBox7: TCheckBox
     Left = 904
     Top = 169
-    Width = 97
-    Height = 17
+    Width = 60
+    Height = 19
     Anchors = [akTop, akRight]
     Caption = 'Program'
     TabOrder = 9
   end
   object CheckBox8: TCheckBox
-    Left = 906
+    Left = 904
     Top = 192
-    Width = 119
-    Height = 17
+    Width = 116
+    Height = 19
     Anchors = [akTop, akRight]
     Caption = 'Primary Expressions'
     TabOrder = 10
   end
   object CheckBox10: TCheckBox
-    Left = 906
+    Left = 904
     Top = 215
-    Width = 125
-    Height = 17
+    Width = 111
+    Height = 19
     Anchors = [akTop, akRight]
     Caption = 'Factor Expressions'
     TabOrder = 11
   end
   object CheckBox11: TCheckBox
-    Left = 906
+    Left = 904
     Top = 238
-    Width = 119
-    Height = 17
+    Width = 104
+    Height = 19
     Anchors = [akTop, akRight]
     Caption = 'Term Expressions'
     TabOrder = 12
   end
   object CheckBox12: TCheckBox
-    Left = 906
+    Left = 904
     Top = 261
-    Width = 125
-    Height = 17
+    Width = 110
+    Height = 19
     Anchors = [akTop, akRight]
     Caption = 'Simple Expressions'
     TabOrder = 13
   end
   object CheckBox13: TCheckBox
-    Left = 906
+    Left = 904
     Top = 284
-    Width = 125
-    Height = 17
+    Width = 127
+    Height = 19
     Anchors = [akTop, akRight]
     Caption = 'Relational Expressions'
     TabOrder = 14
   end
   object CheckBox9: TCheckBox
-    Left = 906
+    Left = 904
     Top = 307
-    Width = 97
-    Height = 17
+    Width = 53
+    Height = 19
     Anchors = [akTop, akRight]
     Caption = 'Access'
     TabOrder = 15
   end
   object SelectAllButton: TButton
-    Left = 904
+    Left = 906
     Top = 408
     Width = 65
     Height = 17
@@ -187,7 +187,7 @@ object MainForm: TMainForm
     OnClick = SelectAllButtonClick
   end
   object RunSelectedTestsButton: TButton
-    Left = 899
+    Left = 906
     Top = 448
     Width = 104
     Height = 25
@@ -197,10 +197,10 @@ object MainForm: TMainForm
     OnClick = RunSelectedTestsButtonClick
   end
   object CheckBox1: TCheckBox
-    Left = 906
+    Left = 904
     Top = 32
-    Width = 97
-    Height = 17
+    Width = 37
+    Height = 19
     Caption = 'Lex'
     TabOrder = 18
   end

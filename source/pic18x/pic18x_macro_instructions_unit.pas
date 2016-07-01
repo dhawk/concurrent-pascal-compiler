@@ -803,7 +803,7 @@ procedure TMOVLW_ROMAddr_B0.set_dest (d: TInstruction);
 function TMOVLW_ROMAddr_B0.hex_code: THexArray;
    begin
       set_destination;
-      inherited
+      inherited hex_code
    end;
 
 procedure TMOVLW_ROMAddr_B0.generate_assembly_code;
@@ -840,7 +840,7 @@ procedure TMOVLW_ROMAddr_B1.set_dest (d: TInstruction);
 function TMOVLW_ROMAddr_B1.hex_code: THexArray;
    begin
       set_destination;
-      inherited
+      inherited hex_code
    end;
 
 procedure TMOVLW_ROMAddr_B1.generate_assembly_code;
@@ -877,7 +877,7 @@ procedure TMOVLW_ROMAddr_B2.set_dest (d: TInstruction);
 function TMOVLW_ROMAddr_B2.hex_code: THexArray;
    begin
       set_destination;
-      inherited
+      inherited hex_code
    end;
 
 procedure TMOVLW_ROMAddr_B2.generate_assembly_code;
@@ -914,7 +914,7 @@ procedure TADDLW_ROMAddr_B0.set_dest (d: TInstruction);
 function TADDLW_ROMAddr_B0.hex_code: THexArray;
    begin
       set_destination;
-      inherited
+      inherited hex_code
    end;
 
 procedure TADDLW_ROMAddr_B0.generate_assembly_code;
@@ -951,7 +951,7 @@ procedure TADDLW_ROMAddr_B1.set_dest (d: TInstruction);
 function TADDLW_ROMAddr_B1.hex_code: THexArray;
    begin
       set_destination;
-      inherited
+      inherited hex_code
    end;
 
 procedure TADDLW_ROMAddr_B1.generate_assembly_code;
@@ -988,7 +988,7 @@ procedure TADDLW_ROMAddr_B2.set_dest (d: TInstruction);
 function TADDLW_ROMAddr_B2.hex_code: THexArray;
    begin
       set_destination;
-      inherited
+      inherited hex_code
    end;
 
 procedure TADDLW_ROMAddr_B2.generate_assembly_code;
@@ -1029,7 +1029,7 @@ procedure TPushLabelMacro.set_dest (d: TInstruction);
 function TPushLabelMacro.hex_code: THexArray;
    begin
       set_destination;
-      inherited
+      inherited hex_code
    end;
 
 procedure TPushLabelMacro.generate_assembly_code;
@@ -1060,7 +1060,8 @@ procedure TPushLabelMacro.exec;
 
 constructor TProgramCode.Create;
    begin
-      // do not call inherited Create - it will attempt to link self to ProgramCode.instr_arr
+      CreateNoLink;
+      assembly_source_code := TStringList.Create
    end;
 
 destructor TProgramCode.Destroy;
@@ -1070,7 +1071,8 @@ destructor TProgramCode.Destroy;
       for i := 0 to Length(DiscardedInstructions)-1 do
          DiscardedInstructions[i].Release;
       // do not call inherited Destroy
-      Clear
+      Clear;
+      assembly_source_code.Free
    end;
 
 procedure TProgramCode.DoPeepHoleOptimization;
@@ -1466,8 +1468,7 @@ function TProgramCode.LastInstruction: TInstruction;
 INITIALIZATION
    ProgramCode := TProgramCode.Create;
 
-
 FINALIZATION
-   ProgramCode.Free;   // use Free instead of Release here since constructor did not call TDefinition.Create
+   ProgramCode.Release;
 
 END.

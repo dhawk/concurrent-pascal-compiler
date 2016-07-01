@@ -130,6 +130,7 @@ function IntValue (s: string): integer;
 
 function BoolValue (s: string): boolean;
    begin
+      result := true;  // suppress compiler warning
       if Lowercase(s) = 'true' then
          result := true
       else if LowerCase(s) = 'false' then

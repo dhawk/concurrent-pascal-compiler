@@ -167,7 +167,7 @@ constructor TIndirect_FSR.Create (_name: string; _kind: TIndirect_FSR_Kind; _get
 procedure TIndirect_FSR.set_value (b: byte);
    begin
       if kind = plusw then
-         cpu.ram[integer(fsr_getfunc) + int8(cpu.w)] := b
+         cpu.ram[integer(fsr_getfunc) + ShortInt(cpu.w)] := b
       else
          cpu.ram[integer(fsr_getfunc)] := b
    end;
@@ -175,7 +175,7 @@ procedure TIndirect_FSR.set_value (b: byte);
 function TIndirect_FSR.get_value: byte;
    begin
       if kind = plusw then
-         result := cpu.ram[integer(fsr_getfunc) + int8(cpu.w)]
+         result := cpu.ram[integer(fsr_getfunc) + ShortInt(cpu.w)]
       else
          result := cpu.ram[integer(fsr_getfunc)]
    end;

@@ -13,9 +13,24 @@ function TDummyPIC18xCPU.TAccess_CreateFromVariable (v: TVariable): TAccess;
       result := TAccess.CreateFromVariable (v)
    end;
 
+function TDummyPIC18xCPU.TAssertStatement_CreateFromSourceTokens: TAssertStatement;
+   begin
+      result := TAssertStatement.CreateFromSourceTokens
+   end;
+
 function TDummyPIC18xCPU.TAssignmentStatement_CreateFromSourceTokens (acc: TAccess): TAssignmentStatement;
    begin
       result := TAssignmentStatement.CreateFromSourceTokens (acc)
+   end;
+
+function TDummyPIC18xCPU.TCycleStatement_CreateFromSourceTokens: TCycleStatement;
+   begin
+      result := TCycleStatement.CreateFromSourceTokens
+   end;
+
+function TDummyPIC18xCPU.TReCycleStatement_CreateFromSourceTokens: TReCycleStatement;
+   begin
+      result := TReCycleStatement.CreateFromSourceTokens
    end;
 
 function TDummyPIC18xCPU.TAwaitInterruptStatement_CreateFromSourceTokens: TAwaitInterruptStatement;
@@ -113,9 +128,9 @@ function TDummyPIC18xCPU.TNotPrimary_CreateFromSourceTokens: TNotPrimary;
       result := TNotPrimary.CreateFromSourceTokens
    end;
 
-function TDummyPIC18xCPU.TParamList_CreateFromSourceTokens (context: TParamListContext): TParamList;
+function TDummyPIC18xCPU.TParamList_CreateFromSourceTokens (context: TParamListContext; max_scope: integer): TParamList;
    begin
-      result := TParamList.CreateFromSourceTokens (context)
+      result := TParamList.CreateFromSourceTokens (context, max_scope)
    end;
 
 function TDummyPIC18xCPU.TParamList_CreatePropertyPseudoParamList (property_id: TIdentifierIdx; property_id_src_loc: TSourceLocation; property_typdef: TTypeDef): TParamList;
@@ -133,9 +148,9 @@ function TDummyPIC18xCPU.TProgram_CreateFromSourceTokens: TProgram;
       result := TProgram.CreateFromSourceTokens
    end;
 
-function TDummyPIC18xCPU.TProperty_CreateFromSourceTokens (cntxt: TDefinition): TProperty;
+function TDummyPIC18xCPU.TProperty_CreateFromSourceTokens (cntxt: TDefinition; entry_property: boolean): TProperty;
    begin
-      result := TProperty.CreateFromSourceTokens (cntxt)
+      result := TProperty.CreateFromSourceTokens (cntxt, entry_property)
    end;
 
 function TDummyPIC18xCPU.TRelationalExpression_CreateFromSourceTokens: TRelationalExpression;
@@ -153,9 +168,9 @@ function TDummyPIC18xCPU.TRoundFunctionPrimary_CreateFromSourceTokens: TRoundFun
       result := TRoundFunctionPrimary.CreateFromSourceTokens
    end;
 
-function TDummyPIC18xCPU.TRoutine_CreateFromSourceTokens (cntxt: TDefinition): TRoutine;
+function TDummyPIC18xCPU.TRoutine_CreateFromSourceTokens (cntxt: TDefinition; entry_routine: boolean): TRoutine;
    begin
-      result := TRoutine.CreateFromSourceTokens (cntxt)
+      result := TRoutine.CreateFromSourceTokens (cntxt, entry_routine)
    end;
 
 function TDummyPIC18xCPU.TRoutine_CreatePropertyGetterFromSourceTokens (cntxt: TDefinition; entre: boolean; property_id: TIdentifierIdx; property_id_src_loc: TSourceLocation; property_typdef: TTypeDef): TRoutine;

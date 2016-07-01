@@ -60,6 +60,7 @@ type
             virtual;
          property dest: TInstruction read f_dest write set_dest;
          constructor Create;
+         constructor CreateNoLink;
          procedure UnattachFromProgramCode;
          function assembler_label: string;
          function loads_w_and_z: boolean;
@@ -1693,6 +1694,11 @@ constructor TInstruction.Create;
       ProgramCode.AppendInstruction (self)
    end;
 
+constructor TInstruction.CreateNoLink;
+   begin
+      inherited Create
+   end;
+
 procedure TInstruction.UnattachFromProgramCode;
    begin
       ProgramCode.UnappendInstruction (self)
@@ -1858,11 +1864,11 @@ function TInstruction.do_alu_addition (op1, op2: byte; carry: boolean): byte;
       signed_sum: integer;
       sum: integer;
    begin
-      signed_sum := int8(op1) + int8(op2) + ord(carry);
+      signed_sum := ShortInt(op1) + ShortInt(op2) + ord(carry);
       sum := op1 + op2 + ord(carry);
 
       cpu.n := (sum and $80) = $80;
-      cpu.ov := (signed_sum < low(int8)) or (high(int8) < signed_sum);
+      cpu.ov := (signed_sum < low(ShortInt)) or (high(ShortInt) < signed_sum);
       cpu.z := (sum and $ff) = 0;
       cpu.c := sum > $FF;
       cpu.dc := ls_nibble(op1) + ls_nibble(op2) + ord(carry) > $F;
@@ -2024,7 +2030,7 @@ function TSubroutine.ComeFrom (instr: TInstruction): TInstruction;
    begin
       assert (not generated, 'come from''s must be noted before subroutine is generated');
       evaluate_additional_stack_use;
-      result := inherited
+      result := inherited ComeFrom (instr)
    end;
 
 function TSubroutine.generate_call_code: TInstruction;
@@ -2235,7 +2241,7 @@ function TPIC18x_byte_oriented_operations_fda.assembly_code: string;
 
 function TPIC18x_byte_oriented_operations_fda.hex_code: THexArray;
    begin
-      result := inherited;
+      result := inherited hex_code;
       if not f_remove then
          if d = dest_f then
             result[1] := result[1] or $02
@@ -2352,7 +2358,7 @@ function TPIC18x_relative_transfer.in_range: boolean;
 
 constructor TPIC18x_conditional_branch.Create (_mnemonic: string; _opcode: byte);
    begin
-      inherited Create (_mnemonic, _opcode, Low(int8), High(int8))
+      inherited Create (_mnemonic, _opcode, Low(ShortInt), High(ShortInt))
    end;
 
 
@@ -2391,7 +2397,7 @@ function TPIC18x_bit_oriented_operations.assembly_code: string;
 
 function TPIC18x_bit_oriented_operations.hex_code: THexArray;
    begin
-      result := inherited;
+      result := inherited hex_code;
       result[1] := result[1] or (bit_num shl 1)
    end;
 
@@ -4294,7 +4300,7 @@ constructor TPIC18x_DB.Create (_bytes: TDataByteArray);
 
 function TPIC18x_DB.hex_code: THexArray;
    begin
-      result := inherited;
+      result := inherited hex_code;
       if Odd (Length (result)) then
          begin
             SetLength (result, Length(result)+1);
@@ -4594,12 +4600,5 @@ destructor TPIC18x_NOP.Destroy;
       inherited
    end;
 {$endif}
-
-
-INITIALIZATION
-   TInstruction.assembly_source_code := TStringList.Create;
-
-FINALIZATION
-   TInstruction.assembly_source_code.Free
 
 END.

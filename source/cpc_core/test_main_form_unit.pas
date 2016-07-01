@@ -19,6 +19,7 @@ type
     CompileButton: TButton;
     CompileResultsMemo: TMemo;
     Memo: TMemo;
+    CheckBox1: TCheckBox;
     CheckBox2: TCheckBox;
     CheckBox3: TCheckBox;
     CheckBox4: TCheckBox;
@@ -26,14 +27,13 @@ type
     CheckBox6: TCheckBox;
     CheckBox7: TCheckBox;
     CheckBox8: TCheckBox;
+    CheckBox9: TCheckBox;
     CheckBox10: TCheckBox;
     CheckBox11: TCheckBox;
     CheckBox12: TCheckBox;
     CheckBox13: TCheckBox;
-    CheckBox9: TCheckBox;
     SelectAllButton: TButton;
     RunSelectedTestsButton: TButton;
-    CheckBox1: TCheckBox;
     procedure ClearButtonClick(Sender: TObject);
     procedure CompileButtonClick(Sender: TObject);
     procedure SelectAllButtonClick(Sender: TObject);

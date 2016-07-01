@@ -122,7 +122,9 @@
       <Unit20>
         <Filename Value="test_main_form_unit.pas"/>
         <IsPartOfProject Value="True"/>
+        <ComponentName Value="MainForm"/>
         <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
       </Unit20>
       <Unit21>
         <Filename Value="test_multi_precision_integer_unit.pas"/>
@@ -183,6 +185,7 @@
         <OverflowChecks Value="True"/>
         <StackChecks Value="True"/>
       </Checks>
+      <VerifyObjMethodCallValidity Value="True"/>
     </CodeGeneration>
     <Linking>
       <Options>

@@ -355,6 +355,13 @@ function err_set_member_value_outside_legal_range: string;
 function err_char_value_outside_legal_range: string;
 function refcount_log_enabled: boolean;
 
+{$IFNDEF FPC}
+   {$IF CompilerVersion < 20.0}
+function CharInSet (c: char; s: TSysCharSet): boolean;
+   {$IFEND}
+{$ENDIF}
+
+
 //============================================
 // TRACING A DEFINITION OBJECT LIFETIME
 //    To trace the lifetime events of a definition object:
@@ -557,6 +564,16 @@ function err_char_value_outside_legal_range: string;
    begin
       result := format('char value outside legal range of %d..%d', [min_char, max_char])
    end;
+
+{$IFNDEF FPC}
+   {$IF CompilerVersion < 20.0}
+function CharInSet (c: char; s: TSysCharSet): boolean;
+   begin
+      result := c in s
+   end;
+   {$IFEND}
+{$ENDIF}
+
 
 {$ifdef DEFINITION_OBJNO_TRACE}
    {$ifndef FPC}

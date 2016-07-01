@@ -59,7 +59,7 @@ function ComparePICNames (L, R: string): integer;
 IMPLEMENTATION
 
 uses
-   regular_expression_unit;
+   regular_expression_unit, cpc_common_unit;
 
 {$R *.dfm}
 

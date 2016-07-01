@@ -10,13 +10,17 @@ uses
 {$ifdef FPC}
    LCLType, LMessages,
    LCLIntf, LResources,
+   htmlview,
 {$ELSE}
    Windows,
+   ActiveX,
+   OleCtrls,
+   SHDocVw,
 {$endif}
    SysUtils, Classes, ComCtrls,
    pic18x_statements_unit, pic18x_blocks_unit, cpc_definitions_unit,
    Spin, Controls, StdCtrls,
-   Forms, Messages, ExtCtrls, htmlview;
+   Forms, Messages, ExtCtrls;
 
 type
    TMainForm =
@@ -24,7 +28,6 @@ type
          Button3: TButton;
          SrcToClipboardForTestButton: TButton;
          SrcToClipboardButton: TButton;
-         Button1: TButton;
          KernelTestWebbrowserBasePanel: TPanel;
          PageControl1: TPageControl;
          TabSheet1: TTabSheet;
@@ -57,11 +60,14 @@ type
          procedure Button3Click(Sender: TObject);
          procedure SrcToClipboardForTestButtonClick(Sender: TObject);
          procedure SrcToClipboardButtonClick(Sender: TObject);
-         procedure Button1Click(Sender: TObject);
          procedure FormCreate(Sender: TObject);
       public
          number_of_tests: integer;
+{$IFDEF FPC}
          kernel_test_result_html_viewer: THtmlViewer;
+{$ELSE}
+         kernel_test_result_html_viewer: TWebBrowser;
+{$ENDIF}
       end;
 
 var
@@ -334,7 +340,7 @@ function rand (size: integer): int64;
    var ov: record
               case integer of
                  0: (i: int64);
-                 1: (a: array [0..7] of int8)
+                 1: (a: array [0..7] of ShortInt)
               end;
       i: integer;
    begin
@@ -357,7 +363,7 @@ function rand_clamped_msbit (size: integer): int64;
    var ov: record
               case integer of
                  0: (i: int64);
-                 1: (a: array [0..7] of int8)
+                 1: (a: array [0..7] of ShortInt)
               end;
       i: integer;
    begin
@@ -382,7 +388,7 @@ function all_ones (size: integer): uint64;
    var ov: record
               case integer of
                  0: (i: uint64);
-                 1: (a: array [0..7] of uint8)
+                 1: (a: array [0..7] of Byte)
               end;
       i: integer;
    begin
@@ -436,37 +442,22 @@ begin
       end
 end;
 
-procedure TMainForm.Button1Click(Sender: TObject);
-   var
-      i: integer;
-      sl: TStringList;
-   begin
-      sl := TStringList.Create;
-      for i := 1 to 9999 do
-         case i mod 10 of
-            0: sl.Add (format ('%4d', [i]));
-            5: sl.Add ('   ●');
-         else
-            sl.Add ('   -')
-         end;
-      clipboard.AsText := sl.Text;
-      sl.Free
-   end;
-
 procedure TMainForm.Button3Click(Sender: TObject);
    var
       i: integer;
-      s: string;
+      sl: TStringList;
       untested: boolean;
+      Doc: Variant;
    begin
+      sl := TStringList.Create;
       GenerateKernelTestCoverageMap := true;
       TestResultsMemo.Clear;
       number_of_tests := 0;
       number_of_errors := 0;
       run_kernel_tests;
       TestResultsMemo.Lines.Add (format ('%d tests run, %d errors', [number_of_tests, number_of_errors]));
-      s := '<body bgcolor="#FFFFFF">';
-      s := s + '<font face="courier new">';
+      sl.Add('<body bgcolor="#FFFFFF">');
+      sl.Add('<font face="courier new">');
       for i := 1 to Length(KernelInstructions)-1
       do begin
             untested := (KernelInstructions[i].execution_count = 0)
@@ -481,17 +472,26 @@ procedure TMainForm.Button3Click(Sender: TObject);
                             );
             if untested
             then
-               s := s + '<font color=red>';
-            s := s + StringReplace (KernelInstructions[i].instrxxx, ' ', '&nbsp', [rfReplaceAll]) + '<br>';
+               sl.Add('<font color=red>');
+            sl.Add(StringReplace (KernelInstructions[i].instrxxx, ' ', '&nbsp', [rfReplaceAll]) + '<br>');
             if untested
             then
-               s := s + '</font>'
+               sl.Add('</font>')
          end;
-      s := s + '</font>';
-      s := s + '</body>';
+      sl.Add('</font>');
+      sl.Add('</body>');
+{$IFDEF FPC}
+      kernel_test_result_html_viewer.LoadFromString (sl.Text);
+{$ELSE}
+  //    kernel_test_result_html_viewer.navigate2 ('about:blank');
+      Doc := kernel_test_result_html_viewer.Document;
+      Doc.Clear;
+      Doc.Write (sl.Text);
+      Doc.Close;
+{$ENDIF}
       GenerateKernelTestCoverageMap := false;
       SetLength (KernelInstructions, 0);
-      kernel_test_result_html_viewer.LoadFromString (s)
+      sl.Free
    end;
 
 procedure TMainForm.SrcToClipboardForTestButtonClick(Sender: TObject);
@@ -536,9 +536,18 @@ procedure TMainForm.TestSimulatorButtonClick(Sender: TObject);
    end;
 
 procedure TMainForm.TestCompilerButtonClick(Sender: TObject);
+{$IFNDEF FPC}
+   var
+      v: OleVariant;
+{$ENDIF}
    begin
       TestResultsMemo.Lines.Add (format ('%d tests run, %d errors', [number_of_tests, number_of_errors]));
+{$IFDEF FPC}
       kernel_test_result_html_viewer.LoadFromString ('<body bgcolor="#FFFFFF"></body>');
+{$ELSE}
+      v := 'about:blank';
+      kernel_test_result_html_viewer.navigate2 (v);
+{$ENDIF}
       TestResultsMemo.Clear;
       number_of_tests := 0;
       number_of_errors := 0;
@@ -656,11 +665,26 @@ procedure TMainForm.RunButtonClick(Sender: TObject);
    end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
+{$IFNDEF FPC}
+   var
+      v: OleVariant;
+{$ENDIF}
    begin
+{$IFDEF FPC}
       kernel_test_result_html_viewer := THtmlViewer.Create (self);
-      kernel_test_result_html_viewer.Align := alClient;
       kernel_test_result_html_viewer.Parent := KernelTestWebbrowserBasePanel;
       kernel_test_result_html_viewer.LoadFromString ('<body bgcolor="#FFFFFF"></body>');
+{$ELSE}
+      KernelTestWebbrowserBasePanel.BevelWidth := 1;
+      KernelTestWebbrowserBasePanel.BorderWidth := 0;
+      KernelTestWebbrowserBasePanel.BevelInner := bvNone;
+      KernelTestWebbrowserBasePanel.BevelOuter := bvRaised;
+      kernel_test_result_html_viewer := TWebBrowser.Create(self);
+      TWinControl(kernel_test_result_html_viewer).Parent := KernelTestWebbrowserBasePanel;
+      v := 'about:blank';
+      kernel_test_result_html_viewer.navigate2 (v);
+{$ENDIF}
+      kernel_test_result_html_viewer.Align := alClient;
       PageControl1.ActivePageIndex := 0;
       SetCurrentDir (ExtractFilePath(ParamStr(0)) + 'pic18x' + PathDelim + 'compiler_test_cases')
    end;
