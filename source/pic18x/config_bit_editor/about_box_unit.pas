@@ -20,33 +20,28 @@ uses
    Forms, Controls, StdCtrls, Buttons, ExtCtrls, about_credit_frame_unit;
 
 type
-  TAboutBox = class(TForm)
-    OKButton: TButton;
-    ProductName: TLabel;
-    WebsiteLabel: TLabel;
-    AboutCreditFrame1: TAboutCreditFrame;
-    procedure FormCreate(Sender: TObject);
-  private
-    { Private declarations }
-  public
-    { Public declarations }
-  end;
+   TAboutBox = class(TForm)
+      OKButton: TButton;
+      ProductName: TLabel;
+      WebsiteLabel: TLabel;
+      AboutCreditFrame: TAboutCreditFrame;
+      procedure FormCreate(Sender: TObject);
+   private
+      { Private declarations }
+   public
+      { Public declarations }
+   end;
 
 var
-  AboutBox: TAboutBox;
+   AboutBox: TAboutBox;
 
 IMPLEMENTATION
-
-{$IFDEF FPC}
-uses
-   LazarusVersionSupport;
-{$ENDIF}
 
 {$R *.dfm}
 
 procedure TAboutBox.FormCreate(Sender: TObject);
    begin
-      AboutCreditFrame1.Init
+      AboutCreditFrame.Init
    end;
 
 END.

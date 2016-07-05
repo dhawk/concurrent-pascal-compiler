@@ -31,6 +31,7 @@ type
          Label1: TLabel;
     Button3: TButton;
     SyntaxCheckIncludeFilesMenuItem: TMenuItem;
+    About1: TMenuItem;
          procedure Button4Click(Sender: TObject);
          procedure Button5Click(Sender: TObject);
          procedure ViewPICFileMenuItemClick(Sender: TObject);
@@ -42,6 +43,7 @@ type
     procedure SyntaxCheckIncludeFilesMenuItemClick(Sender: TObject);
     procedure NewComboTypeMenuItemClick(Sender: TObject);
     procedure Button3Click(Sender: TObject);
+    procedure About1Click(Sender: TObject);
       public
          procedure AppendToMemo1 (s: string);
          procedure Discard (s: string);
@@ -110,6 +112,11 @@ procedure TMainForm.SyntaxCheckIncludeFilesMenuItemClick(Sender: TObject);
    begin
       SyntaxCheckAllIncludeFilesDialog.ShowModal
    end;
+
+procedure TMainForm.About1Click(Sender: TObject);
+begin
+   c
+end;
 
 procedure TMainForm.AppendToMemo1 (s: string);
    begin

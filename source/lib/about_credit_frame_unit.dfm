@@ -19,19 +19,19 @@ object AboutCreditFrame: TAboutCreditFrame
       287
       235)
     object Label1: TLabel
-      Left = 7
+      Left = 8
       Top = 95
-      Width = 51
+      Width = 155
       Height = 13
-      Caption = 'Thanks to:'
+      Caption = 'Additional Third-Party Software:'
     end
-    object BuildUsingGroupBox: TGroupBox
+    object BuiltUsingGroupBox: TGroupBox
       Left = 8
       Top = 2
       Width = 269
       Height = 89
       Anchors = [akLeft, akTop, akRight]
-      Caption = 'BuildUsingGroupBox'
+      Caption = 'BuiltUsingGroupBox'
       Color = clWhite
       ParentColor = False
       TabOrder = 0
@@ -81,31 +81,7 @@ object AboutCreditFrame: TAboutCreditFrame
       BevelEdges = []
       BevelInner = bvNone
       Lines.Strings = (
-        'Third-party Software Utilized in Concurrent Pascal'
-        ''
-        'Balanced Binary Trees'
-        'Nicklaus Wirth'
-        'Algorithmen und Datenstrukturen, p 250'
-        'Fixed By Giacomo Policicchio'
-        'pgiacomo@tiscalinet.it'
-        '----------------------------------------------------'
-        'FastMM4 - Fast Memory Manager'
-        'Pierre le Riche.'
-        'https://github.com/pleriche/FastMM4'
-        '----------------------------------------------------'
-        'LibXmlParser'
-        'Stefan Heymann'
-        'www.destructor.de'
-        '----------------------------------------------------'
-        'MPArith - multi precision integer arithmetic'
-        'Wolfgang Ehrhardt'
-        'http://wolfgang-ehrhardt.de'
-        '----------------------------------------------------'
-        'SmoothSort'
-        'Edsger Dijkstra'
-        'http://en.wikibooks.org/wiki/Algorithm_Implement'
-        'ation/Sorting/Smoothsort'
-        '----------------------------------------------------')
+        '')
       ReadOnly = True
       ScrollBars = ssVertical
       TabOrder = 1

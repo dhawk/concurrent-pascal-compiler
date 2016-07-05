@@ -58,28 +58,35 @@ object AboutBox: TAboutBox
     ModalResult = 1
     TabOrder = 0
   end
-  inline AboutCreditFrame1: TAboutCreditFrame
+  inline AboutCreditFrame: TAboutCreditFrame
     Left = 68
     Top = 65
-    Width = 272
-    Height = 227
+    Width = 287
+    Height = 235
     Color = clWhite
     ParentColor = False
     TabOrder = 1
     ExplicitLeft = 68
     ExplicitTop = 65
-    inherited BuildUsingGroupBox: TGroupBox
-      inherited BuilderLabel1: TLabel
-        Width = 64
-        ExplicitWidth = 64
+    inherited Panel1: TPanel
+      ExplicitWidth = 280
+      inherited Label1: TLabel
+        Width = 148
+        ExplicitWidth = 148
       end
-      inherited BuilderLabel2: TLabel
-        Width = 64
-        ExplicitWidth = 64
-      end
-      inherited BuilderLabel3: TLabel
-        Width = 64
-        ExplicitWidth = 64
+      inherited BuiltUsingGroupBox: TGroupBox
+        inherited BuilderLabel1: TLabel
+          Width = 64
+          ExplicitWidth = 64
+        end
+        inherited BuilderLabel2: TLabel
+          Width = 64
+          ExplicitWidth = 64
+        end
+        inherited BuilderLabel3: TLabel
+          Width = 64
+          ExplicitWidth = 64
+        end
       end
     end
   end

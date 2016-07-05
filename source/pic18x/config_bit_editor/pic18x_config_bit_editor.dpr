@@ -8,7 +8,6 @@ uses
 {$ENDIF}
    Forms,
    main_form_unit in 'main_form_unit.pas' {MainForm},
-   about_box_unit in 'about_box_unit.pas',
    dummy_pic18x_cpu_unit in 'dummy_pic18x_cpu_unit.pas',
    cpc_access_unit in '..\..\cpc_core\cpc_access_unit.pas',
    cpc_blocks_unit in '..\..\cpc_core\cpc_blocks_unit.pas',
@@ -26,7 +25,8 @@ uses
    cpc_term_expression_unit in '..\..\cpc_core\cpc_term_expression_unit.pas',
    cpc_types_unit in '..\..\cpc_core\cpc_types_unit.pas',
    about_credit_frame_unit in '..\..\lib\about_credit_frame_unit.pas' {AboutCreditFrame: TFrame},
-   pic18x_selection_dialog_unit in '..\common\pic18x_selection_dialog_unit.pas' {Pic18xSelectionDialog};
+   pic18x_selection_dialog_unit in '..\common\pic18x_selection_dialog_unit.pas' {Pic18xSelectionDialog},
+   about_box_unit in 'about_box_unit.pas' {AboutBox};
 
 {$R *.res}
 
@@ -36,8 +36,7 @@ begin
    Application.MainFormOnTaskbar := True;
 {$ENDIF}
    Application.CreateForm(TMainForm, MainForm);
+   Application.CreateForm(TPic18xSelectionDialog, Pic18xSelectionDialog);
    Application.CreateForm(TAboutBox, AboutBox);
-   Application.CreateForm(TPic18xSelectionDialog, Pic18xSelectionDialog);
-   Application.CreateForm(TPic18xSelectionDialog, Pic18xSelectionDialog);
    Application.Run;
 end.

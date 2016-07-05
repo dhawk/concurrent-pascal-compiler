@@ -13,17 +13,8 @@
     <Borland.Personality>Default.Personality</Borland.Personality>
     <Borland.ProjectType />
     <BorlandProject>
-  <BorlandProject xmlns=""> <Default.Personality> </Default.Personality> </BorlandProject></BorlandProject>
+<BorlandProject xmlns=""><Default.Personality></Default.Personality></BorlandProject></BorlandProject>
   </ProjectExtensions>
-  <Target Name="pic18x_config_bit_editor">
-    <MSBuild Projects="source\pic18x\config_bit_editor\pic18x_config_bit_editor.dproj" Targets="" />
-  </Target>
-  <Target Name="pic18x_config_bit_editor:Clean">
-    <MSBuild Projects="source\pic18x\config_bit_editor\pic18x_config_bit_editor.dproj" Targets="Clean" />
-  </Target>
-  <Target Name="pic18x_config_bit_editor:Make">
-    <MSBuild Projects="source\pic18x\config_bit_editor\pic18x_config_bit_editor.dproj" Targets="Make" />
-  </Target>
   <Target Name="test_cpc_core">
     <MSBuild Projects="source\cpc_core\test_cpc_core.dproj" Targets="" />
   </Target>
@@ -51,14 +42,23 @@
   <Target Name="cpc_pic18x:Make">
     <MSBuild Projects="source\pic18x\cpc_pic18x.dproj" Targets="Make" />
   </Target>
+  <Target Name="pic18x_config_bit_editor">
+    <MSBuild Projects="source\pic18x\config_bit_editor\pic18x_config_bit_editor.dproj" Targets="" />
+  </Target>
+  <Target Name="pic18x_config_bit_editor:Clean">
+    <MSBuild Projects="source\pic18x\config_bit_editor\pic18x_config_bit_editor.dproj" Targets="Clean" />
+  </Target>
+  <Target Name="pic18x_config_bit_editor:Make">
+    <MSBuild Projects="source\pic18x\config_bit_editor\pic18x_config_bit_editor.dproj" Targets="Make" />
+  </Target>
   <Target Name="Build">
-    <CallTarget Targets="pic18x_config_bit_editor;test_cpc_core;test_cpc_pic18x;cpc_pic18x" />
+    <CallTarget Targets="test_cpc_core;test_cpc_pic18x;cpc_pic18x;pic18x_config_bit_editor" />
   </Target>
   <Target Name="Clean">
-    <CallTarget Targets="pic18x_config_bit_editor:Clean;test_cpc_core:Clean;test_cpc_pic18x:Clean;cpc_pic18x:Clean" />
+    <CallTarget Targets="test_cpc_core:Clean;test_cpc_pic18x:Clean;cpc_pic18x:Clean;pic18x_config_bit_editor:Clean" />
   </Target>
   <Target Name="Make">
-    <CallTarget Targets="pic18x_config_bit_editor:Make;test_cpc_core:Make;test_cpc_pic18x:Make;cpc_pic18x:Make" />
+    <CallTarget Targets="test_cpc_core:Make;test_cpc_pic18x:Make;cpc_pic18x:Make;pic18x_config_bit_editor:Make" />
   </Target>
   <Import Condition="Exists('$(MSBuildBinPath)\Borland.Group.Targets')" Project="$(MSBuildBinPath)\Borland.Group.Targets" />
 </Project>
