@@ -10,8 +10,8 @@ procedure test_statements;
 
 implementation
 
-uses test_main_form_unit, cpc_common_unit, cpc_blocks_unit, cpc_target_cpu_unit,
-  cpc_statements_unit;
+uses cpc_common_unit, cpc_blocks_unit, cpc_target_cpu_unit,
+  cpc_statements_unit, test_subroutines_unit;
 
 procedure test_routine_call_statement;
    begin
@@ -363,24 +363,24 @@ procedure test_statements;
       display('=============================');
       display('TESTING STATEMENT_SYNTAX_UNIT');
       display('=============================');
-      test_routine_call_statement;
-      test_if_statement;
-      test_while_statement;
-      test_until_statement;
-      test_cycle_statement;
-      test_loop_statement;
-      test_exitloop_statement;
-      test_reloop_statement;
-      test_with_statement;
-      test_assignment_statement;
-      test_continue_statement;
-      test_delay_statement;
+//      test_routine_call_statement;
+//      test_if_statement;
+//      test_while_statement;
+//      test_until_statement;
+//      test_cycle_statement;
+//      test_loop_statement;
+//      test_exitloop_statement;
+//      test_reloop_statement;
+//      test_with_statement;
+//      test_assignment_statement;
+//      test_continue_statement;
+//      test_delay_statement;
       test_init_statement;
-      test_for_statement;
-      test_case_statement;
-      test_await_statement;
-      test_string_attribute_routines;
-      test_assert_statement;
+//      test_for_statement;
+//      test_case_statement;
+//      test_await_statement;
+//      test_string_attribute_routines;
+//      test_assert_statement;
       display('')
    end;
 

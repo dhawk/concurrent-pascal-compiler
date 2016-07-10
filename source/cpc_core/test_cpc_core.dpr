@@ -7,7 +7,6 @@ uses
    Fastmm4,
 {$ENDIF}
    Forms,
-   test_main_form_unit in 'test_main_form_unit.pas' {MainForm},
    cpc_access_unit in 'cpc_access_unit.pas',
    cpc_blocks_unit in 'cpc_blocks_unit.pas',
    cpc_common_unit in 'cpc_common_unit.pas',
@@ -30,7 +29,9 @@ uses
    test_expression_syntax_unit in 'test_expression_syntax_unit.pas',
    test_multi_precision_integer_unit in 'test_multi_precision_integer_unit.pas',
    test_statement_syntax_unit in 'test_statement_syntax_unit.pas',
-   test_type_syntax_unit in 'test_type_syntax_unit.pas';
+   test_type_syntax_unit in 'test_type_syntax_unit.pas',
+   test_subroutines_unit in 'test_subroutines_unit.pas',
+   test_main_form_unit in 'test_main_form_unit.pas' {MainForm};
 
 {$R *.res}
 
@@ -40,5 +41,5 @@ begin
    Application.MainFormOnTaskbar := True;
 {$ENDIF}
    Application.CreateForm(TMainForm, MainForm);
-   Application.Run;
+  Application.Run;
 end.

@@ -26,7 +26,7 @@ IMPLEMENTATION
 
 uses
 {$ifdef INCLUDE_SIMULATION}
-   test_pic18x_compiler_main_form_unit,
+   test_pic18x_subroutines_unit,
 {$endif}
    pic18x_macro_instructions_unit, pic18x_statements_unit, pic18x_cpu_unit,
    pic18x_core_objects_unit, pic18x_instructions_unit,

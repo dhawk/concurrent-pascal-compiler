@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectGroup FileVersion="1">
-    <Targets Count="4">
+    <Targets Count="8">
       <Target0 FileName="source\pic18x\cpc_pic18x.lpi">
         <BuildModes Count="1"/>
         <Mode1 Name="Default"/>
@@ -18,6 +18,22 @@
         <BuildModes Count="1"/>
         <Mode1 Name="Default"/>
       </Target3>
+      <Target4 FileName="source\cpc_core\run_cpc_core_tests.lpi">
+        <BuildModes Count="1"/>
+        <Mode1 Name="Default"/>
+      </Target4>
+      <Target5 FileName="source\pic18x\run_pic18x_compiler_tests.lpi">
+        <BuildModes Count="1"/>
+        <Mode1 Name="Default"/>
+      </Target5>
+      <Target6 FileName="source\pic18x\run_pic18x_simulator_tests.lpi">
+        <BuildModes Count="1"/>
+        <Mode1 Name="Default"/>
+      </Target6>
+      <Target7 FileName="source\pic18x\run_pic18x_kernel_tests.lpi">
+        <BuildModes Count="1"/>
+        <Mode1 Name="Default"/>
+      </Target7>
     </Targets>
   </ProjectGroup>
 </CONFIG>

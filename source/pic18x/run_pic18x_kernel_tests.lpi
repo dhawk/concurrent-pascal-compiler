@@ -11,7 +11,7 @@
       </Flags>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
-      <Title Value="test_cpc_core"/>
+      <Title Value="run_pic18x_kernel_tests"/>
       <UseAppBundle Value="False"/>
       <ResourceType Value="res"/>
     </General>
@@ -30,7 +30,6 @@
     <RunParams>
       <local>
         <FormatVersion Value="1"/>
-        <CommandLineParams Value="--debug-log=\temp\cpc_laz.txt"/>
       </local>
     </RunParams>
     <RequiredPackages Count="1">
@@ -38,143 +37,192 @@
         <PackageName Value="LCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="29">
+    <Units Count="42">
       <Unit0>
-        <Filename Value="test_cpc_core.dpr"/>
+        <Filename Value="run_pic18x_kernel_tests.dpr"/>
         <IsPartOfProject Value="True"/>
       </Unit0>
       <Unit1>
-        <Filename Value="cpc_access_unit.pas"/>
+        <Filename Value="..\cpc_core\cpc_access_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit1>
       <Unit2>
-        <Filename Value="cpc_blocks_unit.pas"/>
+        <Filename Value="..\cpc_core\cpc_blocks_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit2>
       <Unit3>
-        <Filename Value="cpc_common_unit.pas"/>
+        <Filename Value="..\cpc_core\cpc_common_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit3>
       <Unit4>
-        <Filename Value="cpc_constant_expression_unit.pas"/>
+        <Filename Value="..\cpc_core\cpc_constant_expression_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit4>
       <Unit5>
-        <Filename Value="cpc_core_objects_unit.pas"/>
+        <Filename Value="..\cpc_core\cpc_core_objects_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit5>
       <Unit6>
-        <Filename Value="cpc_definitions_unit.pas"/>
+        <Filename Value="..\cpc_core\cpc_definitions_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit6>
       <Unit7>
-        <Filename Value="cpc_expressions_unit.pas"/>
+        <Filename Value="..\cpc_core\cpc_expressions_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit7>
       <Unit8>
-        <Filename Value="cpc_main_compiler_unit.pas"/>
+        <Filename Value="..\cpc_core\cpc_main_compiler_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit8>
       <Unit9>
-        <Filename Value="cpc_multi_precision_integer_unit.pas"/>
+        <Filename Value="..\cpc_core\cpc_multi_precision_integer_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit9>
       <Unit10>
-        <Filename Value="cpc_simple_expression_unit.pas"/>
+        <Filename Value="..\cpc_core\cpc_simple_expression_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit10>
       <Unit11>
-        <Filename Value="cpc_source_analysis_unit.pas"/>
+        <Filename Value="..\cpc_core\cpc_source_analysis_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit11>
       <Unit12>
-        <Filename Value="cpc_statements_unit.pas"/>
+        <Filename Value="..\cpc_core\cpc_statements_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit12>
       <Unit13>
-        <Filename Value="cpc_target_cpu_unit.pas"/>
+        <Filename Value="..\cpc_core\cpc_target_cpu_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit13>
       <Unit14>
-        <Filename Value="cpc_term_expression_unit.pas"/>
+        <Filename Value="..\cpc_core\cpc_term_expression_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit14>
       <Unit15>
-        <Filename Value="cpc_types_unit.pas"/>
+        <Filename Value="..\cpc_core\cpc_types_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit15>
       <Unit16>
-        <Filename Value="test_access_syntax_unit.pas"/>
+        <Filename Value="pic18x_access_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit16>
       <Unit17>
-        <Filename Value="test_block_synax_unit.pas"/>
+        <Filename Value="pic18x_assignment_statement_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit17>
       <Unit18>
-        <Filename Value="test_constant_expression_unit.pas"/>
+        <Filename Value="pic18x_blocks_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit18>
       <Unit19>
-        <Filename Value="test_expression_syntax_unit.pas"/>
+        <Filename Value="pic18x_core_objects_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit19>
       <Unit20>
-        <Filename Value="test_main_form_unit.pas"/>
+        <Filename Value="pic18x_cpu_unit.pas"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="MainForm"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Form"/>
       </Unit20>
       <Unit21>
-        <Filename Value="test_multi_precision_integer_unit.pas"/>
+        <Filename Value="pic18x_expressions_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit21>
       <Unit22>
-        <Filename Value="test_statement_syntax_unit.pas"/>
+        <Filename Value="pic18x_floating_point_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit22>
       <Unit23>
-        <Filename Value="test_type_syntax_unit.pas"/>
+        <Filename Value="pic18x_instruction_simulation_test_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit23>
       <Unit24>
-        <Filename Value="..\lib\wirth_balanced_binary_tree_unit.pas"/>
+        <Filename Value="pic18x_instructions_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit24>
       <Unit25>
-        <Filename Value="..\lib\dijkstra_smoothsort_unit.pas"/>
+        <Filename Value="pic18x_kernel_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit25>
       <Unit26>
-        <Filename Value="test_cpu_unit.pas"/>
+        <Filename Value="pic18x_macro_instructions_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit26>
       <Unit27>
-        <Filename Value="..\lib\mparith\mp_base.pas"/>
+        <Filename Value="pic18x_main_compiler_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit27>
       <Unit28>
-        <Filename Value="..\lib\mparith\mp_types.pas"/>
+        <Filename Value="pic18x_microprocessor_information_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit28>
+      <Unit29>
+        <Filename Value="pic18x_multiply_divide_unit.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit29>
+      <Unit30>
+        <Filename Value="pic18x_run_time_error_check_unit.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit30>
+      <Unit31>
+        <Filename Value="pic18x_simple_expression_unit.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit31>
+      <Unit32>
+        <Filename Value="pic18x_statements_unit.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit32>
+      <Unit33>
+        <Filename Value="pic18x_string_unit.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit33>
+      <Unit34>
+        <Filename Value="pic18x_term_expression_unit.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit34>
+      <Unit35>
+        <Filename Value="pic18x_types_unit.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit35>
+      <Unit36>
+        <Filename Value="test_pic18x_compiler_unit.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit36>
+      <Unit37>
+        <Filename Value="test_pic18x_subroutines_unit.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit37>
+      <Unit38>
+        <Filename Value="test_pic18x_kernel_unit.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit38>
+      <Unit39>
+        <Filename Value="test_pic18x_compiler_main_form_unit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <HasResources Value="True"/>
+      </Unit39>
+      <Unit40>
+        <Filename Value="test_pic18x_simulator_unit.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit40>
+      <Unit41>
+        <Filename Value="common\pic18x_common_unit.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit41>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="11"/>
     <PathDelim Value="\"/>
     <Target>
-      <Filename Value="..\..\bin\test_cpc_core"/>
+      <Filename Value="..\..\bin\run_pic18x_kernel_tests"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="..\lib;..\lib\mparith;$(ProjOutDir)"/>
-      <OtherUnitFiles Value="..\lib;..\lib\mparith"/>
-      <UnitOutputDirectory Value="..\..\obj\test_cpc_core"/>
+      <IncludeFiles Value="$(ProjOutDir)"/>
+      <OtherUnitFiles Value="..\lib;..\lib\mparith;common"/>
+      <UnitOutputDirectory Value="..\..\obj\run_pic18x_kernel_tests"/>
     </SearchPaths>
     <Parsing>
       <SyntaxOptions>
         <SyntaxMode Value="Delphi"/>
-        <CStyleOperator Value="False"/>
         <IncludeAssertionCode Value="True"/>
       </SyntaxOptions>
     </Parsing>
@@ -187,30 +235,27 @@
       </Checks>
       <VerifyObjMethodCallValidity Value="True"/>
     </CodeGeneration>
-    <Linking>
-      <Options>
-        <Win32>
-          <GraphicApplication Value="True"/>
-        </Win32>
-      </Options>
-    </Linking>
     <Other>
       <CustomOptions Value="-dBorland
 -dVer150
 -dDelphi7
 -dCompiler6_Up
--dPUREPASCAL"/>
-      <OtherDefines Count="5">
+-dPUREPASCAL
+-dINCLUDE_SIMULATION
+-dCONSOLE_TEST_MODE"/>
+      <OtherDefines Count="7">
         <Define0 Value="Borland"/>
         <Define1 Value="Ver150"/>
         <Define2 Value="Delphi7"/>
         <Define3 Value="Compiler6_Up"/>
         <Define4 Value="PUREPASCAL"/>
+        <Define5 Value="INCLUDE_SIMULATION"/>
+        <Define6 Value="CONSOLE_TEST_MODE"/>
       </OtherDefines>
     </Other>
   </CompilerOptions>
   <Debugging>
-    <Exceptions Count="12">
+    <Exceptions Count="6">
       <Item1>
         <Name Value="EAbort"/>
       </Item1>
@@ -229,24 +274,6 @@
       <Item6>
         <Name Value="ERelationalExpressionSimplification"/>
       </Item6>
-      <Item7>
-        <Name Value="compile_error"/>
-      </Item7>
-      <Item8>
-        <Name Value="EPrimaryExpressionSimplification"/>
-      </Item8>
-      <Item9>
-        <Name Value="EStatementSimplification"/>
-      </Item9>
-      <Item10>
-        <Name Value="EDefinitelyNotASubRange"/>
-      </Item10>
-      <Item11>
-        <Name Value="RunError(219)"/>
-      </Item11>
-      <Item12>
-        <Name Value="EInvalidCast"/>
-      </Item12>
     </Exceptions>
   </Debugging>
 </CONFIG>

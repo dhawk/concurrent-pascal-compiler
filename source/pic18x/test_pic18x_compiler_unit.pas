@@ -11,7 +11,7 @@ procedure RunTests;
 IMPLEMENTATION
 
 uses
-   test_pic18x_compiler_main_form_unit, pic18x_run_time_error_check_unit,
+   test_pic18x_subroutines_unit, pic18x_run_time_error_check_unit,
    pic18x_instructions_unit, pic18x_statements_unit, SysUtils;
 
 procedure test1;
@@ -2708,9 +2708,9 @@ procedure test73;  // strappend
 
 procedure test74;
    begin
-      MainForm.TestResultsMemo.Lines.Add ('test 74');
+      display_test_result ('test 74');
       TSubroutine.check_stack_calculations;
-      MainForm.number_of_tests := MainForm.number_of_tests + 1
+      number_of_tests := number_of_tests + 1
    end;
 
 procedure test75;  // compare ram str to ram str
@@ -7010,7 +7010,7 @@ procedure RunTests;
       test134;
       test135;
       test136;
-      MainForm.TestResultsMemo.Lines.Add ('all tests done')
+      display_test_result ('all tests done')
    end;
 
 END.

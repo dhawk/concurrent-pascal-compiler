@@ -1275,7 +1275,7 @@ IMPLEMENTATION
 uses
 {$ifdef INCLUDE_SIMULATION}
    test_pic18x_simulator_unit,
-   test_pic18x_compiler_main_form_unit,
+   test_pic18x_subroutines_unit,
    test_pic18x_kernel_unit,
 {$endif}
    Math, pic18x_floating_point_unit, pic18x_macro_instructions_unit, cpc_target_cpu_unit,

@@ -1,7 +1,7 @@
 UNIT pic18x_instruction_simulation_test_unit;
 
 {$IFDEF FPC}
-  {$MODE Delphi}
+   {$MODE Delphi}
 {$ENDIF}
 
 INTERFACE
@@ -10,25 +10,21 @@ procedure run_instruction_simulation_tests;
 
 IMPLEMENTATION
 
-uses test_pic18x_compiler_main_form_unit, SysUtils, pic18x_instructions_unit, pic18x_microprocessor_information_unit,
-  test_pic18x_simulator_unit,
-  Classes, pic18x_macro_instructions_unit, pic18x_cpu_unit,
-  test_pic18x_kernel_unit;
+uses test_pic18x_subroutines_unit, SysUtils, pic18x_instructions_unit, pic18x_microprocessor_information_unit,
+   test_pic18x_simulator_unit,
+   Classes, pic18x_macro_instructions_unit, pic18x_cpu_unit,
+   test_pic18x_kernel_unit;
 
 var
-   tests_run, errors: integer;
    current_test: string;
    current_test_num: integer;
-
-procedure out (s: string);
-   begin
-      MainForm.TestResultsMemo.Lines.Add (s)
-   end;
+   compiler_out_hex_files_path: string;
+   compiler_out_asm_files_path: string;
 
 procedure start_instr_test (test: string);
    begin
       if test <> current_test then
-         out ('testing ' + test);
+         display_test_result ('testing ' + test);
       current_test := test
    end;
 
@@ -67,8 +63,8 @@ procedure check_w (expected_w: byte);
 {$ifdef INCLUDE_SIMULATION}
       if expected_w <> cpu.w then
          begin
-            out ('   test #' + IntToStr (current_test_num) + ' failed - w was  ' + byte_to_hex_string(cpu.w) + ', expected ' + byte_to_hex_string(expected_w));
-            errors := errors + 1
+            display_test_result ('   test #' + IntToStr (current_test_num) + ' failed - w was  ' + byte_to_hex_string(cpu.w) + ', expected ' + byte_to_hex_string(expected_w));
+            number_of_errors := number_of_errors + 1
          end
 {$endif}
    end;
@@ -78,8 +74,8 @@ procedure check_ram (addr: integer; expected_value: byte);
 {$ifdef INCLUDE_SIMULATION}
       if cpu.ram[addr] <> expected_value then
          begin
-            out ('   test #' + IntToStr (current_test_num) + ' failed - ram[' + ram_addr_to_hex_string(addr) + '] was  ' + byte_to_hex_string(cpu.ram[addr]) + ', expected ' + byte_to_hex_string(expected_value));
-            errors := errors + 1
+            display_test_result ('   test #' + IntToStr (current_test_num) + ' failed - ram[' + ram_addr_to_hex_string(addr) + '] was  ' + byte_to_hex_string(cpu.ram[addr]) + ', expected ' + byte_to_hex_string(expected_value));
+            number_of_errors := number_of_errors + 1
          end
 {$endif}
    end;
@@ -89,8 +85,8 @@ procedure check_z (expected_z: boolean);
 {$ifdef INCLUDE_SIMULATION}
       if expected_z <> cpu.z then
          begin
-            out ('   test #' + IntToStr (current_test_num) + ' failed - z was  ' + IntToStr(ord(cpu.z)) + ', expected ' + IntToStr(ord(expected_z)));
-            errors := errors + 1
+            display_test_result ('   test #' + IntToStr (current_test_num) + ' failed - z was  ' + IntToStr(ord(cpu.z)) + ', expected ' + IntToStr(ord(expected_z)));
+            number_of_errors := number_of_errors + 1
          end
 {$endif}
    end;
@@ -100,8 +96,8 @@ procedure check_n_z (expected_n, expected_z: boolean);
 {$ifdef INCLUDE_SIMULATION}
       if expected_n <> cpu.n then
          begin
-            out ('   test #' + IntToStr (current_test_num) + ' failed - n was  ' + IntToStr(ord(cpu.n)) + ', expected ' + IntToStr(ord(expected_n)));
-            errors := errors + 1
+            display_test_result ('   test #' + IntToStr (current_test_num) + ' failed - n was  ' + IntToStr(ord(cpu.n)) + ', expected ' + IntToStr(ord(expected_n)));
+            number_of_errors := number_of_errors + 1
          end;
       check_z (expected_z)
 {$endif}
@@ -113,8 +109,8 @@ procedure check_n_z_c (expected_n, expected_z, expected_c: boolean);
       check_n_z (expected_n, expected_z);
       if expected_c <> cpu.c then
          begin
-            out ('   test #' + IntToStr (current_test_num) + ' failed - c was  ' + IntToStr(ord(cpu.c)) + ', expected ' + IntToStr(ord(expected_c)));
-            errors := errors + 1
+            display_test_result ('   test #' + IntToStr (current_test_num) + ' failed - c was  ' + IntToStr(ord(cpu.c)) + ', expected ' + IntToStr(ord(expected_c)));
+            number_of_errors := number_of_errors + 1
          end
 {$endif}
    end;
@@ -126,13 +122,13 @@ procedure check_status (expected_n, expected_ov, expected_z, expected_dc, expect
       check_n_z_c (expected_n, expected_z, expected_c);
       if expected_dc <> cpu.dc then
          begin
-            out ('   test #' + IntToStr (current_test_num) + ' failed - dc was  ' + IntToStr(ord(cpu.dc)) + ', expected ' + IntToStr(ord(expected_dc)));
-            errors := errors + 1
+            display_test_result ('   test #' + IntToStr (current_test_num) + ' failed - dc was  ' + IntToStr(ord(cpu.dc)) + ', expected ' + IntToStr(ord(expected_dc)));
+            number_of_errors := number_of_errors + 1
          end;
       if expected_ov <> cpu.ov then
          begin
-            out ('   test #' + IntToStr (current_test_num) + ' failed - ov was  ' + IntToStr(ord(cpu.ov)) + ', expected ' + IntToStr(ord(expected_ov)));
-            errors := errors + 1
+            display_test_result ('   test #' + IntToStr (current_test_num) + ' failed - ov was  ' + IntToStr(ord(cpu.ov)) + ', expected ' + IntToStr(ord(expected_ov)));
+            number_of_errors := number_of_errors + 1
          end
 {$endif}
    end;
@@ -142,10 +138,10 @@ procedure conclude_test;
       testname: string;
    begin
       testname := current_test + '_' + IntToStr(current_test_num);
-      ProgramCode.WriteHexFile ('..\temp\pic18x_simulator_test_cases\hex_tests\' + testname + '.hex');
-      ProgramCode.WriteAssemblySourceFile ('..\temp\pic18x_simulator_test_cases\asm_tests\' + testname + '.asm');
+      ProgramCode.WriteHexFile (compiler_out_hex_files_path + testname + '.hex');
+      ProgramCode.WriteAssemblySourceFile (compiler_out_asm_files_path + testname + '.asm');
       ProgramCode.Clear;
-      tests_run := tests_run + 1;
+      number_of_tests := number_of_tests + 1;
    end;
 
 procedure movlw_test;
@@ -1903,7 +1899,7 @@ procedure tblrd_test;
          TPIC18x_MOVWF.Create (TBLPTRL, access_mode);
          TPIC18x_TBLRD.Create (tblrd);
          run_test;
-         check_ram (TABLAT, $22);
+         check_ram (TABLAT, $06);
          check_ram (TBLPTRU, 0);
          check_ram (TBLPTRH, 0);
          check_ram (TBLPTRL, first_rom_addr + 6);
@@ -1919,7 +1915,7 @@ procedure tblrd_test;
          TPIC18x_MOVWF.Create (TBLPTRL, access_mode);
          TPIC18x_TBLRD.Create (tblrd_post_inc);
          run_test;
-         check_ram (TABLAT, $22);
+         check_ram (TABLAT, $06);
          check_ram (TBLPTRU, 0);
          check_ram (TBLPTRH, 0);
          check_ram (TBLPTRL, first_rom_addr + 7);
@@ -1935,7 +1931,7 @@ procedure tblrd_test;
          TPIC18x_MOVWF.Create (TBLPTRL, access_mode);
          TPIC18x_TBLRD.Create (tblrd_post_dec);
          run_test;
-         check_ram (TABLAT, $22);
+         check_ram (TABLAT, $06);
          check_ram (TBLPTRU, 0);
          check_ram (TBLPTRH, 0);
          check_ram (TBLPTRL, first_rom_addr + 5);
@@ -2497,9 +2493,8 @@ procedure fsr_plusw_w_test;
 
 procedure run_instruction_simulation_tests;
    begin
-      tests_run := 0;
-      errors := 0;
-      MainForm.TestResultsMemo.Clear;
+      ForceDirectories (compiler_out_hex_files_path);
+      ForceDirectories (compiler_out_asm_files_path);
       movlw_test;
       movlb_test;
       andlw_test;
@@ -2587,7 +2582,11 @@ procedure run_instruction_simulation_tests;
       fsr_plusw1_r_test;
       fsr_plusw2_r_test;
       fsr_plusw_w_test;
-      out (IntToStr (tests_run) + ' tests completed, ' + IntToStr(errors) + ' errors.')
+      display_test_result ('pic18x instruction simulator: ' + IntToStr (number_of_tests) + ' tests completed, ' + IntToStr(number_of_errors) + ' number_of_errors.')
    end;
+
+INITIALIZATION
+   compiler_out_hex_files_path := ExtractFileDir(ParamStr(0)) + PathDelim + 'temp' + PathDelim + 'pic18x_simulator_test_cases' + PathDelim + 'hex_tests' + PathDelim;
+   compiler_out_asm_files_path := ExtractFileDir(ParamStr(0)) + PathDelim + 'temp' + PathDelim + 'pic18x_simulator_test_cases' + PathDelim + 'asm_tests' + PathDelim;
 
 END.
