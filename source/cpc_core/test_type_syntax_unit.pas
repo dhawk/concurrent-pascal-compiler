@@ -20,8 +20,8 @@ function create_TROMConstant: TDefinition;
 
 implementation
 
-uses test_main_form_unit,
-  cpc_common_unit, cpc_source_analysis_unit, SysUtils, cpc_types_unit;
+uses cpc_common_unit, cpc_source_analysis_unit, SysUtils, cpc_types_unit, 
+  test_subroutines_unit;
 
 constructor Told_TROMConstant.CreateFromSourceTokens;
    begin

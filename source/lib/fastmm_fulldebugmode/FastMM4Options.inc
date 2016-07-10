@@ -84,11 +84,11 @@ Set the default options for FastMM here.
 {Enable this option to suppress the generation of debug info for the
  FastMM4.pas unit. This will prevent the integrated debugger from stepping into
  the memory manager code.}
-{.$define NoDebugInfo}
+{$define NoDebugInfo}
 
 {Enable this option to suppress the display of all message dialogs. This is
  useful in service applications that should not be interrupted.}
-{.$define NoMessageBoxes}
+{$define NoMessageBoxes}
 
 {Set this option to use the Windows API OutputDebugString procedure to output
  debug strings on startup/shutdown and when errors occur.}
@@ -123,7 +123,7 @@ Set the default options for FastMM here.
  Very important: If you enable this option your application will require the
  FastMM_FullDebugMode.dll library. If this library is not available you will
  get an error on startup.}
-{.$define FullDebugMode}
+{$define FullDebugMode}
 
   {Set this option to perform "raw" stack traces, i.e. check all entries on the
    stack for valid return addresses. Note that this is significantly slower
@@ -153,7 +153,7 @@ Set the default options for FastMM here.
 
   {Deletes the error log file on startup. No effect if LogErrorsToFile is not
    also set.}
-  {.$define ClearLogFileOnStartup}
+  {$define ClearLogFileOnStartup}
 
   {Loads the FASTMM_FullDebugMode.dll dynamically. If the DLL cannot be found
    then stack traces will not be available. Note that this may cause problems
@@ -215,7 +215,7 @@ Set the default options for FastMM here.
    report memory leaks. This option has no effect if the option
    "EnableMemoryLeakReporting" is not also set. Note that this option does not 
    work with libraries, only EXE projects.}
-  {$define RequireDebuggerPresenceForLeakReporting}
+  {.$define RequireDebuggerPresenceForLeakReporting}
 
   {Set this option to require the presence of debug info ($D+ option) in the
    compiled unit to perform memory leak checking. This option has no effect if
@@ -330,7 +330,7 @@ Set the default options for FastMM here.
  (In FullDebugMode) when the FastMM_FullDebugMode.dll file is available. This
  is useful when the same executable will be distributed for both debugging as
  well as deployment.}
-{.$define FullDebugModeWhenDLLAvailable}
+{$define FullDebugModeWhenDLLAvailable}
 
 {Group the options you use for release and debug versions below}
 {$ifdef Release}
@@ -342,8 +342,8 @@ Set the default options for FastMM here.
   {.$undef UseOutputDebugString}
 {$else}
   {Specify the options you use for debugging below}
-  {.$define FullDebugMode}
-  {.$define EnableMemoryLeakReporting}
+  {$define FullDebugMode}
+  {$define EnableMemoryLeakReporting}
   {.$define UseOutputDebugString}
 {$endif}
 

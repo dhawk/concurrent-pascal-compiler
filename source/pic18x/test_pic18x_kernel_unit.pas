@@ -1,7 +1,7 @@
 UNIT test_pic18x_kernel_unit;
 
 {$IFDEF FPC}
-  {$MODE Delphi}
+   {$MODE Delphi}
 {$ENDIF}
 
 INTERFACE
@@ -24,12 +24,12 @@ procedure construct_kernel_test (nop: TPIC18x_NOP; tokens: TStringList);
 procedure do_kernel_test (nop: TPIC18x_NOP);
 procedure run_kernel_tests;
 
-IMPLEMENTATIOn
+IMPLEMENTATION
 
 uses
-  pic18x_kernel_unit, pic18x_blocks_unit, cpc_blocks_unit, SysUtils,
-  pic18x_core_objects_unit, cpc_core_objects_unit, test_pic18x_simulator_unit,
-  test_pic18x_compiler_main_form_unit, cpc_common_unit;
+   pic18x_kernel_unit, pic18x_blocks_unit, cpc_blocks_unit, SysUtils,
+   pic18x_core_objects_unit, cpc_core_objects_unit, test_pic18x_simulator_unit,
+   test_pic18x_subroutines_unit, cpc_common_unit;
 
 procedure construct_kernel_test (nop: TPIC18x_NOP; tokens: TStringList);
 
@@ -214,18 +214,18 @@ procedure do_kernel_test (nop: TPIC18x_NOP);
                         begin
                            if not test_shown then
                               begin
-                                 MainForm.TestResultsMemo.Lines.Add (format ('failed %s', [nop.annotation]));
+                                 display_test_result (format ('failed %s', [nop.annotation]));
                                  test_shown := true
                               end;
-                           MainForm.TestResultsMemo.Lines.Add (format ('   %s.gate addr $%3.3X: expected $%2.2X, found $%2.2X  %s',
-                                                                       [nop.check_values[i].monitor_name,
-                                                                        TPIC18x_Variable (nop.check_values[i].v).address - $3E,
-                                                                        nop.check_values[i].expected_value,
-                                                                        cpu.ram[TPIC18x_Variable (nop.check_values[i].v).address - $3E],
-                                                                        nop.check_values[i].error_message
-                                                                       ]
-                                                                      )
-                                                              )
+                           display_test_result (format ('   %s.gate addr $%3.3X: expected $%2.2X, found $%2.2X  %s',
+                                                        [nop.check_values[i].monitor_name,
+                                                         TPIC18x_Variable (nop.check_values[i].v).address - $3E,
+                                                         nop.check_values[i].expected_value,
+                                                         cpu.ram[TPIC18x_Variable (nop.check_values[i].v).address - $3E],
+                                                         nop.check_values[i].error_message
+                                                        ]
+                                                       )
+                                               )
                         end
                   end
                else if nop.check_values[i].state_test then
@@ -234,37 +234,37 @@ procedure do_kernel_test (nop: TPIC18x_NOP);
                         begin
                            if not test_shown then
                               begin
-                                 MainForm.TestResultsMemo.Lines.Add (format ('failed %s', [nop.annotation]));
+                                 display_test_result (format ('failed %s', [nop.annotation]));
                                  test_shown := true
                               end;
-                           MainForm.TestResultsMemo.Lines.Add (format ('   addr $%3.3X: expected state $%2.2X, found state $%2.2X %s',
-                                                                       [nop.check_values[i].addr+1,
-                                                                        nop.check_values[i].expected_value,
-                                                                        (cpu.ram[nop.check_values[i].addr+1] and $C0),
-                                                                        nop.check_values[i].error_message
-                                                                       ]
-                                                                      )
-                                                              )
+                           display_test_result (format ('   addr $%3.3X: expected state $%2.2X, found state $%2.2X %s',
+                                                        [nop.check_values[i].addr+1,
+                                                         nop.check_values[i].expected_value,
+                                                         (cpu.ram[nop.check_values[i].addr+1] and $C0),
+                                                         nop.check_values[i].error_message
+                                                        ]
+                                                       )
+                                               )
                         end
                   end
                else if cpu.ram[nop.check_values[i].addr] <> nop.check_values[i].expected_value then
                   begin
                      if not test_shown then
                         begin
-                           MainForm.TestResultsMemo.Lines.Add (format ('failed %s', [nop.annotation]));
+                           display_test_result (format ('failed %s', [nop.annotation]));
                            test_shown := true
                         end;
-                     MainForm.TestResultsMemo.Lines.Add (format ('   addr $%3.3X: expected $%2.2X, found $%2.2X %s',
-                                                                 [nop.check_values[i].addr,
-                                                                  nop.check_values[i].expected_value,
-                                                                  cpu.ram[nop.check_values[i].addr],
-                                                                  nop.check_values[i].error_message
-                                                                 ]
-                                                                )
-                                                        )
+                     display_test_result (format ('   addr $%3.3X: expected $%2.2X, found $%2.2X %s',
+                                                  [nop.check_values[i].addr,
+                                                   nop.check_values[i].expected_value,
+                                                   cpu.ram[nop.check_values[i].addr],
+                                                   nop.check_values[i].error_message
+                                                  ]
+                                                 )
+                                         )
                   end;
          test_not_implemented:
-            MainForm.TestResultsMemo.Lines.Add ('not implemented: ' + nop.msg);
+            display_test_result ('not implemented: ' + nop.msg);
 //         interrupt_test:
 //            begin
 //                           MainForm.TestResultsMemo.Lines.Add (format ('subtest %d failed: %s', [nop.subtest, nop.annotation]));

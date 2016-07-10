@@ -202,7 +202,7 @@ IMPLEMENTATION
 uses
 {$ifdef INCLUDE_SIMULATION}
    test_pic18x_simulator_unit,
-   test_pic18x_compiler_main_form_unit,
+   test_pic18x_subroutines_unit,
    test_pic18x_kernel_unit,
 {$endif}
    SysUtils, pic18x_microprocessor_information_unit, pic18x_access_unit, pic18x_cpu_unit,

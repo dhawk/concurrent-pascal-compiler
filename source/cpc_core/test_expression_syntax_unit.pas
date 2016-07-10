@@ -17,7 +17,7 @@ implementation
 
 uses SysUtils, Math, cpc_target_cpu_unit, test_cpu_unit, cpc_core_objects_unit,
   cpc_common_unit, cpc_definitions_unit, cpc_expressions_unit,
-  cpc_simple_expression_unit, cpc_term_expression_unit, test_main_form_unit;
+  cpc_simple_expression_unit, cpc_term_expression_unit, test_subroutines_unit;
 
 function approximately_equal 
    (r1,r2: real
@@ -174,7 +174,7 @@ function create_TTerm: TDefinition;
    //  Test Procedures
    
 function setup_test 
-   (s: string; 
+   (s: string;
     create_expression: TTestGenerator
    ): TExpression;
    begin
@@ -879,11 +879,8 @@ procedure test_TSimpleExpression;
       s: string;
       expr: TExpression;
    procedure setup;
-      var 
-         e: TExpression;
       begin
-         e := setup_test(s, create_TSimpleExpression);
-         expr := TSimpleExpression(e)
+         expr := setup_test(s, create_TSimpleExpression)
       end;
    procedure takedown;
       begin
@@ -1170,7 +1167,7 @@ procedure test_TTerm;
       expr: TExpression;
    procedure setup;
       begin
-         expr := TTerm (setup_test(s, create_TTerm))
+         expr := setup_test(s, create_TTerm)
       end;
 
    procedure takedown;

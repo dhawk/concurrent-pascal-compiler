@@ -532,4 +532,9 @@ destructor t_pic_info.Destroy;
       sfr_names.Free
    end;
 
+INITIALIZATION
+
+FINALIZATION
+   f_pic_info.Free
+
 END.

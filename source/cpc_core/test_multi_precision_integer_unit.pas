@@ -10,7 +10,7 @@ procedure test_mp_math;
 
 implementation
 
-uses cpc_multi_precision_integer_unit, test_main_form_unit;
+uses cpc_multi_precision_integer_unit, test_subroutines_unit;
 
 procedure test_mp_math;
    procedure test_max_signed_value;

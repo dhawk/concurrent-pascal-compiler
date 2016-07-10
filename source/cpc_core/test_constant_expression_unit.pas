@@ -11,9 +11,9 @@ procedure test_data_syntax_unit;
 
 implementation
 
-uses test_main_form_unit, cpc_constant_expression_unit, cpc_definitions_unit,
+uses cpc_constant_expression_unit, cpc_definitions_unit,
   cpc_core_objects_unit, cpc_source_analysis_unit, test_type_syntax_unit,
-  cpc_common_unit, Math, cpc_target_cpu_unit, SysUtils;
+  cpc_common_unit, Math, cpc_target_cpu_unit, SysUtils, test_subroutines_unit;
 
 function create_cexpression: TDefinition;
    begin

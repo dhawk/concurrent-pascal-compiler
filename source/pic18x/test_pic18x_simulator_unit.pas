@@ -118,9 +118,9 @@ var
 
 IMPLEMENTATION
 
-uses SysUtils, test_pic18x_compiler_main_form_unit,
-  pic18x_macro_instructions_unit, pic18x_cpu_unit,
-  cpc_target_cpu_unit;
+uses SysUtils, test_pic18x_subroutines_unit,
+   pic18x_macro_instructions_unit, pic18x_cpu_unit,
+   cpc_target_cpu_unit;
 
 constructor TFSR.Create;
    begin
