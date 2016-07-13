@@ -6,7 +6,7 @@ uses
 {$ELSE}
   FastMM4,
 {$ENDIF}
-  Forms,
+  Forms, printer4lazarus,
   test_pic18x_compiler_main_form_unit in 'test_pic18x_compiler_main_form_unit.pas' {MainForm},
   pic18x_access_unit in 'pic18x_access_unit.pas',
   pic18x_assignment_statement_unit in 'pic18x_assignment_statement_unit.pas',
