@@ -3,10 +3,11 @@ program test_cpc_pic18x;
 uses
 {$IFDEF FPC}
   Interfaces,
+  printer4lazarus,
 {$ELSE}
   FastMM4,
 {$ENDIF}
-  Forms, printer4lazarus,
+  Forms, 
   test_pic18x_compiler_main_form_unit in 'test_pic18x_compiler_main_form_unit.pas' {MainForm},
   pic18x_access_unit in 'pic18x_access_unit.pas',
   pic18x_assignment_statement_unit in 'pic18x_assignment_statement_unit.pas',

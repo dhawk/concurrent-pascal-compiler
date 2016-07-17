@@ -2,7 +2,7 @@ program pic18x_include_file_generator;
 
 uses
   FastMM4,
-  Vcl.Forms,
+  Forms,
   main_form_unit in 'main_form_unit.pas' {MainForm},
   pic18x_typedef_unit in 'pic18x_typedef_unit.pas',
   pic_file_parser_unit in 'pic_file_parser_unit.pas',
