@@ -25,10 +25,8 @@ uses
 type
    TMainForm =
       class(TForm)
-         Button3: TButton;
          SrcToClipboardForTestButton: TButton;
          SrcToClipboardButton: TButton;
-         KernelTestWebbrowserBasePanel: TPanel;
          PageControl1: TPageControl;
          TabSheet1: TTabSheet;
          TabSheet2: TTabSheet;
@@ -39,7 +37,6 @@ type
          AssemblySourceMemo: TMemo;
          TabSheet4: TTabSheet;
          TestResultsMemo: TMemo;
-         TestSimulatorButton: TButton;
          TestCompilerButton: TButton;
          RunButton: TButton;
          Label1: TLabel;
@@ -53,20 +50,12 @@ type
          procedure CompileMemoButtonClick
             (Sender: TObject
             );
-         procedure TestSimulatorButtonClick(Sender: TObject);
          procedure TestCompilerButtonClick(Sender: TObject);
          procedure RunButtonClick(Sender: TObject);
          procedure CleanupTestSrcButtonClick(Sender: TObject);
-         procedure Button3Click(Sender: TObject);
          procedure SrcToClipboardForTestButtonClick(Sender: TObject);
          procedure SrcToClipboardButtonClick(Sender: TObject);
          procedure FormCreate(Sender: TObject);
-      public
-{$IFDEF FPC}
-         kernel_test_result_html_viewer: THtmlViewer;
-{$ELSE}
-         kernel_test_result_html_viewer: TWebBrowser;
-{$ENDIF}
       end;
 
 var
@@ -195,57 +184,6 @@ begin
       end
 end;
 
-procedure TMainForm.Button3Click(Sender: TObject);
-   var
-      i: integer;
-      sl: TStringList;
-      untested: boolean;
-      Doc: Variant;
-   begin
-      sl := TStringList.Create;
-      GenerateKernelTestCoverageMap := true;
-      TestResultsMemo.Clear;
-      number_of_tests := 0;
-      number_of_errors := 0;
-      run_kernel_tests;
-      TestResultsMemo.Lines.Add (format ('%d tests run, %d errors', [number_of_tests, number_of_errors]));
-      sl.Add('<body bgcolor="#FFFFFF">');
-      sl.Add('<font face="courier new">');
-      for i := 1 to Length(KernelInstructions)-1
-      do begin
-            untested := (KernelInstructions[i].execution_count = 0)
-                        and
-                        not ((KernelInstructions[i].classname = 'TAssemblyLabel')
-                             or
-                             (KernelInstructions[i].classname = 'TAssemblySourceBlankLine')
-                             or
-                             (KernelInstructions[i].classname = 'TAssemblyComment')
-                             or
-                             (KernelInstructions[i].classname = 'TSourceLine')
-                            );
-            if untested
-            then
-               sl.Add('<font color=red>');
-            sl.Add(StringReplace (KernelInstructions[i].instrxxx, ' ', '&nbsp', [rfReplaceAll]) + '<br>');
-            if untested
-            then
-               sl.Add('</font>')
-         end;
-      sl.Add('</font>');
-      sl.Add('</body>');
-{$IFDEF FPC}
-      kernel_test_result_html_viewer.LoadFromString (sl.Text);
-{$ELSE}
-      Doc := kernel_test_result_html_viewer.Document;
-      Doc.Clear;
-      Doc.Write (sl.Text);
-      Doc.Close;
-{$ENDIF}
-      GenerateKernelTestCoverageMap := false;
-      SetLength (KernelInstructions, 0);
-      sl.Free
-   end;
-
 procedure TMainForm.SrcToClipboardForTestButtonClick(Sender: TObject);
    var
       i: integer;
@@ -282,31 +220,18 @@ procedure TMainForm.ClearMemoButtonClick
       Memo.Clear
    end;
 
-procedure TMainForm.TestSimulatorButtonClick(Sender: TObject);
-   begin
-      number_of_tests := 0;
-      number_of_errors := 0;
-      TestResultsMemo.Clear;
-      run_instruction_simulation_tests
-   end;
-
 procedure TMainForm.TestCompilerButtonClick(Sender: TObject);
 {$IFNDEF FPC}
    var
       v: OleVariant;
 {$ENDIF}
    begin
-      TestResultsMemo.Lines.Add (format ('%d tests run, %d errors', [number_of_tests, number_of_errors]));
-{$IFDEF FPC}
-      kernel_test_result_html_viewer.LoadFromString ('<body bgcolor="#FFFFFF"></body>');
-{$ELSE}
-      v := 'about:blank';
-      kernel_test_result_html_viewer.navigate2 (v);
-{$ENDIF}
       TestResultsMemo.Clear;
       number_of_tests := 0;
       number_of_errors := 0;
-      RunTests
+      RunTests;
+      TestResultsMemo.Lines.Add ('');
+      TestResultsMemo.Lines.Add (format ('%d tests run, %d errors', [number_of_tests, number_of_errors]))
    end;
 
 procedure TMainForm.CompileMemoButtonClick
@@ -420,26 +345,7 @@ procedure TMainForm.RunButtonClick(Sender: TObject);
    end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
-{$IFNDEF FPC}
-   var
-      v: OleVariant;
-{$ENDIF}
    begin
-{$IFDEF FPC}
-      kernel_test_result_html_viewer := THtmlViewer.Create (self);
-      kernel_test_result_html_viewer.Parent := KernelTestWebbrowserBasePanel;
-      kernel_test_result_html_viewer.LoadFromString ('<body bgcolor="#FFFFFF"></body>');
-{$ELSE}
-      KernelTestWebbrowserBasePanel.BevelWidth := 1;
-      KernelTestWebbrowserBasePanel.BorderWidth := 0;
-      KernelTestWebbrowserBasePanel.BevelInner := bvNone;
-      KernelTestWebbrowserBasePanel.BevelOuter := bvRaised;
-      kernel_test_result_html_viewer := TWebBrowser.Create(self);
-      TWinControl(kernel_test_result_html_viewer).Parent := KernelTestWebbrowserBasePanel;
-      v := 'about:blank';
-      kernel_test_result_html_viewer.navigate2 (v);
-{$ENDIF}
-      kernel_test_result_html_viewer.Align := alClient;
       PageControl1.ActivePageIndex := 0;
       SetCurrentDir (ExtractFilePath(ParamStr(0)) + 'pic18x' + PathDelim + 'compiler_test_cases')
    end;

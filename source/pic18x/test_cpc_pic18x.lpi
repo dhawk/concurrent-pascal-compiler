@@ -224,7 +224,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="..\cpc_core;..\lib;common;$(ProjOutDir)"/>
-      <OtherUnitFiles Value="..\lib\htmlviewer;..\cpc_core;..\lib;..\lib\fastmm;..\lib\mparith;common"/>
+      <OtherUnitFiles Value="..\cpc_core;..\lib;..\lib\fastmm;..\lib\mparith;common"/>
       <UnitOutputDirectory Value="..\..\obj\test_cpc_pic18x"/>
     </SearchPaths>
     <Parsing>

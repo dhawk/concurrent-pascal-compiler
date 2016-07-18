@@ -21,28 +21,30 @@ object MainForm: TMainForm
   object PageControl1: TPageControl
     Left = 8
     Top = 8
-    Width = 1180
-    Height = 745
-    ActivePage = TabSheet4
+    Width = 1196
+    Height = 759
+    ActivePage = TabSheet1
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 0
     object TabSheet1: TTabSheet
       Caption = 'Source'
+      ExplicitWidth = 1172
+      ExplicitHeight = 717
       DesignSize = (
-        1172
-        717)
+        1188
+        731)
       object Label1: TLabel
         Left = 648
-        Top = 697
+        Top = 696
         Width = 31
         Height = 13
         Caption = 'Label1'
       end
       object Memo: TMemo
-        Left = 24
+        Left = 16
         Top = 16
         Width = 1145
-        Height = 481
+        Height = 495
         Anchors = [akLeft, akTop, akBottom]
         BevelEdges = []
         Font.Charset = DEFAULT_CHARSET
@@ -54,11 +56,12 @@ object MainForm: TMainForm
         ParentFont = False
         ScrollBars = ssBoth
         TabOrder = 0
+        ExplicitHeight = 481
       end
       object CompileResultsMemo: TMemo
         Left = 16
-        Top = 520
-        Width = 1145
+        Top = 534
+        Width = 1161
         Height = 149
         Anchors = [akLeft, akRight, akBottom]
         Font.Charset = DEFAULT_CHARSET
@@ -70,79 +73,92 @@ object MainForm: TMainForm
         ParentFont = False
         ScrollBars = ssBoth
         TabOrder = 1
+        ExplicitTop = 520
+        ExplicitWidth = 1145
       end
       object ClearMemoButton: TButton
         Left = 16
-        Top = 689
+        Top = 703
         Width = 75
         Height = 25
         Anchors = [akLeft, akBottom]
         Caption = 'Clear'
         TabOrder = 2
         OnClick = ClearMemoButtonClick
+        ExplicitTop = 689
       end
       object CompileMemoButton: TButton
         Left = 112
-        Top = 689
+        Top = 703
         Width = 97
         Height = 25
         Anchors = [akLeft, akBottom]
         Caption = 'Compile Memo'
         TabOrder = 3
         OnClick = CompileMemoButtonClick
+        ExplicitTop = 689
       end
       object RunButton: TButton
         Left = 528
-        Top = 689
+        Top = 702
         Width = 75
         Height = 25
         Anchors = [akLeft, akBottom]
         Caption = 'Run'
         TabOrder = 4
         OnClick = RunButtonClick
+        ExplicitTop = 688
       end
       object CleanupTestSrcButton: TButton
-        Left = 705
-        Top = 689
+        Left = 721
+        Top = 702
         Width = 97
         Height = 25
         Anchors = [akRight, akBottom]
         Caption = 'cleanup test src'
         TabOrder = 5
         OnClick = CleanupTestSrcButtonClick
+        ExplicitLeft = 705
+        ExplicitTop = 688
       end
       object SrcToClipboardForTestButton: TButton
-        Left = 895
-        Top = 690
+        Left = 911
+        Top = 703
         Width = 115
         Height = 25
         Anchors = [akRight, akBottom]
         Caption = 'Src->Clipboard 4 test'
         TabOrder = 6
         OnClick = SrcToClipboardForTestButtonClick
+        ExplicitLeft = 895
+        ExplicitTop = 689
       end
       object SrcToClipboardButton: TButton
-        Left = 808
-        Top = 689
+        Left = 824
+        Top = 702
         Width = 81
         Height = 25
         Anchors = [akRight, akBottom]
         Caption = 'Src->Clipboard'
         TabOrder = 7
         OnClick = SrcToClipboardButtonClick
+        ExplicitLeft = 808
+        ExplicitTop = 688
       end
     end
     object TabSheet2: TTabSheet
       Caption = 'Assembly'
       ImageIndex = 1
+      ExplicitWidth = 1172
+      ExplicitHeight = 717
       DesignSize = (
-        1172
-        717)
+        1188
+        731)
       object AssemblySourceMemo: TMemo
         Left = 24
         Top = 24
-        Width = 1145
-        Height = 641
+        Width = 1161
+        Height = 655
         Anchors = [akLeft, akTop, akRight, akBottom]
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
@@ -153,11 +169,15 @@ object MainForm: TMainForm
         ParentFont = False
         ScrollBars = ssVertical
         TabOrder = 0
+        ExplicitWidth = 1145
+        ExplicitHeight = 641
       end
     end
     object TabSheet3: TTabSheet
       Caption = 'Trace'
       ImageIndex = 4
+      ExplicitWidth = 1172
+      ExplicitHeight = 717
       object Label2: TLabel
         Left = 27
         Top = 27
@@ -191,16 +211,18 @@ object MainForm: TMainForm
       end
     end
     object TabSheet4: TTabSheet
-      Caption = 'Simulator Test'
+      Caption = 'Compiler Tests'
       ImageIndex = 3
+      ExplicitWidth = 1172
+      ExplicitHeight = 717
       DesignSize = (
-        1172
-        717)
+        1188
+        731)
       object TestResultsMemo: TMemo
         Left = 32
         Top = 32
-        Width = 1121
-        Height = 217
+        Width = 1137
+        Height = 609
         Anchors = [akLeft, akTop, akRight]
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
@@ -211,50 +233,18 @@ object MainForm: TMainForm
         ParentFont = False
         ScrollBars = ssVertical
         TabOrder = 0
-      end
-      object TestSimulatorButton: TButton
-        Left = 704
-        Top = 672
-        Width = 185
-        Height = 25
-        Anchors = [akLeft, akBottom]
-        Caption = 'Test PIC18E Instruction Simulator'
-        TabOrder = 1
-        OnClick = TestSimulatorButtonClick
+        ExplicitWidth = 1121
       end
       object TestCompilerButton: TButton
         Left = 24
-        Top = 672
+        Top = 686
         Width = 89
         Height = 25
         Anchors = [akLeft, akBottom]
         Caption = 'Test Compiler'
-        TabOrder = 2
+        TabOrder = 1
         OnClick = TestCompilerButtonClick
-      end
-      object Button3: TButton
-        Left = 600
-        Top = 672
-        Width = 75
-        Height = 25
-        Anchors = [akLeft, akBottom]
-        Caption = 'Test Kernel'
-        TabOrder = 3
-        OnClick = Button3Click
-      end
-      object KernelTestWebbrowserBasePanel: TPanel
-        Left = 32
-        Top = 288
-        Width = 1121
-        Height = 361
-        Anchors = [akLeft, akTop, akRight, akBottom]
-        BevelInner = bvRaised
-        BevelOuter = bvLowered
-        BevelWidth = 2
-        BorderWidth = 1
-        Caption = 'KernelTestWebbrowserBasePanel'
-        UseDockManager = False
-        TabOrder = 4
+        ExplicitTop = 672
       end
     end
   end
