@@ -255,7 +255,7 @@ function symbol_id (symbol: string): integer;
 
 IMPLEMENTATION
 
-uses wirth_balanced_binary_tree_unit, cpc_target_cpu_unit, cpc_common_unit, ShLwApi;
+uses wirth_balanced_binary_tree_unit, cpc_target_cpu_unit, cpc_common_unit;
 
 type
    TSymbolInfo =
