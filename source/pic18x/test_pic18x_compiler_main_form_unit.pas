@@ -10,7 +10,6 @@ uses
 {$ifdef FPC}
    LCLType, LMessages,
    LCLIntf, LResources,
-   htmlview,
 {$ELSE}
    Windows,
    ActiveX,
@@ -249,13 +248,15 @@ procedure TMainForm.CompileMemoButtonClick
       AssemblySourceMemo.Lines.Assign(ProgramCode.assembly_source_code);
       ProgramCode.Clear;
       CPU.deallocate_special_sfrs;
+{$IFDEF MSWINDOWS}
       if compilation_result = compile_error_in_source then
          begin
             Memo.SetFocus;
- //           Memo.SelStart := Memo.Perform (EM_LINEINDEX, compilation.compiler_error_source_location.line_no-1, 0) + compilation.compiler_error_source_location.line_idx-1;
+            Memo.SelStart := Memo.Perform (EM_LINEINDEX, compilation.compiler_error_source_location.line_no-1, 0) + compilation.compiler_error_source_location.line_idx-1;
             Memo.SelLength := 0;
             Memo.Perform (EM_SCROLLCARET, 0, 0)
          end;
+{$ENDIF}
       compilation.Free;
       pic_info_Free;
       no_sleep_on_idle := false
