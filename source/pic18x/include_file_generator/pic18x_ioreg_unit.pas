@@ -3,7 +3,7 @@ UNIT pic18x_ioreg_unit;
 INTERFACE
 
 uses
-   pic18x_information_unit, Generics.Collections, Generics.Defaults,
+   pic18x_information_unit, Generics.Collections,
    pic18x_typedef_unit, common_unit, all_pic18x_sfr_field_info_unit,
    combo_type_unit;
 
@@ -23,7 +23,7 @@ type
 
 IMPLEMENTATION
 
-uses System.Classes, System.SysUtils, System.RegularExpressions;
+uses SysUtils, RegularExpressions, Generics.Defaults;
 
 constructor tIoreg.Create (_sfr_name: string; _sfr_addr: integer; _typedef: tTypeDef);
    begin

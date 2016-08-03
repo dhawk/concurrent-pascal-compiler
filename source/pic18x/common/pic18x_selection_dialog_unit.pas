@@ -7,22 +7,16 @@ UNIT pic18x_selection_dialog_unit;
 INTERFACE
 
 uses
-{$IFnDEF FPC}
-  Windows,
+{$IFDEF FPC}
+   LCLIntf, LCLType, LMessages,
 {$ELSE}
-  LCLIntf, LCLType, LMessages,
+   Windows,
 {$ENDIF}
-  Messages,
-   SysUtils,
-   Variants,
-   Classes,
-   Graphics,
    Controls,
    Forms,
-   Dialogs,
    StdCtrls,
    ExtCtrls,
-   dijkstra_smoothsort_unit;
+   dijkstra_smoothsort_unit, Classes;
 
 type
    TStringClass =
@@ -52,14 +46,14 @@ type
       end;
 
 var
-  Pic18xSelectionDialog: TPic18xSelectionDialog;
+   Pic18xSelectionDialog: TPic18xSelectionDialog;
 
 function ComparePICNames (L, R: string): integer;
 
 IMPLEMENTATION
 
 uses
-   regular_expression_unit, cpc_common_unit;
+   regular_expression_unit, SysUtils;
 
 {$R *.dfm}
 

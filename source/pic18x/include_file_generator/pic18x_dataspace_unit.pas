@@ -16,7 +16,7 @@ type
 
 IMPLEMENTATION
 
-uses System.RegularExpressions, System.SysUtils;
+uses SysUtils;
 
 constructor tDataSpaceList.Create (_pic_info: TPICInfo);
    var

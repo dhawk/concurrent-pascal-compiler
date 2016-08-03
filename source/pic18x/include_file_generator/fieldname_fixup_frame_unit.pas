@@ -3,9 +3,8 @@ UNIT fieldname_fixup_frame_unit;
 INTERFACE
 
 uses
-   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
-   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls,
-   System.RegularExpressions, Vcl.ExtCtrls, combo_type_unit;
+   Windows, Forms, StdCtrls,
+   RegularExpressions, ExtCtrls, combo_type_unit, Controls, Classes;
 
 type
    TFieldnameFixupFrame =
@@ -55,7 +54,7 @@ function GetNewTAddFieldObject (_fieldname: string; _bitno, _width: integer): TA
 IMPLEMENTATION
 
 uses
-   combo_type_dialog_unit, add_field_frame_unit;
+   combo_type_dialog_unit, add_field_frame_unit, SysUtils, Graphics;
 
 {$R *.dfm}
 

@@ -268,7 +268,7 @@ IMPLEMENTATION
 
 uses
    cpc_common_unit, cpc_access_unit, cpc_target_cpu_unit, cpc_types_unit, cpc_expressions_unit,
-   cpc_constant_expression_unit, cpc_statements_unit, SysUtils;
+   cpc_constant_expression_unit, cpc_statements_unit;
 
 procedure check_for_valid_ioreg_type (typedef: TTypeDef; typedef_src_loc: TSourceLocation);
    var

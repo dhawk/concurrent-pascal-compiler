@@ -3,9 +3,8 @@ UNIT add_field_frame_unit;
 INTERFACE
 
 uses
-   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
-   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Samples.Spin,
-   Vcl.StdCtrls, Vcl.ExtCtrls, combo_type_unit;
+   Windows, Forms, Spin,
+   StdCtrls, ExtCtrls, combo_type_unit, Controls, Classes;
 
 type
    TAddFieldFrame =
@@ -54,7 +53,7 @@ type
 IMPLEMENTATION
 
 uses
-   combo_type_dialog_unit, System.Math;
+   combo_type_dialog_unit, Math, SysUtils, Graphics;
 
 {$R *.dfm}
 

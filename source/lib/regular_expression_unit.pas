@@ -23,7 +23,7 @@ uses
    {$IFDEF USE_PERLREGEX}
    PerlRegEx;
    {$ELSE}
-   System.RegularExpressions;
+   RegularExpressions;
    {$ENDIF}
 {$ENDIF}
 

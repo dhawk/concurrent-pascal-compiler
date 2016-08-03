@@ -28,7 +28,12 @@ uses
   choose_c_variable_listing_unit in 'choose_c_variable_listing_unit.pas' {ChooseCOrAssemblyTypeListingForm},
   process_all_pic_files_dlg_unit in 'process_all_pic_files_dlg_unit.pas' {ProcessAllPICFilesDlg},
   syntax_check_all_include_files_dialog_unit in 'syntax_check_all_include_files_dialog_unit.pas' {SyntaxCheckAllIncludeFilesDialog},
-  add_field_frame_unit in 'add_field_frame_unit.pas' {AddFieldFrame: TFrame};
+  add_field_frame_unit in 'add_field_frame_unit.pas' {AddFieldFrame: TFrame},
+  cpc_blocks_unit in '..\..\cpc_core\cpc_blocks_unit.pas',
+  cpc_definitions_unit in '..\..\cpc_core\cpc_definitions_unit.pas',
+  LibXmlComps in '..\..\lib\LibXmlComps.pas',
+  LibXmlParser in '..\..\lib\LibXmlParser.pas',
+  view_c_declarations_unit in 'view_c_declarations_unit.pas' {ViewCDeclarationsForm};
 
 {$R *.res}
 

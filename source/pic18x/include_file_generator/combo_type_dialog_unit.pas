@@ -3,11 +3,8 @@ UNIT combo_type_dialog_unit;
 INTERFACE
 
 uses
-   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Generics.Collections, Generics.Defaults,
-   System.RegularExpressions, Vcl.StdCtrls, LibXmlComps, LibXmlParser, Vcl.ComCtrls, Vcl.TabNotBk,
-   combo_type_sfr_pattern_frame_unit, Vcl.Samples.Spin, combo_type_unit,
-   Vcl.ExtCtrls;
+   Windows, Classes, Controls, Forms, StdCtrls, ComCtrls, TabNotBk,
+   combo_type_sfr_pattern_frame_unit, Spin, combo_type_unit, ExtCtrls;
 
 type
    t_var_sfr_list =
@@ -138,10 +135,10 @@ IMPLEMENTATION
 {$R *.dfm}
 
 uses
-   System.UITypes, all_pic18x_sfr_field_info_unit, main_form_unit, Vcl.Menus,
-   fieldname_fixup_frame_unit, pic18x_selection_dialog_unit,
-   choose_c_variable_listing_unit, view_c_declarations_unit,
-  add_field_frame_unit;
+   all_pic18x_sfr_field_info_unit, main_form_unit, Menus, Graphics, RegularExpressions,
+   fieldname_fixup_frame_unit, pic18x_selection_dialog_unit, Generics.Collections, Generics.Defaults,
+   choose_c_variable_listing_unit, view_c_declarations_unit, Dialogs,
+   add_field_frame_unit, SysUtils;
 
 const
    SFR_Patterns_Tab      = 0;

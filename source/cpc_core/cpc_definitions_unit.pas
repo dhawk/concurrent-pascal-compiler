@@ -6,7 +6,7 @@ UNIT cpc_definitions_unit;
 
 INTERFACE
 
-uses cpc_common_unit, cpc_source_analysis_unit, Classes;
+uses cpc_common_unit, cpc_source_analysis_unit;
 
 type
    TDefinition = class;

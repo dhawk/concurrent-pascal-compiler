@@ -3,7 +3,7 @@ UNIT pic18x_information_unit;
 INTERFACE
 
 uses
-  System.Classes, common_unit;
+  Classes, common_unit;
 
 type
    TPICInfo = class;
@@ -149,7 +149,7 @@ function is_cpu_reg (id: string): boolean;
 IMPLEMENTATION
 
 uses
-  System.SysUtils, wirth_balanced_binary_tree_unit;
+  SysUtils, wirth_balanced_binary_tree_unit;
 
 type
    TIDAddr =

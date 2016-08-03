@@ -1,14 +1,9 @@
 UNIT main_form_unit;
 
-// NOTE SAX LIBRARY REQUIRES RANGE CHECKING TO BE OFF!!!!
-
 INTERFACE
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.TabNotBk, Vcl.ComCtrls,
-  Vcl.ExtCtrls, processing_frame_unit, Vcl.OleCtrls, SHDocVw, Vcl.Menus,
-  Data.DB, adsdata, adsfunc, adstable, adscnnct;
+   Windows, Classes, Controls, Forms, StdCtrls, Menus;
 
 type
    TMainForm =
@@ -26,12 +21,12 @@ type
          ComboTypeMainMenuItem: TMenuItem;
          EditComboTypeMenuItem: TMenuItem;
          NewComboTypeMenuItem: TMenuItem;
-    Button1: TButton;
-    Button2: TButton;
+         Button1: TButton;
+         Button2: TButton;
          Label1: TLabel;
-    Button3: TButton;
-    SyntaxCheckIncludeFilesMenuItem: TMenuItem;
-    About1: TMenuItem;
+         Button3: TButton;
+         SyntaxCheckIncludeFilesMenuItem: TMenuItem;
+         About1: TMenuItem;
          procedure Button4Click(Sender: TObject);
          procedure Button5Click(Sender: TObject);
          procedure ViewPICFileMenuItemClick(Sender: TObject);
@@ -39,11 +34,10 @@ type
          procedure ViewIncFileMenuItemClick(Sender: TObject);
          procedure ProcessAllPICFilesMenuItemClick(Sender: TObject);
          procedure ComboTypeEditMenuItemClick(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
-    procedure SyntaxCheckIncludeFilesMenuItemClick(Sender: TObject);
-    procedure NewComboTypeMenuItemClick(Sender: TObject);
-    procedure Button3Click(Sender: TObject);
-    procedure About1Click(Sender: TObject);
+         procedure Button1Click(Sender: TObject);
+         procedure SyntaxCheckIncludeFilesMenuItemClick(Sender: TObject);
+         procedure NewComboTypeMenuItemClick(Sender: TObject);
+         procedure Button3Click(Sender: TObject);
       public
          procedure AppendToMemo1 (s: string);
          procedure Discard (s: string);
@@ -60,13 +54,12 @@ IMPLEMENTATION
 {$R *.dfm}
 
 uses
-   pic18x_typedef_unit, pic_file_parser_unit, win32_utils,
-   pic18x_information_unit, process_pic_file_unit, ClipBrd, file_viewer_unit,
-   pic18x_interrupt_variable_unit, pic18x_config_bits_unit, pic18x_ioreg_unit,
+   win32_utils, SysUtils,
+   ClipBrd, file_viewer_unit,
    process_all_pic_files_dlg_unit, pic18x_selection_dialog_unit,
    combo_type_dialog_unit, all_pic18x_sfr_field_info_unit, combo_type_unit,
-   select_combo_type_dlg_unit, view_c_declarations_unit,
-  syntax_check_all_include_files_dialog_unit;
+   select_combo_type_dlg_unit,
+   syntax_check_all_include_files_dialog_unit;
 
 
 //============
@@ -112,11 +105,6 @@ procedure TMainForm.SyntaxCheckIncludeFilesMenuItemClick(Sender: TObject);
    begin
       SyntaxCheckAllIncludeFilesDialog.ShowModal
    end;
-
-procedure TMainForm.About1Click(Sender: TObject);
-begin
-   c
-end;
 
 procedure TMainForm.AppendToMemo1 (s: string);
    begin

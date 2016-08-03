@@ -17,7 +17,7 @@ IMPLEMENTATION
 uses
    pic18x_information_unit, pic_file_parser_unit, pic18x_interrupt_variable_unit,
    pic18x_config_bits_unit, pic18x_16bit_timer_unit, win32_utils,
-   pic18x_typedef_unit, pic18x_ioreg_unit, main_form_unit, System.SysUtils,
+   pic18x_typedef_unit, pic18x_ioreg_unit, main_form_unit, SysUtils,
    pic18x_dataspace_unit;
 
 procedure process_pic_file (pic_file_name: string;

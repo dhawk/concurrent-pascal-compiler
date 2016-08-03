@@ -3,8 +3,8 @@ UNIT pic18x_typedef_unit;
 INTERFACE
 
 uses
-   SysUtils, Generics.Collections, Generics.Defaults, System.Classes, pic18x_information_unit,
-   System.RegularExpressions, common_unit;
+   Generics.Collections, Classes, pic18x_information_unit,
+   RegularExpressions, common_unit;
 
 type
    tTypeDef =
@@ -79,6 +79,8 @@ type
 
 IMPLEMENTATION
 
+uses
+   SysUtils, Generics.Defaults;
 
 //===============
 //  tTypeDef.tField

@@ -17,7 +17,7 @@ type
 
 IMPLEMENTATION
 
-uses System.RegularExpressions, System.SysUtils;
+uses RegularExpressions, SysUtils;
 
 constructor tTimer16List.Create (_pic_info: TPICInfo);
    var

@@ -3,7 +3,7 @@ UNIT win32_utils;
 INTERFACE
 
 uses
-  StdCtrls, Spin, System.Classes;
+  Spin, Classes;
 
 function min (a,b: integer): integer;
    overload;
@@ -28,7 +28,7 @@ function GetDosOutput(CommandLine: string; _WorkDir: string = 'C:\'): TStringLis
 
 IMPLEMENTATION
 
-uses Winapi.Windows, SysUtils, Dialogs, Vcl.Forms;
+uses Windows, SysUtils;
 
 //type
 //   TSetOfChar = set of char;
@@ -279,7 +279,7 @@ function GetTempFileName (const Extension: string): string;
 1:    FillChar (Path, MAX_PATH, 0);
       GetTempPath (SizeOf(Path), Path);
       FillChar (FileName, MAX_PATH, 0);
-      Winapi.Windows.GetTempFileName (Path, '~', 0, FileName);
+      Windows.GetTempFileName (Path, '~', 0, FileName);
       result := FileName;
       if LowerCase(ExtractFileExt(result)) = LowerCase(Extension) then
          exit;

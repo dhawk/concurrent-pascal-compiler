@@ -2,9 +2,8 @@ UNIT multi_threaded_processing_dialog_base_class_unit;
 
 INTERFACE
 
-uses Winapi.Windows, System.SysUtils, System.Classes, Vcl.Graphics, Vcl.Forms,
-  Vcl.Controls, Vcl.StdCtrls, Vcl.Buttons, Vcl.ExtCtrls, processing_frame_unit,
-  all_pic18x_sfr_field_info_unit, common_unit, combo_type_unit;
+uses Windows, SysUtils, Classes, Forms,
+  Controls, StdCtrls,  ExtCtrls, processing_frame_unit;
 
 type
    TDirectoryList =
@@ -91,7 +90,7 @@ var
 
 IMPLEMENTATION
 
-uses process_pic_file_unit, main_form_unit, win32_utils;
+uses win32_utils;
 
 {$R *.dfm}
 

@@ -3,9 +3,9 @@ UNIT view_c_declarations_unit;
 INTERFACE
 
 uses
-   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls,
-   Vcl.TabNotBk, combo_type_dialog_unit;
+   Windows, Classes,
+   Controls, Forms, StdCtrls, ComCtrls,
+   TabNotBk, combo_type_dialog_unit;
 
 type
    TViewCDeclarationsForm =
@@ -19,6 +19,9 @@ type
       end;
 
 IMPLEMENTATION
+
+uses
+   Graphics, SysUtils;
 
 {$R *.dfm}
 

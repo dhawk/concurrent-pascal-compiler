@@ -3,8 +3,7 @@ UNIT choose_c_variable_listing_unit;
 INTERFACE
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, combo_type_dialog_unit;
+  Windows, Forms, StdCtrls, combo_type_dialog_unit, Controls, Classes;
 
 type
    TChooseCOrAssemblyTypeListingForm =

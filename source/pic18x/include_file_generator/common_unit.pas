@@ -10,7 +10,7 @@ function sanitize_xml_strings (s: string): string;
 IMPLEMENTATIOn
 
 uses
-  System.SysUtils, System.RegularExpressions;
+  SysUtils;
 
 function sanitize_xml_strings (s: string): string;
    begin

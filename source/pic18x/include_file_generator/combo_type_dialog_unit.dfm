@@ -103,7 +103,7 @@ object ComboTypeDialog: TComboTypeDialog
         Left = 8
         Top = 58
         Width = 782
-        Height = 341
+        Height = 287
         HorzScrollBar.Tracking = True
         VertScrollBar.Tracking = True
         Anchors = [akLeft, akTop, akRight, akBottom]
@@ -182,7 +182,7 @@ object ComboTypeDialog: TComboTypeDialog
         Left = 112
         Top = 45
         Width = 676
-        Height = 282
+        Height = 228
         HorzScrollBar.Smooth = True
         HorzScrollBar.Tracking = True
         HorzScrollBar.Visible = False
@@ -202,7 +202,7 @@ object ComboTypeDialog: TComboTypeDialog
       end
       object TestFieldNameFixupsEdit: TEdit
         Left = 10
-        Top = 328
+        Top = 274
         Width = 87
         Height = 21
         Anchors = [akLeft, akBottom]
@@ -210,7 +210,7 @@ object ComboTypeDialog: TComboTypeDialog
       end
       object TestFieldNameFixupsButton: TButton
         Left = 18
-        Top = 370
+        Top = 316
         Width = 75
         Height = 25
         Anchors = [akLeft, akBottom]
@@ -239,7 +239,7 @@ object ComboTypeDialog: TComboTypeDialog
         Left = 103
         Top = 11
         Width = 685
-        Height = 370
+        Height = 316
         Anchors = [akLeft, akTop, akRight, akBottom]
         TabOrder = 1
       end
@@ -282,7 +282,7 @@ object ComboTypeDialog: TComboTypeDialog
         Left = 0
         Top = 0
         Width = 799
-        Height = 203
+        Height = 149
         VertScrollBar.Tracking = True
         Align = alCustom
         Anchors = [akLeft, akTop, akRight, akBottom]
@@ -291,7 +291,7 @@ object ComboTypeDialog: TComboTypeDialog
           Left = 0
           Top = 0
           Width = 795
-          Height = 199
+          Height = 145
           Align = alClient
           Indent = 19
           TabOrder = 0

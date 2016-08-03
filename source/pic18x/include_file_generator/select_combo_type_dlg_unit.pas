@@ -2,8 +2,8 @@ unit select_combo_type_dlg_unit;
 
 interface
 
-uses Winapi.Windows, System.SysUtils, System.Classes, Vcl.Graphics, Vcl.Forms,
-  Vcl.Controls, Vcl.StdCtrls, Vcl.Buttons, Vcl.ExtCtrls, combo_type_unit;
+uses Windows, Classes, Forms,
+  Controls, StdCtrls, combo_type_unit;
 
 type
    TSelectComboTypeDlg =

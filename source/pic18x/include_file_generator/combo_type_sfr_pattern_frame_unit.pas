@@ -3,9 +3,7 @@ UNIT combo_type_sfr_pattern_frame_unit;
 INTERFACE
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls,
-  System.RegularExpressions;
+  Windows, Forms, StdCtrls, RegularExpressions, Classes, Controls;
 
 type
    t_proc_of_object = procedure of object;
@@ -28,6 +26,9 @@ type
       end;
 
 IMPLEMENTATION
+
+uses
+   Graphics;
 
 {$R *.dfm}
 

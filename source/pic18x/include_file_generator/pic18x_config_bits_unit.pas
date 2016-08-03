@@ -18,7 +18,7 @@ type
 IMPLEMENTATION
 
 uses
-  System.SysUtils, System.Classes, pic18x_common_unit;
+  SysUtils, pic18x_common_unit;
 
 constructor tConfigBits.Create (_pic_info: TPICInfo);
    begin

@@ -2,14 +2,14 @@ UNIT pic_file_parser_unit;
 
 INTERFACE
 
-uses pic18x_information_unit, LibXmlComps, LibXmlParser;
+uses pic18x_information_unit;
 
 function parse_pic_file (fn: string): TPICInfo;
 
 IMPLEMENTATION
 
 uses
-   System.Classes, System.SysUtils, wirth_balanced_binary_tree_unit;
+   Classes, SysUtils, wirth_balanced_binary_tree_unit, LibXmlComps, LibXmlParser;
 
 type
    TPICFileParser = class;
@@ -221,7 +221,7 @@ procedure TPICFileParser.XmlScannerStartTag(Sender: TObject; TagName: String; At
       var i: integer;
       begin
          for i := 0 to Attributes.Count-1 do
-            if Attributes.Name(i) = attr_name then
+            if String(Attributes.Name(i)) = attr_name then
                begin
                   result := String(Attributes.Value(i));
                   exit

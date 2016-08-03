@@ -3,10 +3,8 @@ UNIT process_all_pic_files_dlg_unit;
 INTERFACE
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
-  multi_threaded_processing_dialog_base_class_unit, Vcl.ExtCtrls, Vcl.StdCtrls,
-  all_pic18x_sfr_field_info_unit;
+  Windows, Classes, Controls, multi_threaded_processing_dialog_base_class_unit, ExtCtrls,
+  all_pic18x_sfr_field_info_unit, StdCtrls, Forms;
 
 type
    TProcessAllPICFilesDlg =
@@ -32,8 +30,7 @@ var
 IMPLEMENTATION
 
 uses
-   main_form_unit, win32_utils, process_pic_file_unit, combo_type_unit,
-   common_unit;
+   SysUtils, main_form_unit, process_pic_file_unit, combo_type_unit;
 
 {$R *.dfm}
 

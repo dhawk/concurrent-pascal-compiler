@@ -3,9 +3,9 @@ UNIT all_pic18x_sfr_field_info_unit;
 INTERFACE
 
 uses
-  System.SysUtils, System.Classes,
-  pic18x_information_unit, Generics.Collections, Generics.Defaults,
-  LibXmlParser, common_unit;
+   SysUtils,
+   pic18x_information_unit, Generics.Collections,
+   LibXmlParser;
 
 type
    tFileVersion = uint16;
@@ -58,7 +58,7 @@ var
 IMPLEMENTATION
 
 uses
-   System.Variants, LibXmlComps, System.Math, pic18x_selection_dialog_unit;
+   Math, pic18x_selection_dialog_unit, Classes, Generics.Defaults;
 
 {%CLASSGROUP 'Vcl.Controls.TControl'}
 

@@ -3,8 +3,8 @@ UNIT pic18x_interrupt_variable_unit;
 INTERFACE
 
 uses
-   pic18x_information_unit, Generics.Collections, Generics.Defaults,
-   System.Classes, common_unit;
+   pic18x_information_unit, Generics.Collections,
+   common_unit;
 
 type
    t_interrupt_variables =
@@ -33,7 +33,7 @@ type
 IMPLEMENTATION
 
 uses
-  System.SysUtils;
+  SysUtils, Generics.Defaults;
 
 constructor t_interrupt_variables.Create (pic_info: TPICInfo);
 

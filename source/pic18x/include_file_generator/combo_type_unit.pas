@@ -3,8 +3,7 @@ UNIT combo_type_unit;
 INTERFACe
 
 uses
-  System.RegularExpressions, Generics.Collections, Generics.Defaults,
-  System.Classes, LibXmlComps, LibXmlParser;
+  RegularExpressions, Generics.Collections, LibXmlParser;
 
 type
    TComboTypeSFRPattern =
@@ -130,7 +129,7 @@ function GetNew_TAddFieldObject (fieldname: string; bitno, width: integer): TAdd
 IMPLEMENTATION
 
 uses
-  System.SysUtils;
+  SysUtils, LibXmlComps, Classes, Generics.Defaults;
 
 var
    combo_type_file_name: string;

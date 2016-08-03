@@ -3,8 +3,7 @@ unit file_viewer_unit;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.OleCtrls, SHDocVw;
+  Windows, Classes, Controls, Forms, SHDocVw, OleCtrls;
 
 type
    TFileViewerForm =
@@ -20,7 +19,7 @@ type
 
 implementation
 
-uses win32_utils;
+uses win32_utils, SysUtils;
 
 {$R *.dfm}
 

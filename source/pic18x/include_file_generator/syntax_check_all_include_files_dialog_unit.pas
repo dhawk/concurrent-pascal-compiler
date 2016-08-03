@@ -3,8 +3,7 @@ unit syntax_check_all_include_files_dialog_unit;
 interface
 
 uses
-   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-   Vcl.Controls, Vcl.Forms, Vcl.Dialogs,  Vcl.ExtCtrls, Vcl.StdCtrls,
+   Windows, Classes, Controls, Forms, ExtCtrls, StdCtrls,
    multi_threaded_processing_dialog_base_class_unit;
 
 type
@@ -26,7 +25,7 @@ var
 implementation
 
 uses
-   main_form_unit, win32_utils;
+   SysUtils, main_form_unit, win32_utils;
 
 {$R *.dfm}
 

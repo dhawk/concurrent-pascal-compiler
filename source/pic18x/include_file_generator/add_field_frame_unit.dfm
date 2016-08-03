@@ -47,7 +47,7 @@ object AddFieldFrame: TAddFieldFrame
       MaxValue = 999
       MinValue = 1
       TabOrder = 3
-      Value = 0
+      Value = 1
       OnChange = ValidateOnChange
     end
   end
