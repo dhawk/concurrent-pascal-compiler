@@ -1,4 +1,4 @@
-﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 		<PropertyGroup>
 			<ProjectGuid>{603DFA37-AB24-4F4C-BE53-2EF460490687}</ProjectGuid>
 			<ProjectVersion>14.6</ProjectVersion>
@@ -127,13 +127,25 @@
 				<Form>AddFieldFrame</Form>
 				<DesignClass>TFrame</DesignClass>
 			</DCCReference>
-			<DCCReference Include="..\..\cpc_core\cpc_blocks_unit.pas"/>
-			<DCCReference Include="..\..\cpc_core\cpc_definitions_unit.pas"/>
 			<DCCReference Include="..\..\lib\LibXmlComps.pas"/>
 			<DCCReference Include="..\..\lib\LibXmlParser.pas"/>
 			<DCCReference Include="view_c_declarations_unit.pas">
 				<Form>ViewCDeclarationsForm</Form>
 			</DCCReference>
+			<DCCReference Include="..\..\cpc_core\cpc_access_unit.pas"/>
+			<DCCReference Include="..\..\cpc_core\cpc_blocks_unit.pas"/>
+			<DCCReference Include="..\..\cpc_core\cpc_common_unit.pas"/>
+			<DCCReference Include="..\..\cpc_core\cpc_constant_expression_unit.pas"/>
+			<DCCReference Include="..\..\cpc_core\cpc_core_objects_unit.pas"/>
+			<DCCReference Include="..\..\cpc_core\cpc_definitions_unit.pas"/>
+			<DCCReference Include="..\..\cpc_core\cpc_expressions_unit.pas"/>
+			<DCCReference Include="..\..\cpc_core\cpc_multi_precision_integer_unit.pas"/>
+			<DCCReference Include="..\..\cpc_core\cpc_simple_expression_unit.pas"/>
+			<DCCReference Include="..\..\cpc_core\cpc_source_analysis_unit.pas"/>
+			<DCCReference Include="..\..\cpc_core\cpc_statements_unit.pas"/>
+			<DCCReference Include="..\..\cpc_core\cpc_target_cpu_unit.pas"/>
+			<DCCReference Include="..\..\cpc_core\cpc_term_expression_unit.pas"/>
+			<DCCReference Include="..\..\cpc_core\cpc_types_unit.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>

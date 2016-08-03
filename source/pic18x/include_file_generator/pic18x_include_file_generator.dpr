@@ -29,11 +29,23 @@ uses
   process_all_pic_files_dlg_unit in 'process_all_pic_files_dlg_unit.pas' {ProcessAllPICFilesDlg},
   syntax_check_all_include_files_dialog_unit in 'syntax_check_all_include_files_dialog_unit.pas' {SyntaxCheckAllIncludeFilesDialog},
   add_field_frame_unit in 'add_field_frame_unit.pas' {AddFieldFrame: TFrame},
-  cpc_blocks_unit in '..\..\cpc_core\cpc_blocks_unit.pas',
-  cpc_definitions_unit in '..\..\cpc_core\cpc_definitions_unit.pas',
   LibXmlComps in '..\..\lib\LibXmlComps.pas',
   LibXmlParser in '..\..\lib\LibXmlParser.pas',
-  view_c_declarations_unit in 'view_c_declarations_unit.pas' {ViewCDeclarationsForm};
+  view_c_declarations_unit in 'view_c_declarations_unit.pas' {ViewCDeclarationsForm},
+  cpc_access_unit in '..\..\cpc_core\cpc_access_unit.pas',
+  cpc_blocks_unit in '..\..\cpc_core\cpc_blocks_unit.pas',
+  cpc_common_unit in '..\..\cpc_core\cpc_common_unit.pas',
+  cpc_constant_expression_unit in '..\..\cpc_core\cpc_constant_expression_unit.pas',
+  cpc_core_objects_unit in '..\..\cpc_core\cpc_core_objects_unit.pas',
+  cpc_definitions_unit in '..\..\cpc_core\cpc_definitions_unit.pas',
+  cpc_expressions_unit in '..\..\cpc_core\cpc_expressions_unit.pas',
+  cpc_multi_precision_integer_unit in '..\..\cpc_core\cpc_multi_precision_integer_unit.pas',
+  cpc_simple_expression_unit in '..\..\cpc_core\cpc_simple_expression_unit.pas',
+  cpc_source_analysis_unit in '..\..\cpc_core\cpc_source_analysis_unit.pas',
+  cpc_statements_unit in '..\..\cpc_core\cpc_statements_unit.pas',
+  cpc_target_cpu_unit in '..\..\cpc_core\cpc_target_cpu_unit.pas',
+  cpc_term_expression_unit in '..\..\cpc_core\cpc_term_expression_unit.pas',
+  cpc_types_unit in '..\..\cpc_core\cpc_types_unit.pas';
 
 {$R *.res}
 
