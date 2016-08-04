@@ -28,6 +28,8 @@ object MainForm: TMainForm
     TabOrder = 0
     object TabSheet1: TTabSheet
       Caption = 'Source'
+      ExplicitLeft = 0
+      ExplicitTop = 0
       ExplicitWidth = 1172
       ExplicitHeight = 717
       DesignSize = (
@@ -149,6 +151,8 @@ object MainForm: TMainForm
     object TabSheet2: TTabSheet
       Caption = 'Assembly'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
       ExplicitWidth = 1172
       ExplicitHeight = 717
       DesignSize = (
@@ -176,6 +180,8 @@ object MainForm: TMainForm
     object TabSheet3: TTabSheet
       Caption = 'Trace'
       ImageIndex = 4
+      ExplicitLeft = 0
+      ExplicitTop = 0
       ExplicitWidth = 1172
       ExplicitHeight = 717
       object Label2: TLabel
@@ -213,6 +219,8 @@ object MainForm: TMainForm
     object TabSheet4: TTabSheet
       Caption = 'Compiler Tests'
       ImageIndex = 3
+      ExplicitLeft = 0
+      ExplicitTop = 0
       ExplicitWidth = 1172
       ExplicitHeight = 717
       DesignSize = (

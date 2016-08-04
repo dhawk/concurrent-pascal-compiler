@@ -1,4 +1,4 @@
-	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 		<PropertyGroup>
 			<ProjectGuid>{603DFA37-AB24-4F4C-BE53-2EF460490687}</ProjectGuid>
 			<ProjectVersion>14.6</ProjectVersion>
@@ -146,6 +146,13 @@
 			<DCCReference Include="..\..\cpc_core\cpc_target_cpu_unit.pas"/>
 			<DCCReference Include="..\..\cpc_core\cpc_term_expression_unit.pas"/>
 			<DCCReference Include="..\..\cpc_core\cpc_types_unit.pas"/>
+			<DCCReference Include="..\..\lib\about_credit_frame_unit.pas">
+				<Form>AboutCreditFrame</Form>
+				<DesignClass>TFrame</DesignClass>
+			</DCCReference>
+			<DCCReference Include="about_box_unit.pas">
+				<Form>AboutBox</Form>
+			</DCCReference>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>

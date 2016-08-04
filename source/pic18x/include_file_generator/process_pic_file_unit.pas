@@ -75,7 +75,7 @@ procedure process_pic_file (pic_file_name: string;
                   FileAge (pic_file_directory + pic_file_name, pic_file_date);
                   output_xml_line (format ('   <Source filename="%s" mplabx_version="%s" filedate="%s"/>',
                                            [pic_file_name,
-                                            '3.23',
+                                            mplabx_version,
                                             FormatDateTime ('YYYY-MM-DD', pic_file_date)
                                            ]
                                           )

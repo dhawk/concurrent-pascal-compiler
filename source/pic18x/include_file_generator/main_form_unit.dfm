@@ -89,6 +89,10 @@ object MainForm: TMainForm
     Top = 8
     object ProcessTopMenuItem: TMenuItem
       Caption = 'Process'
+      object UnpackPICFilesfromMPLABX1: TMenuItem
+        Caption = 'Unpack PIC Files from MPLABX'
+        OnClick = UnpackPICFilesfromMPLABX1Click
+      end
       object ProcessAllPICFilesMenuItem: TMenuItem
         Caption = 'all PIC Files'
         OnClick = ProcessAllPICFilesMenuItemClick
@@ -125,7 +129,11 @@ object MainForm: TMainForm
       end
     end
     object About1: TMenuItem
-      Caption = 'About'
+      Caption = 'Help'
+      object About2: TMenuItem
+        Caption = 'About'
+        OnClick = About2Click
+      end
     end
   end
 end

@@ -298,20 +298,32 @@ constructor tIoregList.Create (pic_info: TPICInfo; pic_sfr_field_info: tMicroCon
                   end;
             result := false
          end;   // sfr_patterns_match
-
+      var
+         i: integer;
       begin  // process_combo_sfrs
+         for i := 0 to combo_type_list.Count-1 do
+            combo_type_list[i].eligible := true;
          for combo_type in combo_type_list do
-            try
-               for addr_slot_idx := 0 to pic_sfr_field_info.sfr_addr_slots.Count - combo_type.SFRPatterns.Count do
-                  if sufficient_contiguous_slots
-                     and
-                     sfr_patterns_match
-                  then
-                     Add (var_name, tIoreg.Create (var_name, pic_sfr_field_info.sfr_addr_slots[addr_slot_idx].addr, typedef))
-            except
-               on e: EConvertError do
-                  raise EConvertError.Create ('ComboType Field Name Fixup Error: ComboType=' + combo_type.TypeName + ', ' + e.Message)
-            end
+            if combo_type.eligible then
+               try
+                  for addr_slot_idx := 0 to pic_sfr_field_info.sfr_addr_slots.Count - combo_type.SFRPatterns.Count do
+                     if sufficient_contiguous_slots
+                        and
+                        sfr_patterns_match
+                     then
+                        begin
+                           Add (var_name, tIoreg.Create (var_name, pic_sfr_field_info.sfr_addr_slots[addr_slot_idx].addr, typedef));
+                           for i := 0 to combo_type_list.Count-1 do
+                              if (combo_type <> combo_type_list[i])
+                                 and
+                                 (combo_type.TypeName = combo_type_list[i].TypeName)
+                              then
+                                 combo_type_list[i].eligible := false
+                        end
+               except
+                  on e: EConvertError do
+                     raise EConvertError.Create ('ComboType Field Name Fixup Error: ComboType=' + combo_type.TypeName + ', ' + e.Message)
+               end
       end;   // process_combo_sfrs
 
    procedure process_joined_and_muxd_sfrs;

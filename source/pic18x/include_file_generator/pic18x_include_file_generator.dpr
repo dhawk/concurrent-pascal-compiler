@@ -45,7 +45,9 @@ uses
   cpc_statements_unit in '..\..\cpc_core\cpc_statements_unit.pas',
   cpc_target_cpu_unit in '..\..\cpc_core\cpc_target_cpu_unit.pas',
   cpc_term_expression_unit in '..\..\cpc_core\cpc_term_expression_unit.pas',
-  cpc_types_unit in '..\..\cpc_core\cpc_types_unit.pas';
+  cpc_types_unit in '..\..\cpc_core\cpc_types_unit.pas',
+  about_credit_frame_unit in '..\..\lib\about_credit_frame_unit.pas' {AboutCreditFrame: TFrame},
+  about_box_unit in 'about_box_unit.pas' {AboutBox};
 
 {$R *.res}
 
@@ -59,5 +61,6 @@ begin
   Application.CreateForm(TChooseCOrAssemblyTypeListingForm, ChooseCOrAssemblyTypeListingForm);
   Application.CreateForm(TProcessAllPICFilesDlg, ProcessAllPICFilesDlg);
   Application.CreateForm(TSyntaxCheckAllIncludeFilesDialog, SyntaxCheckAllIncludeFilesDialog);
+  Application.CreateForm(TAboutBox, AboutBox);
   Application.Run;
 end.

@@ -101,6 +101,7 @@ type
          SFRPatterns: TComboTypeSFRPatternList;
          FieldNameFixups: TFieldNameFixupList;
          AddFields: TAddFieldList;
+         eligible: boolean;
          constructor Create;
          constructor CreateNew;
          function Size: integer;
@@ -407,16 +408,16 @@ procedure TComboTypeList.SortIntoStandardOrder;
                      if result <> 0 then
                         exit;
 
-                     if L.Reversed < R.Reversed then
+                     if Length(L.SFRPatterns[0].sfrs) < Length(R.SFRPatterns[0].sfrs) then
                         result := -1
-                     else if L.Reversed > R.Reversed then
+                     else if Length(L.SFRPatterns[0].sfrs) > Length(R.SFRPatterns[0].sfrs) then
                         result := 1;
                      if result <> 0 then
                         exit;
 
-                     if Length(L.SFRPatterns[0].sfrs) < Length(R.SFRPatterns[0].sfrs) then
+                     if L.Reversed < R.Reversed then
                         result := -1
-                     else if Length(L.SFRPatterns[0].sfrs) > Length(R.SFRPatterns[0].sfrs) then
+                     else if L.Reversed > R.Reversed then
                         result := 1;
                      if result <> 0 then
                         exit;

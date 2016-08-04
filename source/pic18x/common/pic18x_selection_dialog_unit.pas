@@ -16,7 +16,8 @@ uses
    Forms,
    StdCtrls,
    ExtCtrls,
-   dijkstra_smoothsort_unit, Classes;
+   dijkstra_smoothsort_unit,
+   Classes;
 
 type
    TStringClass =
@@ -53,7 +54,7 @@ function ComparePICNames (L, R: string): integer;
 IMPLEMENTATION
 
 uses
-   regular_expression_unit, SysUtils;
+   regular_expression_unit, SysUtils, win32_utils;
 
 {$R *.dfm}
 

@@ -11,8 +11,8 @@
    </ComboType>
    <ComboType TypeName="tAD" VarNameFormatString="AD" Reversed="true">
          <SFRPattern>
-            <SFR regex="^ADCON2$"/>
             <SFR regex="^ADCON1$"/>
+            <SFR regex="^ADCON0$"/>
             <SFR regex="^ADRESL$"/>
             <SFR regex="^ADRESH$"/>
          </SFRPattern>

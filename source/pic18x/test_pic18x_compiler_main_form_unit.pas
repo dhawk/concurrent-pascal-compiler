@@ -220,10 +220,6 @@ procedure TMainForm.ClearMemoButtonClick
    end;
 
 procedure TMainForm.TestCompilerButtonClick(Sender: TObject);
-{$IFNDEF FPC}
-   var
-      v: OleVariant;
-{$ENDIF}
    begin
       TestResultsMemo.Clear;
       number_of_tests := 0;
