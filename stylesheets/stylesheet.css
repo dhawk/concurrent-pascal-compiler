@@ -1,6 +1,7 @@
 /*******************************************************************************
 Slate Theme for GitHub Pages
 by Jason Costello, @jsncostello
+minor modifications by David Hawk
 *******************************************************************************/
 
 @import url(normalize.css);
@@ -67,7 +68,7 @@ p {
 
 footer p {
   color: #f2f2f2;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 a {
@@ -297,6 +298,12 @@ Full-Width Styles
 }
 
 #main_content_wrap {
+  background: #212121;
+  border-top: 1px solid #111;
+  border-bottom: 1px solid #111;
+}
+
+#nav_content_wrap {
   background: #f2f2f2;
   border-top: 1px solid #111;
   border-bottom: 1px solid #111;
