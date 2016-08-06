@@ -298,13 +298,14 @@ constructor tIoregList.Create (pic_info: TPICInfo; pic_sfr_field_info: tMicroCon
                   end;
             result := false
          end;   // sfr_patterns_match
+
       var
-         i: integer;
+         ct: TComboType;
       begin  // process_combo_sfrs
-         for i := 0 to combo_type_list.Count-1 do
-            combo_type_list[i].eligible := true;
          for combo_type in combo_type_list do
-            if combo_type.eligible then
+            combo_type.typename_defined := false;
+         for combo_type in combo_type_list do
+            if not combo_type.typename_defined then
                try
                   for addr_slot_idx := 0 to pic_sfr_field_info.sfr_addr_slots.Count - combo_type.SFRPatterns.Count do
                      if sufficient_contiguous_slots
@@ -313,12 +314,10 @@ constructor tIoregList.Create (pic_info: TPICInfo; pic_sfr_field_info: tMicroCon
                      then
                         begin
                            Add (var_name, tIoreg.Create (var_name, pic_sfr_field_info.sfr_addr_slots[addr_slot_idx].addr, typedef));
-                           for i := 0 to combo_type_list.Count-1 do
-                              if (combo_type <> combo_type_list[i])
-                                 and
-                                 (combo_type.TypeName = combo_type_list[i].TypeName)
+                           for ct in combo_type_list do
+                              if combo_type.TypeName = ct.TypeName
                               then
-                                 combo_type_list[i].eligible := false
+                                 ct.typename_defined := true
                         end
                except
                   on e: EConvertError do

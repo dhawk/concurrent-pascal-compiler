@@ -66,12 +66,7 @@ procedure process_pic_file (pic_file_name: string;
 
                   output_xml_line ('<?xml version="1.0" encoding="UTF-8"?>');
                   output_xml_line (format ('<Microcontroller name="%s">', [pic_info.chip_name]));
-                  output_xml_line (format ('   <Generator program="%s" version="%s"/>',
-                                           [ExtractFileName(ParamStr(0)),
-                                            GetVersionInfo('FileVersion')
-                                           ]
-                                          )
-                                  );
+                  output_xml_line (format ('   <Generator program="%s"/>', [ExtractFileName(ParamStr(0))]));
                   FileAge (pic_file_directory + pic_file_name, pic_file_date);
                   output_xml_line (format ('   <Source filename="%s" mplabx_version="%s" filedate="%s"/>',
                                            [pic_file_name,

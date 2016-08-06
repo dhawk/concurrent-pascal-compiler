@@ -101,7 +101,7 @@ type
          SFRPatterns: TComboTypeSFRPatternList;
          FieldNameFixups: TFieldNameFixupList;
          AddFields: TAddFieldList;
-         eligible: boolean;
+         typename_defined: boolean;
          constructor Create;
          constructor CreateNew;
          function Size: integer;
