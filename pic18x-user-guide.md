@@ -5,7 +5,7 @@ title: PIC18x Concurrent Pascal User Guide
 
 <h1><center>{{title}}</center></h1>
 
-This document is intended for a user of the Concurrent Pascal implementation for MicroChip's PIC18<b><u>x</u></b> line of microcontrollers. Only PIC18 microcontrollers with the e<b><u>x</u></b>tended instruction set are supported. The extended instruction set adds support for the stack operations that allow re-entrant code, a basic requirement for Concurrent Pascal. 
+This document is intended for a user of the Concurrent Pascal implementation for MicroChip's PIC18<b><u>x</u></b> line of microcontrollers. Only PIC18 microcontrollers with the e<b><u>x</u></b>tended instruction set are supported. The extended instruction set adds support for the stack operations that allow re-entrant code. 
 
 This document assumes the reader is already familiar with:
 
@@ -21,7 +21,7 @@ This document assumes the reader is already familiar with:
 
 # Processor Directive
 
-The microcontrollers is specified by a compiler directive in the the first line in the source file:
+The microcontroller is specified by a compiler directive in the first line in the source file:
 
 ~~~
 {$processor 'pic18f2520'}
@@ -85,15 +85,86 @@ type
             -: uint4
          end
       end;
+
 ioreg
    BAUDCON: tBAUDCON at $FB8;
 ~~~
 
-There are also usually some additional overlaid fields taken from Microchip documentation such as the RCMT, RXCKP and SCKP fields above.
+In addition to the fields defined by the datasheet, there are also occassionally some additional overlaid fields taken from Microchip documentation such as the RCMT, RXCKP and SCKP fields above.
 
 ## Combo SFR types
 
 Often there are adjacent groups of SFRs that can be treated as one type.  This can be for convenience and sometimes, when there are multiple such groups the combined type can be used for all.  The type can be handled as a parameter and one piece of code can be used for the multiple SFR groups.
+
+An example would be the Analog to Digital Converter.  The AD: tAD variable combines the following SFRs into one type:
+* A/D Result High Register (ADRESH)
+* A/D Result Low Register (ADRESL)
+* A/D Control Register 0 (ADCON0)
+* A/D Control Register 1 (ADCON1)
+* A/D Control Register 2 (ADCON2)
+
+~~~
+type
+   tAD =
+      overlay
+         packed record
+            ADRES: uint16;
+            -: uint2;
+            CHS: uint4;
+            GO_nDONE: uint1;
+            ADON: uint1;
+            -: uint2;
+            VCFG: uint2;
+            PCFG: uint4;
+            ADFM: uint1;
+            -: uint1;
+            ACQT: uint3;
+            ADCS: uint3
+         end;
+         packed record
+            ADRESH: uint8;
+            ADRESL: uint8;
+            -: uint2;
+            CHS3: uint1;
+            CHS2: uint1;
+            CHS1: uint1;
+            CHS0: uint1;
+            GO: uint1;
+            -: uint3;
+            VCFG1: uint1;
+            VCFG0: uint1;
+            PCFG3: uint1;
+            PCFG2: uint1;
+            PCFG1: uint1;
+            PCFG0: uint1;
+            -: uint2;
+            ACQT2: uint1;
+            ACQT1: uint1;
+            ACQT0: uint1;
+            ADCS2: uint1;
+            ADCS1: uint1;
+            ADCS0: uint1
+         end;
+         packed record
+            -: uint22;
+            DONE: uint1;
+            -: uint17
+         end;
+         packed record
+            -: uint22;
+            nDONE: uint1;
+            -: uint17
+         end;
+         packed record
+            -: uint22;
+            GO_DONE: uint1;
+            -: uint17
+         end
+      end;
+
+ioreg
+   AD: tAD at $FC0;
+~~~
  
 # EEPROM Support
 
@@ -101,7 +172,7 @@ Many PIC18x microcontrollers have internal EEPROM.  The compiler currently suppo
 
 # ROM Constants
 
-The compiler gathers all ROM constants and constant strings into the first 64K of ROM memory.  Ensuring that the upper byte of the 24-bit program memory address for ROM constants is always clear slightly reduces the amount of code required to support ROM constants and interrupt overhead (TBLPTRU does not need to be saved).
+The compiler gathers all ROM constants and constant strings into the first 64K of ROM memory.  Ensuring that the upper byte of the 24-bit program memory address for ROM constants is always clear slightly reduces the amount of code required to support ROM constants and interrupt overhead (TBLPTRU never needs to be set or saved).
 
 
 
@@ -119,7 +190,7 @@ The real type should be used for most purposes within a Concurrent Pascal progra
 
 ## ieee_single
 
-The ieee_single type is provided for use in transmitting binary values from the microcontroller to or from an external computer that implements IEEE floating point.  ieee_single and real variables are assignment compatible, and an assignment will convert between the two formats.  Normally all calculations should be carried out with real variables and then the result assigned to an ieee_single variable for transmission in binary format to the external computer.
+The ieee_single type is provided for use in transmitting binary values from the microcontroller to or from an external computer that implements IEEE floating point.  ieee_single and real variables are assignment compatible and an assignment will convert between the two formats.  Normally all calculations should be carried out with real variables and then the result assigned to an ieee_single variable for transmission in binary format to the external computer.
 
 The following code fragment shows how to use an overlay variable to access the individual binary bytes of an ieee_single variable:
 
@@ -127,7 +198,7 @@ The following code fragment shows how to use an overlay variable to access the i
 var
    r: real;
    o: overlay
-         s: ieee_single;
+         ieee: ieee_single;
          packed record
             b0: uint8;   // lsb of ieee_single
             b1: uint8;
@@ -137,7 +208,7 @@ var
       end;
 begin
    calculate r;
-   o.r := r;
+   o.ieee := r;
    transmit  o.b3..o.b0  to external computer
 end.
 ~~~
