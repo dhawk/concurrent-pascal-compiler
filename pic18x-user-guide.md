@@ -229,22 +229,14 @@ Each of these fields provides precise access to a particular configurable ADC re
 
 Note that the compiler does not automatically configure the ADC to load a specific result field, it assumes the programmer has done so before accessing that field.  Note also that only a few of the PICs have 12-bit ADCs - presence of a 12-bit ADRES field in the include file does not guarantee that a particular PIC has a 12-bit ADC (see the datasheet!). 
 
-<table border="0" cellpadding="0" cellspacing="0" style="width:100%">
-    <tr>
-        <th style="width:50px">&nbsp;</th>
-        <th>
-           <table border="0" cellpadding="0" cellspacing="0" bgcolor="#C0C0C0" bordercolor="#FFFFFF" style="width:100%" id="header_wrap">
-            <tr id="project_tagline">
-                <td>
-<h3>Help Wanted!</h3>
-<p>It is recognized that far from all useful combo SFR types have been identified.  If you have experience with a particular PIC18x hardware module, please submit suggestions for additional combo SFR types or special fields to cp@davidhawk.us
-</p>
-                </td>
-            </tr>
-           </table>
-        </th>
-        <th style="width:50px">&nbsp;</th>
-    </tr>
+<table border="0" cellpadding="0" cellspacing="0" style="width:100%" id="header_wrap">
+   <tr>
+      <td>
+         <h3 id="project_tagline">Help Wanted!</h3>
+         <p id="project_tagline">It is recognized that far from all useful combo SFR types have been identified.  If you have experience with a particular PIC18x hardware module, please submit suggestions for additional combo SFR types or special fields to cp@davidhawk.us
+         </p>
+      </td>
+   </tr>
 </table>
 
 ## Normal and Reversed Combo SFR Types
@@ -257,8 +249,8 @@ A perusal of the datasheets will reveal that Microchip's chip designers helpfull
         <td align="center">Reversed</td>
     </tr>
     <tr>
-        <td><img src="pic18x-user-guide/ufrm.png" width="139" height="45"></td>
-        <td><img src="pic18x-user-guide/tmr1.png" width="140" height="46"></td>
+        <td><img src="pic18x-user-guide/ufrm.png" width="208" height="68"></td>
+        <td><img src="pic18x-user-guide/tmr1.png" width="208" height="68"></td>
     </tr>
     <tr>
         <td align="center">big-endian</td>
