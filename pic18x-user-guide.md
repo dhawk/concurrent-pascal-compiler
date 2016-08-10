@@ -11,7 +11,7 @@ This document assumes the reader is already familiar with:
 
 * Concurrent Pascal introductory material,
 * Concurrent Pascal Language Reference,
-* The MicroChip Datasheet for your PIC18x microcontroller.
+* The MicroChip Datasheet for your PIC18x microcontroller. 
 
 # Table of Contents
 {:.no_toc}
