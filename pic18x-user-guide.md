@@ -229,7 +229,7 @@ Each of these fields provides precise access to a particular configurable ADC re
 
 Note that the compiler does not automatically configure the ADC to load a specific result field, it assumes the programmer has done so before accessing that field.  Note also that only a few of the PICs have 12-bit ADCs - presence of a 12-bit ADRES field in the include file does not guarantee that a particular PIC has a 12-bit ADC (see the datasheet!). 
 
-<table border="0" cellpadding="0" cellspacing="0" style="width:100%" id="header_wrap">
+<table border="0" cellpadding="25" cellspacing="25" style="width:100%" id="header_wrap">
    <tr>
       <td id="project_tagline">
          <h2 id="project_tagline">Help Wanted!</h2>
