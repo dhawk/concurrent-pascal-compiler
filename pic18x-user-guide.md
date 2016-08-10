@@ -109,7 +109,7 @@ In addition to the fields defined by the datasheet, there are also occassionally
 
 Often there are several adjacent SFRs for a hardware module that can be combined together into a single variable.  When a PIC contains multiple instances of the hardware module, multiple variables can be defined with a common type definition.  This type can be used to define a parameter to a subroutine which allows that subroutine to work with all instances of the hardware module.
 
-An example would be the Analog to Digital Converter (ADC) in the PIC18F2520.  AD: tAD combines five SFRs into a single variable:
+An example would be the Analog to Digital Converter (ADC) in the PIC18F2520.  ADC: tADC combines five SFRs into a single variable:
 
 * A/D Result High Register (ADRESH)
 * A/D Result Low Register (ADRESL)
@@ -119,7 +119,7 @@ An example would be the Analog to Digital Converter (ADC) in the PIC18F2520.  AD
 
 ~~~
 type
-   tAD =
+   tADC =
       overlay
          packed record
             ADRES: uint16;
@@ -191,7 +191,7 @@ type
       end;
 
 ioreg
-   AD: tAD at $FC0;
+   ADC: tADC at $FC0;
 ~~~
 
 ### Special ADC Result Fields
@@ -207,16 +207,16 @@ In addition to ADRES, ADRESH and ADRESL, the following special fields are define
    ADRES_12R: uint12;
 ~~~
 
-Each of these fields provides precise access to a particular configurable ADC result.  Depending on the microcontroller, ADCs can be configured to provide 8, 10 or 12 bit results either left or right justified.  Using one of these fields instead of the 16 bit ADRES field will allow the compiler to generate more efficient code than if a 16-bit result field (ADRES) were used.
+Each of these fields provides precise access to a particular configurable ADC result.  Depending on the microcontroller, ADCs can be configured to provide 8, 10 or 12 bit results either left or right justified.  Using one of these fields instead of the 16 bit ADRES field will allow the compiler to generate more compact code than if a 16-bit result field (ADRES) were used.
 
-Note that the compiler does not automatically configure the ADC to load a specific result field, it assumes the programmer has done so before accessing that field.  Note also that only a few of the PICs have 12-bit ADCs - presence of a 12-bit ADRES field in the include file does not guarantee that a particular PIC has a 12-bit ADC (see the datasheet!). 
+Note that the compiler does not automatically configure the ADC to load a specific result field, it assumes the programmer has done so before accessing that field.  Note also that only a few of the PICs have 12-bit ADCs - presence of a 12-bit ADRES field in the type definition does not guarantee that a particular PIC has a 12-bit ADC (see the datasheet!). 
 
 <table style="border: 1px solid black; width: 100%; background: #212121;">
    <tr>
       <td style="padding: 25px;">
          <p style="color: #fff; font-size: 32px;">Help Wanted!</p>
-         <p style="color: #fff;">It is recognized that far from all useful combo SFR types have been identified.  If you have experience with a particular PIC18x hardware module, please submit suggestions for additional combo SFR types or special fields to 
-         <a href="mailto:cpc@davidhawk.us" style="color: #0090FF; text-decoration: underline;">cp@davidhawk.us</a>
+         <p style="color: #fff;">Identifying useful combinations of SFRs is a manual process requiring knowledge of the PIC hardware module.  It is recognized that far from all useful combo SFR types have been identified.  If you have experience with a particular hardware module, please submit suggestions for additional combo SFR types or special fields to 
+         <a href="mailto:cpc@davidhawk.us?subject=pic18 combo sfr suggestion" style="color: #0090FF; text-decoration: underline;">cp@davidhawk.us</a>
          </p>
       </td>
    </tr>
@@ -249,7 +249,44 @@ The compiler transparently handles both normal and reversed order SFR combinatio
 
 Some PIC18 microcontrollers assign different SFRs to the same physical address and distinguish them by using the ADSHR bit in the WDTCON register.  The following explanation is from the PIC18F65J50 data sheet:
  
+
+![](pic18x-user-guide/shared-sfrs.png){:hspace="50"}
+
+The Concurrent Pascal compiler treats ADSHR as a 13th address bit ($1---).  The addresses for the ioreg variables using the SFRs in Table 5-4 above are (TMR1 and ODCON happen to be combo-SFRs each containing three SFRs):
+
+~~~
+ioreg
+   OSCCON: tOSCCON at $FD3;
+   REFOCON: tREFOCON at $1FD3;
+   TMR1: tTMR16 at $FCD;
+   ODCON: tODCON at $1FCD;
+~~~
  
+Note that the “13th address bit” is set for all “Alternate” SFRs in Table 5-4.  The compiler will generate the necessary code to set ADSHR when an alternate SFR is accessed and then clear it immediately after.  The programmer should never need to set or clear the ADSHR bit directly.
+
+## Atomicity of ioreg operations
+
+The compiler ensures that **individual ioreg field** operations are **atomic**.  That means that a stray interrupt will not compromise a single ioreg field read or write operation.  Interrupts are turned off for any ioreg field operation that takes more than a single instruction - this includes SFR reads, masking, shifts and writes for the single field (plus any necessary setting and clearing of ADSHR for alternate address SFRs).
+
+It should be noted that a sequence of ioreg field operations can be interrupted and are not guaranteed to be atomic unless placed within a single process or monitor and all of those fields are accessed exclusively by that process or monitor.
+
+## Order of Multi-Byte SFR Reads or Writes
+
+For some multi-byte SFRs the order in which reads or writes are done is important.  An example is the 16-bit timer in many PIC18 microcontrollers.  This timer can be configured to count clock cycles.  Special provisions are required to allow a consistent snapshot of its rapidly changing 16-bit value to be correctly read or written byte-wise by several instructions over the 8-bit bus.  The following block diagram of TMR1 is from the PIC18F2520 datasheet:
+
+![](pic18x-user-guide/tmr1-latches.png){:hspace="50"}
+
+The blocks labeled “TMR1L” and “TMR1 High Byte” are 8-bit segments of the 16-bit timer.  The block labeled “TMR1H” is a latch provided by the chip designer to facilitate complete 16-bit transfers to or from the timer over the 8-bit data bus.  
+
+To correctly read the entire 16-bit value TMR1L must be read first.  This simultaneously latches the current value in the upper byte of the timer into the TMR1H latch for later retrieval (by the time TMR1H is retrieved the upper byte of the actual timer may have changed).
+
+Similarly, to correctly write a 16-bit value to TMR1 the upper byte is written into the TMR1H latch first and then that value is simultaneously transferred to the actual timer counter along with the write of TMR1L.
+
+For multi-byte SFR read operations the Concurrent Pascal compiler always emits code that reads the low byte first and writes the low byte last.
+
+
+
+
 # General Purpose Registers (GPRs) 
 
 GPRs are used as RAM and locations are assigned by the compiler for variables, system types, stacks and internal kernel data structures.
@@ -363,3 +400,42 @@ procedure p (// the following parameters will have
             );
 ~~~
 
+# Special Procedures & Functions
+
+## reset_TMRn_cycle (cycle_count: uint16)
+
+These procedures, defined for each 16-bit timer in the microcontroller, can be used to give accurate instruction counter-driven process cycle times.
+
+~~~
+var
+   p: process priority 2;
+         begin
+            // initialize TMRn
+            await interrupt;
+            cycle 
+               …
+               await interrupt;
+               reset_TMRn_cycle (10000);
+               …
+            repeat
+         end interrupt TMRnI_interrupt2;
+~~~
+
+In this example the TMRn interrupt will occur exactly every 10,000 instruction cycles assuming that the timer is initialized as follows:
+
+•	the timer is configured to its full width (16 bits),
+•	the clock source is set to internal instruction clock,
+•	the pre-scaler is disabled (x1),
+•	the timer is enabled.
+
+With this configuration the 16-bit timers continuously count instruction cycles and generates an interrupt when the count reaches $FFFF.  The timer overflows to $0000 and keeps counting.  The reset_TMRn_cycle routine subtracts the cycle_count parameter (with a small adjustment ) from the current timer value to reset it below $FFFF again.  The next counter overflow and interrupt will occur exactly cycle_count instruction cycles after the previous overflow and interrupt.
+
+Although the controlling TMRn interrupt cycle itself will be exactly 10,000 instructions in the above example, there will be some jitter for the instructions within the process cycle itself due to other parts of the Concurrent Pascal program running at higher priority or with interrupts off,.
+
+Cycle times that are too low for a given application will result in frequent or infrequent “TMRn cycle count exceeded” error codes.  The error code is generated when the subtraction of cycle_count from the timer yields a result that is still above $0000.  In such cases process priorities will need to be juggled or a longer cycle time chosen.  It may be good practice to experimentally lower this cycle time until the error code begins to appear and then raise it to a higher value to give some margin.
+
+The first await interrupt statement (the one before the cycle statement) in the above example is to prevent an extraneous “TMRn cycle count exceeded” error code at the first iteration due to the timer being in an unknown state due to a possibly lengthy system initialization time in a given application.  This pattern can result in two complete cycles of the timer (at 65,536 instruction cycles each) occurring after reset before the desired cycling time commences.
+
+## ClearWatchdogTimer
+
+Clears the watchdog timer. 
