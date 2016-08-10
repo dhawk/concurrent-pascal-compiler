@@ -229,11 +229,11 @@ Each of these fields provides precise access to a particular configurable ADC re
 
 Note that the compiler does not automatically configure the ADC to load a specific result field, it assumes the programmer has done so before accessing that field.  Note also that only a few of the PICs have 12-bit ADCs - presence of a 12-bit ADRES field in the include file does not guarantee that a particular PIC has a 12-bit ADC (see the datasheet!). 
 
-> Not all useful combo SFR types have been identified.  If you have experience with a particular PIC18x hardware module, please submit suggestions for additional combo SFR types to cp@davidhawk.us
+> <h3>Help Wanted!</h3>Not all useful combo SFR types have been identified.  If you have experience with a particular PIC18x hardware module, please submit suggestions for additional combo SFR types to cp@davidhawk.us
 
 ## Normal and Reversed Combo SFR Types
 
-A perusal of the datasheets will reveal that SFR pairs are sometimes laid out big-endian (MSB at lowest address) and sometimes little-endian (LSB at lowest address), as illustrated by these two SFR pairs in the PIC18F65J94 datasheet:
+A perusal of the datasheets will reveal that Microchip's chip designers helpfully lay out some SFR groups as big-endian (MSB at lowest address) and others as little-endian (LSB at lowest address).  For example see these two SFR pairs from the PIC18F65J94 datasheet:
 
 <table border="0" cellpadding="5">
     <tr>
@@ -250,10 +250,13 @@ A perusal of the datasheets will reveal that SFR pairs are sometimes laid out bi
     </tr>
 </table>
 
-The compiler normally lays out multi-byte ordinal variables in big-endian format so this is defined as "normal byte order".  Little-endian SFR combinations are considered to be "Reversed byte order".
+The compiler normally lays out multi-byte ordinal variables in big-endian format.  Little-endian SFR combinations are considered to be "Reversed byte order".
 
-The compiler transparently handles these situations.  The combo SFR type definitions are laid out as though everything is big-endian and the compiler generates the correct code to handle reversed byte order types.
+The compiler transparently handles both normal and reversed order SFR combinations.  All type definitions are laid out as  big-endian and the compiler generates the correct code to handle reversed byte order types.  Reversed combo SFR types are flagged in the processor definition xml file.
 
+## Shared Address SFRs
+
+Some PIC18 microcontrollers assign different SFRs to the same physical address and distinguish them by using the ADSHR bit in the WDTCON register.  The following explanation is from the PIC18F65J50 data sheet:
  
  
 # General Purpose Registers (GPRs) 
