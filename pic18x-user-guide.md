@@ -231,9 +231,9 @@ Note that the compiler does not automatically configure the ADC to load a specif
 
 <table border="0" cellpadding="0" cellspacing="0" style="width:100%" id="header_wrap">
    <tr>
-      <td>
-         <h3 id="project_tagline">Help Wanted!</h3>
-         <p id="project_tagline">It is recognized that far from all useful combo SFR types have been identified.  If you have experience with a particular PIC18x hardware module, please submit suggestions for additional combo SFR types or special fields to cp@davidhawk.us
+      <td id="project_tagline">
+         <h2 id="project_tagline">Help Wanted!</h2>
+         <p>It is recognized that far from all useful combo SFR types have been identified.  If you have experience with a particular PIC18x hardware module, please submit suggestions for additional combo SFR types or special fields to cp@davidhawk.us
          </p>
       </td>
    </tr>
