@@ -56,8 +56,6 @@ Setting ErrorCode does not abort anything, the program continues running.  The i
 
 The ErrorCode variable may be directly read by Concurrent Pascal code for reporting – perhaps via a communications link or displayed in LEDs.  Reading the ErrorCode variable clears it, after which the next run-time error can set it again.
 
-
-
 # Process Priority Mapping
 
 Process level 2 is mapped to the high priority interrupt level.  Processes and monitors running at priority level 2 run with interrupts off.
@@ -65,24 +63,6 @@ Process level 2 is mapped to the high priority interrupt level.  Processes and m
 Process level 1 is mapped to the low priority interrupt level.  Processes and monitors running at priority level 1 run with the low priority interrupts off and high priority interrupts on.
 
 Process and monitors running at levels 0 and below run with interrupts on.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 # Special Function Registers (SFRs)
 
@@ -229,10 +209,10 @@ Each of these fields provides precise access to a particular configurable ADC re
 
 Note that the compiler does not automatically configure the ADC to load a specific result field, it assumes the programmer has done so before accessing that field.  Note also that only a few of the PICs have 12-bit ADCs - presence of a 12-bit ADRES field in the include file does not guarantee that a particular PIC has a 12-bit ADC (see the datasheet!). 
 
-<table border="0" cellpadding="25" cellspacing="25" style="width:100%" id="header_wrap">
+<table style="border: 0px solid black; width: 100%; background: #212121; padding: 25px;">
    <tr>
-      <td id="project_tagline">
-         <h2 id="project_tagline">Help Wanted!</h2>
+      <td>
+         <p style="color: #fff; font-size: 32px;">Help Wanted!</p>
          <p>It is recognized that far from all useful combo SFR types have been identified.  If you have experience with a particular PIC18x hardware module, please submit suggestions for additional combo SFR types or special fields to cp@davidhawk.us
          </p>
       </td>
