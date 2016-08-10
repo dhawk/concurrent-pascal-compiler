@@ -197,14 +197,16 @@ ioreg
 ### Special ADC Result Fields
 
 In addition to ADRES, ADRESH and ADRESL, the following special fields are defined for the analog to digital converter (ADC):
+
 ~~~
-            ADRES_8L: uint8;
-            ADRES_8R: uint8;
-            ADRES_10L: uint10;
-            ADRES_10R: uint10;
-            ADRES_12L: uint12;
-            ADRES_12R: uint12;
+   ADRES_8L: uint8;
+   ADRES_8R: uint8;
+   ADRES_10L: uint10;
+   ADRES_10R: uint10;
+   ADRES_12L: uint12;
+   ADRES_12R: uint12;
 ~~~
+
 Each of these fields provides precise access to a particular configurable ADC result.  Depending on the microcontroller, ADCs can be configured to provide 8, 10 or 12 bit results either left or right justified.  Using one of these fields instead of the 16 bit ADRES field will allow the compiler to generate more efficient code than if a 16-bit result field (ADRES) were used.
 
 Note that the compiler does not automatically configure the ADC to load a specific result field, it assumes the programmer has done so before accessing that field.  Note also that only a few of the PICs have 12-bit ADCs - presence of a 12-bit ADRES field in the include file does not guarantee that a particular PIC has a 12-bit ADC (see the datasheet!). 
