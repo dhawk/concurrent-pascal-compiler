@@ -209,12 +209,12 @@ Each of these fields provides precise access to a particular configurable ADC re
 
 Note that the compiler does not automatically configure the ADC to load a specific result field, it assumes the programmer has done so before accessing that field.  Note also that only a few of the PICs have 12-bit ADCs - presence of a 12-bit ADRES field in the include file does not guarantee that a particular PIC has a 12-bit ADC (see the datasheet!). 
 
-<table style="border: 1px solid black; width: 100%; background: #212121; padding: 25px;">
+<table style="border: 1px solid black; width: 100%; background: #212121;">
    <tr>
-      <td>
+      <td style="padding: 25px;">
          <p style="color: #fff; font-size: 32px;">Help Wanted!</p>
-         <p>It is recognized that far from all useful combo SFR types have been identified.  If you have experience with a particular PIC18x hardware module, please submit suggestions for additional combo SFR types or special fields to 
-         <a href="mailto:cpc@davidhawk.us">cp@davidhawk.us</a>
+         <p style="color: #fff;">It is recognized that far from all useful combo SFR types have been identified.  If you have experience with a particular PIC18x hardware module, please submit suggestions for additional combo SFR types or special fields to 
+         <a href="mailto:cpc@davidhawk.us" style="color: #0090FF; text-decoration: underline;">cp@davidhawk.us</a>
          </p>
       </td>
    </tr>
