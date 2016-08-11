@@ -5,7 +5,7 @@ title: PIC18x Concurrent Pascal User Guide
 
 <h1><center>{{title}}</center></h1>
 
-This document is intended for a user of the Concurrent Pascal implementation for MicroChip's PIC18<b><u>x</u></b> line of microcontrollers. Only PIC18 microcontrollers with the e<b><u>x</u></b>tended instruction set are supported. The extended instruction set adds support for the stack operations that allow re-entrant code. 
+This document is intended for a user of the Concurrent Pascal implementation for MicroChip's PIC18<b><u><color="#FF0000">x</font></u></b> line of microcontrollers. Only PIC18 microcontrollers with the e<b><u><color="#FF0000">x</font></u></b>tended instruction set are supported. The extended instruction set adds support for the stack operations that allow re-entrant code. 
 
 This document assumes the reader is already familiar with:
 
@@ -38,31 +38,17 @@ The pic18f2520.inc file is a Concurrent Pascal include file which specifies iore
 The pic18f2520.xml file provides microcontroller specific information for the compiler such as SFR addresses.
 
 
+# General Purpose Registers (GPRs) 
 
+GPRs are used as RAM and locations are assigned by the compiler for variables, system types, stacks and internal kernel data structures.
 
-# Global ErrorCode Variable
+## Non-Contiguous GPR Regions
 
-PIC18 microcontrollers normally do not operate in an environment conducive to extensive run-time error reporting, however a rudimentary error reporting capability is supplied in the form of a single global ErrorCode that can be set when a run-time error occurs.  This capability is used extensively by the compiler and kernel to detect and report run-time errors.  The assert procedure can also be used by the programmer to report errors - it will set ErrorCode if the condition is not true:
+A few PIC18s have non-contiguous GPR regions.  The current implementation of the compiler only utilizes the first GPR region.
 
-~~~
-assert (<boolean>, 'Error Message')
-~~~
+## Dual-Port GPRs
 
-The global ErrorCode variable is a uint24 value that holds the program counter value for the location where the error occurred.  The Error Message itself is not embedded anywhere in the Microcontroller’s ROM but is instead saved in a file named <program_name>.err which lists all possible error locations and the associated error messages.  The .err file is only valid for the assembly and hex files produced at the same time by the compiler.
-
-The first run-time error to occur sets ErrorCode.  Subsequent run-time errors do not overwrite that first run-time error code.  This prevents the initial error code from being over-written if that error results in a cascade of subsequent errors.
-
-Setting ErrorCode does not abort anything, the program continues running.  The idea is to allow the program to limp on long enough to somehow transmit the ErrorCode back to the programmer so that the underlying bug can be fixed before the code is released.
-
-The ErrorCode variable may be directly read by Concurrent Pascal code for reporting – perhaps via a communications link or displayed in LEDs.  Reading the ErrorCode variable clears it, after which the next run-time error can set it again.
-
-# Process Priority Mapping
-
-Process level 2 is mapped to the high priority interrupt level.  Processes and monitors running at priority level 2 run with interrupts off.
-
-Process level 1 is mapped to the low priority interrupt level.  Processes and monitors running at priority level 1 run with the low priority interrupts off and high priority interrupts on.
-
-Process and monitors running at levels 0 and below run with interrupts on.
+Some PIC18x microcontrollers (e.g. USB controllers) have dual-ported GPRs.  This is not currently supported by the compiler but is something that will need to be addressed in the future.
 
 # Special Function Registers (SFRs)
 
@@ -207,7 +193,7 @@ In addition to ADRES, ADRESH and ADRESL, the following special fields are define
    ADRES_12R: uint12;
 ~~~
 
-Each of these fields provides precise access to a particular configurable ADC result.  Depending on the microcontroller, ADCs can be configured to provide 8, 10 or 12 bit results either left or right justified.  Using one of these fields instead of the 16 bit ADRES field will allow the compiler to generate more compact code than if a 16-bit result field (ADRES) were used.
+Each of these fields provides access to the exact bits of a particular configurable ADC result.  Depending on the microcontroller, ADCs can be configured to provide 8, 10 or 12 bit results either left or right justified.  Using one of these fields instead of the 16 bit ADRES field will allow the compiler to generate more compact code than if a 16-bit result field (ADRES) were used.
 
 Note that the compiler does not automatically configure the ADC to load a specific result field, it assumes the programmer has done so before accessing that field.  Note also that only a few of the PICs have 12-bit ADCs - presence of a 12-bit ADRES field in the type definition does not guarantee that a particular PIC has a 12-bit ADC (see the datasheet!). 
 
@@ -266,13 +252,13 @@ Note that the “13th address bit” is set for all “Alternate” SFRs in Tabl
 
 ## Atomicity of ioreg operations
 
-The compiler ensures that **individual ioreg field** operations are **atomic**.  That means that a stray interrupt will not compromise a single ioreg field read or write operation.  Interrupts are turned off for any ioreg field operation that takes more than a single instruction - this includes SFR reads, masking, shifts and writes for the single field (plus any necessary setting and clearing of ADSHR for alternate address SFRs).
+The compiler ensures that **individual ioreg <u>field</u>** operations are **atomic**.  That means that a stray interrupt will not compromise a single ioreg field read or write operation.  Interrupts are turned off for any ioreg field operation that takes more than a single instruction - this includes SFR reads, masking, shifts and writes for the single field (plus any necessary setting and clearing of ADSHR for alternate address SFRs).
 
-It should be noted that a sequence of ioreg field operations can be interrupted and are not guaranteed to be atomic unless placed within a single process or monitor and all of those fields are accessed exclusively by that process or monitor.
+Although each ioreg field operation is atomic, it should be noted that **sequences** of field operations can be interrupted and are not guaranteed to be atomic unless placed within a single process or monitor and all of those fields are accessed exclusively by that process or monitor.
 
 ## Order of Multi-Byte SFR Reads or Writes
 
-For some multi-byte SFRs the order in which reads or writes are done is important.  An example is the 16-bit timer in many PIC18 microcontrollers.  This timer can be configured to count clock cycles.  Special provisions are required to allow a consistent snapshot of its rapidly changing 16-bit value to be correctly read or written byte-wise by several instructions over the 8-bit bus.  The following block diagram of TMR1 is from the PIC18F2520 datasheet:
+For some combo SFRs the order in which individual SFR reads or writes are done is important.  An example is the 16-bit timer in many PIC18 microcontrollers.  This timer can be configured to count clock cycles.  Special provisions are required to allow a consistent snapshot of its rapidly changing 16-bit value to be correctly read or written byte-wise by several instructions over the 8-bit bus.  The following block diagram is of TMR1 from the PIC18F2520 datasheet:
 
 ![](pic18x-user-guide/tmr1-latches.png){:hspace="50"}
 
@@ -280,25 +266,87 @@ The blocks labeled “TMR1L” and “TMR1 High Byte” are 8-bit segments of th
 
 To correctly read the entire 16-bit value TMR1L must be read first.  This simultaneously latches the current value in the upper byte of the timer into the TMR1H latch for later retrieval (by the time TMR1H is retrieved the upper byte of the actual timer may have changed).
 
-Similarly, to correctly write a 16-bit value to TMR1 the upper byte is written into the TMR1H latch first and then that value is simultaneously transferred to the actual timer counter along with the write of TMR1L.
+Similarly, to correctly write a 16-bit value to TMR1 the upper byte is written into the TMR1H latch first and then when TMR1L is written both it and the latched value is simultaneously transferred to the actual timer counter.
 
-For multi-byte SFR read operations the Concurrent Pascal compiler always emits code that reads the low byte first and writes the low byte last.
+For multi-byte SFR read operations the Concurrent Pascal compiler always emits code that reads the low byte first and writes the low byte last (this is true for both normal and reversed types).
+
+# Process Priority Mapping
+
+Process level 2 is mapped to the high priority interrupt level.  Processes and monitors running at priority level 2 run with interrupts off.
+
+Process level 1 is mapped to the low priority interrupt level.  Processes and monitors running at priority level 1 run with the low priority interrupts off and high priority interrupts on.
+
+Process and monitors running at levels 0 and below run with interrupts on.
 
 
+# Interrupt Variables
 
+The include files define a set of all possible interrupt variables for each microcontroller.  For example a microcontroller that implements TMR3 will have two interrupt variables, one for high priority (2) and one for low priority (1), similar to the following:
 
-# General Purpose Registers (GPRs) 
+~~~
+var
+   TMR3I_prio2_interrupt:
+      interrupt priority 2;
+         function signaled: boolean;
+            begin
+               if PIR2.TMR3IF = 1 then
+                  begin
+                     result := true;
+                     PIR2.TMR3IF := 0
+                  end
+            end;
+      begin
+         PIE2.TMR3IE := 1
+      end;
 
-GPRs are used as RAM and locations are assigned by the compiler for variables, system types, stacks and internal kernel data structures.
+   TMR3I_prio1_interrupt:
+      interrupt priority 1;
+         function signaled: boolean;
+            begin
+               if PIR2.TMR3IF = 1 then
+                  begin
+                     result := true;
+                     PIR2.TMR3IF := 0
+                  end
+            end;
+      begin
+         IPR2.TMR3IP := 0;
+         PIE2.TMR3IE := 1
+      end;
+~~~
 
-## Non-Contiguous GPR Regions
+The signaled functions test the interrupt flag and, if set, sets signaled to true and clears the interrupt flag.  This takes advantage of the fact that the result is initialized to false by the compiler and only needs to be set to true if the interrupt flag is set.  The initial statement clears the priority flag for low priority interrupts and enables the interrupt.
 
-A few PIC18s have non-contiguous GPR regions.  The current implementation of the compiler only utilizes the first GPR region.
+Only high priority (2) interrupt variables are defined for interrupts that do not have a priority bit defined.
 
-## Dual-Port GPRs
+<table style="border: 1px solid black; width: 100%; background: #212121;">
+   <tr>
+      <td style="padding: 25px;">
+         <p style="color: #fff; font-size: 32px;">Help Wanted!</p>
+         <p style="color: #fff;">
 
-Some PIC18x microcontrollers (e.g. USB controllers) have dual-ported GPRs.  This is not currently supported by the compiler but is something that will need to be addressed in the future.
+Most interrupts will be properly handled with the above signaled code, however it appears that there are some PIC18x hardware modules with quirky interrupts that won't work with this code.  For example, the USART TXI interrupt requires the enable and the flag bit to be set, and the necessary signaled code is as follows:
 
+<table border="0" cellpadding="10" cellspacing="0">
+    <tr>
+        <td>&nbsp;</td>
+        <td style="font-family: Monaco,'Bitstream Vera Sans Mono','Lucida Console',Terminal,monospace; font-size: 14px; background-color: #0;">
+function signaled: boolean;<br>
+&nbsp;&nbsp;&nbsp;begin<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if PIE1.TXIE = 1 then<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if PIR1.TXIF = 1 then<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;result := true<br>
+&nbsp;&nbsp;&nbsp;end;
+        </td>
+    </tr>
+</table>
+ 
+If you have experience with a particular hardware module that has a quirky interrupt that is not properly handled by the signaled function in the include file, please notify us at 
+         <a href="mailto:cpc@davidhawk.us?subject=pic18 quirky interrupt" style="color: #0090FF; text-decoration: underline;">cp@davidhawk.us</a>
+         </p>
+      </td>
+   </tr>
+</table>
 
 # EEPROM Support
 
