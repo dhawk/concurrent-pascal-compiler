@@ -319,33 +319,44 @@ The signaled functions test the interrupt flag and, if set, sets signaled to tru
 
 Only high priority (2) interrupt variables are defined for interrupts that do not have a priority bit defined.
 
-<table style="border: 1px solid black; width: 100%; background: #212121;">
-   <tr>
-      <td style="padding: 25px;">
-         <p style="color: #fff; font-size: 32px;">Help Wanted!</p>
-         <p style="color: #fff;">
-
-Most interrupts will be properly handled with the above signaled code, however it appears that there are some PIC18x hardware modules with quirky interrupts that won't work with this code.  For example, the USART TXI interrupt requires the enable and the flag bit to be set, and the necessary signaled code is as follows:
-
-<table border="0" cellpadding="10" cellspacing="0">
-    <tr>
-        <td>&nbsp;</td>
-        <td style="font-family: Monaco,'Bitstream Vera Sans Mono','Lucida Console',Terminal,monospace; font-size: 14px; background-color: #0;">
-function signaled: boolean;<br>
-&nbsp;&nbsp;&nbsp;begin<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if PIE1.TXIE = 1 then<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if PIR1.TXIF = 1 then<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;result := true<br>
-&nbsp;&nbsp;&nbsp;end;
-        </td>
-    </tr>
-</table>
- 
-If you have experience with a particular hardware module that has a quirky interrupt that is not properly handled by the signaled function in the include file, please notify us at 
-         <a href="mailto:cpc@davidhawk.us?subject=pic18 quirky interrupt" style="color: #0090FF; text-decoration: underline;">cp@davidhawk.us</a>
-         </p>
-      </td>
-   </tr>
+<table style="border: 1px solid black; background: #212121;">
+  <tr>
+    <td style="padding: 25px;" colspan="2">
+      <p style="color: #fff; font-size: 32px;">Help Wanted!</p>
+      <p style="color: #fff;">
+        Most interrupts will be properly handled with the standard signaled code shown above, however there
+        are some PIC18x hardware modules with quirky interrupts that don&#39;t work this way. For example, the USART TXI interrupt
+        requires the enable and the flag bits to be set, and the necessary signaled code is as follows:
+      </p>
+    </td>
+  </tr>
+  <tr>
+    <td style="width:100px;"></td>
+    <td>
+      <table>
+        <tr>
+          <td style="font-family: Monaco,&#39;Bitstream Vera Sans Mono&#39;,&#39;Lucida Console&#39;,Terminal,monospace; font-size: 14px; background-color: #FFF; padding: 15px;">
+            function signaled: boolean;<br />
+            &nbsp;&nbsp;&nbsp;begin<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if PIE1.TXIE = 1 then<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if PIR1.TXIF = 1 then<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;result := true<br />
+            &nbsp;&nbsp;&nbsp;end;<br />
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td style="padding: 25px;" colspan="3">
+      <p style="color: #fff;">
+        If you have experience with a particular hardware module that has a quirky interrupt that is not
+        properly handled by the signaled function in the include file, please notify us at 
+        <a href="mailto:cpc@davidhawk.us?subject=pic18%20interrupt%20quirk"
+        style="color: #0090FF; text-decoration: underline;">cp@davidhawk.us</a>
+      </p>
+    </td>
+  </tr>
 </table>
 
 # EEPROM Support
