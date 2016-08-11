@@ -321,8 +321,8 @@ Only high priority (2) interrupt variables are defined for interrupts that do no
 
 <table style="border: none; background: #212121;">
   <tr>
-    <td style="padding: 25px;" colspan="2">
-      <p style="color: #fff; font-size: 32px;">Help Wanted!</p>
+    <td style="padding: 25px; border: none;" colspan="2">
+      <p style="color: #fff; font-size: 32px;">xHelp Wanted!</p>
       <p style="color: #fff;">
         Most interrupts will be properly handled with the standard signaled code shown above, however there
         are some PIC18x hardware modules with quirky interrupts that don&#39;t work this way. For example, the USART TXI interrupt
@@ -331,8 +331,8 @@ Only high priority (2) interrupt variables are defined for interrupts that do no
     </td>
   </tr>
   <tr>
-    <td style="width:100px;"></td>
-    <td>
+    <td style="width:100px; border:none;"></td>
+    <td style="border:none;">
       <table style="border:none">
         <tr>
           <td style="font-family: Monaco,&#39;Bitstream Vera Sans Mono&#39;,&#39;Lucida Console&#39;,Terminal,monospace; font-size: 14px; background-color: #FFF; padding: 15px;">
@@ -348,7 +348,7 @@ Only high priority (2) interrupt variables are defined for interrupts that do no
     </td>
   </tr>
   <tr>
-    <td style="padding: 25px;" colspan="3">
+    <td style="padding:25px; border:none;" colspan="2">
       <p style="color: #fff;">
         If you have experience with a particular hardware module that has a quirky interrupt that is not
         properly handled by the signaled function in the include file, please notify us at 
