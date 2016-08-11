@@ -319,7 +319,7 @@ The signaled functions test the interrupt flag and, if set, sets signaled to tru
 
 Only high priority (2) interrupt variables are defined for interrupts that do not have a priority bit defined.
 
-<table style="border: 1px solid black; background: #212121;">
+<table style="border: none; background: #212121;">
   <tr>
     <td style="padding: 25px;" colspan="2">
       <p style="color: #fff; font-size: 32px;">Help Wanted!</p>
