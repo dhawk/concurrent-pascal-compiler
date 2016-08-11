@@ -333,7 +333,7 @@ Only high priority (2) interrupt variables are defined for interrupts that do no
   <tr>
     <td style="width:100px;"></td>
     <td>
-      <table>
+      <table style="border:none">
         <tr>
           <td style="font-family: Monaco,&#39;Bitstream Vera Sans Mono&#39;,&#39;Lucida Console&#39;,Terminal,monospace; font-size: 14px; background-color: #FFF; padding: 15px;">
             function signaled: boolean;<br />
