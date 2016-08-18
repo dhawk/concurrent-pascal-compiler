@@ -281,7 +281,7 @@ procedure test_interrupt;
                                      'procedure x'
                                     );
       test_compile_error_generation ('type ti=interrupt priority 1; function x',
-                                     err_signalled_function_required,
+                                     err_signaled_function_required,
                                      'x'
                                     );
       test_compile_error_generation ('type ti=interrupt priority 1; function signalled +',
@@ -289,7 +289,7 @@ procedure test_interrupt;
                                      '+'
                                     );
       test_compile_error_generation ('type ti=interrupt priority 1; function signalled: int8; begin end; function x',
-                                     err_signalled_function_result_must_be_boolean,
+                                     err_signaled_function_result_must_be_boolean,
                                      'int8'
                                     );
       test_compile_error_generation ('type ti=interrupt priority 1; function signalled: boolean; begin end; x',
@@ -301,16 +301,16 @@ procedure test_interrupt;
                                      'then'
                                     );
       test_compile_error_generation ('type ti=interrupt priority 1; begin end;',
-                                     err_interrupt_definition_must_implement_signalled_function,
+                                     err_interrupt_definition_must_implement_signaled_function,
                                      'interrupt'
                                     );
 
-      test_only_for_successful_compilation ('type ti=interrupt priority 1; function signalled: boolean; begin end; begin end; tp=process (i: ti); priority 1; begin cycle await interrupt repeat end; var i: ti; p: tp interrupt i; begin init p (i) end.');
-      test_compile_error_generation ('type tp=process priority 1; begin cycle await interrupt repeat end; var i: interrupt priority 1; function signalled: boolean; begin end; begin end; p1: tp interrupt i; p2: tp interrupt i; begin end.',
+      test_only_for_successful_compilation ('type ti=interrupt priority 1; function signaled: boolean; begin end; begin end; tp=process (i: ti); priority 1; begin cycle await interrupt repeat end; var i: ti; p: tp interrupt i; begin init p (i) end.');
+      test_compile_error_generation ('type tp=process priority 1; begin cycle await interrupt repeat end; var i: interrupt priority 1; function signaled: boolean; begin end; begin end; p1: tp interrupt i; p2: tp interrupt i; begin end.',
                                      err_interrupt_variable_already_assigned_to_another_process,
                                      'i; begin end.'
                                     );
-      test_compile_error_generation ('type ti=interrupt priority 1; function signalled: boolean; begin end; begin end; var i,j: ti; begin end.',
+      test_compile_error_generation ('type ti=interrupt priority 1; function signaled: boolean; begin end; begin end; var i,j: ti; begin end.',
                                      err_an_instance_of_this_interrupt_type_already_exists,
                                      'j: ti; begin end.'
                                     );
@@ -322,20 +322,20 @@ procedure test_global_var_access_rules;
       // ioreg are accessible from interrupt type routines & init and also in program init
       test_only_for_successful_compilation ('ioreg io: packed record flag: 0..1; x: 0..127 end at 1000;'
                                                + 'type tinterrupt = interrupt priority 1;'
-                                               + 'function signalled: boolean; begin result := io.flag = 1 end;'
+                                               + 'function signaled: boolean; begin result := io.flag = 1 end;'
                                                + 'begin if io.flag = 2 then end;'
                                                + 'begin if io.flag = 4 then end.'
                                            );
       // global vars are not accessible from interrupt routines
       test_compile_error_generation ('var i: int8;'
                                          + 'type tinterrupt = interrupt priority 1;'
-                                         + 'function signalled: boolean; begin result := i = 1 end;',  // in routine
+                                         + 'function signaled: boolean; begin result := i = 1 end;',  // in routine
                                       err_global_variable_not_accessible_here,
                                      'i = 1'
                                     );
       test_compile_error_generation ('var i: int8;'
                                          + 'type tinterrupt = interrupt priority 1;'
-                                         + 'function signalled: boolean; begin end;'
+                                         + 'function signaled: boolean; begin end;'
                                          + 'begin if i = 2 then end;',
                                       err_global_variable_not_accessible_here,
                                      'i = 2'

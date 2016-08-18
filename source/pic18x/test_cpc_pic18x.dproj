@@ -1,4 +1,4 @@
-﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProjectGuid>{30dd8f5b-c99a-46ea-8af1-347980a0d0e8}</ProjectGuid>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -27,6 +27,8 @@
     <DCC_ResourcePath>..\lib;..\lib\mparith;common;..\lib\fastmm</DCC_ResourcePath>
     <DCC_ObjPath>..\lib;..\lib\mparith;common;..\lib\fastmm</DCC_ObjPath>
     <DCC_IncludePath>..\lib;..\lib\mparith;common;..\lib\fastmm</DCC_IncludePath>
+    <DCC_Optimize>False</DCC_Optimize>
+    <DCC_MapFile>3</DCC_MapFile>
   </PropertyGroup>
   <ProjectExtensions>
     <Borland.Personality>Delphi.Personality</Borland.Personality>

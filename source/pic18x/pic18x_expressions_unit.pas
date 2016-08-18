@@ -7,7 +7,7 @@ UNIT pic18x_expressions_unit;
 INTERFACE
 
 uses pic18x_instructions_unit, cpc_expressions_unit, cpc_access_unit,
-   cpc_blocks_unit, cpc_core_objects_unit;
+   cpc_blocks_unit, cpc_core_objects_unit, pic18x_access_unit;
 
 type
    TPIC18x_AbsFunctionPrimary =
@@ -106,6 +106,9 @@ procedure generate_stack_fix_and_sign_extend_code
              IntegerRange: TIntegerRange
             );
 procedure PushRealExpression (expr: TExpression);
+function expression_can_be_evaluated_with_simple_bit_test (expr: TExpression; var bit_sense: boolean): TPIC18x_Access;
+procedure generate_bit_test_skip_code (access: TPIC18x_Access; bit_sense: boolean);
+procedure GenerateCodeForConditionalSkip (boolean_expression: TExpression; skip_sense: boolean);
 
 var
    get_bit_mask_routine: TInstruction;
@@ -117,10 +120,264 @@ uses
   pic18x_macro_instructions_unit, pic18x_run_time_error_check_unit, cpc_source_analysis_unit,
   pic18x_blocks_unit, pic18x_core_objects_unit, cpc_target_cpu_unit, cpc_common_unit, pic18x_kernel_unit,
   pic18x_string_unit, pic18x_types_unit, cpc_multi_precision_integer_unit, pic18x_microprocessor_information_unit,
-  cpc_definitions_unit, pic18x_cpu_unit, pic18x_access_unit;
+  cpc_definitions_unit, pic18x_cpu_unit;
 
 var
    temp: TMultiPrecisionInteger;
+
+procedure gen_skip_instruction (bit_sense: boolean; addr, bit_position: integer; mode: TPIC18x_RAM_Access_Mode);
+   begin
+      case bit_sense of
+         true:  TPIC18x_BTFSS.Create (addr, bit_position, mode);
+         false: TPIC18x_BTFSC.Create (addr, bit_position, mode);
+      end
+   end;
+
+procedure generate_bit_test_skip_code (access: TPIC18x_Access; bit_sense: boolean);
+   var
+      typinfo: TPIC18x_TypeInfo;
+      offset: integer;
+      bit_num: TBitNum;
+   begin
+      if access.node_is_packed_field then
+         begin
+            offset := TPIC18x_PackedRecordFieldInfo (access.node_packed_record_field.info).Offset;
+            bit_num := TPIC18x_PackedRecordFieldInfo (access.node_packed_record_field.info).Position
+         end
+      else
+         begin
+            offset := 0;
+            bit_num := 0
+         end;
+      typinfo := TPIC18x_TypeInfo(access.node_typedef.info);
+      if access.absolute_address_with_no_indexing_required_mode then
+         if access.absolute_address (offset) < 256 then
+            gen_skip_instruction (bit_sense,
+                                  access.absolute_address (offset),
+                                  bit_num,
+                                  bank_mode
+                                 )
+         else
+            gen_skip_instruction (bit_sense,
+                                  access.absolute_address (offset),
+                                  bit_num,
+                                  access_mode
+                                 )
+      else if access.near_stack_address_with_no_indexing_required_mode6 (offset) then
+         gen_skip_instruction (bit_sense,
+                               access.near_stack_address(offset),
+                               bit_num,
+                               access_mode
+                              )
+      else
+         begin
+            access.Generate_Load_Ptr2_Code (pFSR1, typinfo.Size-1+Offset);
+            gen_skip_instruction (bit_sense,
+                                  INDF1,
+                                  bit_num,
+                                  access_mode
+                                 )
+         end;
+   end;
+
+procedure GenerateCodeForConditionalSkip (boolean_expression: TExpression; skip_sense: boolean);
+   var
+      rel_exp: TPIC18x_RelationalExpression;
+      access: TPIC18x_Access;
+   begin
+      if boolean_expression is TPIC18x_VariableAccessPrimary then
+         begin
+            access := TPIC18x_Access (TPIC18x_VariableAccessPrimary(boolean_expression).access);
+            if access.can_be_evaluated_with_simple_bit_test then
+               begin
+                  generate_bit_test_skip_code (access, skip_sense);
+                  exit
+               end
+         end;
+
+      if boolean_expression is TPIC18x_RelationalExpression then
+         begin
+            rel_exp := TPIC18x_RelationalExpression(boolean_expression);
+
+            if (rel_exp.left_simple_expression is TPIC18x_VariableAccessPrimary)
+               and
+               (rel_exp.right_simple_expression.contains_constant)
+               and
+               (rel_exp.relop <> relop_in)
+            then
+               begin
+                  access := TPIC18x_Access (TPIC18x_VariableAccessPrimary (rel_exp.left_simple_expression).access);
+                  if access.can_be_evaluated_with_simple_bit_test then
+                     case rel_exp.right_simple_expression.constant.AsOrdinal of
+                        0: case rel_exp.relop of
+                              relop_equals,
+                              relop_le:
+                                 begin
+                                    generate_bit_test_skip_code (access, not skip_sense);
+                                    exit
+                                 end;
+                              relop_notequals,
+                              relop_gt:
+                                 begin
+                                    generate_bit_test_skip_code (access, skip_sense);
+                                    exit
+                                 end;
+                              relop_lt,
+                              relop_ge:
+                                 assert (false);  // should have been optimized out
+                           else
+                              assert (false)
+                           end;
+
+                        1: case rel_exp.relop of
+                              relop_equals,
+                              relop_ge:
+                                 begin
+                                    generate_bit_test_skip_code (access, skip_sense);
+                                    exit
+                                 end;
+                              relop_notequals,
+                              relop_lt:
+                                 begin
+                                    generate_bit_test_skip_code (access, not skip_sense);
+                                    exit
+                                 end;
+                              relop_le,
+                              relop_gt:
+                                 assert (false);  // should have been optimized out
+                           else
+                              assert (false)
+                           end;
+                     else
+                        assert (false)
+                     end
+               end;
+
+            if (rel_exp.right_simple_expression is TPIC18x_VariableAccessPrimary)
+               and
+               (rel_exp.left_simple_expression.contains_constant)
+               and
+               (rel_exp.relop <> relop_in)
+            then
+               begin
+                  access := TPIC18x_Access (TPIC18x_VariableAccessPrimary (rel_exp.right_simple_expression).access);
+                  if access.can_be_evaluated_with_simple_bit_test then
+                     case rel_exp.left_simple_expression.constant.AsOrdinal of
+                        0: case rel_exp.relop of
+                              relop_equals,
+                              relop_ge:
+                                 begin
+                                    generate_bit_test_skip_code (access, not skip_sense);
+                                    exit
+                                 end;
+                              relop_notequals,
+                              relop_lt:
+                                 begin
+                                    generate_bit_test_skip_code (access, skip_sense);
+                                    exit
+                                 end;
+                              relop_gt,
+                              relop_le:
+                                 assert (false);  // should have been optimized out
+                           else
+                              assert (false)
+                           end;
+
+                        1: case rel_exp.relop of
+                              relop_equals,
+                              relop_le:
+                                 begin
+                                    generate_bit_test_skip_code (access, skip_sense);
+                                    exit
+                                 end;
+                              relop_notequals,
+                              relop_gt:
+                                 begin
+                                    generate_bit_test_skip_code (access, not skip_sense);
+                                    exit
+                                 end;
+                              relop_lt,
+                              relop_ge:
+                                 assert (false);  // should have been optimized out
+                           else
+                              assert (false)
+                           end;
+                     else
+                        assert (false)
+                     end
+               end
+         end;
+
+      // if no exit by now, then full evaluation required
+      boolean_expression.Generate (GenerateCode, 1);
+      gen_skip_instruction (skip_sense, PREINC2, 0, access_mode);
+      StackUsageCounter.Pop(1)
+   end;
+
+function expression_can_be_evaluated_with_simple_bit_test (expr: TExpression; var bit_sense: boolean): TPIC18x_Access;
+   // returns access if true, nil if not
+   var
+      rel_expr: TPIC18x_RelationalExpression;
+      vap: TPIC18x_VariableAccessPrimary;
+      const_val: TConstant;
+   begin
+      if expr is TPIC18x_VariableAccessPrimary then
+         begin
+            result := TPIC18x_Access (TPIC18x_VariableAccessPrimary (expr).access);
+            bit_sense := true;
+            if result.can_be_evaluated_with_simple_bit_test then
+               exit
+         end;
+
+      if (expr is TPIC18x_RelationalExpression)
+         and
+         (TPIC18x_RelationalExpression(expr).relop in [relop_equals, relop_notequals])
+      then
+         begin
+            rel_expr := TPIC18x_RelationalExpression(expr);
+            if (rel_expr.left_simple_expression is TPIC18x_VariableAccessPrimary)
+               and
+               (rel_expr.right_simple_expression.contains_constant)
+            then
+               begin
+                  vap := TPIC18x_VariableAccessPrimary(rel_expr.left_simple_expression);
+                  const_val := rel_expr.right_simple_expression.constant
+               end
+            else
+               if (rel_expr.right_simple_expression is TPIC18x_VariableAccessPrimary)
+                  and
+                  (rel_expr.left_simple_expression.contains_constant)
+               then
+                  begin
+                     vap := TPIC18x_VariableAccessPrimary(rel_expr.right_simple_expression);
+                     const_val := rel_expr.left_simple_expression.constant
+                  end
+               else
+                  begin
+                     vap := nil;
+                     const_val := nil
+                  end;
+
+            if vap <> nil then
+               begin
+                  result := TPIC18x_Access (vap.access);
+                  if result.can_be_evaluated_with_simple_bit_test then
+                     begin
+                        case rel_expr.relop of
+                           relop_equals:
+                              bit_sense := const_val.ordinal_value.AsInteger = 1;
+                           relop_notequals:
+                              bit_sense := const_val.ordinal_value.AsInteger = 0;
+                        else
+                           assert (false)
+                        end;
+                        exit
+                     end
+               end
+         end;
+
+      result := nil
+   end;
 
 function tos_size_description (signed: boolean; significant_bytes: integer): string;
    begin

@@ -43,6 +43,7 @@ type
          function is_overlay_variable_needing_range_check: boolean;
          function node_is_in_data_address_space: boolean;   // data is in RAM or ioreg - not eeprom or ROM
          function node_is_single_bit_data_packed_field: boolean;  // data is RAM or ioreg - not eeprom or ROM
+         function can_be_evaluated_with_simple_bit_test: boolean;
       end;
 
 // Array Indexing Notes:
@@ -63,6 +64,19 @@ uses
 
 var
    temp: TMultiPrecisionInteger;
+
+function TPIC18x_Access.can_be_evaluated_with_simple_bit_test: boolean;
+   begin
+      result := (node_is_in_data_address_space)
+                and
+                (node_typedef.info.PackedSizeInBits = 1)
+                and
+                (not ((base_variable.descriptor = rw_ioreg)
+                      and
+                      (TPIC18x_TypeInfo(base_variable.typedef.info).is_in_alternate_shared_address_space)
+                     )
+                )
+   end;
 
 function TPIC18x_Access.total_fixed_offsets: integer;
    var i: integer;

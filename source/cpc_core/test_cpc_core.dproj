@@ -28,6 +28,7 @@
     <DCC_ResourcePath>..\lib;..\lib\mparith;..\lib\fastmm</DCC_ResourcePath>
     <DCC_ObjPath>..\lib;..\lib\mparith;..\lib\fastmm</DCC_ObjPath>
     <DCC_IncludePath>..\lib;..\lib\mparith;..\lib\fastmm</DCC_IncludePath>
+    <DCC_MapFile>3</DCC_MapFile>
   </PropertyGroup>
   <ProjectExtensions>
     <Borland.Personality>Delphi.Personality</Borland.Personality>

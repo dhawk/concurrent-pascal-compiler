@@ -1967,7 +1967,7 @@ constructor TSystemType.CreateFromSourceTokens;
             begin
                assert (parameters.Length = 0);
                if Length(routines) <> 1 then
-                  raise compile_error.Create (err_interrupt_definition_must_implement_signalled_function, src_loc);
+                  raise compile_error.Create (err_interrupt_definition_must_implement_signaled_function, src_loc);
             end
          else  { class or monitor }
             if not public_section_found then

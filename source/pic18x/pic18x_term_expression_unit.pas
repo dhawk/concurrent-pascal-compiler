@@ -21,7 +21,7 @@ uses
    pic18x_multiply_divide_unit, pic18x_cpu_unit, pic18x_instructions_unit, pic18x_core_objects_unit,
    cpc_core_objects_unit, pic18x_microprocessor_information_unit, SysUtils, pic18x_expressions_unit,
    cpc_multi_precision_integer_unit, pic18x_macro_instructions_unit, pic18x_run_time_error_check_unit,
-   pic18x_floating_point_unit;
+   pic18x_floating_point_unit, pic18x_access_unit;
 
 var
    temp: TMultiPrecisionInteger;
@@ -393,35 +393,28 @@ function TPIC18x_Term.Generate (param1, param2: integer): integer;
          intermediate_calculation_info.Free
       end;
 
-//   procedure generate_real_term_code;
-//      var
-//         idx: integer;
-//      begin
-//         assert (first_factor.expression_kind = real_expression);
-//         assert (length(additional_factors) > 0);
-//         first_factor.Generate (GenerateCode, 4);
-//         for idx := 0 to Length(additional_factors)-1 do
-//            begin
-//               assert (additional_factors[idx].factor.expression_kind = real_expression);
-//               additional_factors[idx].factor.Generate (GenerateCode, 4);
-//               case additional_factors[idx].mulop of
-////                   mulop_mult_int_by_int:
-////                   mulop_mult_int_by_flt:
-//                   mulop_mult_flt_by_flt:
-//                      FPM32.Call (additional_factors[idx].mulop_src_loc);
-////                   mulop_divide_int_by_flt:
-//                   mulop_divide_flt_by_flt:
-//                      FPD32.Call (additional_factors[idx].mulop_src_loc);
-//               else
-//                  assert (false)
-//               end
-//            end
-//      end;
-
    procedure generate_boolean_term_code;
       var
          idx: integer;
+         accessA, accessB: TPIC18x_Access;
+         dummy: boolean;
       begin
+         if Length(additional_factors) = 1 then
+            begin
+               assert (additional_factors[0].mulop = mulop_boolean_and);
+               accessA := expression_can_be_evaluated_with_simple_bit_test (first_factor, dummy);
+               accessB := expression_can_be_evaluated_with_simple_bit_test (additional_factors[0].factor, dummy);
+               if (accessA <> nil) and (accessB <> nil) then
+                  begin
+                     TPIC18x_PUSHL.Create(1);
+                     StackUsageCounter.Push(1);
+                     GenerateCodeForConditionalSkip (first_factor, false);
+                     GenerateCodeForConditionalSkip (additional_factors[0].factor, true);
+                     TPIC18x_CLRF.Create (1, access_mode);
+                     exit
+                  end
+            end;
+
          first_factor.Generate (GenerateCode, 1);
          for idx := 0 to Length(additional_factors)-1 do
             begin

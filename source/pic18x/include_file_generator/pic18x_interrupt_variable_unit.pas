@@ -17,6 +17,7 @@ type
                   enable_bit_sfr: string;
                   flag_bit: string;
                   flag_bit_sfr: string;
+                  flag_bit_access: string;  // 'n' or 'r' or '-'
                   priority_bit: string;
                   priority_bit_sfr: string
                end;
@@ -33,7 +34,11 @@ type
 IMPLEMENTATION
 
 uses
-  SysUtils, Generics.Defaults;
+  SysUtils, Generics.Defaults, RegularExpressions;
+
+var
+   usart_transmit_interrupt_regex: TRegEx;
+   usart_receive_interrupt_regex: TRegEx;
 
 constructor t_interrupt_variables.Create (pic_info: TPICInfo);
 
@@ -68,7 +73,8 @@ constructor t_interrupt_variables.Create (pic_info: TPICInfo);
                              end;
                         'F': begin
                                 possible_interrupt_info.flag_bit := f.fieldname;
-                                possible_interrupt_info.flag_bit_sfr := sfr.name
+                                possible_interrupt_info.flag_bit_sfr := sfr.name;
+                                possible_interrupt_info.flag_bit_access := f.bit_access
                              end;
                         'P': begin
                                 possible_interrupt_info.priority_bit := f.fieldname;
@@ -131,6 +137,7 @@ constructor t_interrupt_variables.Create (pic_info: TPICInfo);
    end;   // t_interrupt_variables.Create
 
 procedure t_interrupt_variables.AppendIncludeFileSource (out: TOutStringProc);
+
    var
       intr: string;
       keyArray: TArray<string>;
@@ -164,70 +171,56 @@ procedure t_interrupt_variables.AppendIncludeFileSource (out: TOutStringProc);
                out ('var');
                for intr in keyArray do
                   with possible_interrupts[intr] do
-                     if (Pos('TXI', intr) = 1) then
-                        begin  // TXI interrupts have funny protocol that require enable bit to be also checked
-                           out ('   ' + intr + '_interrupt2:');
-                           out ('      interrupt priority 2;');
-                           out ('         function signalled: boolean;');
-                           out ('            begin');
-                           out ('               if ' + enable_bit_sfr + '.' + enable_bit + ' = 1 then');
-                           out ('                  if ' + flag_bit_sfr + '.' + flag_bit + ' = 1 then');
-                           out ('                     result := true');
-                           out ('            end;');
-                           out ('      begin');
-                           out ('      end;');
-                           out ('');
-                           if priority_bit <> '' then
-                              begin
-                                 out ('   ' + intr + '_interrupt1:');
-                                 out ('      interrupt priority 1;');
-                                 out ('         function signalled: boolean;');
-                                 out ('            begin');
-                                 out ('               if ' + enable_bit_sfr + '.' + enable_bit + ' = 1 then');
-                                 out ('                  if ' + flag_bit_sfr + '.' + flag_bit + ' = 1 then');
-                                 out ('                     result := true');
-                                 out ('            end;');
-                                 out ('      begin');
-                                 out ('         ' + priority_bit_sfr + '.' + priority_bit + ' := 0');
-                                 out ('      end;');
-                                 out ('')
-                              end
-                        end
-                     else  // non-TXI interrupt
-                        begin
-                           out ('   ' + intr + '_interrupt2:');
-                           out ('      interrupt priority 2;');
-                           out ('         function signalled: boolean;');
-                           out ('            begin');
-                           out ('               if ' + flag_bit_sfr + '.' + flag_bit + ' = 1 then');
-                           out ('                  begin');
-                           out ('                     result := true;');
-                           out ('                     ' + flag_bit_sfr + '.' + flag_bit + ' := 0');
-                           out ('                  end');
-                           out ('            end;');
-                           out ('      begin');
-                           out ('         ' + enable_bit_sfr + '.' + enable_bit + ' := 1');
-                           out ('      end;');
-                           out ('');
-                           if priority_bit <> '' then
-                              begin
-                                 out ('   ' + intr + '_interrupt1:');
-                                 out ('      interrupt priority 1;');
-                                 out ('         function signalled: boolean;');
-                                 out ('            begin');
-                                 out ('               if ' + flag_bit_sfr + '.' + flag_bit + ' = 1 then');
-                                 out ('                  begin');
-                                 out ('                     result := true;');
-                                 out ('                     ' + flag_bit_sfr + '.' + flag_bit + ' := 0');
-                                 out ('                  end');
-                                 out ('            end;');
-                                 out ('      begin');
-                                 out ('         ' + priority_bit_sfr + '.' + priority_bit + ' := 0;');
-                                 out ('         ' + enable_bit_sfr + '.' + enable_bit + ' := 1');
-                                 out ('      end;');
-                                 out ('')
-                              end
-                        end
+                     begin
+                        out ('   ' + intr + '_prio2_interrupt:');
+                        out ('      interrupt priority 2;');
+                        out ('         function signaled: boolean;');
+                        out ('            begin');
+                        out ('               if (' + enable_bit_sfr + '.' + enable_bit + ' = 1)');
+                        out ('                  and');
+                        out ('                  (' + flag_bit_sfr + '.' + flag_bit + ' = 1)');
+                        out ('               then');
+                        if flag_bit_access = 'r' then
+                           out ('                     result := true')
+                        else
+                           begin
+                              out ('                  begin');
+                              out ('                     ' + flag_bit_sfr + '.' + flag_bit + ' := 0;');
+                              out ('                     result := true');
+                              out ('                  end')
+                           end;
+                        out ('            end;');
+                        out ('      begin');
+                        out ('         ' + enable_bit_sfr + '.' + enable_bit + ' := 1');
+                        out ('      end;');
+                        out ('');
+                        if priority_bit <> '' then
+                           begin
+                              out ('   ' + intr + '_prio1_interrupt:');
+                              out ('      interrupt priority 1;');
+                              out ('         function signaled: boolean;');
+                              out ('            begin');
+                              out ('               if (' + enable_bit_sfr + '.' + enable_bit + ' = 1)');
+                              out ('                  and');
+                              out ('                  (' + flag_bit_sfr + '.' + flag_bit + ' = 1)');
+                              out ('               then');
+                              if flag_bit_access = 'r' then
+                                 out ('                     result := true')
+                              else
+                                 begin
+                                    out ('                  begin');
+                                    out ('                     ' + flag_bit_sfr + '.' + flag_bit + ' := 0;');
+                                    out ('                     result := true');
+                                    out ('                  end')
+                                 end;
+                              out ('            end;');
+                              out ('      begin');
+                              out ('         ' + priority_bit_sfr + '.' + priority_bit + ' := 0;');
+                              out ('         ' + enable_bit_sfr + '.' + enable_bit + ' := 1');
+                              out ('      end;');
+                              out ('')
+                           end
+                     end
             end
       finally
          keyCollection.Free
@@ -239,6 +232,10 @@ destructor t_interrupt_variables.Destroy;
       possible_interrupts.Free;
       inherited
    end;
+
+INITIALIZATION
+   usart_transmit_interrupt_regex := TRegEx.Create ('^TX[0-9]*I$');
+   usart_receive_interrupt_regex := TRegEx.Create ('^RC[0-9]*I$');
 
 END.
 

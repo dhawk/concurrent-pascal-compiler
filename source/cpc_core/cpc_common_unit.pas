@@ -122,7 +122,7 @@ const
    err_integer_expected = 'integer expected';
    err_integer_expression_expected = 'integer expression expected';
    err_integer_subrange_expected = 'integer subrange expected';
-   err_interrupt_definition_must_implement_signalled_function = 'interrupt definition must implement signalled function';
+   err_interrupt_definition_must_implement_signaled_function = 'interrupt definition must implement signaled function';
    err_interrupt_expected = '"interrupt" expected';
    err_interrupt_identifier_expected = 'interrupt identifier expected';
    err_interrupt_priority_must_be_greater_than_0 = 'interrupt priority must be > 0';
@@ -174,7 +174,7 @@ const
    err_numeric_expression_expected = 'numeric expression expected';
    err_of_expected = '"of" expected';
    err_only_ioregister_types_allowed_in_ioreg_section = 'only ioregister types allowed in ioreg section';
-   err_only_one_routine_allowed_in_interrupt_definition = 'only one routine (signalled) is allowed in interrupt definition';
+   err_only_one_routine_allowed_in_interrupt_definition = 'only one routine (signaled) is allowed in interrupt definition';
    err_only_single_char_allowed = 'only single char allowed';
    err_only_single_chars_allowed_in_sets = 'only single chars allowed insets';
    err_openning_quote_required_for_s_name = 'openning quote ('') required for %s name';
@@ -262,8 +262,8 @@ const
    err_set_expression_expected = 'set expression expected';
    err_set_is_of_wrong_type = 'set is of wrong type';
    err_set_member_type_differs_from_previous = 'err_set_member_type_differs_from_previous';
-   err_signalled_function_required = '"signalled" function required';
-   err_signalled_function_result_must_be_boolean = 'signalled function result must be boolean';
+   err_signaled_function_required = '"signaled" function required';
+   err_signaled_function_result_must_be_boolean = 'signaled function result must be boolean';
    err_source_file_doesnt_exist = 'source file doesn''t exist: ''%s''';
    err_specific_field_identifer_expected = 'field identifier "%s" expected';
    err_specified_enumeration_not_allowed_as_array_index = 'enumeration with specified values not allowed as array index';

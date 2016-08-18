@@ -591,8 +591,10 @@ procedure tTypeDefList.AppendIncludeFileSource (out: TOutStringProc);
 
                out ('type');
                for typename in keyArray do
-                  Self[typename].AppendIncludeFileSource (out);
-               out ('')
+                  begin
+                     Self[typename].AppendIncludeFileSource (out);
+                     out ('')
+                  end
             end
       finally
          keyCollection.Free

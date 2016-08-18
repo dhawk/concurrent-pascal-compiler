@@ -12,6 +12,7 @@ type
       class
          fieldname: string;
          width: integer;
+         bit_access: string   // only set for 1-bit fields (may be unreliable)
       end;
 
    TSFRMode =
@@ -46,6 +47,7 @@ type
 
    TSFRDef =
       class(TSFR)
+         bit_access: string;  // --nnrr (should be len 8, but 9 seen) - (may be unreliable)
          modes: array of TSFRMode;
          when: string;   // used for mux'd SFRs
          function size: integer;

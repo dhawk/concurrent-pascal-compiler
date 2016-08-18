@@ -286,7 +286,7 @@ procedure TPICFileParser.XmlScannerStartTag(Sender: TObject; TagName: String; At
       msfr: TMuxdSFR;
       select: TSelectSFR;
       when: string;
-   begin
+   begin   // XmlScannerStartTag
       level := level + 1;
       stk[level].tag := identify_tag (TagName);
       stk[level].ptr := nil;
@@ -536,6 +536,13 @@ procedure TPICFileParser.XmlScannerStartTag(Sender: TObject; TagName: String; At
                      sfr := TSFRDef.Create (Self);
                      sfr.name := get_attrs ('edc:cname');
                      sfr.addr := get_attri ('edc:_addr');
+                     sfr.bit_access := get_attrs ('edc:access');
+                     if (sfr.name = 'PSTRCON')
+                        and
+                        (sfr.bit_access = '----nnnnn')
+                     then  // .pic file error
+                        sfr.bit_access := '---nnnnn';  // correct value from pic18f23k80 datasheet
+                     assert (Length(sfr.bit_access)=8);    // PSTRCON: 9 seen...
 
                      if sfr.name = 'EEADR' then
                          eeadr := sfr.addr
@@ -664,14 +671,17 @@ procedure TPICFileParser.XmlScannerStartTag(Sender: TObject; TagName: String; At
          else
             assert (false)
          end
-   end;
+   end;   // XmlScannerStartTag
 
 procedure TPICFileParser.XmlScannerEndTag(Sender: TObject; TagName: String);
    var
       joined_sfr_info: TJoinedSFR;
-      sfr0, sfr1: TSFRDef;
+      sfr, sfr0, sfr1: TSFRDef;
+      mode: TSFRMode;
+      field: TSFRField;
       t: TSFR;
-   begin
+      i, bitno: integer;
+   begin  // XmlScannerEndTag
       assert (stk[level].tag = identify_tag(TagName));
       case stk[level].tag of
          JoinedSFRDef:
@@ -708,6 +718,26 @@ procedure TPICFileParser.XmlScannerEndTag(Sender: TObject; TagName: String);
             in_fuse_section := false;
          DCRDef:
             current_fuse_byte := nil;
+         SFRDef:
+            if in_relevant_sfr_data_sector
+            then
+               begin
+                  sfr := TSFRDef(stk[level].ptr);
+                  for mode in sfr.modes do
+                     begin
+                        bitno := -1;
+                        for field in mode.fields do
+                           begin
+                              bitno := bitno + field.width;
+                              assert ((0 <= bitno) and (bitno <= 7));
+                              if (field.fieldname <> '')
+                                 and
+                                 (field.width = 1)
+                              then
+                                 field.bit_access := sfr.bit_access [8 - bitno]
+                           end
+                     end
+               end;
       else
          {nop}
       end;
@@ -715,7 +745,7 @@ procedure TPICFileParser.XmlScannerEndTag(Sender: TObject; TagName: String);
       then
          stk[level].ptr.Free;
       level := level - 1
-   end;
+   end;    // XmlScannerEndTag
 
 procedure TPICFileParser.XmlScannerEmptyTag(Sender: TObject; TagName: String; Attributes: TAttrList);
    begin

@@ -792,14 +792,14 @@ procedure TPIC18x_SystemType.check_interrupt_routine_signature;
       lex.advance_token;
       if (not lex.token_is_identifier)
          or
-         (LowerCase (lex.identifiers[lex.token.identifier_idx]) <> 'signalled') then
-         raise compile_error.Create (err_signalled_function_required);
+         (LowerCase (lex.identifiers[lex.token.identifier_idx]) <> 'signaled') then
+         raise compile_error.Create (err_signaled_function_required);
       lex.advance_token;
       if not lex.token_is_symbol (sym_colon) then
          raise compile_error.Create (err_colon_expected);
       lex.advance_token;
       if LowerCase (lex.identifiers[lex.token.identifier_idx]) <> 'boolean' then
-         raise compile_error.Create (err_signalled_function_result_must_be_boolean);
+         raise compile_error.Create (err_signaled_function_result_must_be_boolean);
       lex.backup (mark)
    end;
 

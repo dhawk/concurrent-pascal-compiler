@@ -2,7 +2,6 @@
 <ComboTypes>
    <ComboType TypeName="tAD" VarNameFormatString="AD" Reversed="true">
          <SFRPattern>
-            <SFR regex="^ADCON2$"/>
             <SFR regex="^ADCON1$"/>
             <SFR regex="^ADCON0$"/>
             <SFR regex="^ADRESL$"/>
@@ -11,6 +10,7 @@
    </ComboType>
    <ComboType TypeName="tAD" VarNameFormatString="AD" Reversed="true">
          <SFRPattern>
+            <SFR regex="^ADCON2$"/>
             <SFR regex="^ADCON1$"/>
             <SFR regex="^ADCON0$"/>
             <SFR regex="^ADRESL$"/>
@@ -134,6 +134,13 @@
          <SFRPattern>
             <SFR regex="^ECCP([0-9]+)DEL$"/>
             <SFR regex="^ECCP([0-9]+)AS$"/>
+         </SFRPattern>
+   </ComboType>
+   <ComboType TypeName="tODCON" VarNameFormatString="ODCON" Reversed="false">
+         <SFRPattern>
+            <SFR regex="^ODCON3$"/>
+            <SFR regex="^ODCON2$"/>
+            <SFR regex="^ODCON1$"/>
          </SFRPattern>
    </ComboType>
    <ComboType TypeName="tPDC" VarNameFormatString="PDC%s" Reversed="false">
