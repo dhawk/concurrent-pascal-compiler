@@ -3,7 +3,7 @@ UNIT multi_threaded_processing_dialog_base_class_unit;
 INTERFACE
 
 uses Windows, SysUtils, Classes, Forms,
-  Controls, StdCtrls,  ExtCtrls, processing_frame_unit;
+   Controls, StdCtrls,  ExtCtrls, processing_frame_unit;
 
 type
    TDirectoryList =
