@@ -49,7 +49,7 @@ type
          stack_usage: integer;
          hw_stack_usage: integer;
          varlist_initialization: TDynamicByteArray;
-         inline_code: TInstructionArray;     // only used for signalled function in interrupt variables
+         inline_code: TInstructionArray;     // only used for signaled function in interrupt variables
          function Generate (param1, param2: integer): integer;
             override;
          procedure PushDefaultResultValue;

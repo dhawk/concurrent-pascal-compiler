@@ -25,7 +25,7 @@ uses
   cpc_term_expression_unit in 'cpc_term_expression_unit.pas',
   cpc_types_unit in 'cpc_types_unit.pas',
   test_access_syntax_unit in 'test_access_syntax_unit.pas',
-  test_block_synax_unit in 'test_block_synax_unit.pas',
+  test_block_syntax_unit in 'test_block_syntax_unit.pas',
   test_constant_expression_unit in 'test_constant_expression_unit.pas',
   test_cpu_unit in 'test_cpu_unit.pas',
   test_expression_syntax_unit in 'test_expression_syntax_unit.pas',
@@ -43,7 +43,7 @@ begin
       test_data_syntax_unit;
       test_mp_math;
       test_statements;
-      test_block_syntax_unit;
+      test_block_syntax;
       test_TPrimary;
       test_TFactor;
       test_TTerm;

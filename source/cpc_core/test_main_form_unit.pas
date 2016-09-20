@@ -47,7 +47,7 @@ IMPLEMENTATION
 uses cpc_main_compiler_unit, cpc_source_analysis_unit, cpc_target_cpu_unit, test_constant_expression_unit,
    cpc_statements_unit, test_statement_syntax_unit, test_access_syntax_unit, test_multi_precision_integer_unit,
    cpc_core_objects_unit, cpc_common_unit, test_type_syntax_unit, test_expression_syntax_unit,
-   test_block_synax_unit, test_subroutines_unit;
+   test_block_syntax_unit, test_subroutines_unit;
 
 procedure TMainForm.ClearButtonClick(Sender: TObject);
    begin
@@ -99,7 +99,7 @@ procedure TMainForm.RunSelectedTestsButtonClick(Sender: TObject);
       if CheckBox6.Checked then
          test_statements;
       if CheckBox7.Checked then
-         test_block_syntax_unit;
+         test_block_syntax;
       if CheckBox8.Checked then
          test_TPrimary;
       if CheckBox10.Checked then

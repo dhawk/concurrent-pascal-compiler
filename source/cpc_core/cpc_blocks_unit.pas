@@ -97,7 +97,7 @@ type
        system_type_local_routine,
        class_entry_routine,
        monitor_entry_routine,
-       interrupt_signalled_routine
+       interrupt_signaled_routine
       );
 
    TRoutine =
@@ -1442,7 +1442,7 @@ constructor TRoutine.CreateFromSourceTokens
                      end;
                interrupt_system_type:
                   begin
-                     routine_kind := interrupt_signalled_routine;
+                     routine_kind := interrupt_signaled_routine;
                      parameter_context := class_local_routine_param_list  // irrelevent since parameter list will be empty
                   end;
             else

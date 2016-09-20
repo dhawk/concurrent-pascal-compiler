@@ -200,7 +200,7 @@ procedure test_init_statement;
       test_compile_error_generation('type mt=monitor (i: int8); public procedure p; begin end; begin end; pt=process (m: mt); priority 0; begin init m end; begin end; begin end.',
                                     err_system_type_variable_can_only_be_initialized_in_the_initial_statment_of_where_it_was_declared,
                                     'm end; begin end; begin end.');
-      test_compile_error_generation('var i: interrupt priority 1; function signalled: boolean; begin end; begin end;' +
+      test_compile_error_generation('var i: interrupt priority 1; function signaled: boolean; begin end; begin end;' +
                                     'p: process priority 1;' +
                                     '  var m2: monitor var q: queue; public procedure p; begin end; begin delay (q) end;' +
                                     '  begin init m2; cycle await interrupt repeat end interrupt i;' +
@@ -208,7 +208,7 @@ procedure test_init_statement;
                                     err_cant_call_delay_from_an_interrupt_process,
                                     'm2; cycle'
                                    );
-      test_compile_error_generation('var i: interrupt priority 1; function signalled: boolean; begin end; begin end;' +
+      test_compile_error_generation('var i: interrupt priority 1; function signaled: boolean; begin end; begin end;' +
                                     'p: process priority 1;' +
                                     '  var m1: monitor var q: queue; public function f: int8; begin delay(q) end; begin end;' +
                                     '  var m2: monitor (i: int8); public procedure p; begin end; begin end;' +
@@ -217,7 +217,7 @@ procedure test_init_statement;
                                     err_cant_call_delay_from_an_interrupt_process,
                                     'm1.f); cycle'
                                    );
-      test_compile_error_generation('var i: interrupt priority 1; function signalled: boolean; begin end; begin end;' +
+      test_compile_error_generation('var i: interrupt priority 1; function signaled: boolean; begin end; begin end;' +
                                     'p: process priority 1;' +
                                     '  type tm1 = monitor var q: queue; public function fd: int8; begin delay(q) end; begin end;' +
                                     '  var m1: array[1..3] of tm1;' +

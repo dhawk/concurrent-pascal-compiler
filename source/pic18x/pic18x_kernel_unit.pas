@@ -1823,7 +1823,7 @@ function generate_interrupt_handler_code (prog: TProgram; prio: TInterruptPriori
          then
             begin
                process := TPIC18x_Variable(prog.program_vars[i]);
-               TSourceLine.Create ('if ' + process.interrupt.name + '.signalled');
+               TSourceLine.Create ('if ' + process.interrupt.name + '.signaled');
                TPIC18x_PUSHL.Create (0);  // initialize result var
                assert (LowerCase(lex.identifiers [TPIC18x_SystemType(process.interrupt.typedef).routines[0].routine_id_idx]) = 'signaled');
                ProgramCode.AppendInlineCode (TPIC18x_Routine(TSystemType(process.interrupt.typedef).routines[0]).inline_code);

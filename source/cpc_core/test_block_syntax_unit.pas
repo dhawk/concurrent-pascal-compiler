@@ -1,4 +1,4 @@
-unit test_block_synax_unit;
+unit test_block_syntax_unit;
 
 {$IFDEF FPC}
   {$MODE Delphi}
@@ -6,7 +6,7 @@ unit test_block_synax_unit;
 
 interface
 
-procedure test_block_syntax_unit;
+procedure test_block_syntax;
 
 implementation
 
@@ -113,17 +113,17 @@ procedure test_TSystemType;
       test_compile_error_generation('type p=process priority 10; begin...', err_invalid_process_priority, '10; begin...');
       test_compile_error_generation('type p=process priority 5 begin...', err_semicolon_expected, 'begin...');
 
-      test_only_for_successful_compilation('var i: interrupt priority 1; function signalled: boolean; begin end; begin end; p: process priority 1; begin cycle await interrupt repeat end interrupt i; begin end.');
-      test_compile_error_generation('var i: interrupt priority 1; function signalled: boolean; begin end; begin end; p: process priority 0; begin cycle await interrupt repeat end interrupt i; begin end.',
+      test_only_for_successful_compilation('var i: interrupt priority 1; function signaled: boolean; begin end; begin end; p: process priority 1; begin cycle await interrupt repeat end interrupt i; begin end.');
+      test_compile_error_generation('var i: interrupt priority 1; function signaled: boolean; begin end; begin end; p: process priority 0; begin cycle await interrupt repeat end interrupt i; begin end.',
                                     err_interrupt_process_priority_not_positive,
                                     'await'
                                    );
-      test_compile_error_generation('var i: interrupt priority 1; function signalled: boolean; begin end; begin end; p: process priority 1; begin cycle repeat end interrupt i; begin end.',
+      test_compile_error_generation('var i: interrupt priority 1; function signaled: boolean; begin end; begin end; p: process priority 1; begin cycle repeat end interrupt i; begin end.',
                                     err_positive_priority_process_must_call_await_interrupt,
                                     'process'
                                    );
-      test_only_for_successful_compilation('var i: interrupt priority 4; function signalled: boolean; begin end; begin end; p: process priority 4; begin cycle await interrupt repeat end interrupt i; begin end.');
-      test_compile_error_generation('var i: interrupt priority 4; function signalled: boolean; begin end; begin end; p: process priority 3; begin cycle await interrupt repeat end interrupt i; begin end.',
+      test_only_for_successful_compilation('var i: interrupt priority 4; function signaled: boolean; begin end; begin end; p: process priority 4; begin cycle await interrupt repeat end interrupt i; begin end.');
+      test_compile_error_generation('var i: interrupt priority 4; function signaled: boolean; begin end; begin end; p: process priority 3; begin cycle await interrupt repeat end interrupt i; begin end.',
                                     err_process_priority_must_be_matched_to_interrupt_priority,
                                     'i; begin end.'
                                    );
@@ -255,8 +255,8 @@ procedure test_interrupt;
       display ('testing interrupt definition');
 
       // test interrupt syntax in TSystemType.CreateFromSourceTokens
-      test_only_for_successful_compilation ('var i: interrupt priority 1; function signalled: boolean; begin end; begin end; begin end.');
-      test_compile_error_generation ('var i: interrupt priority 0; function signalled: boolean; begin end; begin end; begin end.',
+      test_only_for_successful_compilation ('var i: interrupt priority 1; function signaled: boolean; begin end; begin end; begin end.');
+      test_compile_error_generation ('var i: interrupt priority 0; function signaled: boolean; begin end; begin end; begin end.',
                                       err_interrupt_priority_must_be_greater_than_0,
                                       '0'
                                     );
@@ -272,7 +272,7 @@ procedure test_interrupt;
                                      err_properties_not_allowed_in_interrupt_definitions,
                                      'property'
                                     );
-      test_compile_error_generation ('type ti=interrupt priority 1; function signalled: boolean; begin end; function x',
+      test_compile_error_generation ('type ti=interrupt priority 1; function signaled: boolean; begin end; function x',
                                      err_only_one_routine_allowed_in_interrupt_definition,
                                      'function x'
                                     );
@@ -284,15 +284,15 @@ procedure test_interrupt;
                                      err_signaled_function_required,
                                      'x'
                                     );
-      test_compile_error_generation ('type ti=interrupt priority 1; function signalled +',
+      test_compile_error_generation ('type ti=interrupt priority 1; function signaled +',
                                      err_colon_expected,
                                      '+'
                                     );
-      test_compile_error_generation ('type ti=interrupt priority 1; function signalled: int8; begin end; function x',
+      test_compile_error_generation ('type ti=interrupt priority 1; function signaled: int8; begin end; function x',
                                      err_signaled_function_result_must_be_boolean,
                                      'int8'
                                     );
-      test_compile_error_generation ('type ti=interrupt priority 1; function signalled: boolean; begin end; x',
+      test_compile_error_generation ('type ti=interrupt priority 1; function signaled: boolean; begin end; x',
                                      err_begin_expected,
                                      'x'
                                     );
@@ -402,7 +402,7 @@ procedure test_param_type_rules;
       test_only_for_successful_compilation ('type te=(ea,eb,ec,ed); tc=class type tee=set of eb..ec; public procedure p (e: tee); begin end; begin end; var c: tc; begin c.p([eb,ec]) end.');
    end;
 
-procedure test_block_syntax_unit;
+procedure test_block_syntax;
    begin
       display ('=========================');
       display ('TESTING BLOCK SYNTAX UNIT');

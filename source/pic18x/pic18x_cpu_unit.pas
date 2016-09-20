@@ -1305,7 +1305,7 @@ procedure TPIC18x_CPU.generate_machine_code (_prog: TProgram);
             then  // interrupt process
                kernel_stack_size :=
                   max (kernel_stack_size,
-                       TPIC18x_Routine(TSystemType(prog.program_vars[i].interrupt.typedef).routines[0]).stack_usage + 1 {size of signalled function result}
+                       TPIC18x_Routine(TSystemType(prog.program_vars[i].interrupt.typedef).routines[0]).stack_usage + 1 {size of signaled function result}
                       );
          sdram_used := sdram_used + kernel_stack_size;
          kernel_stack_base := sdram_used-1;

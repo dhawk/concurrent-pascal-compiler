@@ -58,6 +58,9 @@
     <DCCReference Include="cpc_types_unit.pas" />
     <DCCReference Include="test_access_syntax_unit.pas" />
     <DCCReference Include="test_block_synax_unit.pas" />
+    <DCCReference Include="test_block_syntax_unit.pas">
+      <ModuleName>test_block_synax_unit</ModuleName>
+    </DCCReference>
     <DCCReference Include="test_constant_expression_unit.pas" />
     <DCCReference Include="test_cpu_unit.pas" />
     <DCCReference Include="test_expression_syntax_unit.pas" />
