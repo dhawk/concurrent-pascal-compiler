@@ -26,22 +26,26 @@ function GetTempFileName(const Extension: string): string;
 
 function GetDosOutput(CommandLine: string; _WorkDir: string = 'C:\'): TStringList;
 
+{$ifndef FPC}
 {$IF CompilerVersion < 20}  // Delphi 2009
 type
    TSetOfChar = set of char;
 function CharInSet(c: char; s: TSetOfChar): boolean;
 {$IFEND}
+{$endif}
 
 IMPLEMENTATION
 
 uses Windows, SysUtils;
 
+{$ifndef FPC}
 {$IF CompilerVersion < 20}
 function CharInSet(c: char; s: TSetOfChar): boolean;
    begin
       result := c in s
    end;
 {$IFEND}
+{$endif}
 
 function min (a,b: integer): integer;
    begin
