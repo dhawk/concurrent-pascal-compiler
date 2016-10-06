@@ -20,6 +20,7 @@
     <DCC_Define>DEBUG;INCLUDE_SIMULATION;CONSOLE_TEST_MODE</DCC_Define>
     <DCC_IntegerOverflowCheck>True</DCC_IntegerOverflowCheck>
     <DCC_RangeChecking>True</DCC_RangeChecking>
+    <DCC_MapFile>3</DCC_MapFile>
     <DCC_ExeOutput>..\..\bin</DCC_ExeOutput>
     <DCC_DcuOutput>..\..\obj\run_pic18x_compiler_tests</DCC_DcuOutput>
     <DCC_ObjOutput>..\..\obj\run_pic18x_compiler_tests</DCC_ObjOutput>
