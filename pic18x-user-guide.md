@@ -5,7 +5,7 @@ title: PIC18x Concurrent Pascal User Guide
 
 <h1><center>{{title}}</center></h1>
 
-This document is intended for the user of the Concurrent Pascal compiler for MicroChip's PIC18<b><u><font color="#FF0000">x</font></u></b> line of microcontrollers. Only PIC18 microcontrollers with the e<b><u><font color="#FF0000">x</font></u></b>tended instruction set are supported. The extended instruction set adds support for the stack operations required for allow re-entrant code. 
+This document is intended for the user of the Concurrent Pascal compiler for MicroChip's PIC18<b><font color="#FF0000">x</font></b> line of microcontrollers. Only PIC18 microcontrollers with the e<b><font color="#FF0000">x</font></b>tended instruction set are supported. The extended instruction set adds support for the stack operations required for  re-entrant code. 
 
 This document assumes the reader is already familiar with:
 
@@ -33,7 +33,7 @@ This directive causes the compiler to reference two files included with the Conc
 * bin/pic18x/processor_definition_files/pic18f2520.xml
 
 
-The pic18f2520.inc file is a Concurrent Pascal include file that specifies ioreg type definitions, ioregs, interrupt variables and prototypes for special compiler-implemented procedures for that microprocessor.
+The pic18f2520.inc file is a Concurrent Pascal source file that specifies a configuration bits type definition, ioreg type definitions, ioregs, interrupt variables and prototypes for special compiler-implemented procedures for that microprocessor.
 
 The pic18f2520.xml file provides microcontroller specific information for the compiler such as SFR addresses, memory layout and sizes, and so forth.
 
@@ -92,7 +92,7 @@ type
          ...
 ~~~
 
-The program itself will normally contain a structured constant specifying the desired configuration bits. A program containing an appropriately named structured constant will include the configuration bits in the binary files produced by the compiler. The constant <b>must</b> be named xxxx_configuration_bits where xxxx is the PIC18 microcontroller specified in the compiler directive at the beginning of the program.
+Your program will normally contain a structured constant specifying the desired configuration bits. Any program containing an appropriately named structured constant will include the configuration bits in the binary files produced by the compiler. This constant <b>must</b> be named xxxx_configuration_bits where xxxx is the PIC18 microcontroller specified in the compiler directive at the beginning of the program.  For example:
 
 ~~~
 const
@@ -125,13 +125,14 @@ const
 ## Configuration Bits Editor
 
 The Configuration Bits Editor (pic18x_config_bit_editor.exe) is used to easily construct a custom configuration bits constant for a project. This constant is typically saved in its own include file in the project directory and included into the main source file:  
+
 ~~~
 {$processor 'pic18f2520'}
 {$include 'pic18f2520_config_bits.inc'}
 ...
 ~~~
 
-The desired micro-controller is selected when a new include file is created.  The initial version of the constant with standard default values appears in the Main tab.  There is a tab for each configuration byte of the microcontroller and individual fields can be set using radio buttons.
+The desired micro-controller is selected when a new include file is first created.  The initial version of the constant with standard default values appears in the Main tab.  There is a tab for each configuration byte of the microcontroller and individual fields are set using radio buttons.
 
 ![](pic18x-user-guide/config-bit-editor.png){:hspace="50"}
 
@@ -151,11 +152,11 @@ A few PIC18s have non-contiguous GPR regions.  The current implementation of the
 
 ## Dual-Port GPRs
 
-Some PIC18x microcontrollers (e.g. USB controllers) have dual-ported GPRs.  This is not currently supported by the compiler.
+Some PIC18x microcontrollers (e.g. USB controllers) have dual-ported GPRs.  This is not currently supported.
 
 # Special Function Registers (SFRs)
 
-The microprocessor include file referenced by the $processor directive contain type definitions for the SFRs.  
+The microprocessor include file referenced by the $processor directive contains type definitions for the SFRs.  
 
 For example, the datasheet for the PIC18F2525 describes the BAUDCON SFR bits as follows:
 
@@ -196,7 +197,7 @@ In addition to the fields defined by the datasheet, there are also occassionally
 
 ## Combo SFR types
 
-Often there are two or more adjacent SFRs for a hardware module that are combined together into a single variable - this is specified by a combo SFR type definition.  When a PIC contains multiple instances of the hardware module, multiple variables can be defined with a common type definition.  This type can be used to define a parameter to a subroutine which allows that subroutine to work with all instances of the hardware module.
+Often there are two or more adjacent SFRs for a hardware module that can be combined to form a single multi-byte ioreg variable - this is specified by a "combo SFR" type definition.  
 
 An example would be the Analog to Digital Converter (ADC) in the PIC18F2520.  AD: tAD combines five SFRs into a single variable:
 
@@ -298,7 +299,13 @@ In addition to ADRES, ADRESH and ADRESL, the following special fields are define
 
 Each of these fields provides access to the exact bits of a particular configurable ADC result.  Depending on the microcontroller, ADCs can be configured to provide 8, 10 or 12 bit results either left or right justified.  Using one of these fields instead of the 16 bit ADRES field will allow the compiler to generate more compact code than if a 16-bit result field (ADRES) were used.
 
-Note that the compiler does not automatically configure the ADC to load a specific result field, it assumes the programmer has previously done so before accessing that field.  Note also that only a few of the PICs have 12-bit ADCs - presence of a 12-bit ADRES field in the type definition does not guarantee that a particular PIC has a 12-bit ADC (see the datasheet!). 
+Note that the compiler does not automatically configure the ADC to load a specific result field, it assumes the programmer has already done so before accessing that field.  Note also that only a few of the PICs have 12-bit ADCs - presence of a 12-bit ADRES field in the type definition does not guarantee that a particular PIC has a 12-bit ADC (see the datasheet!). 
+
+### Multiple Instances of an SFR ioreg variable type
+
+When a PIC contains multiple instances of a hardware module, multiple ioreg variables can be defined with a common type definition for each instance.  This type can then be used to define a parameter to a subroutine which allows that subroutine to work with all instances of the hardware module.
+
+Sometimes not all instances support the exact same set of fields.  In such cases the type definition will include <em>all</em> fields present in any instance.  The programmer must be careful to use only the appropriate fields for the instance being operated upon.  Careful examination of the datasheet is recommended.
 
 <table style="border: 1px solid black; width: 100%; background: #212121;">
    <tr>
@@ -355,7 +362,7 @@ Note that the “13th address bit” is set for all “Alternate” SFRs in Tabl
 
 ## Atomicity of ioreg operations
 
-The compiler ensures that **individual ioreg <u>field</u>** operations are **atomic**.  That means that a stray interrupt will not compromise a single ioreg field read or write operation.  Interrupts are turned off for any ioreg field operation that takes more than a single instruction - this includes SFR reads, masking, shifts and writes for the single field (plus any necessary setting and clearing of ADSHR for alternate address SFRs).
+The compiler ensures that **individual ioreg <u>field</u>** operations are **atomic** for both single byte and multi-byte fields.  That means that a stray interrupt will not compromise a single ioreg field read or write operation.  Interrupts are turned off for any ioreg field operation that takes more than a single instruction - this includes SFR reads, masking, shifts and writes for the single field (plus any necessary setting and clearing of ADSHR for alternate address SFRs).
 
 Although each ioreg field operation is atomic, it should be noted that **sequences** of field operations can be interrupted and are not guaranteed to be atomic unless placed within a single process or monitor and all of those fields are accessed exclusively by that process or monitor.
 
@@ -384,7 +391,7 @@ Process and monitors running at levels 0 and below run with interrupts on.
 
 # Interrupt Variables
 
-The include files define a set of all possible interrupt variables for each microcontroller.  For example a microcontroller that implements TMR3 will have two interrupt variables, one for high priority (2) and one for low priority (1), similar to the following (PIC18F2520):
+The include file defines a set of all possible interrupt variables for a microcontroller.  For example a microcontroller that implements TMR3 will have two interrupt variables in the include file, one for high priority (2) and one for low priority (1), similar to the following (PIC18F2520):
 
 ~~~
 var
@@ -443,7 +450,7 @@ For some special cases other action is required to clear the interrupt flag. A p
 * TXI (USART Transmit Interrupt) - write TXREG
 * UERR
 
-For these special cases no code is included in the interrupt variable signaled function to clear the flag bit since it wouldn't accomplish anything.  Instead the programmer **must** include code in the interrupt process after the await interrupt call that has the effect of clearing the interrupt flag.  <b>*Failure to do so will cause the program to hang!*</b>
+For these special cases no code is included in the interrupt variable signaled function to clear the flag bit since it wouldn't accomplish anything.  Instead the programmer **must** include code in the interrupt process after the await interrupt call that has the effect of clearing the interrupt flag.  Clearing the interrupt flag **must** be done before either the next await interrupt statement and before any monitor calls.  <b>*Failure to do so will cause the program to hang!*</b>
 
 # EEPROM Support
 
@@ -577,7 +584,7 @@ With this configuration the 16-bit timer will continuously count instruction cyc
 
 The controlling TMRn interrupt cycle will be exactly 10,000 instructions in the above example, however there will still be some jitter for the instructions within the process cycle itself due to other parts of the Concurrent Pascal program running at higher priority or with interrupts off.
 
-Cycle times that are too low for a given application will result in frequent or infrequent “TMRn cycle count exceeded” error code.  The error code is generated when the subtraction of cycle_count from the timer yields a result that is still above $0000.  In such cases process priorities will need to be juggled or a longer cycle time chosen.  It may be good practice to experimentally lower this cycle time until the error code begins to appear and then raise it to a higher value to give some margin.
+Cycle times that are too low for a given application will result in frequent or infrequent “TMRn cycle count exceeded” error codes.  The error code is generated when the subtraction of cycle_count from the timer yields a result that is still above $0000.  In such cases process priorities will need to be juggled or a longer cycle time chosen.  It may be good practice to experimentally lower this cycle time until the error code begins to appear and then raise it to a higher value to give some margin.
 
 The first await interrupt statement (the one before the cycle statement) in the above example is to prevent an extraneous “TMRn cycle count exceeded” error code at the first iteration due to the timer being in an unknown state due to a possibly lengthy system initialization time in a given application.  This pattern can result in two complete cycles of the timer (at 65,536 instruction cycles each) occurring after reset before the desired cycling time commences.
 
