@@ -575,10 +575,10 @@ var
 
 In this example the TMRn interrupt will occur exactly every 10,000 instruction cycles assuming that the timer is initialized as follows:
 
-•	the timer is configured to its full width (16 bits),
-•	the clock source is set to internal instruction clock,
-•	the pre-scaler is disabled (x1),
-•	the timer is enabled.
+* the timer is configured to its full width (16 bits),
+* the clock source is set to internal instruction clock,
+* the pre-scaler is disabled (x1),
+* the timer is enabled.
 
 With this configuration the 16-bit timer will continuously count instruction cycles and generate an interrupt when the count reaches $FFFF.  The timer overflows to $0000 and keeps counting.  The reset_TMRn_cycle routine subtracts the cycle_count parameter (with a small adjustment for the number of instruction cycles necessary to implement the subtraction) from the current timer value to reset it below $FFFF again.  The next counter overflow and interrupt will occur exactly cycle_count instruction cycles after the previous timer overflow and interrupt.
 
