@@ -7161,7 +7161,7 @@ procedure test_138;
    end;
 
 procedure test_139;
-   begin
+   begin   // test short-circuit and
       add ('function ft: boolean;');
       add ('  begin');
       add ('    result := true;');
@@ -7211,6 +7211,62 @@ procedure test_139;
       test_abs_value (12, 0);
       test_abs_value (13, 0);
       test_abs_value (14, 0);
+      test_abs_value (15, 1);
+
+      conclude_test
+   end;
+
+procedure test_140;
+   begin   // test short-circuit and
+      add ('function ft: boolean;');
+      add ('  begin');
+      add ('    result := true;');
+      add ('  end;');
+      add ('function ff: boolean;');
+      add ('  begin');
+      add ('    result := false ');
+      add ('  end;');
+      add ('var');
+      add ('  b0,b1,b2,b3,b4,b5,b6,b7: boolean;');
+      add ('  b8,b9,b10,b11,b12,b13,b14,b15: boolean;');
+      add ('  vf: boolean;');
+      add ('  vt: boolean := true;');
+      add ('begin');
+      add ('  b0 := ff or ff or ff;');
+      add ('  b1 := ff or ff or ft;');
+      add ('  b2 := ff or ft or ff;');
+      add ('  b3 := ff or ft or ft;');
+      add ('  b4 := ft or ff or ff;');
+      add ('  b5 := ft or ff or ft;');
+      add ('  b6 := ft or ft or ff;');
+      add ('  b7 := ft or ft or ft;');
+
+      add ('  b8 := vf or vf or vf;');
+      add ('  b9 := vf or vf or vt;');
+      add ('  b10 := vf or vt or vf;');
+      add ('  b11 := vf or vt or vt;');
+      add ('  b12 := vt or vf or vf;');
+      add ('  b13 := vt or vf or vt;');
+      add ('  b14 := vt or vt or vf;');
+      add ('  b15 := vt or vt or vt;');
+      add ('end.');
+      start_test (140);
+      test_abs_value (0, 0);
+      test_abs_value (1, 1);
+      test_abs_value (2, 1);
+      test_abs_value (3, 1);
+      test_abs_value (4, 1);
+      test_abs_value (5, 1);
+      test_abs_value (6, 1);
+      test_abs_value (7, 1);
+
+      test_abs_value (8, 0);
+      test_abs_value (9, 1);
+      test_abs_value (10, 1);
+      test_abs_value (11, 1);
+      test_abs_value (12, 1);
+      test_abs_value (13, 1);
+      test_abs_value (14, 1);
       test_abs_value (15, 1);
 
       conclude_test
@@ -7357,6 +7413,7 @@ procedure RunTests;
       test_137;
       test_138;
       test_139;
+      test_140;
       display_test_result ('all tests done')
    end;
 

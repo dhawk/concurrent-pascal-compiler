@@ -20,7 +20,8 @@ IMPLEMENTATION
 uses
   SysUtils, Math, pic18x_cpu_unit, pic18x_expressions_unit,
   pic18x_instructions_unit, pic18x_microprocessor_information_unit, cpc_core_objects_unit,
-  pic18x_floating_point_unit, pic18x_core_objects_unit;
+  pic18x_floating_point_unit, pic18x_core_objects_unit, 
+  pic18x_macro_instructions_unit;
 
 
 function TPIC18x_SimpleExpression.Generate (param1, param2: integer): integer;
@@ -310,17 +311,58 @@ function TPIC18x_SimpleExpression.Generate (param1, param2: integer): integer;
 
    procedure generate_simple_boolean_expression_code;
       var
-         i: integer;
+         bras: array of TPIC18x_BRA;
+         dummy: boolean;
+
+      procedure add_bra;
+         var i: integer;
+         begin
+            i := Length(bras);
+            SetLength (bras, i+1);
+            bras[i] := TPIC18x_BRA.Create
+         end;
+
+      procedure generate_term_code (term: TExpression; skip_sense: boolean);
+         begin
+            if expression_can_be_evaluated_with_simple_bit_test (term, dummy) <> nil then
+               GenerateCodeForConditionalSkip (term, skip_sense)
+            else
+               begin
+                  term.Generate (GenerateCode, 1);
+                  if skip_sense then
+                     TPIC18x_BTFSS.Create (PREINC2, 0, access_mode)
+                  else
+                     TPIC18x_BTFSC.Create (PREINC2, 0, access_mode);
+                  StackUsageCounter.Pop (1)
+               end
+         end;
+      var
+         idx: integer;
+         lbl: TInstruction;
       begin
-         first_term.Generate (GenerateCode, 1);
-         for i := 0 to Length(additional_terms)-1 do
+//         first_term.Generate (GenerateCode, 1);
+//         for i := 0 to Length(additional_terms)-1 do
+//            begin
+//               additional_terms[i].right_term.Generate(GenerateCode, 1);
+//               assert (additional_terms[i].addop = addop_boolean_or);
+//               TPIC18x_MOVF.Create (PREINC2, dest_w, access_mode).annotation := 'or tos*1 with (tos-1)*1, pop tos*1';
+//               StackUsageCounter.Pop (1);
+//               TPIC18x_IORWF.Create (1, dest_f, access_mode)
+//            end
+         TPIC18x_PUSHL.Create (1);
+         StackUsageCounter.Push(1);
+         generate_term_code (first_term, false);
+         add_bra;
+         for idx := 0 to Length(additional_terms)-2 do
             begin
-               additional_terms[i].right_term.Generate(GenerateCode, 1);
-               assert (additional_terms[i].addop = addop_boolean_or);
-               TPIC18x_MOVF.Create (PREINC2, dest_w, access_mode).annotation := 'or tos*1 with (tos-1)*1, pop tos*1';
-               StackUsageCounter.Pop (1);
-               TPIC18x_IORWF.Create (1, dest_f, access_mode)
-            end
+               generate_term_code (additional_terms[idx].right_term, false);
+               add_bra
+          end;
+         generate_term_code (additional_terms[Length(additional_terms)-1].right_term, true);
+         TPIC18x_CLRF.Create (1, access_mode);
+         lbl := TAssemblyLabel.Create;
+         for idx := 0 to Length(bras)-1 do
+            bras[idx].dest := lbl
       end;
 
    procedure generate_simple_set_expression_code;
