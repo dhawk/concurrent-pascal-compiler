@@ -7160,6 +7160,62 @@ procedure test_138;
       conclude_test
    end;
 
+procedure test_139;
+   begin
+      add ('function ft: boolean;');
+      add ('  begin');
+      add ('    result := true;');
+      add ('  end;');
+      add ('function ff: boolean;');
+      add ('  begin');
+      add ('    result := false ');
+      add ('  end;');
+      add ('var');
+      add ('  b0,b1,b2,b3,b4,b5,b6,b7: boolean;');
+      add ('  b8,b9,b10,b11,b12,b13,b14,b15: boolean;');
+      add ('  vf: boolean;');
+      add ('  vt: boolean := true;');
+      add ('begin');
+      add ('  b0 := ff and ff and ff;');
+      add ('  b1 := ff and ff and ft;');
+      add ('  b2 := ff and ft and ff;');
+      add ('  b3 := ff and ft and ft;');
+      add ('  b4 := ft and ff and ff;');
+      add ('  b5 := ft and ff and ft;');
+      add ('  b6 := ft and ft and ff;');
+      add ('  b7 := ft and ft and ft;');
+
+      add ('  b8 := vf and vf and vf;');
+      add ('  b9 := vf and vf and vt;');
+      add ('  b10 := vf and vt and vf;');
+      add ('  b11 := vf and vt and vt;');
+      add ('  b12 := vt and vf and vf;');
+      add ('  b13 := vt and vf and vt;');
+      add ('  b14 := vt and vt and vf;');
+      add ('  b15 := vt and vt and vt;');
+      add ('end.');
+      start_test (139);
+      test_abs_value (0, 0);
+      test_abs_value (1, 0);
+      test_abs_value (2, 0);
+      test_abs_value (3, 0);
+      test_abs_value (4, 0);
+      test_abs_value (5, 0);
+      test_abs_value (6, 0);
+      test_abs_value (7, 1);
+
+      test_abs_value (8, 0);
+      test_abs_value (9, 0);
+      test_abs_value (10, 0);
+      test_abs_value (11, 0);
+      test_abs_value (12, 0);
+      test_abs_value (13, 0);
+      test_abs_value (14, 0);
+      test_abs_value (15, 1);
+
+      conclude_test
+   end;
+
 procedure RunTests;
    begin
       test1;
@@ -7300,6 +7356,7 @@ procedure RunTests;
       test136;
       test_137;
       test_138;
+      test_139;
       display_test_result ('all tests done')
    end;
 

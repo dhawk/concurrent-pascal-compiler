@@ -208,7 +208,7 @@ function GenerateCodeForConditionalBranch (boolean_expression: TExpression; bran
                begin
                   generate_bit_test_skip_code (accessA, not (branch_on_sense xor bit_senseA));
                   result := generate_bit_test_conditional_branch_code (accessB, not (branch_on_sense xor bit_senseB));
-                  exit
+                  EXIT
                end;
 
             if accessB <> nil then
@@ -220,19 +220,7 @@ function GenerateCodeForConditionalBranch (boolean_expression: TExpression; bran
                      TPIC18x_BTFSC.Create (PREINC2, 0, access_mode);
                   StackUsageCounter.Pop (1);
                   result := generate_bit_test_conditional_branch_code (accessB, not (branch_on_sense xor bit_senseB));
-                  exit
-               end;
-
-            if accessA <> nil then
-               begin
-                  term_expr.additional_factors[0].factor.Generate (GenerateCode, 1);
-                  if branch_on_sense then
-                     TPIC18x_BTFSS.Create (PREINC2, 0, access_mode)
-                  else
-                     TPIC18x_BTFSC.Create (PREINC2, 0, access_mode);
-                  StackUsageCounter.Pop (1);
-                  result := generate_bit_test_conditional_branch_code (accessA, not (branch_on_sense xor bit_senseA));
-                  exit
+                  EXIT
                end
          end;
 

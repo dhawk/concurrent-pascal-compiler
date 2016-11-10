@@ -59,6 +59,6 @@ function ProgramGenerator: TDefinition;
    end;
 
 INITIALIZATION
-   source_file_name := 'test.cp'
+   source_file_name := ExtractFilePath(ParamStr(0)) + 'test.cp'
 
 END.

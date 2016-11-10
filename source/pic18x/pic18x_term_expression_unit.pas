@@ -395,10 +395,38 @@ function TPIC18x_Term.Generate (param1, param2: integer): integer;
 
    procedure generate_boolean_term_code;
       var
+         bras: array of TPIC18x_BRA;
+         dummy: boolean;
+
+      procedure add_bra;
+         var i: integer;
+         begin
+            i := Length(bras);
+            SetLength (bras, i+1);
+            bras[i] := TPIC18x_BRA.Create
+         end;
+
+      procedure generate_factor_code (factor: TExpression; skip_sense: boolean);
+         begin
+            if expression_can_be_evaluated_with_simple_bit_test (factor, dummy) <> nil then
+               GenerateCodeForConditionalSkip (factor, skip_sense)
+            else
+               begin
+                  factor.Generate (GenerateCode, 1);
+                  if skip_sense then
+                     TPIC18x_BTFSS.Create (PREINC2, 0, access_mode)
+                  else
+                     TPIC18x_BTFSC.Create (PREINC2, 0, access_mode);
+                  StackUsageCounter.Pop (1)
+               end
+         end;
+
+      var
          idx: integer;
          accessA, accessB: TPIC18x_Access;
-         dummy: boolean;
-      begin
+         lbl: TInstruction;
+      begin  // generate_boolean_term_code
+         // try optimization for two single-bit factors
          if Length(additional_factors) = 1 then
             begin
                assert (additional_factors[0].mulop = mulop_boolean_and);
@@ -411,20 +439,25 @@ function TPIC18x_Term.Generate (param1, param2: integer): integer;
                      GenerateCodeForConditionalSkip (first_factor, false);
                      GenerateCodeForConditionalSkip (additional_factors[0].factor, true);
                      TPIC18x_CLRF.Create (1, access_mode);
-                     exit
+                     EXIT
                   end
             end;
 
-         first_factor.Generate (GenerateCode, 1);
-         for idx := 0 to Length(additional_factors)-1 do
+         TPIC18x_PUSHL.Create (0);
+         StackUsageCounter.Push(1);
+         generate_factor_code (first_factor, true);
+         add_bra;
+         for idx := 0 to Length(additional_factors)-2 do
             begin
-               assert (additional_factors[idx].mulop = mulop_boolean_and);
-               additional_factors[idx].factor.Generate (GenerateCode, 1);
-               TPIC18x_MOVF.Create (PREINC2, dest_w, access_mode).annotation := 'and tos*1 with (tos-1)*1, pop tos*1';
-               StackUsageCounter.Pop (1);
-               TPIC18x_ANDWF.Create (1, dest_f, access_mode)
-            end
-      end;
+               generate_factor_code (additional_factors[idx].factor, true);
+               add_bra
+          end;
+         generate_factor_code (additional_factors[Length(additional_factors)-1].factor, false);
+         TPIC18x_INCF.Create (1, dest_f, access_mode);
+         lbl := TAssemblyLabel.Create;
+         for idx := 0 to Length(bras)-1 do
+            bras[idx].dest := lbl
+      end;  // generate_boolean_term_code
 
    procedure generate_set_term_code;
       var
