@@ -17,7 +17,7 @@ function ProgramGenerator: TDefinition;
 IMPLEMENTATION
 
 uses
-  pic18x_macro_instructions_unit, pic18x_instructions_unit,
+  pic18x_macro_instructions_unit, pic18x_instructions_unit, pic18x_run_time_error_check_unit,
   cpc_target_cpu_unit, pic18x_blocks_unit, SysUtils, pic18x_cpu_unit;
 
 function ProgramGenerator: TDefinition;
@@ -55,7 +55,8 @@ function ProgramGenerator: TDefinition;
       ProgramCode.AssignConfigByteAddresses;
 
       ProgramCode.WriteHexFile (ChangeFileExt(source_file_name, '.hex'));
-      ProgramCode.WriteAssemblySourceFile (ChangeFileExt(source_file_name, '.asm'))
+      ProgramCode.WriteAssemblySourceFile (ChangeFileExt(source_file_name, '.asm'));
+      OutputRuntimeErrorInfo (ChangeFileExt(source_file_name, '.rterr'));
    end;
 
 INITIALIZATION

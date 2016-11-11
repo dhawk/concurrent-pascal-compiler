@@ -6,8 +6,7 @@ UNIT pic18x_run_time_error_check_unit;
 
 INTERFACE
 
-uses cpc_core_objects_unit, cpc_source_analysis_unit,
-  pic18x_instructions_unit;
+uses cpc_core_objects_unit, cpc_source_analysis_unit, pic18x_instructions_unit;
 
 type
    TSetErrorCodeRoutine =
@@ -127,6 +126,7 @@ function GetRunTimeErrorInfo (error_pc: integer;
                               var message: string;
                               var src_loc: TSourceLocation
                              ): boolean;
+procedure OutputRuntimeErrorInfo (fn: string);
 
 IMPLEMENTATION
 
@@ -165,6 +165,27 @@ var
             src_loc: TSourceLocation
          end;
 
+procedure OutputRuntimeErrorInfo (fn: string);
+   var
+      f: textfile;
+      i: integer;
+   begin
+      AssignFile (f, fn);
+      Rewrite (f);
+      writeln (f, '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>');
+      writeln (f, '<RunTimeErrors>');
+      for i := 0 to Length(RunTimeErrorLocations)-1 do
+         with RunTimeErrorLocations[i] do
+            begin
+               writeln (f, '   <RunTimeError ErrorCode="' + IntToStr(error_location_instruction.rom_addr + offset) + '"');
+               writeln (f, '      ErrorMessage="' + error_message + '"');
+               writeln (f, '      SourceFile="' + src_loc.file_name + '" LineNo="' + IntToStr(src_loc.line_no) + '" Pos="' + IntToStr(src_loc.line_idx) + '"');
+               writeln (f, '   />')
+            end;
+      writeln (f, '</RunTimeErrors>');
+      Closefile (f)
+   end;
+
 procedure RecordRunTimeErrorLocation (instruction: TInstruction;
                                       message: string;
                                       src_loc: TSourceLocation
@@ -191,9 +212,9 @@ procedure RecordRunTimeErrorLocation (instruction: TInstruction;
    end;
 
 function GetRunTimeErrorInfo (error_pc: integer;
-                       var message: string;
-                       var src_loc: TSourceLocation
-                      ): boolean;
+                              var message: string;
+                              var src_loc: TSourceLocation
+                             ): boolean;
    var
       i: integer;
    begin
