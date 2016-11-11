@@ -168,7 +168,7 @@ var
 procedure OutputRuntimeErrorInfo (fn: string);
    var
       f: textfile;
-      i: integer;
+      i, error_code: integer;
    begin
       AssignFile (f, fn);
       Rewrite (f);
@@ -177,7 +177,8 @@ procedure OutputRuntimeErrorInfo (fn: string);
       for i := 0 to Length(RunTimeErrorLocations)-1 do
          with RunTimeErrorLocations[i] do
             begin
-               writeln (f, '   <RunTimeError ErrorCode="' + IntToStr(error_location_instruction.rom_addr + offset) + '"');
+               error_code := error_location_instruction.rom_addr + offset;
+               writeln (f, '   <RunTimeError ErrorCode="' + IntToStr(error_code) + '" Addr="$' + format ('%6.6X', [error_code]) + '"');
                writeln (f, '      ErrorMessage="' + error_message + '"');
                writeln (f, '      SourceFile="' + src_loc.file_name + '" LineNo="' + IntToStr(src_loc.line_no) + '" Pos="' + IntToStr(src_loc.line_idx) + '"');
                writeln (f, '   />')
