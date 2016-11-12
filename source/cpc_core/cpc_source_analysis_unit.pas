@@ -447,6 +447,7 @@ function TSourceLocation.beyond (loc: TSourceLocation): boolean;
       if source_idx < loc.source_idx then
          result := false
       else if source_idx > loc.source_idx then
+      if source_idx > loc.source_idx then
          result := true
       else
          result := line_idx > loc.line_idx
@@ -459,7 +460,10 @@ function TSourceLocation.in_preamble: boolean;
 
 function TSourceLocation.line_no: integer;
    begin
-      result := source[source_idx].line_no
+      if source_idx = -1 then
+         result := 0
+      else
+         result := source[source_idx].line_no
    end;
 
 function TSourceLocation.line: string;
@@ -474,7 +478,9 @@ function TSourceLocation.caret: string;
 
 function TSourceLocation.file_name: string;
    begin
-      if source[source_idx].file_list_idx = -1 then
+      if source_idx = -1 then
+         result := '*internal*'
+      else if source[source_idx].file_list_idx = -1 then
          result := '*preamble*'
       else
          result := ExtractFileName(file_list[source[source_idx].file_list_idx])
