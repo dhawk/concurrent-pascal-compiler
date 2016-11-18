@@ -962,9 +962,9 @@ procedure TPIC18x_Access.Generate_Load_Ptr2_Code (ptr: TPointer; offset: integer
                      annotation := 'FSR1L := @' + path_src + '.b' + IntToStr(TPIC18x_TypeInfo(node_typedef.info).Size-1-offset);
                pTHIS:
                   if node_typedef = nil then
-                     annotation := 'this_ptr := @' + path_src
+                     annotation := 'this := @' + path_src
                   else
-                     annotation := 'this_ptr := @' + path_src + '.b' + IntToStr(TPIC18x_TypeInfo(node_typedef.info).Size-1-offset);
+                     annotation := 'this := @' + path_src + '.b' + IntToStr(TPIC18x_TypeInfo(node_typedef.info).Size-1-offset);
                pTBLPTR:
                   if node_typedef = nil then
                      annotation := 'TBLPTR := @' + path_src

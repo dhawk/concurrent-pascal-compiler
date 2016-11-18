@@ -34,16 +34,25 @@ type
             override;
       end;
 
-   TAssemblySourceBlankLine =
-      class (TInstruction)
-         procedure generate_assembly_code;
-            override;
-      end;
-
    TSourceLine =
       class (TInstruction)
          constructor Create (line: string);
             overload;
+         procedure generate_assembly_code;
+            override;
+      end;
+
+   TAssemblySourceLine =
+      class (TInstruction)
+         line: string;
+         constructor Create (_line: string);
+            overload;
+         procedure generate_assembly_code;
+            override;
+      end;
+
+   TAssemblySourceBlankLine =
+      class (TInstruction)
          procedure generate_assembly_code;
             override;
       end;
@@ -381,6 +390,17 @@ constructor TSourceSyncPoint.Create (_src_loc: TSourceLocation);
 procedure TSourceSyncPoint.generate_assembly_code;
    begin
       sync_source (src_loc)
+   end;
+
+constructor TAssemblySourceLine.Create (_line: string);
+   begin
+      line := _line;
+      inherited Create
+   end;
+
+procedure TAssemblySourceLine.generate_assembly_code;
+   begin
+      assembly_source_code.Add (line)
    end;
 
 procedure TAssemblySourceBlankLine.generate_assembly_code;

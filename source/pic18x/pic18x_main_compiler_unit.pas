@@ -26,6 +26,10 @@ function ProgramGenerator: TDefinition;
       changed: boolean;
       last_instr: TInstruction;
    begin
+      DeleteFile (ChangeFileExt(source_file_name, '.hex'));
+      DeleteFile (ChangeFileExt(source_file_name, '.asm'));
+      DeleteFile (ChangeFileExt(source_file_name, '.rterr'));
+
       result := target_cpu.TProgram_CreateFromSourceTokens;
       ProgramCode.Clear;
       try

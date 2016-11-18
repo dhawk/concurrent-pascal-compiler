@@ -9,7 +9,7 @@ INTERFACE
 uses
    cpc_expressions_unit, cpc_statements_unit, cpc_core_objects_unit,
    pic18x_core_objects_unit, pic18x_instructions_unit, cpc_blocks_unit,
-   pic18x_blocks_unit, Classes;
+   pic18x_blocks_unit, Classes, pic18x_cpu_unit;
 
 const
    initial_process_stk_init = ord('S');
@@ -70,14 +70,14 @@ type
 {$endif}
       end;
 
+   TPriorityInfo =
+      record
+         prio: integer;        // value in source
+         ready_addr: integer;  // encoded value
+      end;
    TPriorityMapper =
       record
-         priorities:
-            array of
-               record
-                  prio: integer;        // value in source
-                  ready_addr: integer;  // encoded value
-               end;
+         priorities: array of TPriorityInfo;
          number_of_processes: integer;
          procedure Init;
          procedure NotePriorityLevelUse (prio: TPriorityRange);
@@ -178,6 +178,8 @@ procedure GenerateKernel (prog: TProgram);
 procedure GenerateKernelStartupCode;
 procedure EnterMonitor (monitor_prio: integer);
 procedure LeaveMonitor (monitor_prio, pop_size: integer);
+function kernel_variables_map: tRAMVariableMapNode;
+function process_pcb_map (group: tRAMVariableGroup = process_pcbs_group): tRAMVariableMapNode;
 
 function ExitKernel: TInstruction;
 function TurnInterruptsOn: TInstruction;
@@ -205,7 +207,7 @@ uses
    test_pic18x_subroutines_unit,
    test_pic18x_kernel_unit,
 {$endif}
-   SysUtils, pic18x_microprocessor_information_unit, pic18x_access_unit, pic18x_cpu_unit,
+   SysUtils, pic18x_microprocessor_information_unit, pic18x_access_unit,
    pic18x_macro_instructions_unit, cpc_source_analysis_unit,
    pic18x_run_time_error_check_unit, cpc_target_cpu_unit;
 
@@ -363,8 +365,8 @@ procedure InitProcessStateSFRAddresses;
       init (psTABLAT, TABLAT, 'TABLAT');
       init (psTBLPTRL, TBLPTRL, 'TBLPTRL');
       init (psTBLPTRH, TBLPTRH, 'TBLPTRH');
-      init (psthis_ptrH, this_ptrH, 'this_ptrH');
-      init (psthis_ptrL, this_ptrL, 'this_ptrL');
+      init (psthis_ptrH, this_ptrH, 'thisH');
+      init (psthis_ptrL, this_ptrL, 'thisL');
       init (psTOSU, TOSU, 'TOSU');
       init (psTOSH, TOSH, 'TOSH');
       init (psTOSL, TOSL, 'TOSL');
@@ -502,7 +504,7 @@ function TPIC18x_DelayStatement.Generate (param1, param2: integer): integer;
                lbl := TCALLMacro.Create;
                kernel_delay.ComeFrom (lbl);
                lbl.annotation := 'execute delay';
-               StackUsageCounter.PushPop (5)    // resume addr(3) and this_ptr(2)
+               StackUsageCounter.PushPop (5)    // resume addr(3) and this(2)
             end;
       else
          assert (false, 'TPIC18x_DelayStatement.Generate(' + IntToStr(param1) + ') not implemented')
@@ -568,7 +570,7 @@ procedure TInitProcessSubroutine.generate_subroutine_code;
       bz.dest := TAssemblyLabel.Create;
       push_return_address_macro := TPushLabelMacro.Create;
       push_return_address_macro.annotation := 'push return address';
-      TPIC18x_SUBFSR.Create (2, 2);  // push garbage this_ptr (this_ptr in program initial process not used)
+      TPIC18x_SUBFSR.Create (2, 2);  // push garbage this_ptr (ptr in program initial process not used)
       // save caller's (the initial process) stack pointer
       TPIC18x_MOVFF.Create (FSR2H, initial_process_pcb_addr + pcb_stk_saveH_offset).annotation := 'save initial process stack pointer for return via dispatch';
       TPIC18x_MOVFF.Create (FSR2L, initial_process_pcb_addr + pcb_stk_saveL_offset);
@@ -698,7 +700,7 @@ procedure generate_await_interrupt_code;
       TPIC18x_MOVFF.Create (TOSL, POSTDEC2);
       TPIC18x_MOVFF.Create (TOSH, POSTDEC2);
       TPIC18x_MOVFF.Create (TOSU, POSTDEC2);
-      TSourceLine.Create.annotation := 'push this_ptr;';
+      TSourceLine.Create.annotation := 'push this;';
       TPIC18x_MOVFF.Create (this_ptrL, POSTDEC2);
       TPIC18x_MOVFF.Create (this_ptrH, POSTDEC2);
       TSourceLine.Create.annotation := 'pcb := ready[current_prio].queue;';
@@ -886,7 +888,7 @@ procedure generate_dispatch_code;
       TPIC18x_MOVFF.Create (PREINC0, FSR2H);
       TPIC18x_MOVFF.Create (PREINC0, FSR2L);
 
-      TSourceLine.Create.annotation :='   pop this_ptr;';
+      TSourceLine.Create.annotation :='   pop this;';
       TPIC18x_MOVFF.Create (PREINC2, this_ptrH);
       TPIC18x_MOVFF.Create (PREINC2, this_ptrL);
 
@@ -1052,7 +1054,7 @@ procedure generate_enter_monitor_code;
       TPIC18x_MOVFF.Create (TOSH, POSTDEC2);
       TPIC18x_MOVFF.Create (TOSU, POSTDEC2);
 
-      TPIC18x_MOVFF.Create (this_ptrL, POSTDEC2).annotation := 'save this_ptr';
+      TPIC18x_MOVFF.Create (this_ptrL, POSTDEC2).annotation := 'save this';
       TPIC18x_MOVFF.Create (this_ptrH, POSTDEC2);
 
       TSourceLine.Create.annotation := '      ready[current_prio].state := suspended;';
@@ -1191,7 +1193,7 @@ procedure generate_leave_monitor_code;
       TSourceLine.Create.annotation := '         gate := nil;';
       TPIC18x_CLRF.Create (INDF1, access_mode);
 
-      TSourceLine.Create.annotation := '         this_ptr := stack.pop;';
+      TSourceLine.Create.annotation := '         this := stack.pop;';
       TPIC18x_MOVFF.Create (PREINC2, this_ptrH);
       TPIC18x_MOVFF.Create (PREINC2, this_ptrL);
       TSourceLine.Create.annotation := '         return';
@@ -1538,7 +1540,7 @@ procedure generate_delay_code;
       TPIC18x_MOVFF.Create (TOSH, POSTDEC2);
       TPIC18x_MOVFF.Create (TOSU, POSTDEC2);
 
-      TSourceLine.Create.annotation := 'push this_ptr;';
+      TSourceLine.Create.annotation := 'push this;';
       TPIC18x_MOVFF.Create (this_ptrL, POSTDEC2);
       TPIC18x_MOVFF.Create (this_ptrH, POSTDEC2);
 
@@ -1936,7 +1938,7 @@ procedure list_kernel_variables (prog: TProgram);
       TSourceLine.Create ('        pcb =');
       TSourceLine.Create ('           record');
       TSourceLine.Create ('              next: ppcb;       { offset 0 }');
-      TSourceLine.Create ('              stkptr_save: SFR; { offset H=1,L=2 }');
+      TSourceLine.Create ('              fsr2_save: SFR; { offset H=1,L=2 }');
       TSourceLine.Create ('              nesting: 0..255   { offset 3 }');
       TSourceLine.Create ('           end;');
       TSourceLine.Create ('        process_state =');
@@ -1957,7 +1959,7 @@ procedure list_kernel_variables (prog: TProgram);
       TSourceLine.Create (format ('%3.3x     current_prio: prio_range;', [current_prio]));
       TSourceLine.Create (format ('%3.3x:%d:1 system_initializing: boolean;', [kernel_exit_flags, kef_system_initializing_bit]));
       TSourceLine.Create (format ('%3.3x:%d:1 running_at_high_priority: boolean;', [kernel_exit_flags, kef_running_at_high_priority_bit]));
-      TSourceLine.Create (format ('%3.3x     this_ptr: ram pointer;', [this_ptrH]));
+      TSourceLine.Create (format ('%3.3x     this: ram pointer;', [this_ptrH]));
       TSourceLine.Create (format ('%3.3x     error_log: uint24;', [error_logU]));
       TSourceLine.Create ('        ready:  { an "array" of unequally sized elements }');
       TSourceLine.Create ('           array [prio_range] of');
@@ -1992,6 +1994,68 @@ procedure list_kernel_variables (prog: TProgram);
          then
             TSourceLine.Create (format ('%3.3x     %s_pcb: pcb;', [TPIC18x_Variable(prog.program_vars[i]).pcb_address, prog.program_vars[i].name]));
       TSourceLine.Create (format ('%3.3x     initial_process_pcb: pcb;', [initial_process_pcb_addr]))
+   end;
+
+function kernel_variables_map: tRAMVariableMapNode;
+   function current_prio_typedef: string;
+      var i: integer;
+      begin
+         if Length(PriorityMapper.priorities) = 1 then
+            result := format ('(init {encoded $%2.2x})', [PriorityMapper.priorities[0].ready_addr])
+         else
+            result := format ('(init {encoded $%2.2x}, ', [PriorityMapper.priorities[0].ready_addr]);
+         for i := Low(PriorityMapper.priorities)+1 to High(PriorityMapper.priorities) do
+            if i < High(PriorityMapper.priorities) then
+               result := result + format ('%d {$%2.2x}, ', [PriorityMapper.priorities[i].prio, PriorityMapper.priorities[i].ready_addr])
+            else
+               result := result + format ('%d {$%2.2x})', [PriorityMapper.priorities[i].prio, PriorityMapper.priorities[i].ready_addr]);
+      end;
+   function ready_element (idx: integer): tRAMVariableMapNode;
+      var
+         save: tRAMVariableMapNode;
+         sfr_idx: TProcessStateSFRs;
+      begin
+         result := tRAMVariableMapNode.Create (format ('ready_%2.2X', [PriorityMapper.priorities[idx].ready_addr]));
+         if idx = 0 then
+            result.id := 'ready[init]'
+         else
+            result.id := 'ready[' + IntToStr(PriorityMapper.priorities[idx].prio) + ']';
+         result.append (tRAMVariableMapNode.Create ('queue', '^pcb', 1, kernel_vars_group));
+         result.append (tRAMVariableMapNode.Create ('state', 'process_state', 1, kernel_vars_group));
+         if PriorityMapper.Interruptable (PriorityMapper.priorities[idx].prio) then
+            begin
+               save := tRAMVariableMapNode.Create ('save');
+               for sfr_idx := Low(TProcessStateSFRs) to High(TProcessStateSFRs) do
+                  save.append (tRAMVariableMapNode.Create (ProcessStateSFRAddress[sfr_idx].name, 'byte', 1, kernel_vars_group));
+               result.append (save)
+            end
+      end;
+   var
+      i: integer;
+      flags: tRAMVariableMapNode;
+   begin
+      result := tRAMVariableMapNode.Create ('KERNEL');
+      result.append (tRAMVariableMapNode.Create ('current_prio', current_prio_typedef, 1, kernel_vars_group));
+      flags := tRAMVariableMapNode.Create ('flags', '', 1, kernel_vars_group);
+      flags.id := 'system_initializing';
+      flags.typename := 'bit7; KERNEL.running_at_high_priority: bit6';
+      result.append (flags);
+      result.append (tRAMVariableMapNode.Create ('this', '2 bytes', 2, kernel_vars_group));
+      result.append (tRAMVariableMapNode.Create ('ErrorCode', 'uint24', 3, kernel_vars_group));
+      result.append (tRAMVariableMapNode.Create ('temp1', 'byte', 1, kernel_vars_group));
+      result.append (tRAMVariableMapNode.Create ('temp2', 'byte', 1, kernel_vars_group));
+      result.append (process_pcb_map (kernel_pcb_group));
+      result.append (tRAMVariableMapNode.Create ('STACK', IntToStr(kernel_stack_size) + ' bytes', kernel_stack_size, kernel_stack_phase));
+      for i := Low(PriorityMapper.priorities) to High(PriorityMapper.priorities) do
+         result.append (ready_element(i))
+   end;
+
+function process_pcb_map (group: tRAMVariableGroup = process_pcbs_group): tRAMVariableMapNode;
+   begin
+      result := tRAMVariableMapNode.Create ('PCB');
+      result.append (tRAMVariableMapNode.Create ('next', '^pcb', 1, group));
+      result.append (tRAMVariableMapNode.Create ('fsr2_save', '2 bytes', 2, group));
+      result.append (tRAMVariableMapNode.Create ('nesting', 'uint8', 1, group))
    end;
 
 procedure GenerateKernel (prog: TProgram);

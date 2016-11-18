@@ -447,10 +447,10 @@ function TSourceLocation.beyond (loc: TSourceLocation): boolean;
       if source_idx < loc.source_idx then
          result := false
       else if source_idx > loc.source_idx then
-      if source_idx > loc.source_idx then
-         result := true
-      else
-         result := line_idx > loc.line_idx
+         if source_idx > loc.source_idx then
+            result := true
+         else
+            result := line_idx > loc.line_idx
    end;
 
 function TSourceLocation.in_preamble: boolean;

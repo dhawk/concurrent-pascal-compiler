@@ -106,8 +106,7 @@ constructor TTargetCPUBaseClass.Create (_processor_name: string);
       for i := 1 to max_supported_ordinal_size do
          begin
             add_additional_supported_data_type ('int' + IntToStr(i), TIntegerDataType.CreateSignedOrdinal(i));
-            add_additional_supported_data_type ('uint' + IntToStr(i), TIntegerDataType.CreateUnSignedOrdinal(i));
-//            add_additional_supported_data_type ('kernel' + IntToStr(i), TIntegerDataType.CreateReadOnly(i))
+            add_additional_supported_data_type ('uint' + IntToStr(i), TIntegerDataType.CreateUnSignedOrdinal(i))
          end
    end;
 
@@ -140,6 +139,7 @@ function TTargetCPUBaseClass.process_compiler_directive (simplified_line: string
 procedure TTargetCPUBaseClass.add_additional_supported_data_type (id: string; typedef: TTypeDef);
    var i: integer;
    begin
+      typedef.name := id;
       i := Length(supported_data_types);
       SetLength (supported_data_types, i+1);
       supported_data_types[i].id := id;
