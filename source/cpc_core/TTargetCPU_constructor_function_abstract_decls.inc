@@ -74,6 +74,8 @@
             virtual; abstract;
          function TRoutineCallStatement_CreateFromSourceTokens (acc: TAccess): TRoutineCallStatement;
             virtual; abstract;
+         function TRoutineCallStatement_CreatePropertySetterCall (acc: TAccess; exp: TExpression; _src_loc: TSourceLocation): TRoutineCallStatement;
+            virtual; abstract;
          function TSetConstructorPrimary_CreateFromSourceTokens: TSetConstructorPrimary;
             virtual; abstract;
          function TSimpleExpression_CreateFromSourceTokens: TSimpleExpression;

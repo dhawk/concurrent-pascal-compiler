@@ -74,6 +74,8 @@
             override;
          function TRoutineCallStatement_CreateFromSourceTokens (acc: TAccess): TRoutineCallStatement;
             override;
+         function TRoutineCallStatement_CreatePropertySetterCall (acc: TAccess; exp: TExpression; _src_loc: TSourceLocation): TRoutineCallStatement;
+            override;
          function TSetConstructorPrimary_CreateFromSourceTokens: TSetConstructorPrimary;
             override;
          function TSimpleExpression_CreateFromSourceTokens: TSimpleExpression;

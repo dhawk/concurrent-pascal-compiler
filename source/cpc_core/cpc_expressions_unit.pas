@@ -1231,8 +1231,11 @@ constructor TFunctionAccessPrimary.CreateFromSourceTokens
          assert(false)
       end;
 
-      call_record := target_cpu.TRoutineCallRecord_Create (access.node_routine, access.node_id_src_loc);
-      BlockStack.tos.AddRoutineCallRecord (call_record)
+      if BlockStack.tos_idx >= 0 then 
+         begin
+            call_record := target_cpu.TRoutineCallRecord_Create (access.node_routine, access.node_id_src_loc);
+            BlockStack.tos.AddRoutineCallRecord (call_record)
+         end
    end;
 
 destructor TFunctionAccessPrimary.Destroy;

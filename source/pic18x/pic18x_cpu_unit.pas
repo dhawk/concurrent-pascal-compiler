@@ -207,6 +207,8 @@ type
             override;
          function TRoutineCallStatement_CreateFromSourceTokens (acc: TAccess): TRoutineCallStatement;
             override;
+         function TRoutineCallStatement_CreatePropertySetterCall (acc: TAccess; exp: TExpression; _src_loc: TSourceLocation): TRoutineCallStatement;
+            override;
          function TSetConstructorPrimary_CreateFromSourceTokens: TSetConstructorPrimary;
             override;
          function TSimpleExpression_CreateFromSourceTokens: TSimpleExpression;
@@ -722,6 +724,11 @@ function TPIC18x_CPU.TRoutine_CreatePropertySetterFromSourceTokens (cntxt: TDefi
 function TPIC18x_CPU.TRoutineCallStatement_CreateFromSourceTokens (acc: TAccess): TRoutineCallStatement;
    begin
       result := TPIC18x_RoutineCallStatement.CreateFromSourceTokens (acc)
+   end;
+
+function TPIC18x_CPU.TRoutineCallStatement_CreatePropertySetterCall (acc: TAccess; exp: TExpression; _src_loc: TSourceLocation): TRoutineCallStatement;
+   begin
+      result := TPIC18x_RoutineCallStatement.CreatePropertySetterCall (acc, exp, _src_loc,)
    end;
 
 function TPIC18x_CPU.TSetConstructorPrimary_CreateFromSourceTokens: TSetConstructorPrimary;

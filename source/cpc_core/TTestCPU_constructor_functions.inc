@@ -188,6 +188,11 @@ function TTestCPU.TRoutineCallStatement_CreateFromSourceTokens (acc: TAccess): T
       result := TRoutineCallStatement.CreateFromSourceTokens (acc)
    end;
 
+function TTestCPU.TRoutineCallStatement_CreatePropertySetterCall (acc: TAccess; exp: TExpression; _src_loc: TSourceLocation): TRoutineCallStatement;
+   begin
+      result := TRoutineCallStatement.CreatePropertySetterCall (acc, exp, _src_loc)
+   end;
+
 function TTestCPU.TSetConstructorPrimary_CreateFromSourceTokens: TSetConstructorPrimary;
    begin
       result := TSetConstructorPrimary.CreateFromSourceTokens

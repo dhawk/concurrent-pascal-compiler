@@ -1642,8 +1642,6 @@ function TPIC18x_AssignmentStatement.Generate (param1, param2: integer): integer
             generate_copy_assignment_code
       end;   // generate_assignement_code
 
-   var
-      rc: TPIC18x_RoutineCallStatement;
    begin   // TAssignmentStatement.Generate
       result := 0;  // to suppress compiler warning
       case param1 of
@@ -1653,13 +1651,7 @@ function TPIC18x_AssignmentStatement.Generate (param1, param2: integer): integer
                TSourceSyncPoint.Create (last_token_src_loc);
 
                if assignee.node_property <> nil then
-                  begin
-                     rc := TPIC18x_RoutineCallStatement.Create (assignee, expression, last_token_src_loc);
-                     rc.call_record := target_cpu.TRoutineCallRecord_Create (assignee.node_property.set_proc, assignee.node_id_src_loc);
-                     current_block.AddRoutineCallRecord (rc.call_record);
-                     rc.Generate (GenerateCode, 0);
-                     rc.Release
-                  end
+                  property_setter_routine_call.Generate (GenerateCode, 0)
                else if assignee.node_typedef.type_kind = string_type then
                   generate_string_assignment_code
                else

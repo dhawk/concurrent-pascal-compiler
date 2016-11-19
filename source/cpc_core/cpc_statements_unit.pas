@@ -58,12 +58,14 @@ type
             override;
       end;
 
+   TRoutineCallStatement = class;
    TAssignmentStatement =
       class(TStatement)
          assignee: TAccess;
          assignment_operator_src_loc: TSourceLocation;
          expression: TExpression;
          last_token_src_loc: TSourceLocation;
+         property_setter_routine_call: TRoutineCallStatement;
          constructor CreateFromSourceTokens
             (acc: TAccess
             );
@@ -302,6 +304,7 @@ type
          constructor CreateFromSourceTokens
             (acc: TAccess
             );
+         constructor CreatePropertySetterCall (acc: TAccess; exp: TExpression; _src_loc: TSourceLocation);
          destructor Destroy;
             override;
          procedure MarkAsReachable;
@@ -718,13 +721,17 @@ constructor TAssignmentStatement.CreateFromSourceTokens
                end;
          end;
 
-      last_token_src_loc := lex.previous_token_src_loc
+      last_token_src_loc := lex.previous_token_src_loc;
+
+      if assignee.node_property <> nil then
+         property_setter_routine_call := target_cpu.TRoutineCallStatement_CreatePropertySetterCall (assignee, expression, last_token_src_loc)
    end;
 
 destructor TAssignmentStatement.Destroy;
    begin
       assignee.Release;
-      expression.Release
+      expression.Release;
+      property_setter_routine_call.Release
    end;
 
 procedure TAssignmentStatement.MarkAsReachable;
@@ -1754,6 +1761,19 @@ constructor TRoutineCallStatement.CreateFromSourceTokens
             call_record := target_cpu.TRoutineCallRecord_Create (access.node_routine, access.node_id_src_loc);
             BlockStack.tos.AddRoutineCallRecord (call_record)
          end
+   end;
+
+constructor TRoutineCallStatement.CreatePropertySetterCall (acc: TAccess; exp: TExpression; _src_loc: TSourceLocation);
+   begin
+      inherited Create(routine_call_statement);
+      access := acc;
+      access.AddRef;
+      SetLength (actual_parameters, 1);
+      actual_parameters[0] := exp;
+      actual_parameters[0].AddRef;
+      src_loc := _src_loc;
+      call_record := target_cpu.TRoutineCallRecord_Create (access.node_routine, access.node_id_src_loc);
+      BlockStack.tos.AddRoutineCallRecord (call_record)
    end;
 
 destructor TRoutineCallStatement.Destroy;
