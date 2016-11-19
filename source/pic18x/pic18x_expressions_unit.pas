@@ -797,6 +797,8 @@ function TPIC18x_FunctionAccessPrimary.Generate (param1, param2: integer): integ
          if routine.function_result.typedef.type_kind <> string_type then
             routine.PushDefaultResultValue;
 
+         TPIC18x_RoutineCallRecord(call_record).stk_ptr_at_call := StackUsageCounter.Current;
+
          push_return_address_macro := TPushLabelMacro.Create;
          push_return_address_macro.annotation := 'push return address';
          StackUsageCounter.Push (3);

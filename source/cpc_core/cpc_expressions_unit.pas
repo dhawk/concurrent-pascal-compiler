@@ -82,6 +82,7 @@ type
       class(TExpression)
          access: TAccess;
          actual_parameters: TArrayOfTDefinition;
+         call_record: TRoutineCallRecord;
          constructor CreateFromSourceTokens
             (_access: TAccess
             );
@@ -1229,6 +1230,9 @@ constructor TFunctionAccessPrimary.CreateFromSourceTokens
       else
          assert(false)
       end;
+
+      call_record := target_cpu.TRoutineCallRecord_Create (access.node_routine, access.node_id_src_loc);
+      BlockStack.tos.AddRoutineCallRecord (call_record)
    end;
 
 destructor TFunctionAccessPrimary.Destroy;

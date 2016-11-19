@@ -1607,7 +1607,7 @@ procedure test54;    // get/set properties
       add ('    var x: int8;');
       add ('    public');
       add ('    property ii: int8;');
-      add ('       get :');
+      add ('       get:');
       add ('          begin');
       add ('           ii := x + 20');
       add ('          end;');

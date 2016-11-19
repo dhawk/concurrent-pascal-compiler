@@ -20,6 +20,13 @@ type
    TArrayOfTDefinition =
       array of TDefinition;  // either TAccess or TExpression
 
+   TRoutineCallRecord =
+      class
+         called_routine: TDefinition;  // must be TRoutine
+         src_loc: TSourceLocation;
+         constructor Create (_called_routine: TDefinition; _src_loc: TSourceLocation);
+      end;
+
    TDefinitiontKind =
       (uninitialized_definition,  // must be first (ord 0)
        access_definition,
@@ -51,6 +58,7 @@ type
          src_loc: TSourceLocation;
          reachable: boolean;
          definition_kind: TDefinitiontKind;
+         routine_call_record_list: array of TRoutineCallRecord;
          class var CodeBlockList: TArrayOfTDefinition;
             // routines, system type initial statements, program initial statement and rom constants in source code order
          class procedure ClearCodeBlockList;
@@ -72,6 +80,7 @@ type
             virtual;
          function Generate (param1, param2: integer): integer;
             virtual;
+         procedure AddRoutineCallRecord (routine_call: TRoutineCallRecord);
       end;
 
    TDefStack =
@@ -149,6 +158,18 @@ IMPLEMENTATION
 
 uses SysUtils, cpc_target_cpu_unit;
 
+
+//=====================
+//  TRoutineCallRecord
+//=====================
+
+constructor TRoutineCallRecord.Create (_called_routine: TDefinition; _src_loc: TSourceLocation);
+   begin
+      called_routine := _called_routine;
+      src_loc := _src_loc
+   end;
+
+
 //===============
 //  TDefinition
 //===============
@@ -167,8 +188,12 @@ constructor TDefinition.Create
    end;
 
 destructor TDefinition.Destroy;
+   var
+      i: integer;
    begin
-      f_info.Release
+      f_info.Release;
+      for i := 0 to Length(routine_call_record_list)-1 do
+         routine_call_record_list[i].Free
    end;
 
 function TDefinition.info: TCPUSpecificInfo;
@@ -224,6 +249,14 @@ procedure TDefinition.AddSelfToCodeBlockList;
       SetLength (CodeBlockList, i+1);
       CodeBlockList[i] := self;
       AddRef
+   end;
+
+procedure TDefinition.AddRoutineCallRecord (routine_call: TRoutineCallRecord);
+   var i: integer;
+   begin
+      i := Length(routine_call_record_list);
+      SetLength (routine_call_record_list, i+1);
+      routine_call_record_list[i] := routine_call
    end;
 
 

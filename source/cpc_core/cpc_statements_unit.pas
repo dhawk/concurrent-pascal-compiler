@@ -298,6 +298,7 @@ type
       class(TStatement)
          access: TAccess;
          actual_parameters: TArrayOfTDefinition;
+         call_record: TRoutineCallRecord;
          constructor CreateFromSourceTokens
             (acc: TAccess
             );
@@ -1722,10 +1723,7 @@ constructor TRoutineCallStatement.CreateFromSourceTokens
       then
          raise compile_error.Create (err_variable_not_initialized, access.src_loc);
 
-      if access.is_strappend_attribute then
-         begin
-         end
-      else
+      if not access.is_strappend_attribute then
          begin
             if not access.node_routine.definition_complete then
                raise compile_error.Create (err_recursive_call_not_allowed, access.node_id_src_loc);
@@ -1751,7 +1749,10 @@ constructor TRoutineCallStatement.CreateFromSourceTokens
                actual_parameters := access.node_routine.AssembleAndCheckCallerParameterListFromSourceTokens
             else   // no parameters allowed
                if lex.token_is_symbol(sym_left_parenthesis) then
-                  raise compile_error.Create(err_procedure_has_no_parameters)
+                  raise compile_error.Create(err_procedure_has_no_parameters);
+
+            call_record := target_cpu.TRoutineCallRecord_Create (access.node_routine, access.node_id_src_loc);
+            BlockStack.tos.AddRoutineCallRecord (call_record)
          end
    end;
 

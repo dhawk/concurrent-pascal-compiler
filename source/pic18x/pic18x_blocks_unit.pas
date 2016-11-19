@@ -9,7 +9,7 @@ INTERFACE
 uses
    cpc_blocks_unit, cpc_definitions_unit, pic18x_instructions_unit,
    cpc_core_objects_unit, pic18x_macro_instructions_unit, pic18x_cpu_unit,
-   Classes, pic18x_core_objects_unit;
+   Classes, pic18x_core_objects_unit, cpc_source_analysis_unit;
 
 type
    TPIC18x_ParamList =
@@ -89,6 +89,11 @@ type
             override;
       end;
 
+   TPIC18x_RoutineCallRecord =
+      class (TRoutineCallRecord)
+         stk_ptr_at_call: integer
+      end;
+
 var
    prog: TPIC18x_Program;
    program_memory_used: integer;
@@ -112,7 +117,7 @@ procedure NoteHWStackUsage (call_hw_stack_usage: integer);
 IMPLEMENTATION
 
 uses
-   cpc_source_analysis_unit, pic18x_access_unit, SysUtils, pic18x_floating_point_unit,
+   pic18x_access_unit, SysUtils, pic18x_floating_point_unit,
    pic18x_microprocessor_information_unit, pic18x_run_time_error_check_unit,
    cpc_target_cpu_unit, cpc_expressions_unit, pic18x_kernel_unit,
    cpc_types_unit, cpc_common_unit, cpc_statements_unit, pic18x_common_unit;
@@ -941,6 +946,7 @@ procedure TPIC18x_DataItemList.PushInitialValues;
       SetLength (variable_initial_value, 0);
       StackUsageCounter.Push (Size)
    end;
+
 
 procedure NoteHWStackUsage (call_hw_stack_usage: integer);
    procedure set_max (var hw_stack_usage: integer);

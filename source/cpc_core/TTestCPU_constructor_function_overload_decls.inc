@@ -118,3 +118,5 @@
             override;
          function TWithStatement_CreateFromSourceTokensStartingAtVariable: TWithStatement;
             override;
+         function TRoutineCallRecord_Create (called_routine: TDefinition; src_loc: TSourceLocation): TRoutineCallRecord;
+            override;

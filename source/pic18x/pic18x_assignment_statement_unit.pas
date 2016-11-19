@@ -34,7 +34,7 @@ uses
    cpc_definitions_unit, pic18x_run_time_error_check_unit,
    pic18x_kernel_unit, pic18x_floating_point_unit, pic18x_expressions_unit,
    cpc_target_cpu_unit, cpc_multi_precision_integer_unit, Math,
-   SysUtils, pic18x_microprocessor_information_unit;
+   SysUtils, pic18x_microprocessor_information_unit, pic18x_blocks_unit;
 
 
 constructor TPIC18x_AssignmentStatement.Create (_assignee: TAccess; _expression: TExpression; _src_loc: TSourceLocation);
@@ -1655,6 +1655,8 @@ function TPIC18x_AssignmentStatement.Generate (param1, param2: integer): integer
                if assignee.node_property <> nil then
                   begin
                      rc := TPIC18x_RoutineCallStatement.Create (assignee, expression, last_token_src_loc);
+                     rc.call_record := target_cpu.TRoutineCallRecord_Create (assignee.node_property.set_proc, assignee.node_id_src_loc);
+                     current_block.AddRoutineCallRecord (rc.call_record);
                      rc.Generate (GenerateCode, 0);
                      rc.Release
                   end

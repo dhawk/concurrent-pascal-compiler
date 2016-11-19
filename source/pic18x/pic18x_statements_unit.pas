@@ -1505,6 +1505,8 @@ function TPIC18x_RoutineCallStatement.Generate (param1, param2: integer): intege
          is_monitor_entry_routine := false;
          NoteHWStackUsage (routine.hw_stack_usage);
 
+         TPIC18x_RoutineCallRecord(call_record).stk_ptr_at_call := StackUsageCounter.Current;
+
          push_return_address_macro := TPushLabelMacro.Create;
          push_return_address_macro.annotation := 'push return address';
          StackUsageCounter.Push (3);

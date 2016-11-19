@@ -247,6 +247,8 @@ type
             override;
          function TWithStatement_CreateFromSourceTokensStartingAtVariable: TWithStatement;
             override;
+         function TRoutineCallRecord_Create (called_routine: TDefinition; src_loc: TSourceLocation): TRoutineCallRecord;
+            override;
       private
          ram_initialization:  TInitialValueBytes;
          procedure append_initial_value_byte (b: byte; byte_no: integer; path, value: string; initialization_unnecessary: boolean);
@@ -834,6 +836,11 @@ function TPIC18x_CPU.TWithStatement_CreateFromSourceTokensStartingAtVariable: TW
       result := TPIC18x_WithStatement.CreateFromSourceTokensStartingAtVariable
    end;
 
+function TPIC18x_CPU.TRoutineCallRecord_Create (called_routine: TDefinition; src_loc: TSourceLocation): TRoutineCallRecord;
+   begin
+      result := TPIC18x_RoutineCallRecord.Create (called_routine, src_loc)
+   end;
+
 function TPIC18x_CPU.src_directory_relative_to_bin: string;
    begin
       result := '..\source\pic18x'
@@ -1073,7 +1080,7 @@ procedure tRAMVariableMapNode.shorten_if_needed (expanded_short_name: string);
             begin
                result[1] := c1;
                if no_conflict (result) then
-                  exit
+                  EXIT
             end;
          SetLength (result, 2);
          for c1 := 'a' to 'z' do
@@ -1083,13 +1090,13 @@ procedure tRAMVariableMapNode.shorten_if_needed (expanded_short_name: string);
                   begin
                      result[2] := c2;
                      if no_conflict (result) then
-                        exit
+                        EXIT
                   end;
                for c2 := 'a' to 'z' do
                   begin
                      result[2] := c2;
                      if no_conflict (result) then
-                        exit
+                        EXIT
                   end;
             end;
          assert (false)  // no substitute found!

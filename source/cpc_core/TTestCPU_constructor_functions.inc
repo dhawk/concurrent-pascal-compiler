@@ -298,3 +298,8 @@ function TTestCPU.TWithStatement_CreateFromSourceTokensStartingAtVariable: TWith
       result := TWithStatement.CreateFromSourceTokensStartingAtVariable
    end;
 
+function TTestCPU.TRoutineCallRecord_Create (called_routine: TDefinition; src_loc: TSourceLocation): TRoutineCallRecord;
+   begin
+      result := TRoutineCallRecord.Create (called_routine, src_loc)
+   end;
+
