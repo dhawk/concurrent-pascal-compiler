@@ -231,7 +231,10 @@ type
          function token_is_constant: boolean;
          function token_is_eof: boolean;
 
+         function token_string (src_loc: TSourceLocation): string;
+            overload;
          function token_string (first_src_loc, last_src_loc: TSourceLocation): string;
+            overload;
 
          destructor Destroy;
             override;
@@ -1497,6 +1500,11 @@ destructor TLexicalAnalysis.Destroy;
             tokens[i].i.Free;
       inherited;
       lex := nil
+   end;
+
+function TLexicalAnalysis.token_string (src_loc: TSourceLocation): string;
+   begin
+      result := token_string (src_loc, src_loc)
    end;
 
 function TLexicalAnalysis.token_string (first_src_loc, last_src_loc: TSourceLocation): string;

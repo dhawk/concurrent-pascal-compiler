@@ -107,6 +107,7 @@ type
       public
          routine_id_idx: TIdentifierIdx;
          routine_id_src_loc: TSourceLocation;
+         name: string;
          block_header_end_src_loc, last_var_declaration_src_loc, block_begin_src_loc, block_end_src_loc: TSourceLocation;
          routine_kind: TRoutineKind;
          entry: boolean;
@@ -149,6 +150,7 @@ type
    TProperty =
       class(TDefinition)
          id: TIdentifierIdx;
+         name: string;
          entry: boolean;
          typedef: TTypeDef;
          typedef_src_loc: TSourceLocation;
@@ -1389,6 +1391,7 @@ constructor TRoutine.CreateFromSourceTokens
             raise compile_error.Create(err_identifier_expected);
          routine_id_idx := lex.token.identifier_idx;
          routine_id_src_loc := lex.token.src_loc;
+         name := lex.token_string(routine_id_src_loc);
 
          CurrentDefinitionTable.DefineForCurrentScope(lex.token.identifier_idx, Self, lex.token.src_loc);
          if routine_type = function_routine then
@@ -1514,6 +1517,7 @@ constructor TRoutine.CreatePropertySetterFromSourceTokens
       BlockStack.push(Self);
       context := cntxt;
       entry := entre;
+      name := lex.token_string (property_id_src_loc);
 
       case TSystemType(context).system_type_kind of
          process_system_type:
@@ -1566,6 +1570,8 @@ constructor TRoutine.CreatePropertyGetterFromSourceTokens
       BlockStack.push(Self);
       context := cntxt;
       entry := entre;
+
+      name := lex.token_string (property_id_src_loc);
 
       case TSystemType(context).system_type_kind of
          process_system_type:
@@ -1700,6 +1706,7 @@ constructor TProperty.CreateFromSourceTokens
          raise compile_error.Create(err_identifier_expected);
       id := lex.token.identifier_idx;
       property_id_src_loc := lex.token.src_loc;
+      name := lex.token_string (property_id_src_loc);
       lex.advance_token;
 
       if not lex.token_is_symbol(sym_colon) then

@@ -20,11 +20,13 @@ type
    TArrayOfTDefinition =
       array of TDefinition;  // either TAccess or TExpression
 
-   TRoutineCallRecord =
+   TCallType = (standalone_routine_call, systemtype_init_call, systemtype_routine_call, systemtype_property_call);
+   TCallRecord =
       class
-         called_routine: TDefinition;  // must be TRoutine
-         src_loc: TSourceLocation;
-         constructor Create (_called_routine: TDefinition; _src_loc: TSourceLocation);
+         called_name: string;
+         called_access: TDefinition;  // must be TAccess
+         call_type: TCallType;
+         constructor Create (_called_name: string; _called_access: TDefinition; _call_type: TCallType);
       end;
 
    TDefinitiontKind =
@@ -58,7 +60,7 @@ type
          src_loc: TSourceLocation;
          reachable: boolean;
          definition_kind: TDefinitiontKind;
-         routine_call_record_list: array of TRoutineCallRecord;
+         call_record_list: array of TCallRecord;
          class var CodeBlockList: TArrayOfTDefinition;
             // routines, system type initial statements, program initial statement and rom constants in source code order
          class procedure ClearCodeBlockList;
@@ -80,7 +82,7 @@ type
             virtual;
          function Generate (param1, param2: integer): integer;
             virtual;
-         procedure AddRoutineCallRecord (routine_call: TRoutineCallRecord);
+         procedure AddCallRecord (call: TCallRecord);
       end;
 
    TDefStack =
@@ -159,14 +161,15 @@ IMPLEMENTATION
 uses SysUtils, cpc_target_cpu_unit;
 
 
-//=====================
-//  TRoutineCallRecord
-//=====================
+//==============
+//  TCallRecord
+//==============
 
-constructor TRoutineCallRecord.Create (_called_routine: TDefinition; _src_loc: TSourceLocation);
+constructor TCallRecord.Create (_called_name: string; _called_access: TDefinition; _call_type: TCallType);
    begin
-      called_routine := _called_routine;
-      src_loc := _src_loc
+      called_name := _called_name;
+      called_access := _called_access;
+      call_type := _call_type
    end;
 
 
@@ -192,8 +195,8 @@ destructor TDefinition.Destroy;
       i: integer;
    begin
       f_info.Release;
-      for i := 0 to Length(routine_call_record_list)-1 do
-         routine_call_record_list[i].Free
+      for i := 0 to Length(call_record_list)-1 do
+         call_record_list[i].Free
    end;
 
 function TDefinition.info: TCPUSpecificInfo;
@@ -251,12 +254,12 @@ procedure TDefinition.AddSelfToCodeBlockList;
       AddRef
    end;
 
-procedure TDefinition.AddRoutineCallRecord (routine_call: TRoutineCallRecord);
+procedure TDefinition.AddCallRecord (call: TCallRecord);
    var i: integer;
    begin
-      i := Length(routine_call_record_list);
-      SetLength (routine_call_record_list, i+1);
-      routine_call_record_list[i] := routine_call
+      i := Length(call_record_list);
+      SetLength (call_record_list, i+1);
+      call_record_list[i] := call
    end;
 
 

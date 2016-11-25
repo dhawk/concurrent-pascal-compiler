@@ -51,6 +51,14 @@ type
             override;
       end;
 
+   TAssemblySourceLineWithLabelReference =
+      class (TAssemblySourceLine)
+         procedure generate_assembly_code;
+            override;
+         procedure set_dest (d: TInstruction);
+            override;
+      end;
+
    TAssemblySourceBlankLine =
       class (TInstruction)
          procedure generate_assembly_code;
@@ -401,6 +409,21 @@ constructor TAssemblySourceLine.Create (_line: string);
 procedure TAssemblySourceLine.generate_assembly_code;
    begin
       assembly_source_code.Add (line)
+   end;
+
+procedure TAssemblySourceLineWithLabelReference.generate_assembly_code;
+   begin
+      if dest = nil then
+         assembly_source_code.Add (format (line, ['L??????']))
+      else
+         assembly_source_code.Add (format (line, [format ('L%6.6d', [dest.assembler_label_number])]))
+   end;
+
+procedure TAssemblySourceLineWithLabelReference.set_dest (d: TInstruction);
+   begin
+      f_dest := d;
+      if d <> nil then
+         d.assembler_label_required := true
    end;
 
 procedure TAssemblySourceBlankLine.generate_assembly_code;

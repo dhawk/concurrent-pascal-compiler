@@ -68,7 +68,7 @@ type
              var h: boolean; 
              dl: boolean
             );
-         Function remove
+         function remove
             (item: TBalancedTreeEntry
             ): boolean;
       public

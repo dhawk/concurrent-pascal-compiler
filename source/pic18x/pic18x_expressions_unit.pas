@@ -120,7 +120,7 @@ uses
   pic18x_macro_instructions_unit, pic18x_run_time_error_check_unit, cpc_source_analysis_unit,
   pic18x_blocks_unit, pic18x_core_objects_unit, cpc_target_cpu_unit, cpc_common_unit, pic18x_kernel_unit,
   pic18x_string_unit, pic18x_types_unit, cpc_multi_precision_integer_unit, pic18x_microprocessor_information_unit,
-  cpc_definitions_unit, pic18x_cpu_unit;
+  cpc_definitions_unit, pic18x_cpu_unit, pic18x_ram_map_unit;
 
 var
    temp: TMultiPrecisionInteger;
@@ -732,7 +732,8 @@ constructor TPIC18x_FunctionAccessPrimary.CreateFromSourceTokens (_access: TAcce
          or
          (access.node_routine = TPIC18x_CPU(target_cpu).Trunc24)
          or
-         (access.node_routine = TPIC18x_CPU(target_cpu).Trunc32) then
+         (access.node_routine = TPIC18x_CPU(target_cpu).Trunc32)
+      then
          begin
             access.AddRef;
 
@@ -797,8 +798,6 @@ function TPIC18x_FunctionAccessPrimary.Generate (param1, param2: integer): integ
          if routine.function_result.typedef.type_kind <> string_type then
             routine.PushDefaultResultValue;
 
-         TPIC18x_RoutineCallRecord(call_record).stk_ptr_at_call := StackUsageCounter.Current;
-
          push_return_address_macro := TPushLabelMacro.Create;
          push_return_address_macro.annotation := 'push return address';
          StackUsageCounter.Push (3);
@@ -824,6 +823,8 @@ function TPIC18x_FunctionAccessPrimary.Generate (param1, param2: integer): integ
 
          if routine.entry then
             TPIC18x_Access(access).Generate_Load_Ptr2_Code (pTHIS, 0);
+
+         TPIC18x_CallRecord(call_record).caller_relative_stk_ptr_at_call := StackUsageCounter.Current;
 
          instr := TGOTOMacro.Create;
          instr.dest := routine.entry_point_label;

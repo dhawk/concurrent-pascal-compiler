@@ -7,7 +7,7 @@ UNIT pic18x_kernel_unit;
 INTERFACE
 
 uses
-   cpc_expressions_unit, cpc_statements_unit, cpc_core_objects_unit,
+   cpc_expressions_unit, cpc_statements_unit, cpc_core_objects_unit, pic18x_microprocessor_information_unit,
    pic18x_core_objects_unit, pic18x_instructions_unit, cpc_blocks_unit,
    pic18x_blocks_unit, Classes, pic18x_cpu_unit;
 
@@ -178,8 +178,6 @@ procedure GenerateKernel (prog: TProgram);
 procedure GenerateKernelStartupCode;
 procedure EnterMonitor (monitor_prio: integer);
 procedure LeaveMonitor (monitor_prio, pop_size: integer);
-function kernel_variables_map: tRAMVariableMapNode;
-function process_pcb_map (group: tRAMVariableGroup = process_pcbs_group): tRAMVariableMapNode;
 
 function ExitKernel: TInstruction;
 function TurnInterruptsOn: TInstruction;
@@ -197,24 +195,6 @@ var
    kernel_idle: TBranchTarget;
    GetEEPROMByte: TGetEEPROMByte;
    SetEEPROMByte: TSetEEPROMByte;
-
-
-IMPLEMENTATION
-
-uses
-{$ifdef INCLUDE_SIMULATION}
-   test_pic18x_simulator_unit,
-   test_pic18x_subroutines_unit,
-   test_pic18x_kernel_unit,
-{$endif}
-   SysUtils, pic18x_microprocessor_information_unit, pic18x_access_unit,
-   pic18x_macro_instructions_unit, cpc_source_analysis_unit,
-   pic18x_run_time_error_check_unit, cpc_target_cpu_unit;
-
-const
-   ready_state_offset = 1;
-   ready_state_running_bit = 7;
-   ready_state_suspended_bit = 6;
 
 type
    TProcessStateSFRs =
@@ -234,16 +214,32 @@ type
        psTOSL,
        psWREG
       );
-   TProcessState =
+const
+   ProcessStateAreaSize = ord(High(TProcessStateSFRs)) + 1;
+var
+   ProcessStateSFRAddress:
       array [TProcessStateSFRs] of
          record
             addr: TDataMemoryAddress;
             name: string
          end;
+
+IMPLEMENTATION
+
+uses
+{$ifdef INCLUDE_SIMULATION}
+   test_pic18x_simulator_unit,
+   test_pic18x_subroutines_unit,
+   test_pic18x_kernel_unit,
+{$endif}
+   SysUtils, pic18x_access_unit,
+   pic18x_macro_instructions_unit, cpc_source_analysis_unit,
+   pic18x_run_time_error_check_unit, cpc_target_cpu_unit;
+
 const
-   ProcessStateAreaSize = ord(High(TProcessStateSFRs)) + 1;
-var
-   ProcessStateSFRAddress: TProcessState;
+   ready_state_offset = 1;
+   ready_state_running_bit = 7;
+   ready_state_suspended_bit = 6;
 
 function ExitKernel: TInstruction;
    begin
@@ -1994,68 +1990,6 @@ procedure list_kernel_variables (prog: TProgram);
          then
             TSourceLine.Create (format ('%3.3x     %s_pcb: pcb;', [TPIC18x_Variable(prog.program_vars[i]).pcb_address, prog.program_vars[i].name]));
       TSourceLine.Create (format ('%3.3x     initial_process_pcb: pcb;', [initial_process_pcb_addr]))
-   end;
-
-function kernel_variables_map: tRAMVariableMapNode;
-   function current_prio_typedef: string;
-      var i: integer;
-      begin
-         if Length(PriorityMapper.priorities) = 1 then
-            result := format ('(init {encoded $%2.2x})', [PriorityMapper.priorities[0].ready_addr])
-         else
-            result := format ('(init {encoded $%2.2x}, ', [PriorityMapper.priorities[0].ready_addr]);
-         for i := Low(PriorityMapper.priorities)+1 to High(PriorityMapper.priorities) do
-            if i < High(PriorityMapper.priorities) then
-               result := result + format ('%d {$%2.2x}, ', [PriorityMapper.priorities[i].prio, PriorityMapper.priorities[i].ready_addr])
-            else
-               result := result + format ('%d {$%2.2x})', [PriorityMapper.priorities[i].prio, PriorityMapper.priorities[i].ready_addr]);
-      end;
-   function ready_element (idx: integer): tRAMVariableMapNode;
-      var
-         save: tRAMVariableMapNode;
-         sfr_idx: TProcessStateSFRs;
-      begin
-         result := tRAMVariableMapNode.Create (format ('ready_%2.2X', [PriorityMapper.priorities[idx].ready_addr]));
-         if idx = 0 then
-            result.id := 'ready[init]'
-         else
-            result.id := 'ready[' + IntToStr(PriorityMapper.priorities[idx].prio) + ']';
-         result.append (tRAMVariableMapNode.Create ('queue', '^pcb', 1, kernel_vars_group));
-         result.append (tRAMVariableMapNode.Create ('state', 'process_state', 1, kernel_vars_group));
-         if PriorityMapper.Interruptable (PriorityMapper.priorities[idx].prio) then
-            begin
-               save := tRAMVariableMapNode.Create ('save');
-               for sfr_idx := Low(TProcessStateSFRs) to High(TProcessStateSFRs) do
-                  save.append (tRAMVariableMapNode.Create (ProcessStateSFRAddress[sfr_idx].name, 'byte', 1, kernel_vars_group));
-               result.append (save)
-            end
-      end;
-   var
-      i: integer;
-      flags: tRAMVariableMapNode;
-   begin
-      result := tRAMVariableMapNode.Create ('KERNEL');
-      result.append (tRAMVariableMapNode.Create ('current_prio', current_prio_typedef, 1, kernel_vars_group));
-      flags := tRAMVariableMapNode.Create ('flags', '', 1, kernel_vars_group);
-      flags.id := 'system_initializing';
-      flags.typename := 'bit7; KERNEL.running_at_high_priority: bit6';
-      result.append (flags);
-      result.append (tRAMVariableMapNode.Create ('this', '2 bytes', 2, kernel_vars_group));
-      result.append (tRAMVariableMapNode.Create ('ErrorCode', 'uint24', 3, kernel_vars_group));
-      result.append (tRAMVariableMapNode.Create ('temp1', 'byte', 1, kernel_vars_group));
-      result.append (tRAMVariableMapNode.Create ('temp2', 'byte', 1, kernel_vars_group));
-      result.append (process_pcb_map (kernel_pcb_group));
-      result.append (tRAMVariableMapNode.Create ('STACK', IntToStr(kernel_stack_size) + ' bytes', kernel_stack_size, kernel_stack_phase));
-      for i := Low(PriorityMapper.priorities) to High(PriorityMapper.priorities) do
-         result.append (ready_element(i))
-   end;
-
-function process_pcb_map (group: tRAMVariableGroup = process_pcbs_group): tRAMVariableMapNode;
-   begin
-      result := tRAMVariableMapNode.Create ('PCB');
-      result.append (tRAMVariableMapNode.Create ('next', '^pcb', 1, group));
-      result.append (tRAMVariableMapNode.Create ('fsr2_save', '2 bytes', 2, group));
-      result.append (tRAMVariableMapNode.Create ('nesting', 'uint8', 1, group))
    end;
 
 procedure GenerateKernel (prog: TProgram);

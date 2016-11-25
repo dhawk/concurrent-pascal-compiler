@@ -82,7 +82,7 @@ type
       class(TExpression)
          access: TAccess;
          actual_parameters: TArrayOfTDefinition;
-         call_record: TRoutineCallRecord;
+         call_record: TCallRecord;
          constructor CreateFromSourceTokens
             (_access: TAccess
             );
@@ -1231,10 +1231,20 @@ constructor TFunctionAccessPrimary.CreateFromSourceTokens
          assert(false)
       end;
 
-      if BlockStack.tos_idx >= 0 then 
+      if BlockStack.tos_idx >= 0 then  // not a fragment test 
          begin
-            call_record := target_cpu.TRoutineCallRecord_Create (access.node_routine, access.node_id_src_loc);
-            BlockStack.tos.AddRoutineCallRecord (call_record)
+            case access.node_access_kind of
+               function_access:
+                  if access.node_routine.routine_kind = standalone_routine then
+                     call_record := target_cpu.TCallRecord_Create (access.node_routine.name, access, standalone_routine_call)
+                  else
+                     call_record := target_cpu.TCallRecord_Create (access.node_routine.name, access, systemtype_routine_call);
+               property_access:
+                  call_record := target_cpu.TCallRecord_Create (access.node_property.name, access, systemtype_property_call);
+            else
+               assert (false)
+            end;
+            BlockStack.tos.AddCallRecord (call_record)
          end
    end;
 

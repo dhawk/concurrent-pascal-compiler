@@ -162,7 +162,7 @@ uses
    pic18x_blocks_unit, cpc_target_cpu_unit, cpc_multi_precision_integer_unit,
    pic18x_kernel_unit, pic18x_string_unit, pic18x_types_unit, cpc_common_unit, cpc_definitions_unit,
    pic18x_assignment_statement_unit, pic18x_term_expression_unit, 
-   cpc_term_expression_unit;
+   cpc_term_expression_unit, pic18x_ram_map_unit;
 
 var
    expression_lower_fence, expression_upper_fence, temp: TMultiPrecisionInteger;
@@ -1152,13 +1152,12 @@ function TPIC18x_InitStatement.Generate (param1, param2: integer): integer;
                            param_blk_size := TPIC18x_ParamList(TPIC18x_SystemType(initlist[i].access.node_typedef).parameters).Size;
                            var_blk_size := TPIC18x_DataItemList(TPIC18x_SystemType(initlist[i].access.node_typedef).permanent_ram_vars).Size;
                            stk_size := TPIC18x_SystemType(initlist[i].access.node_typedef).process_stack_size;
+                           stk_base_adjustment := var_blk_size + stk_size - 1;
 
                            TPIC18x_ParamList(TSystemType(initlist[i].access.node_typedef).parameters).PushParameters (initlist[i].parameters);
                            TPIC18x_Access(initlist[i].access).Generate_Load_Ptr2_Code (pFSR1, 0);
 
                            InitProcessSubroutine.Call.annotation := 'call init process';
-                           StackUsageCounter.Pop (param_blk_size);
-                           stk_base_adjustment := var_blk_size + stk_size - 1;
 
                            dw := TPIC18x_DW.Create (0);
                            dw.lsb := PriorityMapper.ReadyQueueAddr (TSystemType(initlist[i].access.node_typedef).priority);
@@ -1177,31 +1176,36 @@ function TPIC18x_InitStatement.Generate (param1, param2: integer): integer;
 
                            dw := TPIC18x_DW.Create (0);
                            dw.lsb_from_labelH := TPIC18x_SystemType(initlist[i].access.node_typedef).init_stmt_entry_point_label;
-                           dw.msb_from_labelL := TPIC18x_SystemType(initlist[i].access.node_typedef).init_stmt_entry_point_label
+                           dw.msb_from_labelL := TPIC18x_SystemType(initlist[i].access.node_typedef).init_stmt_entry_point_label;
+
+                           StackUsageCounter.Pop (param_blk_size);
+
+                           TPIC18x_CallRecord(initlist[i].call_record).caller_relative_stk_ptr_at_call := StackUsageCounter.Current;
                         end;
                      class_system_type,
                      monitor_system_type:
                         begin
-                            push_return_address_macro := TPushLabelMacro.Create;
-                            push_return_address_macro.annotation := 'push return address';
-                            StackUsageCounter.Push (3);
-                            TPIC18x_MOVFF.Create (this_ptrL, POSTDEC2).annotation := 'save current this pointer';
-                            TPIC18x_MOVFF.Create (this_ptrH, POSTDEC2);
-                            StackUsageCounter.Push(2);
+                           push_return_address_macro := TPushLabelMacro.Create;
+                           push_return_address_macro.annotation := 'push return address';
+                           StackUsageCounter.Push (3);
+                           TPIC18x_MOVFF.Create (this_ptrL, POSTDEC2).annotation := 'save current this pointer';
+                           TPIC18x_MOVFF.Create (this_ptrH, POSTDEC2);
+                           StackUsageCounter.Push(2);
 
-                            TPIC18x_ParamList(TSystemType(initlist[i].access.node_typedef).parameters).PushParameters (initlist[i].parameters);
+                           TPIC18x_ParamList(TSystemType(initlist[i].access.node_typedef).parameters).PushParameters (initlist[i].parameters);
+                           TPIC18x_Access(initlist[i].access).Generate_Load_Ptr2_Code (pTHIS, 0);
 
-                            TPIC18x_Access(initlist[i].access).Generate_Load_Ptr2_Code (pTHIS, 0);
+                           TPIC18x_CallRecord(initlist[i].call_record).caller_relative_stk_ptr_at_call := StackUsageCounter.Current;
 
-                            instr := TGOTOMacro.Create;
-                            instr.dest := TPIC18x_SystemType(initlist[i].access.node_typedef).init_stmt_entry_point_label;
-                            instr.annotation := 'call ' + initlist[i].access.path_src + ' initial statement';
-                            push_return_address_macro.dest := TAssemblyLabel.Create;
+                           instr := TGOTOMacro.Create;
+                           instr.dest := TPIC18x_SystemType(initlist[i].access.node_typedef).init_stmt_entry_point_label;
+                           instr.annotation := 'call ' + initlist[i].access.path_src + ' initial statement';
+                           push_return_address_macro.dest := TAssemblyLabel.Create;
 
-                            StackUsageCounter.Pop (TPIC18x_ParamList(TSystemType(initlist[i].access.node_typedef).parameters).Size);
-                            StackUsageCounter.PushPop (TPIC18x_SystemType(initlist[i].access.node_typedef).initial_stmt_stack_usage);
-                            StackUsageCounter.Pop (2);    // this pointer
-                            StackUsageCounter.Pop (3)     // return address
+                           StackUsageCounter.Pop (TPIC18x_ParamList(TSystemType(initlist[i].access.node_typedef).parameters).Size);
+                           StackUsageCounter.PushPop (TPIC18x_SystemType(initlist[i].access.node_typedef).initial_stmt_stack_usage);
+                           StackUsageCounter.Pop (2);    // this pointer
+                           StackUsageCounter.Pop (3)     // return address
                         end;
                      interrupt_system_type:
                         begin
@@ -1505,8 +1509,6 @@ function TPIC18x_RoutineCallStatement.Generate (param1, param2: integer): intege
          is_monitor_entry_routine := false;
          NoteHWStackUsage (routine.hw_stack_usage);
 
-         TPIC18x_RoutineCallRecord(call_record).stk_ptr_at_call := StackUsageCounter.Current;
-
          push_return_address_macro := TPushLabelMacro.Create;
          push_return_address_macro.annotation := 'push return address';
          StackUsageCounter.Push (3);
@@ -1531,6 +1533,8 @@ function TPIC18x_RoutineCallStatement.Generate (param1, param2: integer): intege
 
          if routine.entry then
             TPIC18x_Access(access).Generate_Load_Ptr2_Code (pTHIS, 0);
+
+         TPIC18x_CallRecord(call_record).caller_relative_stk_ptr_at_call := StackUsageCounter.Current;
 
          instr := TGOTOMacro.Create;
          instr.dest := TPIC18x_Routine(routine).entry_point_label;

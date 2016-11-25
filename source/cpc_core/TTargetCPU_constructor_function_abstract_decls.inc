@@ -120,5 +120,5 @@
             virtual; abstract;
          function TWithStatement_CreateFromSourceTokensStartingAtVariable: TWithStatement;
             virtual; abstract;
-         function TRoutineCallRecord_Create (called_routine: TDefinition; src_loc: TSourceLocation): TRoutineCallRecord;
+         function TCallRecord_Create (called_name: string; called_access: TDefinition; call_type: TCallType): TCallRecord;
             virtual; abstract;

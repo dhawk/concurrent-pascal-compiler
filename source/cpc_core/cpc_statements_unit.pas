@@ -242,7 +242,8 @@ type
                record
                   access: TAccess;
                   parameters: TArrayOfTDefinition;
-                  src_loc: TSourceLocation
+                  src_loc: TSourceLocation;
+                  call_record: TCallRecord
                end;
          constructor CreateFromSourceTokens;
          destructor Destroy;
@@ -300,7 +301,7 @@ type
       class(TStatement)
          access: TAccess;
          actual_parameters: TArrayOfTDefinition;
-         call_record: TRoutineCallRecord;
+         call_record: TCallRecord;
          constructor CreateFromSourceTokens
             (acc: TAccess
             );
@@ -640,6 +641,7 @@ constructor TAssignmentStatement.CreateFromSourceTokens
    );
    var
       start_idx: integer;
+      call_record_len, i: integer;
    begin
       inherited Create(assignment_statement);
       assignee := acc;
@@ -675,16 +677,25 @@ constructor TAssignmentStatement.CreateFromSourceTokens
          string_type:  // string assignment allows constant expressions (i.e. "+"), otherwise must be a single primary
             try
                start_idx := lex.token_idx;
+               call_record_len := Length(BlockStack.tos.call_record_list);
                expression := CreateExpressionFromSourceTokens;
                if not expression.contains_constant then
                   begin
                      expression.Release;
-                     lex.token_idx := start_idx;
                      raise compile_error.Create ('')
                   end;
             except
                on e: compile_error do
-                  expression := CreatePrimaryFromSourceTokens
+                  begin
+                     lex.token_idx := start_idx;
+                     while Length(BlockStack.tos.call_record_list) > call_record_len do
+                        begin
+                           i := Length(BlockStack.tos.call_record_list)-1;
+                           BlockStack.tos.call_record_list[i].Free;
+                           SetLength (BlockStack.tos.call_record_list, i)
+                        end;
+                     expression := CreatePrimaryFromSourceTokens
+                  end
             end;
          record_type,
          array_type,
@@ -1541,6 +1552,9 @@ constructor TInitStatement.CreateFromSourceTokens;
          initlist[initlist_idx].parameters := TSystemType(access.node_typedef).parameters.AssembleAndCheckCallerParameterListFromSourceTokens;
          initlist[initlist_idx].src_loc := lex.previous_token_src_loc;
 
+         initlist[initlist_idx].call_record := target_cpu.TCallRecord_Create (access.base_variable.name, access, systemtype_init_call);
+         BlockStack.tos.AddCallRecord (initlist[initlist_idx].call_record);
+
          access.base_variable.init_statement_called := true;
 
          if access.node_typedef.IsProcessSystemType then
@@ -1735,7 +1749,7 @@ constructor TRoutineCallStatement.CreateFromSourceTokens
             if not access.node_routine.definition_complete then
                raise compile_error.Create (err_recursive_call_not_allowed, access.node_id_src_loc);
 
-            if (access.node_routine.routine_kind = monitor_entry_routine) then
+            if access.node_routine.routine_kind = monitor_entry_routine then
                case BlockStack.tos.definition_kind of
                   routine_definition:
                      if TRoutine(BlockStack.tos).context = access.node_routine.context then
@@ -1758,8 +1772,18 @@ constructor TRoutineCallStatement.CreateFromSourceTokens
                if lex.token_is_symbol(sym_left_parenthesis) then
                   raise compile_error.Create(err_procedure_has_no_parameters);
 
-            call_record := target_cpu.TRoutineCallRecord_Create (access.node_routine, access.node_id_src_loc);
-            BlockStack.tos.AddRoutineCallRecord (call_record)
+            case access.node_access_kind of
+               procedure_access:
+                  if access.node_routine.routine_kind = standalone_routine then
+                     call_record := target_cpu.TCallRecord_Create (access.node_routine.name, access, standalone_routine_call)
+                  else
+                     call_record := target_cpu.TCallRecord_Create (access.node_routine.name, access, systemtype_routine_call);
+               property_access:
+                  call_record := target_cpu.TCallRecord_Create (access.node_property.name, access, systemtype_property_call);
+            else
+               assert (false)
+            end;
+            BlockStack.tos.AddCallRecord (call_record)
          end
    end;
 
@@ -1772,8 +1796,8 @@ constructor TRoutineCallStatement.CreatePropertySetterCall (acc: TAccess; exp: T
       actual_parameters[0] := exp;
       actual_parameters[0].AddRef;
       src_loc := _src_loc;
-      call_record := target_cpu.TRoutineCallRecord_Create (access.node_routine, access.node_id_src_loc);
-      BlockStack.tos.AddRoutineCallRecord (call_record)
+      call_record := target_cpu.TCallRecord_Create (acc.node_property.name, access, systemtype_property_call);
+      BlockStack.tos.AddCallRecord (call_record)
    end;
 
 destructor TRoutineCallStatement.Destroy;

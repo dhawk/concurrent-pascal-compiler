@@ -22,7 +22,6 @@ type
       class (TProgram)
          initial_statement_label: TInstruction;
          initial_statement_stack_usage: integer;
-         initial_statement_pcb_address: integer;
          initial_statement_hw_stack_usage: integer;
          config_bits: TStructuredConstant;
          destructor Destroy;
@@ -89,11 +88,6 @@ type
             override;
       end;
 
-   TPIC18x_RoutineCallRecord =
-      class (TRoutineCallRecord)
-         stk_ptr_at_call: integer
-      end;
-
 var
    prog: TPIC18x_Program;
    program_memory_used: integer;
@@ -120,7 +114,8 @@ uses
    pic18x_access_unit, SysUtils, pic18x_floating_point_unit,
    pic18x_microprocessor_information_unit, pic18x_run_time_error_check_unit,
    cpc_target_cpu_unit, cpc_expressions_unit, pic18x_kernel_unit,
-   cpc_types_unit, cpc_common_unit, cpc_statements_unit, pic18x_common_unit;
+   cpc_types_unit, cpc_common_unit, cpc_statements_unit, pic18x_common_unit, 
+   cpc_access_unit;
 
 var
    temp: TConstant;
@@ -287,7 +282,7 @@ function TPIC18x_Program.Generate (param1, param2: integer): integer;
       case param1 of
          AssignAddresses:
             begin
-               // assign non-system types first so as to be more likely to be in bank0
+               // assign simple types first so as to be more likely to be in bank0
                for i := 0 to program_vars.Length-1 do
                   if not system_type_or_array_of_system_type (program_vars[i].TypeDef) then
                      begin
@@ -295,7 +290,7 @@ function TPIC18x_Program.Generate (param1, param2: integer): integer;
                         sdram_used := sdram_used + TPIC18x_TypeInfo(program_vars[i].typedef.info).Size
                      end;
                total_bank0_used := sdram_used;
-               // assign system type addresses
+               // assign system and array type addresses
                for i := 0 to program_vars.Length-1 do
                   if system_type_or_array_of_system_type (program_vars[i].TypeDef) then
                      begin
@@ -311,8 +306,7 @@ function TPIC18x_Program.Generate (param1, param2: integer): integer;
                                  program_vars[i].address := sdram_used + $3E;
                               sdram_used := sdram_used + TPIC18x_TypeInfo(program_vars[i].typedef.info).Size;
                            end
-                     end;
-               initial_statement_pcb_address := sdram_used + $3E
+                     end
             end;
          GenerateCode:
             begin
@@ -946,7 +940,6 @@ procedure TPIC18x_DataItemList.PushInitialValues;
       SetLength (variable_initial_value, 0);
       StackUsageCounter.Push (Size)
    end;
-
 
 procedure NoteHWStackUsage (call_hw_stack_usage: integer);
    procedure set_max (var hw_stack_usage: integer);

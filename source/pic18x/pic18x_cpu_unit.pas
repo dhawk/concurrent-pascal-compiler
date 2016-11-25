@@ -28,39 +28,6 @@ type
          timer_number: integer
       end;
 
-   tRAMVariableGroup = (nosuch_group, kernel_vars_group, process_pcbs_group, kernel_pcb_group, global_vars_phase, kernel_stack_phase);
-   tRAMVariableMapNode =
-      class
-      private
-         size: integer;      // only used if typedef is nil
-         ParentNode: tRAMVariableMapNode;
-         SubNodes: array of tRAMVariableMapNode;
-         ram_variable_group: tRAMVariableGroup;
-         function too_long (expanded_short_name: string): boolean;
-         procedure shorten_if_needed (expanded_short_name: string);
-         function separator: char;
-      public
-         id: string;
-         shortened_id: string;
-         typedef: TTypedef;  // might be nil!
-         typename: string;
-         is_array_index: boolean;
-         array_index: integer;
-         class var
-            max_id_len, max_reserved_size: integer;
-            reserved_format_string: string;
-         constructor Create (_id: string = ''; _typename: string = ''; _size: integer = 0; _group: tRAMVariableGroup = nosuch_group);
-            overload;
-         constructor Create (_id: string; _typedef: TTypeDef; _ram_variable_group: tRAMVariableGroup = global_vars_phase);
-            overload;
-         constructor CreateArrIndex (_id: string; _typedef: TTypeDef; idx: integer);
-         procedure append (new_sub_node: tRAMVariableMapNode);
-         procedure calculate_output_string_lengths (expanded_short_name: string);
-         procedure output_reserved (_phase: tRAMVariableGroup; expanded_name, expanded_short_name: string);
-         destructor Destroy;
-            override;
-      end;
-
    TPIC18x_CPU =
       class (TTargetCPUBaseClass)
       private
@@ -249,7 +216,7 @@ type
             override;
          function TWithStatement_CreateFromSourceTokensStartingAtVariable: TWithStatement;
             override;
-         function TRoutineCallRecord_Create (called_routine: TDefinition; src_loc: TSourceLocation): TRoutineCallRecord;
+         function TCallRecord_Create (called_name: string; called_access: TDefinition; call_type: TCallType): TCallRecord;
             override;
       private
          ram_initialization:  TInitialValueBytes;
@@ -302,7 +269,7 @@ uses
    pic18x_expressions_unit, math, pic18x_multiply_divide_unit, pic18x_macro_instructions_unit, pic18x_run_time_error_check_unit,
    pic18x_Statements_unit, cpc_multi_precision_integer_unit, pic18x_microprocessor_information_unit,
    cpc_types_unit, pic18x_access_unit, pic18x_term_expression_unit, pic18x_kernel_unit,
-   pic18x_simple_expression_unit, pic18x_types_unit, cpc_common_unit,
+   pic18x_simple_expression_unit, pic18x_types_unit, cpc_common_unit, pic18x_ram_map_unit,
    pic18x_core_objects_unit, pic18x_instructions_unit,
    pic18x_assignment_statement_unit, pic18x_blocks_unit;
 
@@ -843,9 +810,9 @@ function TPIC18x_CPU.TWithStatement_CreateFromSourceTokensStartingAtVariable: TW
       result := TPIC18x_WithStatement.CreateFromSourceTokensStartingAtVariable
    end;
 
-function TPIC18x_CPU.TRoutineCallRecord_Create (called_routine: TDefinition; src_loc: TSourceLocation): TRoutineCallRecord;
+function TPIC18x_CPU.TCallRecord_Create (called_name: string; called_access: TDefinition; call_type: TCallType): TCallRecord;
    begin
-      result := TPIC18x_RoutineCallRecord.Create (called_routine, src_loc)
+      result := TPIC18x_CallRecord.Create (called_name, called_access, call_type)
    end;
 
 function TPIC18x_CPU.src_directory_relative_to_bin: string;
@@ -862,284 +829,6 @@ procedure TPIC18x_CPU.append_config_byte (b: byte; byte_no: integer; path, value
       config_bytes[i].byte_no := byte_no;
       config_bytes[i].path := path;
       config_bytes[i].value := value
-   end;
-
-constructor tRAMVariableMapNode.Create (_id: string = ''; _typename: string = ''; _size: integer = 0; _group: tRAMVariableGroup = nosuch_group);
-   begin
-      id := _id;
-      shortened_id := _id;
-      typename := _typename;
-      size := _size;
-      ram_variable_group := _group
-   end;
-
-constructor tRAMVariableMapNode.CreateArrIndex (_id: string; _typedef: TTypeDef; idx: integer);
-   begin
-      Create (_id, _typedef);
-      is_array_index := true;
-      array_index := idx
-   end;
-
-constructor tRAMVariableMapNode.Create (_id: string; _typedef: TTypeDef; _ram_variable_group: tRAMVariableGroup = global_vars_phase);
-   var
-      i: integer;
-      st: TPIC18x_SystemType;
-      arr: TArrayType;
-      node: tRAMVariableMapNode;
-   begin
-      id := _id;
-      shortened_id := _id;
-      typedef := _typedef;
-      assert (_typedef <> nil);
-      typename := _typedef.name;
-      size := TPIC18x_TypeInfo(typedef.info).Size;
-      ram_variable_group := _ram_variable_group;
-
-      case typedef.type_kind of
-         system_type:
-            begin
-               st := TPIC18x_SystemType (typedef);
-               if st.system_type_kind = process_system_type then
-                  append (process_pcb_map);
-               if st.permanent_eeprom_vars.Length > 0 then
-                  append (tRAMVariableMapNode.Create ('EEPROM_BASE', 'uint8', 1, ram_variable_group));
-               if st.system_type_kind = monitor_system_type then
-                  append (tRAMVariableMapNode.Create ('GATE', 'tMonitorGate', 1, ram_variable_group));
-               for i := st.parameters.Length-1 downto 0
-                  do case st.parameters[i].address_mode of
-                        system_type_address_mode:
-                           append (tRAMVariableMapNode.Create (LowerCase(st.parameters[i].name), st.parameters[i].typedef));
-                        system_type_indirect_address_mode:
-                           append (tRAMVariableMapNode.Create (LowerCase(st.parameters[i].name), '^' + st.parameters[i].typedef.name, 2, ram_variable_group));
-                     else
-                        assert (false)
-                     end;
-               for i := 0 to st.permanent_ram_vars.Length-1 do
-                  append (tRAMVariableMapNode.Create (LowerCase(st.permanent_ram_vars[i].name), st.permanent_ram_vars[i].typedef, ram_variable_group));
-               if st.system_type_kind = process_system_type then
-                  append (tRAMVariableMapNode.Create ('STACK', '<' + IntToStr(st.process_stack_size) + ' bytes>', st.process_stack_size, ram_variable_group))
-            end;
-         record_type:
-            for i := 0 to Length(TRecordType(typedef).fields)-1 do
-               append (tRAMVariableMapNode.Create (LowerCase(TRecordType(typedef).fields[i].name), TRecordType(typedef).fields[i].typedef, ram_variable_group));
-         array_type:
-            begin
-               arr := TArrayType (typedef);
-               case arr.index_typedef.ordinal_kind of
-                  ordinal_base_is_integer:
-                     for i := arr.index_typedef.info.min_value.AsInteger to arr.index_typedef.info.max_value.AsInteger do
-                        append (tRAMVariableMapNode.CreateArrIndex (IntToStr(i), arr.element_typedef, i));
-                  ordinal_base_is_char:
-                     for i := arr.index_typedef.info.min_value.AsInteger to arr.index_typedef.info.max_value.AsInteger do
-                        begin
-                           if (i <= 31) or (i >= 127) then
-                              node := tRAMVariableMapNode.CreateArrIndex (IntToStr(i), arr.element_typedef, i)
-                           else
-                              begin
-                                 node := tRAMVariableMapNode.CreateArrIndex ('''' + chr(i) + '''', arr.element_typedef, i);
-                                 node.shortened_id := IntToStr(i)
-                              end;
-                           append (node)
-                        end;
-                  ordinal_base_is_bool:
-                     for i := arr.index_typedef.info.min_value.AsInteger to arr.index_typedef.info.max_value.AsInteger do
-                        case i of
-                           0: append (tRAMVariableMapNode.CreateArrIndex ('false', arr.element_typedef, i));
-                           1: append (tRAMVariableMapNode.CreateArrIndex ('true', arr.element_typedef, i));
-                        else
-                           assert (false)
-                        end;
-                  ordinal_base_is_enum:
-                     for i := arr.index_typedef.info.min_value.AsInteger to arr.index_typedef.info.max_value.AsInteger do
-                        append (tRAMVariableMapNode.CreateArrIndex (lex.token_string (arr.index_typedef.enum_typedef.enums[i].identifier_src_loc, arr.index_typedef.enum_typedef.enums[i].identifier_src_loc), arr.element_typedef, i));
-               else
-                  assert (false)
-               end
-            end;
-         packed_record_type:
-            if TPIC18x_PackedRecordFieldInfo(typedef.info).reversed_byte_order then
-               typename := typename + ' {REVERSED BYTE ORDER}';
-         basic_data_type,
-         set_type,
-         string_type,
-         queue_type,
-         overlay_type:
-            ;
-      else
-         assert (false)
-      end
-   end;
-
-procedure tRAMVariableMapNode.append (new_sub_node: tRAMVariableMapNode);
-   var i: integer;
-   begin
-      i := Length(SubNodes);
-      SetLength (SubNodes, i+1);
-      SubNodes[i] := new_sub_node;
-      new_sub_node.ParentNode := self
-   end;
-
-function tRAMVariableMapNode.separator: char;
-   begin
-      if (typedef <> nil)
-         and
-         (typedef.type_kind = array_type)
-      then
-         separator := '['
-      else
-         separator := '.'
-   end;
-
-procedure tRAMVariableMapNode.calculate_output_string_lengths (expanded_short_name: string);
-   var
-      id_len, i: integer;
-   begin
-      expanded_short_name := expanded_short_name + shortened_id;
-      if (Length(SubNodes) = 0)
-         and
-         (size > 0)
-      then
-         begin
-            id_len := Length(expanded_short_name);
-            if id_len > max_id_len then
-               max_id_len := id_len;
-            if size > max_reserved_size then
-               max_reserved_size := size
-         end;
-      if id = '' then
-         for i := 0 to Length(SubNodes)-1 do
-            SubNodes[i].calculate_output_string_lengths ('')
-      else
-         for i := 0 to Length(SubNodes)-1 do
-            SubNodes[i].calculate_output_string_lengths (expanded_short_name + '?')
-   end;
-
-procedure tRAMVariableMapNode.output_reserved (_phase: tRAMVariableGroup; expanded_name, expanded_short_name: string);
-   var
-      i: integer;
-   begin
-      if (Length(expanded_name) > 0)
-         and
-         (expanded_name[Length(expanded_name)] = '[')
-      then
-         expanded_name := expanded_name + id + ']'
-      else
-         expanded_name := expanded_name + id;
-      expanded_short_name := expanded_short_name + shortened_id;
-      if (Length(SubNodes) = 0)
-         and
-         (ram_variable_group = _phase)
-         and
-         (size > 0)
-      then
-         begin
-            expanded_short_name := expanded_short_name;
-            TAssemblySourceLine.Create (format (reserved_format_string, [expanded_short_name, size, expanded_name, typename]))
-         end;
-      if id = '' then
-         for i := 0 to Length(SubNodes)-1 do
-            SubNodes[i].output_reserved (_phase, '', '')
-      else
-         for i := 0 to Length(SubNodes)-1 do
-            SubNodes[i].output_reserved (_phase, expanded_name + separator, expanded_short_name + '?')
-   end;
-
-function tRAMVariableMapNode.too_long (expanded_short_name: string): boolean;
-   const
-      max_mpasm_label_len = 32;
-   var
-      i: integer;
-   begin
-      result := false;
-      expanded_short_name := expanded_short_name + shortened_id;
-      if Length(SubNodes) = 0 then
-         if size = 0 then
-            result := false
-         else
-            result := Length(expanded_short_name) > max_mpasm_label_len
-      else
-         if id = '' then
-            for i := 0 to Length(SubNodes)-1 do
-               result := result or SubNodes[i].too_long ('')
-         else
-            for i := 0 to Length(SubNodes)-1 do
-               result := result or SubNodes[i].too_long (expanded_short_name + '?')
-   end;
-
-procedure tRAMVariableMapNode.shorten_if_needed (expanded_short_name: string);
-   var
-      idx: integer;
-   function replacement_id: string;
-      function no_conflict (s: string): boolean;
-         var i: integer;
-         begin
-            result := false;
-            for i := 0 to Length(SubNodes)-1 do
-               if i <> idx then
-                  if s = SubNodes[i].shortened_id then
-                     exit;
-            result := true
-         end;
-      var c1,c2: char;
-      begin
-         SetLength (result, 1);
-         for c1 := 'a' to 'z' do
-            begin
-               result[1] := c1;
-               if no_conflict (result) then
-                  EXIT
-            end;
-         SetLength (result, 2);
-         for c1 := 'a' to 'z' do
-            begin
-               result[1] := c1;
-               for c2 := '0' to '9' do
-                  begin
-                     result[2] := c2;
-                     if no_conflict (result) then
-                        EXIT
-                  end;
-               for c2 := 'a' to 'z' do
-                  begin
-                     result[2] := c2;
-                     if no_conflict (result) then
-                        EXIT
-                  end;
-            end;
-         assert (false)  // no substitute found!
-      end;
-   begin
-      expanded_short_name := expanded_short_name + shortened_id;
-      for idx := 0 to Length(SubNodes)-1 do
-         if ((id = '') and (SubNodes[idx].too_long ('')))
-            or
-            ((id <> '') and (SubNodes[idx].too_long (expanded_short_name + '?')))
-         then
-            begin
-               if SubNodes[idx].is_array_index then
-                  begin
-                     if SubNodes[idx].shortened_id = 'true' then
-                        SubNodes[idx].shortened_id := 'T'
-                     else if SubNodes[idx].shortened_id = 'false' then
-                        SubNodes[idx].shortened_id := 'F'
-                     else
-                        SubNodes[idx].shortened_id := IntToStr(SubNodes[idx].array_index)
-                  end
-               else
-                  SubNodes[idx].shortened_id := replacement_id;
-               if id = '' then
-                  SubNodes[idx].shorten_if_needed ('')
-               else
-                  SubNodes[idx].shorten_if_needed (expanded_short_name + '?')
-            end
-   end;
-
-destructor tRAMVariableMapNode.Destroy;
-   var i: integer;
-   begin
-      for i := 0 to Length(SubNodes)-1 do
-         SubNodes[i].Free;
-      inherited
    end;
 
 procedure TPIC18x_CPU.generate_machine_code (_prog: TProgram);
@@ -1298,184 +987,6 @@ procedure TPIC18x_CPU.generate_machine_code (_prog: TProgram);
          end
       end;
 
-   procedure generate_ram_variable_map;
-      const
-         indent_amt = '  ';
-
-//      procedure out_var_infox (v: TPIC18x_Variable; this_ptr: integer; indent, dot: string);
-//
-//         procedure out_interrupt_var_info;
-//            var
-//               st: TPIC18x_SystemType;
-//               i: integer;
-//            begin
-//               if TSystemType(v.typedef).permanent_ram_vars.Length > 0 then
-//                  begin
-//                     TAssemblyComment.Create (format ('%3.3X %s%s%s  size=%d', [v.address, indent, dot, v.name, TPIC18x_TypeInfo(v.typedef.info).Size]));
-//                     st := TPIC18x_SystemType (v.typedef);
-//                     for i := 0 to st.permanent_ram_vars.Length-1 do
-//                        out_var_infox (TPIC18x_Variable(st.permanent_ram_vars[i]), 0, indent + indent_amt, '.')
-//                  end
-//            end;
-//
-//         procedure out_systemtype_var_info (this_ptr: integer);
-//            var
-//               st: TPIC18x_SystemType;
-//               i: integer;
-//               addr: integer;
-//            begin
-//               st := TPIC18x_SystemType (v.typedef);
-//               addr := this_ptr - $3E;
-//               if st.permanent_eeprom_vars.Length > 0 then
-//                  addr := addr - 1;
-//               TAssemblyComment.Create (format ('%3.3X %s%s%s  size=%d  this=$%3.3X', [addr, indent, dot, v.name, TPIC18x_TypeInfo(v.typedef.info).Size, this_ptr]));
-//               indent := indent + indent_amt;
-//               dot := '.';
-//               if st.permanent_eeprom_vars.Length > 0 then
-//                  TAssemblyComment.Create (format ('%3.3X %s.<eeprom base>  size=1', [this_ptr - $3F, indent]));
-//               if st.system_type_kind = monitor_system_type then
-//                  TAssemblyComment.Create (format ('%3.3X %s.<gate>  size=1', [this_ptr - $3E, indent]));
-//               for i := st.parameters.Length-1 downto 0
-//                  do case st.parameters[i].address_mode of
-//                        system_type_address_mode:
-//                           out_var_infox (TPIC18x_Variable(st.parameters[i]), this_ptr, indent, dot);
-//                        system_type_indirect_address_mode:
-//                           TAssemblyComment.Create (format ('%3.3X %s.@%s  size=2', [this_ptr + st.parameters[i].address, indent, st.parameters[i].name]));
-//                     else
-//                        assert (false)
-//                     end;
-//               for i := 0 to st.permanent_ram_vars.Length-1 do
-//                  out_var_infox (TPIC18x_Variable(st.permanent_ram_vars[i]), this_ptr, indent, dot);
-//               if st.system_type_kind = process_system_type then
-//                  TAssemblyComment.Create (format ('%3.3X %s.<stk>  size=%d  bos=$%3.3X', [addr + TPIC18x_TypeInfo(v.typedef.info).Size - st.process_stack_size, indent, st.process_stack_size, addr + TPIC18x_TypeInfo(v.typedef.info).Size - 1]))
-//            end;
-//
-//         procedure out_fields (offset: integer; typedef: TTypeDef);
-//            var
-//               i: integer;
-//               f: TPIC18x_RecordFieldInfo;
-//               o: TOverlaidVariable;
-//            begin
-//               case typedef.type_kind of
-//                  record_type:
-//                     for i := 0 to Length(TRecordType(typedef).fields)-1 do
-//                        begin
-//                           f := TPIC18x_RecordFieldInfo(TRecordType(typedef).fields[i].info);
-//                           TAssemblyComment.Create (format ('%3.3X %s%s  size=%d', [offset + f.Offset, indent, '.' + TRecordType(typedef).fields[i].name, TPIC18x_TypeInfo(typedef.info).Size]));
-//                           out_fields (offset + f.Offset, TRecordType(typedef).fields[i].typedef)
-//                        end;
-//                  overlay_type:
-//                     for i := 0 to Length(TOverlayType(typedef).overlaid_variables)-1 do
-//                        begin
-//                           o := TOverlayType(typedef).overlaid_variables[i];
-//                           TAssemblyComment.Create (format ('%3.3X %s%s  size=%d', [offset, indent, '.' + o.name, TPIC18x_TypeInfo(o.typedef.info).Size]));
-//                           out_fields (offset, o.typedef)
-//                        end;
-//                  basic_data_type,
-//                  set_type,
-//                  array_type,
-//                  packed_record_type,
-//                  string_type,
-//                  queue_type:
-//                     {nop};
-//               else
-//                  assert (false)
-//               end
-//            end;
-//
-//         var
-//            addr: integer;
-//         begin  // out_var_infox
-//            if v.typedef.IsInterruptType then
-//               out_interrupt_var_info
-//            else if v.typedef.type_kind = system_type then
-//               case v.address_mode of
-//                  absolute_address_mode:
-//                     out_systemtype_var_info (v.address);
-//                  system_type_address_mode:
-//                     out_systemtype_var_info (this_ptr + v.address);
-//                  system_type_indirect_address_mode:
-//                     out_systemtype_var_info (this_ptr + v.address);
-//               else
-//                  assert (false)
-//               end
-//            else
-//               begin
-//                  addr := 0;  // to suppress compiler warning
-//                  case v.address_mode of
-//                     absolute_address_mode:
-//                        addr := v.address;
-//                     system_type_address_mode,
-//                     system_type_indirect_address_mode:
-//                        addr := this_ptr + v.address;
-//                  else
-//                     assert (false)
-//                  end;
-//                  TAssemblyComment.Create (format ('%3.3X %s%s%s  size=%d', [addr, indent, dot, v.name, TPIC18x_TypeInfo(v.typedef.info).Size]));
-//                  indent := indent + indent_amt;
-//                  dot := '.';
-//                  out_fields (addr, v.typedef)
-//               end
-//         end;    // out_var_infox
-
-      var
-         i: integer;
-         ram_map: tRAMVariableMapNode;
-         phase: tRAMVariableGroup;
-         s: string;
-      begin   // generate_ram_variable_map
-         TAssemblySourceBlankLine.Create;
-         TSourceLine.Create ('==================');
-         TSourceLine.Create (' RAM Variable Map ');
-         TSourceLine.Create ('==================');
-         TAssemblySourceBlankLine.Create;
-
-//         // old map
-//         for i := 0 to prog.program_vars.Length-1 do
-//            out_var_infox (TPIC18x_Variable(prog.program_vars[i]), 0, '', '');
-//         TAssemblyComment.Create (format ('%3.3X <kernel stk>  size=%d  bos=$%3.3X', [kernel_stack_base-kernel_stack_size+1, kernel_stack_size, kernel_stack_base]));
-
-         // new map
-         ram_map := tRAMVariableMapNode.Create;
-         // 1. init kernel ram
-         ram_map.append (kernel_variables_map);
-         // 2. init interrupt variables
-         for i := 0 to prog.program_vars.Length-1 do
-            if (prog.program_vars[i].TypeDef.type_kind = system_type)
-               and
-               (TSystemType(prog.program_vars[i].typedef).system_type_kind = interrupt_system_type)
-            then
-               ram_map.append (tRAMVariableMapNode.Create (LowerCase(prog.program_vars[i].name), prog.program_vars[i].typedef));
-         // 3. init global variables
-         for i := 0 to prog.program_vars.Length-1 do
-            if not system_type_or_array_of_system_type (prog.program_vars[i].TypeDef) then
-               ram_map.append (tRAMVariableMapNode.Create (LowerCase(prog.program_vars[i].name), prog.program_vars[i].typedef));
-         // 4. init non-interrupt system types
-         for i := 0 to prog.program_vars.Length-1 do
-            if system_type_or_array_of_system_type (prog.program_vars[i].TypeDef) then
-               case prog.program_vars[i].TypeDef.type_kind of
-                  system_type:
-                     if TSystemType(prog.program_vars[i].typedef).system_type_kind <> interrupt_system_type then
-                        ram_map.append (tRAMVariableMapNode.Create (LowerCase(prog.program_vars[i].name), prog.program_vars[i].typedef));
-                  array_type:
-                     ram_map.append (tRAMVariableMapNode.Create (LowerCase(prog.program_vars[i].name), prog.program_vars[i].typedef));
-               else
-                  assert (false)
-               end;
-
-         ram_map.shorten_if_needed ('');
-         ram_map.calculate_output_string_lengths ('');
-         i := Length(IntToStr(ram_map.max_reserved_size));
-         ram_map.reserved_format_string := '%-' + IntToStr(ram_map.max_id_len) + 's RES %' + IntToStr(i) + 'd ;   %s: %s;';
-         s := '';
-         for i := 1 to ram_map.max_id_len do
-            s := s + ' ';
-         TAssemblySourceLine.Create (s + ' UDATA 0x000');
-         for phase := Low(tRAMVariableGroup) to High(tRAMVariableGroup) do
-            ram_map.output_reserved (phase, '', '');
-         ram_map.Free
-      end;    // generate_ram_variable_map
-
    var
       i,j,o,f: integer;
       initial_statement_block_idx: integer;
@@ -1562,7 +1073,7 @@ procedure TPIC18x_CPU.generate_machine_code (_prog: TProgram);
          // Subroutine to generate bit mask
          //    This routine is generated in fixed memory to guarantee that all routine
          //    instructions are in the same PCL block to prevent ADDWF PCL wrap-around.
-         //    This routine MUST be located in ROM "bank" $0000--
+         //    This routine MUST be entirely located in ROM "bank" $0000--
          TAssemblySourceBlankLine.Create;
          get_bit_mask_routine := TPIC18x_CLRF.Create (PCLATU, access_mode);
          get_bit_mask_routine.annotation := 'subroutine to generate bit mask';
@@ -1794,7 +1305,7 @@ procedure TPIC18x_CPU.generate_machine_code (_prog: TProgram);
                   init_eeprom_data (prog.program_vars[i].name, prog.program_vars[i].TypeDef)
             end;
 
-         generate_ram_variable_map;
+         generate_memory_map;
 
          kernel_dispatch.set_client_destinations;
          kernel_await_interrupt.set_client_destinations;

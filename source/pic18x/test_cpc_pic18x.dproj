@@ -70,6 +70,7 @@
     <DCCReference Include="pic18x_main_compiler_unit.pas" />
     <DCCReference Include="pic18x_microprocessor_information_unit.pas" />
     <DCCReference Include="pic18x_multiply_divide_unit.pas" />
+    <DCCReference Include="pic18x_ram_map_unit.pas" />
     <DCCReference Include="pic18x_run_time_error_check_unit.pas" />
     <DCCReference Include="pic18x_simple_expression_unit.pas" />
     <DCCReference Include="pic18x_statements_unit.pas" />
