@@ -112,7 +112,7 @@ type
          routine_kind: TRoutineKind;
          entry: boolean;
          context: TDefinition; // either a program or a system type
-         header_only: boolean;
+         built_in_routine: boolean;
          parameter_definitions: TParamList;
          function_result: TVariable;
          local_vars: TDataItemList;
@@ -1362,7 +1362,7 @@ constructor TRoutine.CreateFromSourceTokens
       inherited Create(routine_definition);
       context := cntxt;
       entry := entry_routine;
-      header_only :=
+      built_in_routine :=
          (lex.token.in_preamble)
          and
          (context.definition_kind = program_definition);   // stand-alone procedure
@@ -1491,7 +1491,7 @@ constructor TRoutine.CreateFromSourceTokens
             raise compile_error.Create(err_semicolon_expected);
          lex.advance_token;
 
-         if not header_only then
+         if not built_in_routine then
             begin
                create_block_from_source_tokens;
                AddSelfToCodeBlockList
@@ -2160,7 +2160,7 @@ constructor TProgram.CreateFromSourceTokens;
                   begin
                      gr := target_cpu.TRoutine_CreateFromSourceTokens(Self, false);
                      CurrentDefinitionTable.DefineForCurrentScope(gr.routine_id_idx, gr, gr.routine_id_src_loc);
-                     if not gr.header_only then
+                     if not gr.built_in_routine then
                         begin
                            i := Length(global_routines);
                            SetLength(global_routines, i + 1);

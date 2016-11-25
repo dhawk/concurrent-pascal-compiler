@@ -1775,15 +1775,26 @@ constructor TRoutineCallStatement.CreateFromSourceTokens
             case access.node_access_kind of
                procedure_access:
                   if access.node_routine.routine_kind = standalone_routine then
-                     call_record := target_cpu.TCallRecord_Create (access.node_routine.name, access, standalone_routine_call)
+                     begin
+                        if not access.node_routine.built_in_routine then
+                           begin
+                              call_record := target_cpu.TCallRecord_Create (access.node_routine.name, access, standalone_routine_call);
+                              BlockStack.tos.AddCallRecord (call_record)
+                           end
+                     end
                   else
-                     call_record := target_cpu.TCallRecord_Create (access.node_routine.name, access, systemtype_routine_call);
+                     begin
+                        call_record := target_cpu.TCallRecord_Create (access.node_routine.name, access, systemtype_routine_call);
+                        BlockStack.tos.AddCallRecord (call_record)
+                     end;
                property_access:
-                  call_record := target_cpu.TCallRecord_Create (access.node_property.name, access, systemtype_property_call);
+                  begin
+                     call_record := target_cpu.TCallRecord_Create (access.node_property.name, access, systemtype_property_call);
+                     BlockStack.tos.AddCallRecord (call_record)
+                  end;
             else
                assert (false)
-            end;
-            BlockStack.tos.AddCallRecord (call_record)
+            end
          end
    end;
 
