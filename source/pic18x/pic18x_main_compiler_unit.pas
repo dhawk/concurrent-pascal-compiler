@@ -61,6 +61,7 @@ function ProgramGenerator: TDefinition;
       ProgramCode.WriteHexFile (ChangeFileExt(source_file_name, '.hex'));
       ProgramCode.WriteAssemblySourceFile (ChangeFileExt(source_file_name, '.asm'));
       OutputRuntimeErrorInfo (ChangeFileExt(source_file_name, '.rterr'));
+      OutputLinkerFile (ChangeFileExt(source_file_name, '.lkr'))
    end;
 
 INITIALIZATION

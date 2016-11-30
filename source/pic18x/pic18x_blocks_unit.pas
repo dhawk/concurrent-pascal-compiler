@@ -306,7 +306,17 @@ function TPIC18x_Program.Generate (param1, param2: integer): integer;
                                  program_vars[i].address := sdram_used + $3E;
                               sdram_used := sdram_used + TPIC18x_TypeInfo(program_vars[i].typedef.info).Size;
                            end
-                     end
+                     end;
+               // assign process stack addresses
+               for i := 0 to program_vars.Length-1 do
+                  if (program_vars[i].typedef.type_kind = system_type)
+                     and
+                     (TSystemType(program_vars[i].typedef).system_type_kind = process_system_type)
+                  then
+                     begin
+                        TPIC18x_Variable(program_vars[i]).stack_address := sdram_used;
+                        sdram_used := sdram_used + TPIC18x_SystemType(program_vars[i].typedef).process_stack_size
+                     end;
             end;
          GenerateCode:
             begin
@@ -406,7 +416,8 @@ function TPIC18x_Routine.Generate (param1, param2: integer): integer;
                      begin
                         if (parameter_definitions[i].descriptor in [rw_var, rw_eeprom])
                            and
-                           (parameter_definitions[i].typedef.type_kind = string_type) then
+                           (parameter_definitions[i].typedef.type_kind = string_type)
+                        then
                            addr := addr + 1;   // alloc space for hidden size parameter
                         parameter_definitions[i].address := addr;
                         case parameter_definitions[i].descriptor of

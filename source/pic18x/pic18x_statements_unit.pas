@@ -1135,7 +1135,7 @@ function TPIC18x_IfStatement.Generate (param1, param2: integer): integer;
 
 function TPIC18x_InitStatement.Generate (param1, param2: integer): integer;
    var
-      i, param_blk_size, var_blk_size, stk_size, stk_base_adjustment: integer;
+      i, param_blk_size, stk_base: integer;
       instr, push_return_address_macro: TInstruction;
       dw: TPIC18x_DW;
    begin
@@ -1150,9 +1150,7 @@ function TPIC18x_InitStatement.Generate (param1, param2: integer): integer;
                      process_system_type:
                         begin
                            param_blk_size := TPIC18x_ParamList(TPIC18x_SystemType(initlist[i].access.node_typedef).parameters).Size;
-                           var_blk_size := TPIC18x_DataItemList(TPIC18x_SystemType(initlist[i].access.node_typedef).permanent_ram_vars).Size;
-                           stk_size := TPIC18x_SystemType(initlist[i].access.node_typedef).process_stack_size;
-                           stk_base_adjustment := var_blk_size + stk_size - 1;
+                           stk_base := TPIC18x_Variable (initlist[i].access.base_variable).stack_address + TPIC18x_SystemType(initlist[i].access.node_typedef).process_stack_size - 1;
 
                            TPIC18x_ParamList(TSystemType(initlist[i].access.node_typedef).parameters).PushParameters (initlist[i].parameters);
                            TPIC18x_Access(initlist[i].access).Generate_Load_Ptr2_Code (pFSR1, 0);
@@ -1166,13 +1164,13 @@ function TPIC18x_InitStatement.Generate (param1, param2: integer): integer;
 
                            dw := TPIC18x_DW.Create (0);
                            dw.lsb := param_blk_size;
-                           dw.msb := stk_base_adjustment and $ff;
-                           dw.annotation := '   - param_blk_size, stk_base_adjustment.lsb';
+                           dw.msb := stk_base and $ff;
+                           dw.annotation := '   - param_blk_size, stk_base.lsb';
 
                            dw := TPIC18x_DW.Create (0);
-                           dw.lsb := (stk_base_adjustment and $ff00) shr 8;
+                           dw.lsb := (stk_base and $ff00) shr 8;
                            dw.msb_from_labelU := TPIC18x_SystemType(initlist[i].access.node_typedef).init_stmt_entry_point_label;
-                           dw.annotation := '   - stk_base_adjustment.msb, @initial statement entry point';
+                           dw.annotation := '   - stk_base.msb, @initial statement entry point';
 
                            dw := TPIC18x_DW.Create (0);
                            dw.lsb_from_labelH := TPIC18x_SystemType(initlist[i].access.node_typedef).init_stmt_entry_point_label;

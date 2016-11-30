@@ -966,7 +966,6 @@ procedure TLexicalAnalysis.ReadInPreamble (preamble: TStringList);
       init_source (preamble)
    end;
 
-
 procedure TLexicalAnalysis.ReadInSourceFile (source_file_name: string);
    begin
       first_non_preamble_source_idx := Length(source);

@@ -21,6 +21,7 @@ type
       public
          // for process variables only
          pcb_address: integer;
+         stack_address: integer;
          // used for interrupt variables only:
          dropped_interrupt_br: TGOTOMacro;
          dropped_interrupt_endif: TInstruction;
@@ -228,13 +229,6 @@ function TPIC18x_TypeDef_TypeInfo.Size: integer;
                          TPIC18x_DataItemList(TSystemType(typ).permanent_ram_vars).Size;
                if TPIC18x_SystemType(typ).contains_eeprom_vars then
                   result := result + 1;
-               if TSystemType(typ).system_type_kind = process_system_type then
-                  begin
-                     result := result + TPIC18x_SystemType(typ).initial_stmt_stack_usage;
-                     if PriorityMapper.Interruptable(TSystemType(typ).priority)
-                     then
-                        result := result + kernel_interrupt_handler_stack_allowance
-                  end
             end;
          queue_type:
             result := queue_variable_size;

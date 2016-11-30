@@ -1515,6 +1515,10 @@ constructor TStringType.Create (_max_length: integer);
    begin
       inherited Create(string_type);
       max_length := _max_length;
+      if max_length = -1 then
+         name := 'string'
+      else
+         name := 'string[' + IntToStr(max_length) + ']';
       MarkTypeDefinitionAsComplete
    end;
 
@@ -1528,7 +1532,10 @@ constructor TStringType.CreateFromSourceTokens;
       lex.advance_token;
 
       if not lex.token_is_symbol(sym_left_bracket) then
-         max_length := -1     // var string
+         begin  // var string
+            name := 'string';
+            max_length := -1
+         end
       else
          begin
             lex.advance_token;
@@ -1543,7 +1550,8 @@ constructor TStringType.CreateFromSourceTokens;
                   raise compile_error.Create(err_string_length_must_be_non_negative, constant.src_loc);
                if constant.ordinal_value.gt (255) then
                   raise compile_error.Create(err_string_length_must_be_less_than_256, constant.src_loc);
-               max_length := constant.ordinal_value.AsInteger
+               max_length := constant.ordinal_value.AsInteger;
+               name := 'string[' + IntToStr(max_length) + ']'
             finally
                constant.Release
             end;

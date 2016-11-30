@@ -178,7 +178,7 @@ procedure OutputRuntimeErrorInfo (fn: string);
          with RunTimeErrorLocations[i] do
             begin
                error_code := error_location_instruction.rom_addr + offset;
-               writeln (f, '   <RunTimeError ErrorCode="' + IntToStr(error_code) + '" Addr="$' + format ('%6.6X', [error_code]) + '"');
+               writeln (f, '   <RunTimeError ErrorCode="' + IntToStr(error_code) + '" HexErrorCode="$' + format ('%6.6X', [error_code]) + '"');
                writeln (f, '      ErrorMessage="' + error_message + '"');
                writeln (f, '      SourceFile="' + src_loc.file_name + '" LineNo="' + IntToStr(src_loc.line_no) + '" Pos="' + IntToStr(src_loc.line_idx) + '"');
                writeln (f, '   />')

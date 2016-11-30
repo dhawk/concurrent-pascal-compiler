@@ -161,8 +161,9 @@ var
    hi_priority_interrupt_vector_goto,
    low_priority_interrupt_vector_goto: TInstruction;
    PriorityMapper: TPriorityMapper;
-   kernel_stack_base: integer;
+   kernel_stack_addr: integer;
    kernel_stack_size: integer;
+   kernel_stack_base: integer;
 {$ifdef INCLUDE_SIMULATION}
    no_sleep_on_idle: boolean;
 {$endif}
@@ -572,13 +573,11 @@ procedure TInitProcessSubroutine.generate_subroutine_code;
       TPIC18x_MOVFF.Create (FSR2L, initial_process_pcb_addr + pcb_stk_saveL_offset);
 
       // set process initial stack ptr
-      TPIC18x_TBLRD.Create (tblrd_post_inc).annotation := 'fsr2 := fsr1 + stk_base_adj;';
+      TPIC18x_TBLRD.Create (tblrd_post_inc).annotation := 'fsr2 := stk_base;';
       TPIC18x_MOVF.Create (TABLAT, dest_w, access_mode);
-      TPIC18x_ADDWF.Create (FSR1L, dest_w, access_mode);
       TPIC18x_MOVWF.Create (FSR2L, access_mode);
       TPIC18x_TBLRD.Create (tblrd_post_inc);
       TPIC18x_MOVF.Create (TABLAT, dest_w, access_mode);
-      TPIC18x_ADDWFC.Create (FSR1H, dest_w, access_mode);
       TPIC18x_MOVWF.Create (FSR2H, access_mode);
 
       // call process initial statement
