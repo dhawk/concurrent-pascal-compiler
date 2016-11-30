@@ -650,7 +650,7 @@ Step 2. Create the new MPLABX Project
 4. Select Header: None
 5. Select Tool: Simulator
 6. Select Compiler: mpasm
-7. Project Name: test (or another name of your choosing)
+7. Project Name: test
 8. Project Location: *chose the directory that contains test_cpc_pic18x.exe.*
 9. Set as main project: checked
 10. Click Finish
@@ -675,9 +675,9 @@ Step 4. Enable the extended instruction set:
 
 ![](pic18x-user-guide/extended_option.png){:hspace="50"}
 
- *Note: Failure to add the Concurrent Pascal generated <proj>.lkr file to the Linker Files section will result in an obscure MPLINK error message similar to the following when the program's RAM usage exceeds a trivial amount:*
+Note: Failure to add the Concurrent Pascal generated <proj>.lkr file to the Linker Files section will result in an obscure MPLINK error message similar to the following when the program's RAM usage exceeds a trivial amount:
 
-      <font color="red">Error - section '.udata' can not fit the absolute section. Section '.udata' start=0x00000000, length=0x000000d8</font>
+<font color="red">Error - section '.udata' can not fit the absolute section. Section '.udata' start=0x00000000, length=0x000000d8</font>
 
 ## Debugging using the MPLABX Simulator
 
@@ -685,11 +685,11 @@ MPLABX debugging support for Concurrent Pascal programs is limited.  The Simulat
 
 Note that to use the debugger the source file must include a processor specification as well as a configuration bits file.  Failure to include these will result in the following error message when attempting to run it:
  
-     <font color="red">The program file could not be loaded: The program was built using extended CPU instructions, but the Extended CPU Mode configuration bit is not enabled.</font>
+<font color="red">The program file could not be loaded: The program was built using extended CPU instructions, but the Extended CPU Mode configuration bit is not enabled.</font>
 
 ### Memory Maps
 
-The Concurrent Pascal Compiler generates memory maps for both static and local (stack) variables.  These appear at the very end of the assembly source file produced by the compiler.  Each variable is represented by a label and its size in bytes.  The variable can be displayed in the debugger by specifying the label and making the appropriate settings for the variable type (see below).
+The Concurrent Pascal Compiler generates memory maps for both static and local (stack) variables.  These appear at the very end of the assembly source file produced by the compiler.  Each variable is represented by a label and its size in bytes.  The variable can be displayed in the debugger by specifying the label and making the appropriate settings for the variable type (see "MPLABX Simulator Data Visualizors" below).
 
 #### Static Memory Maps
 
@@ -736,25 +736,27 @@ S000000?STACK               RES .0002
 
 The static variable map starts with a listing of kernel variables and data structures for the custom generated kernel for the program.  
 
-Note that KERNEL?ErrorCode is available in the Static Variables Map.  It may be useful to keep this as a permanent watch variable (although the bytes are reversed ("Displaying Ordinal Values" below).
+Note that KERNEL?ErrorCode is available in the Static Variables Map.  It may be helpful to keep this as a permanent watch variable (although the bytes are reversed ("Displaying Ordinal Values" below).
 
 The variables specified in the program source itself appear next.  Each variable has a unique label and it's size in bytes is shown in the RES operand.
 
-MPASM is case sensitive, so all identifiers declared in the Concurrent Pascal program are coverted to lowercase to avoid possible conflicts with MicroChip identifiers (these will be uppercase).  Note that complex types (records, arrays, classes, monitors and processes) are expanded to simple types.  MPASM does not allow "**.**" characters in labels so they are replaced with "**?**" characters.  Similarly "**[**" and "**]**" characters are not allowed so indices are represented with a single "**?**" character separating the variable name and the value of the index.  
-
-*MPASM has a restriction that label names may be no more than 32 characters.  If an expanded name is too long then it is shortened by successively replacing leftern ids with short ids (e.g. 'a', 'b', etc.) as needed to produce an unambigous label.  It is possible that expanded names with many levels may still be too long - in this case MPASM will produce truncated label warnings and possibly fail to assemble if a truncated label conflicts with another label.*   
-
 Following the program source variables are the stacks.  A typical Concurrent Pascal program will have multiple stacks - one for each process variable and an additional one for the kernel.  This simple example has only the kernel stack named S000000.  Additional stacks would be named S000001, S000002, etc.
+
+Complex types (records, arrays, classes, monitors and processes) are expanded to simple types.  MPASM does not allow "**.**" characters in labels so they are replaced with "**?**" characters.  Similarly "**[**" and "**]**" characters are not allowed so indices are represented with a single "**?**" character separating the variable name and the value of the index.  
+
+MPASM is case sensitive, so all identifiers declared in the Concurrent Pascal program are coverted to lowercase to avoid possible conflicts with MicroChip identifiers (these will be uppercase).  
+
+MPASM has a restriction that label names may be no more than 32 characters.  If an expanded name is too long then it is shortened by successively replacing leftern ids with short ids (e.g. 'a', 'b', etc.) as needed to produce an unambigous label.  It is possible that expanded names with many levels may still be too long - in this case MPASM will produce truncated label warnings and possibly fail to assemble if a truncated label conflicts with another label.   
 
 #### Stack Frame Maps
 
 Stack Frame Maps are useful for examining the local variables of procedures and functions in the debugger.  
 
-The MPLABX Simulator does not understand the multiple process stacks of a typical Concurrent Pascal program and is therefore unable to display  stack frames easily.  As a work-around the compiler produces Stack Frame Maps for each procedure or function in the program.  The compiler calculates each location where the stack frame may appear and calculates absolute addresses for each part of that stack frame.  The label names can be used to display these variables in the debugger.
+The MPLABX Simulator does not understand the multiple process stacks of a typical Concurrent Pascal program and is therefore unable to display  stack frames easily.  As a work-around the compiler produces Stack Frame Maps for each procedure or function in the program.  The compiler calculates each location where the stack frame may appear and calculates absolute addresses for each part of that stack frame.  The resulting labels in the appropriate Stack Frame Map can be used to display these variables in the debugger.
 
-##### A single Stack Frame
+##### A Single Stack Frame
 
-For example, the following monitor declaration contains one public function tm.f:   
+In the following example, the monitor declaration contains one public function tm.f:   
 
 ~~~
 type
@@ -796,9 +798,9 @@ M000001?RETURN_ADDRESS RES .0003 ;   RETURN_ADDRESS: ^rom;
 M000001?RESULT         RES .0001 ;   RESULT: int8;           <--- (8)
 ~~~
 
-Each Stack Frame Map has a unique name.  In the above example the map is named M000001 - this appears as the first part of each variable label (4) thru (7).  Additional memory maps would be named M000002, M000003, etc.
+Each Stack Frame Map has a unique name.  In the above example the map is named M000001 - this appears as the first part of each variable label (4) thru (7).  Additional Stack Frame Maps would be named M000002, M000003, etc.
 
-(1) Each Stack Frame Map shows the value of FSR2 (stack pointer) at the entry point for the routine.  In this case FSR2 will be $015 at label L000002.  You can put a breakpoint at the first instruction after L000002 and examine the value of FSR2 to make sure you are using the correct map (more on this below).
+(1) Each Stack Frame Map shows the value of FSR2 (the stack pointer) at the entry point for the routine.  In this case FSR2 will be $015 at label L000002.  You can put a breakpoint at the first instruction after L000002 and examine the value of FSR2 to make sure you are using the correct map (more on multiple Stack Frame Maps below).
 
 (2) The call path that leads to the function stack frame appearing at this location on the stack.  There may be multiple call paths that lead to the same stack frame location in which case they will be listed here as well.  The "@{15:6}" notation gives the line number (15) and line position (6) in the Concurrent Pascal source file where the call was made. 
 
@@ -833,9 +835,9 @@ type
          end;
 var
    i: int8;
-   p1, p2: tProcess;                     <--- two instances of tProcess
+   p1, p2: tProcess;               <--- two instances of tProcess
 begin
-   i := f(56);                           <--- call to f
+   i := f(56);                     <--- call to f
    init p1;
    init p2
 end.
@@ -917,7 +919,7 @@ The similar variable names in the different maps for a routine can be confusing 
 
 ### MPLABX Simulator Data Visualizors
 
-The MPLABX Simulator data visualizors, designed for Microchip C compilers, are often awkward to use when displaying Concurrent Pascal variables.  They are an improvement in that they at least help get the correct set of bytes into view (this is easier than calculating addresses and retrieving the appropriate number of bytes from a memory dump).  *Ideally maybe someday a set of custom data visualizors for Concurrent Pascal variables could be developed and installed if MPLABX even allows for such a thing...* 
+The MPLABX Simulator data visualizors, designed for Microchip C compilers, are often awkward to use when displaying Concurrent Pascal variables.  They are an improvement in that they at least help get the correct set of bytes into view (this is easier than calculating addresses and retrieving the appropriate number of bytes from a memory dump).  *Ideally maybe someday a set of custom data visualizors for Concurrent Pascal variables could be developed and installed if MPLABX allows for such a thing...* 
 
 #### Displaying Ordinal Variables
 
