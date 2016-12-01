@@ -946,7 +946,7 @@ constructor TCaseStatement.CreateFromSourceTokens;
          end_src_loc := lex.token.src_loc;
          lex.advance_token;
 
-         SmoothSort (label_specs, label_spec_is_ascending);
+         SmoothSort (label_specs, @label_spec_is_ascending);
 
          // ensure all case indexes are unique
          for i := 1 to Length(label_specs)-1 do

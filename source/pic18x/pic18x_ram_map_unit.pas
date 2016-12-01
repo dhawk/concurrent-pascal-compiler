@@ -116,7 +116,6 @@ constructor tRAMVariableMapNode.Create (_id: string; _typedef: TTypeDef; _ram_va
       fmt: string;
       ovf_typedef: TOverlayType;
       reversed: boolean;
-pfi: TPIC18x_PackedRecordFieldInfo;
    begin
       id := _id;
       shortened_id := _id;
@@ -928,7 +927,7 @@ procedure generate_stack_frame_maps;
          if routine.lesser_values <> nil then
             output_routine_stack_frame_maps (TCalledRoutine(routine.lesser_values));
 
-         SmoothSort (routine.call_paths, CompareCallPaths);
+         SmoothSort (routine.call_paths, @CompareCallPaths);
          map_count := 1;
          for i := 1 to Length(routine.call_paths)-1 do
             if TCallPath(routine.call_paths[i-1]).fsr2_at_start_label <> TCallPath(routine.call_paths[i]).fsr2_at_start_label then
