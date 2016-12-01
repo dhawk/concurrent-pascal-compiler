@@ -697,7 +697,7 @@ function TPIC18x_CPU.TRoutineCallStatement_CreateFromSourceTokens (acc: TAccess)
 
 function TPIC18x_CPU.TRoutineCallStatement_CreatePropertySetterCall (acc: TAccess; exp: TExpression; _src_loc: TSourceLocation): TRoutineCallStatement;
    begin
-      result := TPIC18x_RoutineCallStatement.CreatePropertySetterCall (acc, exp, _src_loc,)
+      result := TPIC18x_RoutineCallStatement.CreatePropertySetterCall (acc, exp, _src_loc)  
    end;
 
 function TPIC18x_CPU.TSetConstructorPrimary_CreateFromSourceTokens: TSetConstructorPrimary;
