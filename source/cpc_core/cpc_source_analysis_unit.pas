@@ -1515,6 +1515,9 @@ function TLexicalAnalysis.token_string (first_src_loc, last_src_loc: TSourceLoca
                and
                (a.length = b.length)
       end;
+   procedure add_whitespace;
+      begin
+      end;
    var
       i: integer;
       in_range: boolean;
@@ -1526,7 +1529,16 @@ function TLexicalAnalysis.token_string (first_src_loc, last_src_loc: TSourceLoca
             if eq (tokens[i].src_loc, first_src_loc) then
                in_range := true;
             if in_range then
-               result := result + source_token(tokens[i].src_loc);
+               begin
+                  if (result <> '')
+                     and
+                     (result[Length(result)] in ['A'..'Z', 'a'..'z', '0'..'9', '_'])
+                     and
+                     (source_token(tokens[i].src_loc)[1] in ['A'..'Z', 'a'..'z', '0'..'9', '_'])
+                  then
+                     result := result + ' ';
+                  result := result + source_token(tokens[i].src_loc);
+               end;
             if eq (tokens[i].src_loc, last_src_loc) then
                in_range := false
          end

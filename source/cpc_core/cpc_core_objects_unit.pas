@@ -75,12 +75,16 @@ type
       class(TDefinition)
       private
          f_type_kind: TTypeKind;
+         f_name: string;
+         last_src_loc: TSourceLocation;
          procedure set_type_kind (tk: TTypeKind);
+         procedure set_name (n: string);
+         function get_name: string;
       public
          definition_complete: boolean;
-         name: string;
          defining_scope: integer;
          property type_kind: TTypeKind read f_type_kind write set_type_kind;
+         property name: string read get_name write set_name;
          constructor Create
             (kind: TTypeKind
             );
@@ -765,6 +769,21 @@ procedure TTypeDef.set_type_kind (tk: TTypeKind);
       f_type_kind := tk
    end;
 
+procedure TTypeDef.set_name (n: string);
+   begin
+      f_name := n
+   end;
+
+function TTypeDef.get_name: string;
+   begin
+      if f_name = '' then
+         begin  // anonymous type
+            result := lex.token_string (src_loc, last_src_loc)
+         end
+      else
+         result := f_name
+   end;
+
 procedure TTypeDef.CheckAssignmentCompatability
    (def: TDefinition
    );
@@ -1431,6 +1450,7 @@ constructor TSetType.CreateFromSourceTokens;
    begin
       inherited Create(set_type);
       assert(lex.token_is_reserved_word(rw_set));
+      src_loc := lex.token.src_loc;
       lex.advance_token;
 
       if not lex.token_is_reserved_word(rw_of) then
@@ -2983,7 +3003,8 @@ function CreateTypeDenoterFromSourceTokens: TTypeDef;
                except
                   on e: EDefinitelyNotASubRange do
                      raise compile_error.Create(err_type_definition_expected, e.src_loc)
-               end
+               end;
+            result.last_src_loc := lex.previous_token_src_loc
          end;
       assert(result.IsTypeDefinition)
    end;

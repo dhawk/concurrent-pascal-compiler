@@ -1392,21 +1392,7 @@ procedure OutputLinkerFile (fn: string);
       if pic_info.available_eeprom_memory > 0 then
          writeln (f, 'CODEPAGE   NAME=eedata    START=' + hex($F00000) + '  END=' + hex($F00000 + pic_info.available_program_memory-1));
       writeln (f);
-
-      for i := 0 to Length(pic_info.data_regions)-1 do
-         begin
-            case pic_info.data_regions[i].region_type of
-               gpr_region: s := 'DATABANK   NAME=gpr' + IntToStr(i) + '     ';
-               sfr_region: s := 'ACCESSBANK NAME=accesssfr';    // are there ever multiple SFR regions?
-               dpr_region: assert (false);  // examine a .lkr file with a DPR region to see what to do here
-            else
-               assert (false)
-            end;
-            s := s + ' START=' + hex(pic_info.data_regions[i].start_addr) + '  END=' + hex(pic_info.data_regions[i].end_addr-1);
-            if pic_info.data_regions[i].region_type = sfr_region then
-               s := s + '  PROTECTED';
-            writeln (f, s)
-         end;
+      writeln (f, 'DATABANK   NAME=gpr_sfr   START=' + hex(0) +'  END=' + hex($FFF));
       CloseFile (f)
    end;
 

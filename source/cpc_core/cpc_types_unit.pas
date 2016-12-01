@@ -395,6 +395,7 @@ constructor TPackedRecordType.CreateFromSourceTokens;
    begin
       inherited Create(packed_record_type);
       assert(lex.token_is_reserved_word(rw_packed));
+      src_loc := lex.token.src_loc;
       lex.advance_token;
 
       if not lex.token_is_reserved_word(rw_record) then
