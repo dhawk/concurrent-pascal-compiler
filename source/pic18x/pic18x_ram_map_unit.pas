@@ -703,7 +703,7 @@ procedure TCalledRoutine.output_stack_frame_map (fsr2_at_start_label: integer);
       map: tRAMVariableMapNode;
       available_stk_headroom: integer;
       segment: TStackOverlaySegment;
-      name, typename: string;
+      name, _typename: string;
    begin
       segment := TStackOverlaySegment.FindSegment (fsr2_at_start_label);
       segment.output_udata_ovr_line;
@@ -720,15 +720,15 @@ procedure TCalledRoutine.output_stack_frame_map (fsr2_at_start_label: integer);
          for i := routine.parameter_definitions.Length-1 downto 0 do
             begin
                name := routine.parameter_definitions[i].name;
-               typename := routine.parameter_definitions[i].typedef.name;
+               _typename := routine.parameter_definitions[i].typedef.name;
                case routine.parameter_definitions[i].descriptor of
                   rw_const,
                   rw_for:
                      case routine.parameter_definitions[i].ParamMode of
                         ByValue:
-                           map.append (tRAMVariableMapNode.Create (name, typename, TPIC18x_TypeInfo(routine.parameter_definitions[i].TypeDef.info).Size, vars_group));
+                           map.append (tRAMVariableMapNode.Create (name, _typename, TPIC18x_TypeInfo(routine.parameter_definitions[i].TypeDef.info).Size, vars_group));
                         ByAddress:
-                           map.append (tRAMVariableMapNode.Create (name, '^' + typename, ram_ptr_size, vars_group));
+                           map.append (tRAMVariableMapNode.Create (name, '^' + _typename, ram_ptr_size, vars_group));
                      else
                         assert (false)
                      end;
@@ -737,16 +737,16 @@ procedure TCalledRoutine.output_stack_frame_map (fsr2_at_start_label: integer);
                      begin
                         if routine.parameter_definitions[i].typedef.type_kind = string_type then
                            map.append (tRAMVariableMapNode.Create (name + '_MAXSIZE', 'uint8', 1, vars_group));
-                        map.append (tRAMVariableMapNode.Create (name, '^' + typename, ram_ptr_size, vars_group))
+                        map.append (tRAMVariableMapNode.Create (name, '^' + _typename, ram_ptr_size, vars_group))
                      end;
                   rw_eeprom:
                      begin
                         if routine.parameter_definitions[i].typedef.type_kind = string_type then
                            map.append (tRAMVariableMapNode.Create (name + '_MAXSIZE', 'uint8', 1, vars_group));
-                        map.append (tRAMVariableMapNode.Create (name, '^' + typename, eeprom_ptr_size, vars_group))
+                        map.append (tRAMVariableMapNode.Create (name, '^' + _typename, eeprom_ptr_size, vars_group))
                      end;
                   rw_rom:
-                     map.append (tRAMVariableMapNode.Create (name, '^' + typename, rom_ptr_size, vars_group));
+                     map.append (tRAMVariableMapNode.Create (name, '^' + _typename, rom_ptr_size, vars_group));
                else
                   assert (false)
                end
