@@ -671,7 +671,7 @@ Step 4. Enable the extended instruction set:
 1. File / Project Properties (test)
 2. Select mpasm (Global Options)
 3. Check "Enable extended instruction set" (you may have to click the Unlock button)
-4. Click on Ok
+4. Click Ok
 
 ![](pic18x-user-guide/extended_option.png){:hspace="50"}
 
@@ -924,12 +924,14 @@ The MPLABX Simulator data visualizors, designed for Microchip C compilers, are o
 #### Displaying Ordinal Variables
 
 ~~~
-var i: int16;
-  ---
-i := 1;
+var 
+   i: int16;
+begin
+   i := 1
+end.
 ~~~
 
-Results in the following entry in the Static Variable Map:
+This produces the following variable map entry:
 
 ~~~
 i                                RES .0002 ;   i: int16;
@@ -944,14 +946,16 @@ Note that the bytes are displayed in reverse order.  The Windows Calculator has 
 #### Displaying Floating Point Variables
 
 ~~~
-r: real;
-i: ieee_single;
-  ---
-r := 10.0;
-i := 10.0;
+var 
+   r: real;
+   i: ieee_single;
+begin
+   r := 10.0;
+   i := 10.0
+end.
 ~~~
 
-The variable map supplies the following identifiers for the floating point variables:
+This produces the following variable map entries:
 
 ~~~
 r                           RES .0004 ;   r: real;
@@ -967,13 +971,15 @@ The ieee_single variable should be displayed in hex (32 bits).  *The "IEEE FLoat
 #### Displaying String Variables
 
 ~~~
-var s: string[16];
-  ---
-s := 'GARBAGE12345678!';
-s := 'abc';
+var 
+   s: string[16];
+begin
+   s := 'GARBAGE12345678!';
+   s := 'abc'
+end.
 ~~~
 
-The variable map supplies the following identifiers for the string variable:
+This produces the following variable map entries:
 
 ~~~
 s?LEN                       RES .0001 ;   s.LEN: uint8;
@@ -1002,19 +1008,17 @@ Note that the length field has been updated to 3 and the first three characters 
 #### Displaying Set Variables
 
 ~~~
-type
-   tset = set of 0..15;
-var
-   s: tset; 
+var 
+   s: set of 0..15;
 begin
-   s := [0]
+   s:=[0]
 end.
 ~~~
 
-The variable map supplies the following identifiers for the set variable:
+This produces the following variable map entry:
 
 ~~~
-s                                RES .0002 ;   s: tset;
+s                                RES .0002 ;   s: set of 0..15;
 ~~~
 
 Set variables should be displayed in hex format with the appropriate width.
@@ -1026,15 +1030,13 @@ Bit 0 is the rightmost byte of the least significant byte and bit 15 is the left
 #### Displaying Packed Record Values
 
 ~~~
-type
-   tpr = 
-      packed record
-         a: uint4;
-         b: uint4;
-         c: uint4;
-         d: uint4
-      end;
-var pr: tpr;
+var 
+   pr: packed record
+          a: uint4;
+          b: uint4;
+          c: uint4;
+          d: uint4
+       end;
 begin
    pr.a := 1;
    pr.b := 2;
@@ -1043,16 +1045,70 @@ begin
 end.
 ~~~
 
-
+This produces the following variable map entry:
 
 ~~~
-pr                               RES .0002 ;   pr: tpr;
+pr RES .0002; pr: packed record a:uint4;b:uint4;c:uint4;d:uint4 end;
 ~~~
 
 The best visualizor for packed record types is hex with the appropriate number of bytes.
 
 ![](pic18x-user-guide/visualizer-packed-record.png){:hspace="50"}
 
-Packed record bit fields are assigned left to right from lowest to highest address byte.  The visualizer displays the bytes in reveresed order, except when the packed record type itself is a reversed type, in which case they are displayed in normal order (the variable map will indicate that the packed record type is reversed).
+Packed record bit fields are assigned left to right from lowest to highest address byte.  The visualizer displays the bytes in reveresed order, except when the packed record type itself is a reversed type.
+
+#### Displaying Packed Record Values for Reversed Types
+
+For example tTMR16 is a type defined for ioreg variables which happens to be a reversed type:
+
+~~~
+type
+   tTMR16 =
+      overlay
+         packed record
+            TMRx: uint16;
+            RD16: uint1;
+            TxRUN: uint1;
+            TxCKPS: uint2;
+            TxOSCEN: uint1;
+            nTxSYNC: uint1;
+            TMRxCS: uint1;
+            TMRxON: uint1
+         end;
+         ---
+      end;
+~~~
+
+This type can then be used to define a variable in RAM which will also be a reversed type:
+
+~~~
+var 
+   tmr: tTMR16;   
+begin
+   tmr.TMRx := $1234;
+   tmr.RD16 := 1;
+   tmr.TxRUN := 1;
+   tmr.TxCKPS := 3;
+   tmr.TxOSCEN := 1;
+   tmr.nTxSYNC := 1;
+   tmr.TMRxCS := 1;
+   tmr.TMRxON := 1
+end.
+~~~
+
+This produces the following variable map entry:
+~~~
+tmr             RES .0003 ;   tmr: tTMR16 {REVERSED BYTE ORDER};
+~~~
+
+Note that it is flagged as a reversed byte order type.
+
+After the assignment statement have completed the following will appear in the debugger:
+
+![](pic18x-user-guide/visualizer-reversed.png){:hspace="50"}
+
+Note that the double-reversal results in the variable value being displayed "correctly".
+
+
 
 
