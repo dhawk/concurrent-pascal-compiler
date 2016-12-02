@@ -1059,7 +1059,7 @@ Packed record bit fields are assigned left to right from lowest to highest addre
 
 #### Displaying Packed Record Values for Reversed Types
 
-For example tTMR16 is a type defined for ioreg variables which happens to be a reversed type:
+Reversed types normally appear only in ioreg types for the purpose of making useable type definitions for SFRs arranged by the PIC18x hardware designers in inconvenient orderings.  However, as a valid type definition, it is possible to declare RAM variables using these types and the RAM variable will be laid out in the same reversed order as the SFR registers.  For example tTMR16 happens to be a reversed type:
 
 ~~~
 type
@@ -1097,6 +1097,7 @@ end.
 ~~~
 
 This produces the following variable map entry:
+
 ~~~
 tmr             RES .0003 ;   tmr: tTMR16 {REVERSED BYTE ORDER};
 ~~~
