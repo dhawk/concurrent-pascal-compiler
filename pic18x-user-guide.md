@@ -1104,11 +1104,11 @@ tmr             RES .0003 ;   tmr: tTMR16 {REVERSED BYTE ORDER};
 
 Note that it is flagged as a reversed byte order type.
 
-After the assignment statement have completed the following will appear in the debugger:
+After the assignment statements have completed the following will appear in the debugger:
 
 ![](pic18x-user-guide/visualizer-reversed.png){:hspace="50"}
 
-Note that the double-reversal results in the variable value being displayed "correctly".
+Note that the double-reversal of the reversed type and the debugger displaying the results in reversed order results in the variable value being displayed "correctly".
 
 
 
