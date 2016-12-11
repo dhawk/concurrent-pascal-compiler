@@ -1374,8 +1374,6 @@ procedure OutputLinkerFile (fn: string);
       end;
    var
       f: TextFile;
-      i: integer;
-      s: string;
    begin
       AssignFile (f, fn);
       Rewrite (f);

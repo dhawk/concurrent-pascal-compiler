@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------
-Basic information about the MPArith package (V1.25.03)
+Basic information about the MPArith package (V1.33.10)
 ---------------------------------------------------------------------------
 
 Contents
@@ -19,17 +19,17 @@ Contents
     * Functions specific to I/O or Pascal
     * FPU and 32 bit functions
     * Rational arithmetic functions
-    * Floating point functions
-
+    * Real floating point functions
+    * Complex floating point functions
 
 
 Introduction
 ---------------------------------------------------------------------------
-The MPArith (formerly mpint) package contains Pascal/Delphi source for multi
-precision integer, rational, and floating point arithmetic; the units can be
-compiled with the usual Pascal versions that allow const parameters. MPArith
-does not have the most efficient code, but it is small, understandable, open
-source, and can be compiled with BP7. My Pascal routines use many public
+The MPArith package contains Pascal/Delphi source for multi precision integer,
+rational, real and complex floating point arithmetic and functions; the units
+can be compiled with the usual Pascal versions that allow const parameters.
+MPArith does not have the most efficient code, but it is small, understandable,
+open source, and can be compiled with BP7. My Pascal routines use many public
 resources (source code libraries, books, articles), links are given in the
 references section.
 
@@ -46,23 +46,25 @@ are other test programs, batch files, data files, etc...
 
 mp_base.pas   MP integer arithmetic basic routines
 mp_calc.pas   Parse and evaluate mp_int expressions
+mp_cmplx.pas  MP complex floating point arithmetic routines
 mp_conf.inc   Include file: Configuration definitions/options for the MPArith library
 mp_modul.pas  MP basic modular arithmetic, GCD and LCM, Jacobi/Kronecker
 mp_numth.pas  MPArith number theoretic functions
 mp_pfu.pas    Multi precision prime factorization routines
-mp_prime.pas  Basic 16/32 bit prime numbers and related
+mp_prime.pas  Basic 16/32 bit prime numbers and functions
 mp_prng.pas   MP interface to (C)PRNG, functions for PRNG generation
 mp_ratio.pas  MP rational arithmetic routines
 mp_rc??.pas   Bit tables for pi, ln(2), ln(10), exp(1)
 mp_rcalc.pas  Parse and evaluate mp_float expressions
-mp_real.pas   MP floating point arithmetic routines
+mp_real.pas   MP real floating point arithmetic routines
 mp_rsa.pas    MP functions for basic RSA based public-key cryptography
 mp_supp.pas   Supplemental routines for MPArith
 mp_types.pas  MPArith type definitions and constants
 std.inc       Standard include file with definitions and options
 t_calc.pas    Simple interactive calculator for mp_int expressions
 t_check.pas   Main test program for the integer  routines
-t_chkfp.pas   Main test program for the floating point routines
+t_chkfp.pas   Main test program for the real floating point routines
+t_chkmpc.pas  Main test program for the complex floating point routines
 t_chkrat.pas  Main test program for the rational routines
 t_rcalc.pas   Simple interactive calculator for mp_float expressions
 
@@ -77,7 +79,8 @@ MPArith definitions
 The basic mp_int type is a record with a pointer to a dynamically allocated
 array of mp_digits (plus some extras), a rational number is represented by a
 record of two mp_ints, and a real number is defined by an mp_int mantissa, an
-exponent, and a bit precision:
+exponent, and a bit precision; finally, a complex number is a record of two
+mp_floats for the real and imaginary part:
 
 type
   TDigitArray = packed array[0..MaxDigits+63] of mp_digit; {the digits of an mp_int}
@@ -107,6 +110,12 @@ type
                 bitprec : longint;     {bit precision=max bitsize of mantissa}
               end;
   pmp_float = ^mp_float;               {pointer to an MP float}
+
+  mp_complex  = record                 {MP complex number           }
+                  re: mp_float;        {real part                   }
+                  im: mp_float;        {imaginary part              }
+                end;
+  pmp_complex = ^mp_complex;           {pointer to an MP complex    }
 
 The mp_digit type can be configured with the mp_conf.inc file. Default:
 MP_32BIT if compiler supports int64, MP_16BIT otherwise.
@@ -239,11 +248,13 @@ WIN32 even for console mode programs.
 {.$define MPC_FPrec30K}         {MPF_MAX_PREC=30000, default for 16 bit  }
 {.$define MPC_FPU_ISQRT}        {isqrt32=trunc(sqrt()),default for BIT16 }
 {.$define MPC_SmallSieve}       {Max sieve prime = 1908867043            }
+{$define MPC_SieveNextPrime}    {use sieve for mp_next_prime             }
 {$define MPC_E1Ln10Tab}         {use tables for exp(1) and ln(10)        }
 {$define MPC_Reduce_2k}         {use mp_reduce_2k in mp_exptmod          }
 {$define MPC_UseKONG}           {use Kong if sqrtmethod=0 and p=9 mod 16 }
 {$define MPC_UseGCD32}          {use 32 bit GCD in MP GCD routines       }
 {$define MPC_UseISAAC}          {use ISAAC random number generator       }
+{.$define MPC_ACCEPTBIAS}       {accept small bias in mp_random_radix    }
 {.$define MPC_MAXRadix64}       {use MaxRadix=64 instead of 36           }
 {.$define MPC_TRACE}            {emit trace info if mp_verbose > 0       }
 {.$define MPC_USE_ODS}          {always use OutputDebugStr for WIN32/64  }
@@ -264,10 +275,10 @@ WIN32 even for console mode programs.
 Simple examples, general information
 ---------------------------------------------------------------------------
 The MPArith units can be compiled with the usual Pascal versions that allow
-const parameters (tested with BP 7.0, VP 2.1, FPC 1.0/2.0/2.2/2.4/2.6, and
-Delphi versions 1..7/9/10/12/17). As an example, here is the small t_intro.pas
-demo program compiled with FPC 2.4.4, with Delphi use the -cc command line
-switch or load the t_ddemo.dpr Delphi GUI demo (it calculates Mersenne primes):
+const parameters (tested with BP 7.0, VP 2.1, FPC 1.0/2.0-2.6/3.x, and Delphi
+versions 1..7/9/10/12/17/18). As an example, here is the small t_intro.pas demo
+program compiled with FPC 3.0.0, with Delphi use the -cc command line switch or
+load the t_ddemo.dpr Delphi GUI demo (it calculates Mersenne primes):
 
 uses
   mp_types, mp_base, mp_numth;
@@ -283,7 +294,7 @@ begin
   mp_clear(a);
 end.
 
-MPArith V1.25.03 (31/32 bit) with MAXDigits = 16777216, MP_MAXBIT = 520093696
+MPArith V1.33.10 (31/32 bit) with MAXDigits = 16777216, MP_MAXBIT = 520093696
 Fibonacci(271) = 193270471243015279782059101964580241188515112465021394429
 Number of decimal digits of 2^520093695 = 156563805
 
@@ -306,7 +317,7 @@ mp_lucas(1000,a);
 mp_4sq_sd(a,b,c,d,e);
 ..
 
-Test of MP library version 1.25.03 (31/32 bit)   (c) W.Ehrhardt 2012
+Test of MP library version 1.33.10 (31/32 bit)   (c) W.Ehrhardt 2012
 9719417773590817520798198207932647373779787915534568508272808108477251\
 8818444815269080619149045968297679578305403209347401163036907660573971\
 740862463751801641201490284097309096322681531675707666695323797578127
@@ -315,7 +326,7 @@ Test of MP library version 1.25.03 (31/32 bit)   (c) W.Ehrhardt 2012
 + 24970374757386993674494899978552505624409975485893125^2
 + 2388281972686783802745888945^2
 + 127348960691262133779212551^2
-Time [s]: 0.007
+Time [s]: 0.011
 
 Unit mp_ratio.pas implements multi precision rational arithmetic. Most
 functions expect normalized rational input: the denominator must be greater
@@ -335,7 +346,9 @@ normalization. Although there is the function mpf_is_eq, equality of mp_floats
 is a fuzzy concept; mpf_is_eq_rel checks if the relative deviation is not
 greater than 1/2^(bitprec-1). mpf_reldev returns the value of the relative
 deviation and is used to detect failures and bad precisions in the t_chkfp test
-program.
+program. Unit mp_cmplx.pas implements complex arithmetic and functions based on
+mp_real; the mp_complex data type is just a record of the real and imaginary
+part of type mp_float.
 
 
 
@@ -352,14 +365,15 @@ Operators:  +  -  *  /  div  mod  ^  !  !!  # (primorial)  % (same as mod)
 
 Functions:  abs(a)         and(a,b)         binomial(a,b)   carmichael(a)
             catalan(a)     cbrtmod(a,b)     eulerphi(a)     fermat(a)
-            fib(a)         gcd(a,b)         invmod(a,b)     ispprime(a)
-            jacobi(a,b)    kronecker(a,b)   lcm(a,b)        luc(a)
-            maurer(a)      max(a,b)         mersenne(a)     min(a,b)
-            moebius(a)     nextprime(a)     or(a,b)         order(a,b)
-            perm(a,b)      poch(a,b)        popcount(a)     prevprime(a)
-            prime(a)       primepi(a)       primroot(a)     qnr(a)
-            random(a)      randprime(a)     root(a,b)       sigma(a,b)
-            spsp(a,b)      sqrt(a)          sqrtmod(a,b)    xor(a,b)
+            fib(a)         gcd(a,b)         invmod(a,b)     iscarmichael(a)
+            ispprime(a)    jacobi(a,b)      kronecker(a,b)  lcm(a,b)
+            luc(a)         maurer(a)        max(a,b)        mersenne(a)
+            min(a,b)       moebius(a)       nextprime(a)    or(a,b)
+            order(a,b)     perm(a,b)        poch(a,b)       popcount(a)
+            prevprime(a)   prime(a)         primepi(a)      primroot(a)
+            qnr(a)         random(a)        randprime(a)    root(a,b)
+            safeprime(a)   sigma(a,b)       spsp(a,b)       sqrt(a)
+            sqrtmod(a,b)   val(a,b)         xor(a,b)
 
 Variables:  x  y  z,  Syntax: Var=expression[;] or Var=_[;]
 
@@ -376,14 +390,15 @@ Operators:  +  -  *  /  ^             Constants: pi, e, ln2, ln10
 Functions:  abs(a)       agm(a,b)     arccos(a)      arccosh(a)   arccosh1p(a)
             arccot(a)    arccotc(a)   arccoth(a)     arccsc(a)    arccsch(a)
             arcgd(a)     archav(a)    arcsec(a)      arcsech(a)   arcsin(a)
-            arcsinh(a)   arctan(a)    arctan2(y,x)   arctanh(a)   CE(a)
-            CK(a)        cos(a)       cosh(a)        coshm1(a)    cot(a)
-            coth(a)      csc(a)       csch(a)        exp(a)       expm1(a)
-            frac(a)      gd(a)        hav(a)         int(a)       lambertw(a)
-            ln(a)        ln1p(a)      log10(a)       log2(a)      log(a,b)
-            max(a,b)     min(a,b)     numbpart(a)    random(a)    round(a)
-            sec(a)       sech(a)      sin(a)         sinc(a)      sinh(a)
-            sqr(a)       sqrt(a)      tan(a)         tanh(a)      vers(a)
+            arcsinh(a)   arctan(a)    arctan2(y,x)   arctanh(a)   asd(a)
+            asx(a)       CE(a)        CK(a)          cos(a)       cosh(a)
+            coshm1(a)    cot(a)       coth(a)        csc(a)       csch(a)
+            exp(a)       expm1(a)     frac(a)        gd(a)        hav(a)
+            hypot(a,b)   int(a)       lambertw(a)    ln(a)        ln1p(a)
+            log10(a)     log2(a)      log(a,b)       max(a,b)     min(a,b)
+            nroot(a,n)   numbpart(a)  random(a)      round(a)     sec(a)
+            sech(a)      sin(a)       sinc(a)        sinh(a)      sqr(a)
+            sqrt(a)      tan(a)       tanh(a)        vers(a)
 
 Variables:  x  y  z,  Syntax: Var=expression[;] or Var=_[;]
 
@@ -392,7 +407,7 @@ Other    :  line terminator ";" shows only sign/ldx/chksum/time of result
             xh,  dh,  ddh: displays last result as hex extended/double(double)
             prec  [n]:  display/set bit precision
             nfd   [n]:  display/set number of digits in fractional part
-            asx,  asd:  set result to extended/double value
+            as[x|d|s]:  set result to extended/double/single value
             sci,  alt:  display results using scientific/alternative format
             "_<enter>"  re-displays last result
             ".<enter>"  displays time for last calculation
@@ -414,8 +429,8 @@ For me the most valuable general references in the list are [3], [4], [5] (with
 the focus on cryptography), and [10]. [35] is a new and highly recommended
 reference.
 
- [1]  LibTomMath V0.41, Tom St Denis, 2007, http://www.libtom.org/
- [2]  MPI, M.J. Fromberger, [no stable URL]
+ [1]  LibTomMath V0.41, Tom St Denis, 2007, [cf. https://github.com/libtom/libtommath]
+ [2]  MPI, M.J. Fromberger, [discontinued, no stable URL]
  [3]  D.E. Knuth, The Art of computer programming:
       Volume 1, Fundamental Algorithms, 3rd ed., 1997;
       Volume 2, Seminumerical Algorithms, 3rd ed., 1998;
@@ -507,6 +522,12 @@ reference.
 [40]  H. Riesel, Prime Numbers and Computer Methods for Factorization,
       Vol. 126 of Progress in Mathematics, Boston, 2nd ed. 1994.
       Paperback reprint 2012 in Modern Birkh„user Classics Series.
+[41]  [HMF]: M. Abramowitz, I.A. Stegun. Handbook of Mathematical
+      Functions. New York, 1970, http://www.math.sfu.ca/~cbm/aands/
+[42]  W. Kahan, "Branch Cuts for Complex Elementary Functions, or Much Ado
+      About Nothing's Sign Bit", in The State of Art in Numerical Analysis,
+      ed. by A. Iserles and M.J.D. Powell, 1987, pp. 165-211.
+      Available as http://people.freebsd.org/~das/kahan86branch.pdf
 
 
 
@@ -560,7 +581,7 @@ mp_crt_single           Calculate x with x mod m[i] = v[i], pairwise co-prime mo
 mp_crt_solve            Calculate x with x mod m[i] = v[i], coefficients c[i] must be precalculated with mp_crt_setup
 mp_dec                  Decrement an mp_int by 1
 mp_dec_int              Calculate a = a - b
-mp_dfact                Calculate double factorial a = n!!, a=n*(n-2)...
+mp_dfact                Calculate double factorial a = n!!, a=n*(n-2)... ; a=0 for n < -3
 mp_div                  Integer signed division, c = a div b
 mp_divrem               Integer signed division, pc^ = a div b, pd^ = a rem b; sign(pd^)=sign(a)
 mp_div_2                Divide by 2, b = a/2
@@ -578,6 +599,7 @@ mp_expt_d               Calculate c = a^b
 mp_expt_int             Calculate c = a^b, b>=0
 mp_fact                 Calculate a = factorial(n) using Borwein/Schoenhage or Recursive Split, error if n > MaxFact
 mp_fermat               Return nth Fermat number, fn = 2^(2^n)+1 (MP_RANGE error for n>MaxFermat)
+mp_fermat_factor        Find a factor f of N with Fermat's method, f=0 if no factor found; cnt: number of tests
 mp_fib                  Calculate Fibonacci number fn=fib(n), fib(-n)=(-1)^(n-1)*fib(n)
 mp_fib2                 Calculate two Fibonacci numbers fn=fib(n), f1=fib(n-1), n>=0
 mp_gcd                  Calculate c = gcd(a,b) using the binary method
@@ -589,6 +611,7 @@ mp_get_int              Get the lower signed 31 bits of an mp_int
 mp_grow                 Grow an mp_int to a given size (new part is zerofilled)
 mp_gr_mod               Reduce x to x mod N, N > 1, using generalized reciprocal iteration.
 mp_gr_setup             Calculate the generalized reciprocal for N>1, @RN<>@N
+mp_holf                 Find a factor f of n with Hart's OneLineFactor, f=0 if no factor found; cnt: number of tests
 mp_inc                  Increment an mp_int by 1
 mp_inc_int              Calculate a = a + b
 mp_init[x]              Initialize [x] mp_ints (x=1..9)
@@ -619,13 +642,14 @@ mp_is_pow2              Check if |a| is a power of 2, if true, return n with |a|
 mp_is_pow2_d            Check if d is power of 2, if true, return n with d=2^n
 mp_is_power             Calculate smallest prime p with a=b^p; p=1,b=a if a is no power
 mp_is_power_max         Calculate largest k with a=b^k; k=1,b=a if a is no power
-mp_is_pprime            Test if a is prime (BPSW pseudo prime if a>2^32)
-mp_is_pprime_ex         Test if a is prime (BPSW pseudo prime if a>2^32); trial division up to smax
+mp_is_power_modpk       Return true if a is a nth power residue mod p^k; p prime (not checked); gcd(a,p)=1; n, k > 0.
+mp_is_pprime            Test if a is prime (BPSW probable prime if a>2^32)
+mp_is_pprime_ex         Test if a is prime (BPSW probable prime if a>2^32); trial division up to smax
 mp_is_primepower        Return true if a=b^k, b prime, k>1, otherwise false and a=b^k, k=1 if no power
 mp_is_pth_power         Return true if a is pth power, a>0, p prime. If true, calculate r with a=r^p
-mp_is_slpsp             Strong Lucas pseudo prime test for a, done for the first p=2k+1 with jacobi(p^2-4,a) = -1
-mp_is_spsp              Strong pseudo prime test of n to base a > 1
-mp_is_spsp_d            Strong pseudo prime test of n to mp_digit base a > 1
+mp_is_slpsp             Strong Lucas probable prime test for a, done for the first p=2k+1 with jacobi(p^2-4,a) = -1
+mp_is_spsp              Strong probable prime test of n to base a > 1
+mp_is_spsp_d            Strong probable prime test of n to mp_digit base a > 1
 mp_is_square            Test if a is square
 mp_is_square2           Test if a is square, return sqrt(a) if a is a square and psqrt<>nil
 mp_jacobi               Compute the Jacobi/Legendre symbol (a|n), n: odd and > 2
@@ -683,10 +707,11 @@ mp_provable_prime       Generate a random provable prime p with bitsize bits usi
 mp_qnr                  Return a small quadratic nonresidue for n > 0, -1 if error or no QNR is found
 mp_radix_size           Return size of ASCII representation
 mp_rand                 Make a pseudo-random int of a given size
+mp_random               Make a pseudo-random mp_int b with  0 <= b < |a|
 mp_rand_bits            Make a pseudo-random mp_int of a given bit size
 mp_rand_bits_ex         Make pseudo-random a with bitsize <= bits, if sethi highest bit is set
 mp_rand_ex              Make a pseudo-random mp_int, if not sethi then a[digits-1] may be zero
-mp_rand_prime           Generate random (BPSW pseudo) prime of bitsize > 3, pt: prime type of p
+mp_rand_prime           Generate random (probable BPSW) prime of bitsize > 3, pt: prime type of p
 mp_rand_radix           Make a pseudo-random int of size radix^digits
 mp_read_decimal         Read an mp_int from a decimal ASCII pchar
 mp_read_decimal_astr    Read an mp_int from a decimal ansistring
@@ -701,12 +726,13 @@ mp_reduce_2k            Reduce a mod n where n is of the form 2^p-d
 mp_reduce_2k_setup      Determine setup value d for unrestricted diminished radix reduction, a>=0
 mp_reduce_is_2k         Determine if mp_reduce_2k can be used
 mp_reduce_setup         Pre-calculate the value required for Barrett reduction
-mp_reverse              Reverse an array of char, used for radix code
 mp_rnr                  Rational number reconstruction: for m>0 calculate x,y with a*x=y mod m, gcd(x,y)=1, 0<=x,|y|<sqrt(m/2)
 mp_rnr2                 Rational number reconstruction: for m,NN,DD > 0 calculate co-prime d,n with a*d=n mod m, i.e. a=n/d mod m
 mp_rqffu                Return the fundamental unit e = (u + v*sqrt(d))/2 of the real quadratic field with discriminant d>4, d mod 4 = 0,1
 mp_rshd                 Shift right a certain amount of digits
 mp_rshd2                Set b to a shifted right by cnt digits
+mp_safeprime            Compute the next safe prime >= n: new n and (n-1)/2 are prime, 5 if n<=5
+mp_safeprime_ex         Compute the next safe prime >= p and a generator g of Z_p^*, smallest g or random
 mp_set                  Set a to digit b
 mp_set1                 Set a=1
 mp_setbit               Set bit n of a, error if n<0 or n>MP_MAXBIT (1 = bit 0)
@@ -763,7 +789,7 @@ s_mp_borsch_fact        Calculate a = factorial(n) with Borwein/Schoenhage prime
 s_mp_cbrtmodpk          Compute a cube root b of a with b^3 = a mod p^k, p prime <> 3
 s_mp_checksum           Update Adler32 checksum with Msg data; init with adler=1
 s_mp_chs                Change sign, assumes that a is initialized
-s_mp_cornacchia_ex      Solve a*x^2 + b*y^2 = m, m=p^k if k>0 otherise m=p*q, a,b > 0, a+b < m, (a,m)=1 with Cornacchia's algorithm. Check @x<>@y, but not p,q prime.  }
+s_mp_cornacchia_ex      Solve a*x^2 + b*y^2 = m, m=p^k if k>0 otherwise m=p*q, a,b > 0, a+b < m, (a,m)=1 with Cornacchia's algorithm. Check @x<>@y, but not p,q prime.
 s_mp_divrem             Integer signed division, pc^ = a div b, pd^ = a rem b; sign(pd^)=sign(a), no init check
 s_mp_divrem_basecase    Integer signed division using Knuth's basecase algorithm D
 s_mp_div_d              Single digit division, pc^=sign(a)(|a| div b), r = |a| mod b, no init check
@@ -773,6 +799,8 @@ s_mp_fakeinit           Make a positive fake mp_int b = a[i0..i1], b=0 if i0>=a.
 s_mp_gbinom             Calculate the generalized binomial coefficient a = n!/m!/k!, using prime power decomposition.
 s_mp_is_cubres          Simple test if a is a cubic residue mod p, p prime (not checked)
 s_mp_is_le0             Return true if a<=0, no init check
+s_mp_is_pprime_ex       Test if a is prime (BPSW probable prime if a>2^32); trial division from smin to smax; no init check, no check if a is less than 2<31
+s_mp_is_psp2            Test if n>2 is a base-2 (Fermat) probable prime, no init check
 s_mp_is_pth_power       Return true if a is pth power, then a=r^p. a>0, p>2 prime, no checks
 s_mp_karatsuba_mul      Calculate c = |a| * |b| using Karatsuba Multiplication
 s_mp_karatsuba_sqr      Karatsuba squaring, compute b = a*a using three half size squarings
@@ -785,9 +813,12 @@ s_mp_mod_is0            Test if a mod b = 0, ie if a is a multiple of b
 s_mp_mul_digs           Multiply |a| * |b| and only compute up to digs digits of result
 s_mp_mul_high_digs      Multiply |a| * |b| and does not compute the lower digs digits
 s_mp_mul_int            Multiply by a 32 bit integer, c=a*b, tmp is an initialized temporary
-s_mp_nextprime_sieve    Next prime >= n using a segmented sieve, 2 if n <= 2
+s_mp_nextprime_sieve    Compute the next prime >= n using a segmented sieve, safe prime if safe=true
 s_mp_npfirst            Setup idx and increment a to first prime candidate, no init check, a > 7
 s_mp_npnext             Update idx and increment a to next prime candidate, no init check, a > 7
+s_mp_nroot_modp         Solve x^n = a mod p; p prime (not checked), gcd(n, p-1)=1 or gcd(n, (p-1)/n)=1
+s_mp_nroot_modpk        Solve x^n = a mod p^k; p prime (not checked), k>0, gcd(a,p)=1 and 1/n mod p^k exists
+s_mp_nroot_modpq        Solve x^n = a mod pq; p,q primes (not checked), gcd(n, phi(pq))=1; gcd(a,p)=1 if p=q
 s_mp_n_root2            Calculate the n'th root of a, n>=2, pr^ = a-b^n; return true, if b is an exact root; no init check
 s_mp_ppexpo             Product of primes B0 < p <= B1 and integers B0 < n*n <= B1
 s_mp_read_radix         Read an ASCII pchar in a given radix into a, breaks on sep and #0, no init check
@@ -908,6 +939,7 @@ mp_read_radix_arr       Read an mp_int from concatenated pchar array in given ra
 mp_realloc              Reallocate heap to new size, if newsize>oldsize the new allocated space is zerofilled
 mp_reset_diagctr        Reset diagnostic counters to 0
 mp_result               Return and reset mp_error
+mp_reverse              Reverse an array of char, used for radix code
 mp_set_allocprec        Set new alloc prec 8..64, will be rounded up to power of 2
 mp_set_progress         Make PP the new progress proc
 mp_set_short            Set a to a shortint
@@ -935,6 +967,8 @@ core32                  Return the squarefree part of n, n<>0, i.e. the unique s
 DblNaN                  Return double NaN (Not a Number)
 DblNegInf               Return negative double infinity
 DblPosInf               Return positive double infinity
+dlog32                  Compute the discrete log_a(b) mod p using Pollard's rho algorithm: i.e. solve a^x = b mod p, with p prime, a > 1, b > 0; return -1 for failure.
+dlog32_ex               Compute the discrete log_a(b) mod p using Pollard's rho (expanded version with variable trial parameter)
 EulerPhi32              Return Euler's totient function phi(|n|), phi(0)=0
 exptmod32               Calculate a^b mod c if a>=0, b>=0, c>0; result=0 otherwise
 FindFirstPrime32        Find first prime >= n and initialize ctx for FindNextPrime32
@@ -949,9 +983,12 @@ IsPow2_w                Check if w is power of 2, if true, return n with w=2^n
 IsPrime16               Test if N is prime
 IsPrime32               Test if longint N is prim
 isqrt32                 Return floor(sqrt(abs(a))
+is_Carmichael32         Test if |n| is a Carmichael number
 is_fundamental32        Return true if d is a fundamental discriminant, false if not.
-is_spsp32               Strong pseudo prime test for N with base A
-is_spsp32A              Strong pseudo prime test for N with a number of bases
+is_primepower32         Test if n is a prime power: return 0 if not, n = p^result otherwise.
+is_primroot32           Test if g is primitive root mod n
+is_spsp32               Strong probable prime test for N with base A
+is_spsp32A              Strong probable prime test for N with a number of bases
 is_square32             Test if a is square, i.e. test if a=sqr(isqrt32(a)), false if a < 0
 is_square32ex           Test if a is square, false if a<0. If yes, b = sqrt(a) else b is undefined
 is_squarefree32         Return true if n is squarefree, i.e. not divisible by a square > 1.
@@ -960,7 +997,9 @@ kronecker32             Compute the Kronecker symbol (a|b)
 ldexpd                  Return d*2^e (double)
 ldexpx                  Return d*2^e (extended)
 lsumphi32               Return the partial sieve function Phi(x,a), aka "Legendre's sum"
+mlinsolve32             Solve ax=b mod m; m>1. If result=true then x0 >= 0, d=gcd(a,m) > 0 and there are d solutions: x_k = x0 + k*(m/d) mod m, for k=0..d-1.
 Moebius32               Return the Moebius function mu(abs(n)), mu(0)=0, mu(1)=1
+mulmod32                Return a*b mod n, assumes n > 0, a,b >= 0
 nextprime32             Next 32 bit prime >= n (DWORD interpretation, see note)
 nextprime32_array       Fill an array with the next 32 bit primes >= n (DWORD interpretation)
 order32                 Return the order of n mod m, m > 1, i.e. the smallest integer e with n^e = 1 mod m
@@ -978,6 +1017,8 @@ prime_sieve_reset       Initialize already allocated sieve to return primes >= f
 primroot32              Compute the smallest primitive root mod n, 0 if n does not have a primimtive root
 quaddisc32              Return the discriminant of the quadratic field Q(sqrt(n))
 rad32                   Return the radical rad(n) of n = product of the distinct prime factors of n.
+safeprime32             Return the next safe prime p >= n, i.e. p and (p-1)/2 prime; 0 if n > 2147483579
+tau32                   Return the number of positive divisors of n (including 1 and n)
 xgcd32                  Extended gcd algorithm, calculate a*u1 + b*u2 = u3 = gcd(a,b); a,b <> -2^31
 
 
@@ -986,7 +1027,7 @@ Rational arithmetic functions
 mpr_abs                 Absolute value, b = |a|
 mpr_add                 Add two mp_rats: c = a+b
 mpr_add_mpi             Add mp_int to mp_rat: c = a+b
-mpr_adecimal            Convert to radix representation ansistring
+mpr_adecimal            Convert to decimal ansistring
 mpr_ceil                Return b := ceil(a)
 mpr_checksum            Return a checksum for a, -1 if mp_error<>MP_OKAY, -2 if not initialized
 mpr_chs                 Change sign, b = -a
@@ -1062,15 +1103,15 @@ s_mpr_qr                Calculate q := abs(num) div abs(den); r := abs(num) mod 
 s_mpr_tofloat_n         Convert to float format for a given radix, prec digits after '.', assumes a is initialized
 
 
-Floating point functions
+Real floating point functions
 
 mpf_abs                 Absolute value, b = |a|
 mpf_add                 Calculate c = a+b
 mpf_add_ext             Calculate c = a+b
 mpf_add_int             Calculate c = a+b
 mpf_add_mpi             Calculate c = a+b
-mpf_adecimal            Convert to decimal scientific  representation with ndd digits, max 65000 digits
-mpf_adecimal_alt        Convert to decimal alternative representation with ndd digits, max 65000 digits
+mpf_adecimal            Convert to decimal scientific  representation with ndd digits, max 65000 digits for 32+ bit
+mpf_adecimal_alt        Convert to decimal alternative representation with ndd digits, max 65000 digits for 32+ bit
 mpf_agm                 Calculate c = AGM(|a|,|b|)
 mpf_arccos              Calculate b = arccos(a), |a| <= 1
 mpf_arccosh             Calculate b = arccosh(a), a >= 1. Note: for a near 1 the function arccosh1p(a-1) should be used.
@@ -1116,10 +1157,14 @@ mpf_div_d               Calculate c = a/b
 mpf_div_ext             Calculate c = a/b
 mpf_div_int             Calculate c = a/b
 mpf_div_mpi             Calculate c = a/b
-mpf_exch                Exchange two mp_floats (including bitprec!!)
+mpf_divr_ext            Calculate c = a/b
+mpf_exch                Exchange two mp_floats (including bitprec)
 mpf_exp                 Calculate b = exp(a)
 mpf_exp10               Calculate b = 10^a
+mpf_exp10i              Calculate a = 10^n
+mpf_exp10m1             Calculate b = 10^a-1
 mpf_exp2                Calculate b = 2^a
+mpf_exp2m1              Calculate b = 2^a-1
 mpf_expm1               Calculate b = exp(a)-1, a < 2^31 * ln(2); special version for small a
 mpf_expt                Calculate c = a^b, a>0
 mpf_expt1pm1            Calculate c = (1+a)^b-1, a>-1
@@ -1129,6 +1174,7 @@ mpf_frac                Set b to the fractional part of a; frac(x)=x-int(x)
 mpf_gd                  Calculate the Gudermannian function b = gd(a) = arctan(sinh(a))
 mpf_get_default_prec    Return current default (bit) precision, initial=240
 mpf_hav                 Calculate the haversine b = hav(a) = 0.5*(1 - cos(a))
+mpf_hypot               Calculate c = sqrt(a^2 + b^2)
 mpf_iexpt               Calculate c = a^b, a>0
 mpf_init                Initialize an mp_float with default precision
 mpf_initp               Initialize an mp_float with bit precision prec
@@ -1151,7 +1197,9 @@ mpf_lambertw            Calculate b = LambertW(a); principal branch, a >= -1/e
 mpf_ln                  Calculate b = ln(a), a>0
 mpf_ln1p                Calculate b = ln(1+a), a>-1; special version for small a
 mpf_log10               Calculate b = log10(a), a>0
+mpf_log10p1             Calculate b = log10(1+a),  a > -1
 mpf_log2                Calculate b = log2(a), a>0
+mpf_log2p1              Calculate b = log2(1+a),  a > -1
 mpf_logbase             Calculate y = base b logarithm of x
 mpf_mul                 Calculate c = a*b
 mpf_mul_2k              Calculate b = a*2^k
@@ -1160,7 +1208,8 @@ mpf_mul_ext             Calculate c = a*b
 mpf_mul_int             Multiply by a 32 bit integer
 mpf_mul_mpi             Calculate c = a*b
 mpf_not_init            Sanity check if a is initialized, does not catch all cases!
-mpf_numbpart            Compute number of partitions of n with Hardy-Ramanujan-Rademacher formula
+mpf_numbpart            Calculate the number of partitions of n with Hardy-Ramanujan-Rademacher formula
+mpf_nroot               Calculate the nth root of a: b = a^(1/n); n<>0, a >= 0 if n is even
 mpf_output_decimal      Write an mp_float to output using decimal scientific  representation
 mpf_output_decimal_alt  Write an mp_float to output using decimal alternative representation
 mpf_output_radix        Write an mp_float to output using radix scientific  representation
@@ -1196,6 +1245,7 @@ mpf_set_pip             Set a to pi with bit precision prec
 mpf_set_pip2k           Set a to pi*2^k with bit precision prec
 mpf_sin                 Calculate b = sin(a)
 mpf_sinc                Calculate b = sin(a)/a
+mpf_sincos              Calculate b = sin(a), c = cos(a);  @b<>@c
 mpf_sinh                Calculate b = sinh(a), |a| < 2^31 * ln(2)
 mpf_sinhcosh            Calculate b = sinh(a), c = cosh(a);  @b<>@c,  |a| < 2^31 * ln(2)
 mpf_sqr                 Calculate b = a*a
@@ -1241,6 +1291,7 @@ s_mpf_incexp            Increment a.exponent by x, do nothing if a.mantissa=0
 s_mpf_incf              Calculate x = x+y; return true if x is changed
 s_mpf_is0               Return true if a=0, no init checks
 s_mpf_is_ge0            Return true if a>=0, no init checks
+s_mpf_is_gt0            Return true if a>0, no init checks
 s_mpf_is_le0            Return true if a<=0, no init checks
 s_mpf_is_neg            Return true if a<0, no init checks
 s_mpf_ldx               Calculate ldx(a) = a.exponent + mp_bitsize(a.mantissa) = floor(log2(|a|))+1 for a<>0
@@ -1248,8 +1299,95 @@ s_mpf_lnagm             Calculate b = ln(a) with AGM algorithm, a>0; no init che
 s_mpf_mod_pi2k          Calculate b = a mod pi*2^k, c in [0,pi*2^k)
 s_mpf_normalize         Normalize an mp_float
 s_mpf_normalizep        Normalize an mp_float to bit precision prec
-s_mpf_numbpart          Compute number of partitions of n with Hardy-Ramanujan-Rademacher formula
+s_mpf_numbpart          Calculate the number of partitions of n with Hardy-Ramanujan-Rademacher formula
 s_mpf_rint              Set a = round(a)
 s_mpf_toradix_alt       Convert an mp_float to radix alternative representation
 s_mpf_toradix_n         Convert an mp_float to radix scientific  representation
+
+
+Complex floating point functions
+
+mpc_abs                 Calculate the absolute value, b = |a|
+mpc_abs2                Calculate the squared absolute value, b = |a|^2
+mpc_add                 Calculate c = a+b
+mpc_add_ext             Calculate c = a+b
+mpc_add_mpf             Calculate c = a+b
+mpc_agm                 Calculate the 'optimal' arithmetic-geometric mean w = AGM(x,y)
+mpc_agm1                Calculate the 'optimal' arithmetic-geometric mean w = AGM(1,z)
+mpc_arccos              Calculate the principal value of the complex inverse circular cosine b = arccos(a)
+mpc_arccosh             Calculate the principal value of the complex inverse hyperbolic cosine b = arccosh(a)
+mpc_arccot              Calculate the principal value of the complex inverse circular cotangent b = arccot(a) = arctan(1/a)
+mpc_arccotc             Calculate the principal value of the complex inverse circular cotangent b = arccotc(a) = Pi/2 - arctan(a)
+mpc_arccoth             Calculate the principal value of the complex inverse hyperbolic cotangent b = arccoth(a) = arctanh(1/a)
+mpc_arccothc            Calculate the principal value of the complex inverse hyperbolic cotangent b = arccothc(a) = arctanh(a) + i*Pi/2
+mpc_arccsc              Calculate the principal value of the complex inverse circular cosecant b = arccsc(a) = arcsin(1/a)
+mpc_arccsch             Calculate the principal value of the complex inverse hyperbolic cosecant b = arccsch(a) = arcsinh(1/a)
+mpc_arcsec              Calculate the principal value of the complex inverse circular secant b = arcssec(a) = arccos(1/a)
+mpc_arcsech             Calculate the principal value of the complex inverse hyperbolic secant b = arcssech(a) = arccosh(1/a)
+mpc_arcsin              Calculate the principal value of the complex inverse circular sine b = arcsin(a)
+mpc_arcsinh             Calculate the principal value of the complex inverse hyperbolic sine b = arcsinh(a)
+mpc_arctan              Calculate the principal value of the complex inverse circular tangent w = arctan(z)
+mpc_arctanh             Calculate the principal value of the complex inverse hyperbolic tangent b = arctanh(a)
+mpc_arg                 Calculate the principle value of the argument: b = arg(a) = arctan2(a.im, a.re)
+mpc_checksum            Return a checksum for a, -1 if mp_error<>MP_OKAY, -2 if not initialized
+mpc_chs                 Change sign, b = -a
+mpc_cis                 Calculate a = exp(i*x) = cos(x) + i*sin(x)
+mpc_clear[x]            Clear [x] mp_complex variables
+mpc_conj                Return the complex conjugate b = a.re - i*a.im
+mpc_copy                Copy a to b including bitprecs
+mpc_copyp               Copy a to b, preserve b's bitprecs
+mpc_cos                 Calculate b = cos(a)
+mpc_cosh                Calculate b = cosh(a)
+mpc_cot                 Calculate b = cot(a)
+mpc_coth                Calculate b = coth(a)
+mpc_csc                 Calculate the complex circular cosecant b = csc(a) = 1/sin(a)
+mpc_csch                Calculate the complex hyperbolic cosecant b = csch(a) = 1/sinh(a)
+mpc_div                 Calculate c = a/b
+mpc_div_ext             Calculate c = a/b
+mpc_div_mpf             Calculate c = a/b
+mpc_exch                Exchange two mp_complexes (including bitprec)
+mpc_exp                 Calculate b = exp(a)
+mpc_exp2                Calculate b = 2^a = exp(a*ln(2))
+mpc_exp10               Calculate b = 10^a = exp(a*ln(10))
+mpc_expm1               Calculate b = exp(a)-1
+mpc_initp[x]            Initialize [x] mp_complexes with bit precision prec
+mpc_initp_multi_p       Initialize with bit precision prec a list of mp_complexes given as a pointer vector; on error the already initialized mp_complexes will be cleared
+mpc_init[x]             Initialize [x] mp_complexes with default precision
+mpc_inv                 Calculate b = 1/a
+mpc_is0                 Return true if a=0
+mpc_is1                 Return true if a=1
+mpc_is1a                Return true if |a|=1
+mpc_is_i                Return true if a=I
+mpc_ln                  Calculate the natural logarithm b = ln(a); principal branch ln(|a|) + i*arg(a), accurate near |a|=1
+mpc_ln1p                Calculate the natural logarithm b = ln(1+a)
+mpc_mul                 Calculate c = a*b
+mpc_mul_2k              Calculate b = a*2^k
+mpc_mul_ext             Calculate c = a*b
+mpc_mul_mpf             Calculate c = a*b
+mpc_not_init            Sanity check if a is initialized, does not catch all cases!
+mpc_nroot               Calculate the nth principal root b = a^(1/n) = exp(ln(a)/n)
+mpc_nroot1              Calculate the principal nth root of unity a = exp(2*Pi*i/n)
+mpc_pow                 Calculate the principal value of the complex power c = a^b = exp(b*ln(a))
+mpc_sec                 Calculate the complex circular secant b = sec(a) = 1/cos(a)
+mpc_sech                Calculate the complex hyperbolic secant b = sech(a) = 1/cosh(a)
+mpc_set0                Set a = 0
+mpc_set1                Set a = 1
+mpc_seti                Set a = i
+mpc_setp_mpf            Set a = x + iy, bitprecs of a are preserved
+mpc_set_dbl             Set a = x + iy with x,y double, error if x,y are NAN or INF
+mpc_set_ext             Set a = x + iy with x,y extended, error if x,y are NAN or INF
+mpc_set_mpf             Set a = x + iy
+mpc_sin                 Calculate b = sin(a)
+mpc_sincos              Calculate s = sin(a),  c = cos(a)
+mpc_sinh                Calculate b = sinh(a)
+mpc_sinhcosh            Calculate s = sinh(a), c = cosh(a)
+mpc_sqr                 Calculate b = a*a
+mpc_sqrt                Calculate the principal square root b = sqrt(a)
+mpc_sub                 Calculate c = a-b
+mpc_sub_ext             Calculate c = a-b
+mpc_sub_mpf             Calculate c = a-b
+mpc_tan                 Calculate b = tan(a)
+mpc_tanh                Calculate b = tanh(a)
+mpc_xdivc               Calculate c = a/b
+s_mpc_mul               Calculate c = a*b or c=a*conj(b) if bc
 

@@ -1,8 +1,4 @@
-Unit mp_base;
-
-{$IFDEF FPC}
-  {$MODE Delphi}
-{$ENDIF}
+unit mp_base;
 
 {Multi precision integer arithmetic basic routines}
 
@@ -12,7 +8,7 @@ interface
   {$X+} {needed for pchars/RESULT}
 {$endif}
 
-{$i std.inc}
+{$i STD.INC}
 
 {$ifdef BIT16}
   {$N+}
@@ -29,7 +25,7 @@ uses
 
  DESCRIPTION   :  Multi precision integer arithmetic basic routines
 
- REQUIREMENTS  :  BP7, D1-D7/D9-D10/D12/D17, FPC, VP
+ REQUIREMENTS  :  BP7, D1-D7/D9-D10/D12/D17-D18, FPC, VP
 
  EXTERNAL DATA :  (mp_types)
 
@@ -58,7 +54,7 @@ uses
                       Algebra, Version 2, 2008, from http://shoup.net/ntb/
                  [30] J. v. zur Gathen, J. Gerhard, Modern computer algebra, 2nd ed., 2003
                       http://math-www.uni-paderborn.de/mca/
-                 [33] C. Burnikel, J. Ziegler: Fast Recursive Division. MPI fÂr Informatik,
+                 [33] C. Burnikel, J. Ziegler: Fast Recursive Division. MPI fr Informatik,
                       Forschungsbericht MPI-I-98-1-022 (1998); available via
                       http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.47.565
                  [34] P. Zimmermann, Karatsuba Square Root, INRIA Research Report RR-3805;
@@ -446,7 +442,10 @@ uses
  1.24.05  05.01.13  we          Fix debug mode icbrt32 for VPC, D2/D3
  1.24.06  05.01.13  we          Fix FPC242/244 bug in debug mode s_mp_div_d
 
- *************************************************************************)
+ 1.30.00  27.09.14  we          mp_random
+ 1.30.01  30.09.14  we          Reintroduced mulmod32 function
+ 1.30.02  03.10.14  we          mlinsolve32
+*************************************************************************)
 
 
 (*-------------------------------------------------------------------------
@@ -458,7 +457,7 @@ uses
 
 
 (*-------------------------------------------------------------------------
- (C) Copyright 2004-2013 Wolfgang Ehrhardt
+ (C) Copyright 2004-2014 Wolfgang Ehrhardt
 
  This software is provided 'as-is', without any express or implied warranty.
  In no event will the authors be held liable for any damages arising from
@@ -521,6 +520,13 @@ function  jacobi32(a,b: longint): integer;
 
 function  kronecker32(a,b: longint): integer;
   {-Compute the Kronecker symbol (a|b)}
+
+function  mlinsolve32(a,b,m: longint; var x0,d: longint): boolean;
+  {-Solve ax=b mod m; m>1. If result=true then x0 >= 0, d=gcd(a,m) > 0}
+  { and there are d solutions: x_k = x0 + k*(m/d) mod m, for k=0..d-1.}
+
+function  mulmod32(a,b,n: longint): longint;
+  {-Return a*b mod n, assumes n>0, a,b>=0}
 
 function  popcount16(w: word): integer;
   {-Get population count = number of 1-bits in a word}
@@ -916,6 +922,9 @@ function  mp_radix_str(const a: mp_int; radix: word): mp_string;
 
 procedure mp_rand(var a: mp_int; digits: longint);
   {-Make a pseudo-random mp_int of a given digit size}
+
+procedure mp_random(const a: mp_int; var b: mp_int);
+  {-Make a pseudo-random mp_int b with  0 <= b < |a|}
 
 procedure mp_rand_ex(var a: mp_int; digits: longint; sethi: boolean);
   {-Make a pseudo-random mp_int of a given digit size, if not sethi}
@@ -1721,7 +1730,7 @@ end;
     s: integer;
     x,y,y2,b: cardinal; {must be declared unsigned for test x >= b}
   begin
-    {Ref: http://www.hackersdelight.org/HDcode/icbrt.c.txt}
+    {Ref: http://www.hackersdelight.org/hdcodetxt/icbrt.c.txt}
     x  := abs(a);
     y  := 0;
     s  := 30;
@@ -1749,7 +1758,7 @@ end;
   var
     x: longint;
   begin
-    {Ref: http://www.hackersdelight.org/HDcode/icbrt.c.txt}
+    {Ref: http://www.hackersdelight.org/hdcodetxt/icbrt.c.txt}
 
     {Note: There will be RTEs for large a if Range!? checking (not obverflow)}
     {is done, e.g. in debug mode. Here a 32-bit BASM port of the Pascal code:}
@@ -1805,7 +1814,7 @@ function icbrt32(a: longint): longint;
 var
   x: longint;
 begin
-  {Ref: http://www.hackersdelight.org/HDcode/icbrt.c.txt}
+  {Ref: http://www.hackersdelight.org/hdcodetxt/icbrt.c.txt}
 
   {Note: Floating point implementation icbrt = trunc(exp(ln(abs(a)/3)) }
   {does not work without various small corrections for different ranges}
@@ -2026,6 +2035,34 @@ end;
 
 
 {---------------------------------------------------------------------------}
+function mlinsolve32(a,b,m: longint; var x0,d: longint): boolean;
+  {-Solve ax=b mod m; m>1. If result=true then x0 >= 0, d=gcd(a,m) > 0}
+  { and there are d solutions: x_k = x0 + k*(m/d) mod m, for k=0..d-1.}
+var
+  y: longint;
+begin
+  mlinsolve32 := false;
+  if m>0 then begin
+    {normalize a,b because mod may return negative results}
+    if (a<0) or (a >= m) then begin
+      a := a mod m;
+      if a<0 then a := a + m;
+    end;
+    if (b<0) or (b >= m) then begin
+      b := b mod m;
+      if b<0 then b := b + m;
+    end;
+    xgcd32(a,m,x0,y,d);
+    if b mod d = 0 then begin
+      mlinsolve32 := true;
+      while x0<0 do x0 := x0+m;
+      x0 := mulmod32(x0,b div d,m);
+    end;
+  end;
+end;
+
+
+{---------------------------------------------------------------------------}
 procedure mp_set_allocprec(prec: integer);
   {-Set new alloc prec 8..64, will be rounded up to power of 2}
 begin
@@ -2157,7 +2194,6 @@ begin
     if used=0 then sign := MP_ZPOS;
   end;
 end;
-
 
 
 {---------------------------------------------------------------------------}
@@ -6552,6 +6588,9 @@ begin
   {FastIntegerOutput in Brent/Zimmermann [35], Ch. 1.7 Base conversion; and the}
   {GMP [15] documentation, Ch. Algorithms/Radix Conversion/Binary to Radix.}
   s_mp_radix_astr := '';
+  {$ifndef RESULT}
+    Result := '';  {Some FPC versions give warnings}
+  {$endif}
 
   {Arg checks are done by mp_radix_size}
   ls := mp_radix_size(a, radix)+16;
@@ -6751,6 +6790,25 @@ procedure mp_rand(var a: mp_int; digits: longint);
   {-Make a pseudo-random mp_int of a given digit size}
 begin
   mp_rand_ex(a, digits, true);
+end;
+
+
+{---------------------------------------------------------------------------}
+procedure mp_random(const a: mp_int; var b: mp_int);
+  {-Make a pseudo-random mp_int b with  0 <= b < |a|}
+var
+  bs: longint;
+begin
+  bs := mp_bitsize(a);
+  if mp_error<>MP_OKAY then exit;
+  if bs<2 then mp_zero(b)
+  else begin
+    mp_rand_bits_ex(b, bs, false);
+    while (mp_error=MP_OKAY) and not (mp_cmp_mag(b,a)=MP_LT) do begin
+      if a.sign=MP_ZPOS then mp_sub(b,a,b)
+      else mp_add(b,a,b);
+    end;
+  end;
 end;
 
 
@@ -8846,7 +8904,7 @@ begin
     if a.sign=MP_NEG then mp_todouble_ex := DblNegInf
     else mp_todouble_ex := DblPosInf;
   end
-  else if bs > -1024 then begin
+  else if bs >= -1074 then begin
     {loop through significant digits of a}
     d := 0.0;
     {get index of lowest digit to accumulate}
@@ -8877,20 +8935,22 @@ var
 const
   umin = (64 div DIGIT_BIT) + 2; {minimum a.used for skipping low digits}
   {$ifdef EXT64}
-    MAXBS=1024;
+    MAXPOS=1024;
+    MAXNEG=-1074;
   {$else}
-    MAXBS=16384;
+    MAXPOS=16384;
+    MAXNEG=-16445;
   {$endif}
 begin
   mp_toextended_ex := 0.0;
   if (mp_error<>MP_OKAY) or mp_is0(a) then exit;
   {if bitsize too large return +-inf}
   bs := mp_bitsize(a)+x;
-  if bs>MAXBS then begin
+  if bs>MAXPOS then begin
     if a.sign=MP_NEG then mp_toextended_ex := DblNegInf
     else mp_toextended_ex := DblPosInf;
   end
-  else if bs > -MAXBS then begin
+  else if bs >= MAXNEG then begin
     {loop through significant digits of a}
     d := 0.0;
     {get index of lowest digit to accumulate}
@@ -10979,11 +11039,11 @@ begin
 
   {now solve the linear system
 
-   | 0  0  0  0  1 |   |x0|    |w0|
-   | 1 -1  1 -1  1 |   |x1|    |w1|
-   | 1  1  1  1  1 | * |x2|  = |w2|
-   | 16 8  4  2  1 |   |x3|    |w3|
    | 1  0  0  0  0 |   |x4|    |w4|
+   | 16 8  4  2  1 |   |x3|    |w3|
+   | 1  1  1  1  1 | * |x2|  = |w2|
+   | 1 -1  1 -1  1 |   |x1|    |w1|
+   | 0  0  0  0  1 |   |x0|    |w0|
 
    for x[i] using 9 subs, 2 shifts, 1 small div.
    x[i] will overlay w[i], obviously x0=w0, x4=w4.
@@ -11087,11 +11147,11 @@ begin
 
   {As for multiplication solve the linear system
 
-   | 0  0  0  0  1 |   |x0|    |w0|
-   | 1 -1  1 -1  1 |   |x1|    |w1|
-   | 1  1  1  1  1 | * |x2|  = |w2|
-   | 16 8  4  2  1 |   |x3|    |w3|
    | 1  0  0  0  0 |   |x4|    |w4|
+   | 16 8  4  2  1 |   |x3|    |w3|
+   | 1  1  1  1  1 | * |x2|  = |w2|
+   | 1 -1  1 -1  1 |   |x1|    |w1|
+   | 0  0  0  0  1 |   |x0|    |w0|
 
    for x[i] using 9 subs, 2 shifts, 1 small div.
    x[i] will overlay w[i], obviously x0=w0, x4=w4.

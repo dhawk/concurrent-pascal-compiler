@@ -1,14 +1,10 @@
 unit mp_types;
 
-{$IFDEF FPC}
-  {$MODE Delphi}
-{$ENDIF}
-
 {MPArith type definitions and constants}
 
 interface
 
-{$i std.inc}
+{$i STD.INC}
 
 {$ifdef HAS_ASSERT}
   {$C+}   {Turn assertions on for critical conditions in initialization}
@@ -18,7 +14,7 @@ interface
 
  DESCRIPTION     :  MPArith type definitions and constants
 
- REQUIREMENTS    :  TP 7, D1-D7/D9-D10/D12/D17, FPC, VP
+ REQUIREMENTS    :  BP7, D1-D7/D9-D10/D12/D17-D18, FPC, VP
 
  EXTERNAL DATA   :  ----
 
@@ -137,6 +133,13 @@ interface
  1.24.02  17.12.12  we          system.sysutils for D16+
  1.24.03  03.01.13  we          $ifdef MPC_TRACE: winapi.windows for D16+
 
+ 1.27.00  10.09.13  we          Turn off unreachable code warnings for FPC 2.7.1+
+ 1.27.01  19.02.14  we          mp_complex types
+
+ 1.29.00  28.04.14  we          Test8086 only for BIT16
+
+ 1.32.00  13.01.15  we          Turn off unreachable code warnings for FPC 2.7.1 only
+
 **************************************************************************)
 
 (*-------------------------------------------------------------------------
@@ -147,7 +150,7 @@ interface
 ----------------------------------------------------------------------------*)
 
 (*-------------------------------------------------------------------------
- (C) Copyright 2004-2013 Wolfgang Ehrhardt
+ (C) Copyright 2004-2016 Wolfgang Ehrhardt
 
  This software is provided 'as-is', without any express or implied warranty.
  In no event will the authors be held liable for any damages arising from
@@ -216,7 +219,7 @@ const
 {$endif}
 
 const
-  MP_ShortVERS  = '1.25.03';      {Short version number string   }
+  MP_ShortVERS  = '1.33.10';      {Short version number string   }
 
 const
   MP_VERSION    = MP_ShortVERS + ' ' + DIGBITSTR;  {external MP version string}
@@ -334,10 +337,15 @@ type
               end;
   pmp_float = ^mp_float;               {pointer to an MP float      }
 
+type
+  mp_complex  = record                 {MP complex number}
+                  re: mp_float;        {real part        }
+                  im: mp_float;        {imaginary part   }
+                end;
+  pmp_complex = ^mp_complex;           {pointer to an MP complex}
 
 const
   MPF_MIN_PREC  = 8;                   {minimum floating point bit precision}
-
 
 type
   TMPHexExtW = packed array[0..4] of word;  {Extended as array of word}
@@ -693,6 +701,11 @@ begin
     mp_ods_strip_cr := true;  {Strip leading/trailing CR+LF for OutputDebugString}
   {$endif}
 
+  {$ifdef VER2_7_1}
+    {Turn off unreachable code warnings for FPC 2.7.1, corrected for 3.0.1, 3.1.1}
+    {$WARN 6018 OFF}
+  {$endif}
+
   {$ifdef MP_32BIT}
     {make sure DIGIT_BIT >= 16 }
     assert(DIGIT_BIT >= 16, MPAF+'DIGIT_BIT >= 16');
@@ -706,13 +719,10 @@ begin
 
   {$ifdef BIT16}
     assert(MAXDigits <= 32640, MPAF+'MAXDigits <= 32640)');
-  {$endif}
-
-  {$ifndef BIT64}
     assert(Test8086>1,MPAF+'CPU386 or better');
   {$endif}
 
-  {make sure precompiled floats const are valid for all precisions}
+  {make sure precompiled float constants are valid for all precisions}
   assert(MPF_MAX_PREC <= MAX_TCBITS, MPAF+'MPF_MAX_PREC <= MAX_TCBITS');
 
   assert(MP_LT < 0, MPAF+'MP_LT < 0');

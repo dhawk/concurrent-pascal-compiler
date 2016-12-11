@@ -63,6 +63,7 @@ asm
      db $66;  shr   dx,16
 end;
 
+
 {---------------------------------------------------------------------------}
 function gcd32u(A, B: longint): longint; assembler;
   {-Calculate GCD of two longints (DWORD interpretation)}
@@ -71,6 +72,7 @@ asm
      db $66;  mov   dx,word ptr [B]
               call  __gcd32
 end;
+
 
 {---------------------------------------------------------------------------}
 function gcd32(A, B: longint): longint; assembler;
@@ -85,6 +87,20 @@ asm
               jns   @@2
      db $66;  neg   dx
 @@2:          call  __gcd32
+end;
+
+
+{---------------------------------------------------------------------------}
+function mulmod32(a,b,n: longint): longint; assembler;
+  {-Return a*b mod n, assumes n>0, a,b>=0}
+asm
+  db $66; mov   ax,word ptr [a]
+  db $66; mov   dx,word ptr [b]
+  db $66; mov   cx,word ptr [n]
+  db $66; mul   dx
+  db $66; div   cx
+  db $66; mov   ax,dx   {return result in (dx:ax)}
+  db $66; shr   dx,16
 end;
 
 
@@ -169,6 +185,7 @@ inline(
   $66/$03/$C2/             {add    eax,edx      }
   $66/$8B/$D0/             {mov    edx,eax      }
   $66/$C1/$EA/$10);        {shr    edx,16       }
+
 
 {---------------------------------------------------------------------------}
 procedure LeftShiftAdd(var w: longint; d: word);

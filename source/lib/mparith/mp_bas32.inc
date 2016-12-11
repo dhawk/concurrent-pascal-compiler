@@ -68,6 +68,7 @@ asm
 
 end;
 
+
 {---------------------------------------------------------------------------}
 function  gcd32u(A, B: longint): longint; assembler;
   {-Calculate GCD of two longints (DWORD interpretation)}
@@ -98,6 +99,26 @@ asm
 end;
 
 
+{---------------------------------------------------------------------------}
+function mulmod32(a,b,n: longint): longint;
+  {-Return a*b mod n, assumes n>0, a,b>=0}
+begin
+  asm
+    mov   eax,[a]
+    mov   edx,[b]
+    mov   ecx,[n]
+    mul   edx
+    div   ecx
+  {$ifdef FPC}
+    mov   [a],edx
+  {$else}
+    mov   [@result],edx
+  {$endif}
+  end;
+  {$ifdef FPC}
+    mulmod32 := a;
+  {$endif}
+end;
 
 
 {---------------------------------------------------------------------------}

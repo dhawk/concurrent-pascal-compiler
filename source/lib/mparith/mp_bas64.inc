@@ -63,6 +63,14 @@ end;
 
 
 {---------------------------------------------------------------------------}
+function mulmod32(a,b,n: longint): longint;
+  {-Return a*b mod n, assumes n>0, a,b>=0}
+begin
+  mulmod32 := int64(a)*int64(b) mod n;
+end;
+
+
+{---------------------------------------------------------------------------}
 function invmod32(a,b: longint): longint;
   {-Return a^-1 mod b, b>1. Result is 0 if gcd(a,b)<>1 or b<2}
 var
@@ -95,21 +103,6 @@ begin
   end;
 end;
 
-
-(*
-{---------------------------------------------------------------------------}
-function add32_ovr(x,y: longint; var z: longint): boolean;
-  {-Add z=x+y with overflow detection}
-var
-  OK: boolean;
-  i64: int64;
-begin
-  i64 := int64(x) + y;
-  OK := (abs(i64) < MaxLongint) or (i64=$80000000);
-  add32_ovr := not OK;
-  z := longint(i64 and $FFFFFFFF);
-end;
-*)
 
 {---------------------------------------------------------------------------}
 function add32_ovr(x,y: longint; var z: longint): boolean;

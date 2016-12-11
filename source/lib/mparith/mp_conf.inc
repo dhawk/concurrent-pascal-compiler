@@ -6,7 +6,7 @@
 
  DESCRIPTION : Configuration definitions/options for MPArith library
 
- REQUIREMENTS: BP7, D1-D7/D9-D10/D12/D17, FPC, VP
+ REQUIREMENTS: BP7, D1-D7/D9-D10/D12/D17-D18, FPC, VP, WDOSX
 
  Version  Date      Author      Modification
  -------  --------  -------     ------------------------------------------
@@ -40,6 +40,10 @@
  0.36     20.09.12  we          removed forced MPC_SmallSieve for BIT16
  0.37     12.12.12  we          MPC_PurePascal (if UINT64 available)
  0.38     23.12.12  we          Removed MPC_Old_EleFun
+ 0.39     06.05.14  we          MPC_PurePascal $ifdef CPUARM
+ 0.40     16.07.14  we          MPC_SieveNextPrime: use sieve for mp_next_prime
+ 0.41     02.03.15  we          FPC3x adjustment
+ 0.42     03.03.15  we          long-used MPC_ACCEPTBIAS listed here
 **************************************************************************)
 
 {This file is normally included after STD.INC and 'uses' statements, }
@@ -49,8 +53,11 @@
 
 {.$define MPC_PurePascal}       {Do not use inline asm, assumes HAS_UINT64}
 
-{$ifdef BIT64}
   {$ifndef MPC_PurePascal}
+  {$ifdef BIT64}
+    {$define MPC_PurePascal}
+  {$endif}
+  {$ifdef CPUARM}
     {$define MPC_PurePascal}
   {$endif}
 {$endif}
@@ -92,11 +99,13 @@
 {.$define MPC_FPrec30K}         {MPF_MAX_PREC=30000, default for 16 bit  }
 {.$define MPC_FPU_ISQRT}        {isqrt32=trunc(sqrt()),default for BIT16 }
 {.$define MPC_SmallSieve}       {Max sieve prime = 1908867043            }
+{$define MPC_SieveNextPrime}    {use sieve for mp_next_prime             }
 {$define MPC_E1Ln10Tab}         {use tables for exp(1) and ln(10)        }
 {$define MPC_Reduce_2k}         {use mp_reduce_2k in mp_exptmod          }
 {$define MPC_UseKONG}           {use Kong if sqrtmethod=0 and p=9 mod 16 }
 {$define MPC_UseGCD32}          {use 32 bit GCD in MP GCD routines       }
 {$define MPC_UseISAAC}          {use ISAAC random number generator       }
+{.$define MPC_ACCEPTBIAS}       {accept small bias in mp_random_radix    }
 {.$define MPC_MAXRadix64}       {use MaxRadix=64 instead of 36           }
 {.$define MPC_TRACE}            {emit trace info if mp_verbose > 0       }
 {.$define MPC_USE_ODS}          {always use OutputDebugStr for WIN32/64  }
@@ -113,7 +122,7 @@
 {$ifdef FPC}
   {$ifdef FPC_OBJFPC}
     {$define RESULT}            {fix bug in compiler: -S2 does not work in std.inc}
-    {$ifdef VER2}
+    {$ifdef FPC2Plus}
       {Real Version 2.0 is buggy, but Version 2.0.2+ works OK}
       {$define MPC_UseExceptions} {use exception instead of RunError}
     {$endif}

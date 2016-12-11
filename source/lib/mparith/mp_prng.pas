@@ -1,14 +1,10 @@
 unit mp_prng;
 
-{$IFDEF FPC}
-  {$MODE Delphi}
-{$ENDIF}
-
 {MP interface to (C)PRNG, functions for PRNG generation}
 
 interface
 
-{$i std.inc}
+{$i STD.INC}
 
 uses mp_types;
 
@@ -19,7 +15,7 @@ uses mp_types;
  DESCRIPTION     :  MP interface to (C)PRNG, functions for PRNG generation,
                     generators are plugged in via $ifdefs/mp_conf
 
- REQUIREMENTS    :  BP7, D1-D7/D9-D10/D12, FPC, VP
+ REQUIREMENTS    :  BP7, D1-D7/D9-D10/D12/D17-D18, FPC, VP
 
  EXTERNAL DATA   :  (mp_types)
 
@@ -58,7 +54,7 @@ uses mp_types;
 
 
 (*-------------------------------------------------------------------------
- (C) Copyright 2005-2010 Wolfgang Ehrhardt
+ (C) Copyright 2005-2015 Wolfgang Ehrhardt
 
  This software is provided 'as-is', without any express or implied warranty.
  In no event will the authors be held liable for any damages arising from
@@ -78,8 +74,6 @@ uses mp_types;
 
  3. This notice may not be removed or altered from any source distribution.
 ----------------------------------------------------------------------------*)
-
-
 
 
 function  mp_random_byte: byte;
@@ -122,8 +116,7 @@ implementation
 {$endif}
 
 
-
-{$ifdef MPC_ACCEPTBIAS}
+{$ifdef MPC_ACCEPTBIAS}  {included in mp_conf.inc V0.42+}
 
 {---------------------------------------------------------------------------}
 function  mp_random_radix(radix: word): word;
@@ -189,7 +182,6 @@ procedure mp_random_seed1(seed: longint);
 begin
   mp_random_seed(seed);
 end;
-
 
 
 begin

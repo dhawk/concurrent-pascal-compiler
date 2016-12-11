@@ -1,22 +1,18 @@
 unit BTypes;
 
-{$IFDEF FPC}
-  {$MODE Delphi}
-{$ENDIF}
-
 {Common basic type definitions}
 
 
 interface
 
 
-{$i std.inc}
+{$i STD.INC}
 
 (*************************************************************************
 
  DESCRIPTION     :  Common basic type definitions
 
- REQUIREMENTS    :  TP5-7, D1-D7/D9-D12, FPC, VP, WDOSX
+ REQUIREMENTS    :  TP5-7, D1-D7/D9-D12/D17-D22, FPC, VP, WDOSX
 
  EXTERNAL DATA   :  ---
 
@@ -39,11 +35,13 @@ interface
  0.17     02.12.08  we          Use pchar and pAnsiChar for pchar8 if possible
  0.18     27.02.09  we          pBoolean
  0.19     14.02.12  we          extended = double $ifdef SIMULATE_EXT64
+ 0.20     06.05.14  we          extended = double $ifdef SIMULATE_EXT64 OR EXT64
+ 0.21     25.04.15  we          With $ifdef HAS_INTXX, HAS_PINTXX
 *************************************************************************)
 
 
 (*-------------------------------------------------------------------------
- (C) Copyright 2006-2012 Wolfgang Ehrhardt
+ (C) Copyright 2006-2015 Wolfgang Ehrhardt
 
  This software is provided 'as-is', without any express or implied warranty.
  In no event will the authors be held liable for any damages arising from
@@ -84,6 +82,8 @@ type
   pLongint    = ^Longint;
 
 {$else}
+
+  {$ifndef HAS_INTXX}
 type
   Int8   = ShortInt;                { 8 bit   signed integer}
   Int16  = SmallInt;                {16 bit   signed integer}
@@ -95,7 +95,10 @@ type
   {$else}
   UInt32 = Longint;                 {32 bit unsigned integer}
   {$endif}
+  {$endif}
+
   {$ifndef HAS_XTYPES}
+  type
   pByte     = ^Byte;
   pBoolean  = ^Boolean;
   pShortInt = ^ShortInt;
@@ -104,26 +107,28 @@ type
   pLongint  = ^Longint;
   {$endif}
   {$ifdef FPC} {$ifdef VER1_0}
+  type
   pBoolean  = ^Boolean;
   pShortInt = ^ShortInt;
   {$endif} {$endif}
 
-{$endif}
+{$endif} {BIT16}
 
 type
   Str255  = string[255];   {Handy type to avoid problems with 32 bit and/or unicode}
   Str127  = string[127];
 
 type
+{$ifndef HAS_PINTXX}
   pInt8   = ^Int8;
   pInt16  = ^Int16;
   pInt32  = ^Int32;
   pUInt8  = ^UInt8;
   pUInt16 = ^UInt16;
   pUInt32 = ^UInt32;
+{$endif}
   pStr255 = ^Str255;
   pStr127 = ^Str127;
-
 
 {$ifdef BIT16}
   {$ifdef V7Plus}
@@ -180,8 +185,12 @@ type
 {$endif}
 
 
+{$ifdef EXT64}
+  type extended = double;    {Force 64-bit 'extended'}
+{$else}
 {$ifdef SIMULATE_EXT64}
   type extended = double;  {Debug simulation EXT64}
+  {$endif}
 {$endif}
 
 
