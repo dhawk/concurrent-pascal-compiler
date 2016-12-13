@@ -1,4 +1,3 @@
-Note: The files included here with the Concurrent Pascal sources is 
-but a small subset of the original multi-precision
-library by Wolfgang Ehrhardt.  
+Note: The files included here with the Concurrent Pascal Compiler sources are 
+only a small subset of the original multi-precision library by Wolfgang Ehrhardt.  
 The full library can be downloaded from http://wolfgang-ehrhardt.de 
