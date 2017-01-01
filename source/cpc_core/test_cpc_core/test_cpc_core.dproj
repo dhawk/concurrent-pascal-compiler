@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
-    <DCC_DependencyCheckOutputName>..\..\bin\test_cpc_core.exe</DCC_DependencyCheckOutputName>
+    <DCC_DependencyCheckOutputName>..\..\..\bin\test_cpc_core.exe</DCC_DependencyCheckOutputName>
     <MainSource>test_cpc_core.dpr</MainSource>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -20,14 +20,14 @@
     <DCC_Define>DEBUG</DCC_Define>
     <DCC_IntegerOverflowCheck>True</DCC_IntegerOverflowCheck>
     <DCC_RangeChecking>True</DCC_RangeChecking>
-    <DCC_ExeOutput>..\..\bin</DCC_ExeOutput>
-    <DCC_DcuOutput>..\..\obj\test_cpc_core</DCC_DcuOutput>
-    <DCC_ObjOutput>..\..\obj\test_cpc_core</DCC_ObjOutput>
-    <DCC_HppOutput>..\..\obj\test_cpc_core</DCC_HppOutput>
-    <DCC_UnitSearchPath>..\lib;..\lib\mparith;..\lib\fastmm</DCC_UnitSearchPath>
-    <DCC_ResourcePath>..\lib;..\lib\mparith;..\lib\fastmm</DCC_ResourcePath>
-    <DCC_ObjPath>..\lib;..\lib\mparith;..\lib\fastmm</DCC_ObjPath>
-    <DCC_IncludePath>..\lib;..\lib\mparith;..\lib\fastmm</DCC_IncludePath>
+    <DCC_ExeOutput>..\..\..\bin</DCC_ExeOutput>
+    <DCC_DcuOutput>.\$(Platform)\$(Config)</DCC_DcuOutput>
+    <DCC_ObjOutput>.\$(Platform)\$(Config)</DCC_ObjOutput>
+    <DCC_HppOutput>.\$(Platform)\$(Config)</DCC_HppOutput>
+    <DCC_UnitSearchPath>..\..\lib;..\..\lib\mparith;..\..\lib\fastmm</DCC_UnitSearchPath>
+    <DCC_ResourcePath>..\..\lib;..\..\lib\mparith;..\..\lib\fastmm</DCC_ResourcePath>
+    <DCC_ObjPath>..\..\lib;..\..\lib\mparith;..\..\lib\fastmm</DCC_ObjPath>
+    <DCC_IncludePath>..\..\lib;..\..\lib\mparith;..\..\lib\fastmm</DCC_IncludePath>
     <DCC_MapFile>3</DCC_MapFile>
   </PropertyGroup>
   <ProjectExtensions>
@@ -41,7 +41,33 @@
     <DelphiCompile Include="test_cpc_core.dpr">
       <MainSource>MainSource</MainSource>
     </DelphiCompile>
-    <DCCReference Include="cpc_access_unit.pas" />
+    <DCCReference Include="..\cpc_access_unit.pas" />
+    <DCCReference Include="..\cpc_blocks_unit.pas" />
+    <DCCReference Include="..\cpc_common_unit.pas" />
+    <DCCReference Include="..\cpc_constant_expression_unit.pas" />
+    <DCCReference Include="..\cpc_core_objects_unit.pas" />
+    <DCCReference Include="..\cpc_definitions_unit.pas" />
+    <DCCReference Include="..\cpc_expressions_unit.pas" />
+    <DCCReference Include="..\cpc_main_compiler_unit.pas" />
+    <DCCReference Include="..\cpc_multi_precision_integer_unit.pas" />
+    <DCCReference Include="..\cpc_simple_expression_unit.pas" />
+    <DCCReference Include="..\cpc_source_analysis_unit.pas" />
+    <DCCReference Include="..\cpc_statements_unit.pas" />
+    <DCCReference Include="..\cpc_target_cpu_unit.pas" />
+    <DCCReference Include="..\cpc_term_expression_unit.pas" />
+    <DCCReference Include="..\cpc_types_unit.pas" />
+    <DCCReference Include="..\test_access_syntax_unit.pas" />
+    <DCCReference Include="..\test_block_syntax_unit.pas" />
+    <DCCReference Include="..\test_constant_expression_unit.pas" />
+    <DCCReference Include="..\test_cpu_unit.pas" />
+    <DCCReference Include="..\test_expression_syntax_unit.pas" />
+    <DCCReference Include="test_main_form_unit.pas">
+      <Form>MainForm</Form>
+    </DCCReference>
+    <DCCReference Include="..\test_multi_precision_integer_unit.pas" />
+    <DCCReference Include="..\test_statement_syntax_unit.pas" />
+    <DCCReference Include="..\test_subroutines_unit.pas" />
+    <DCCReference Include="..\test_type_syntax_unit.pas" />
     <DCCReference Include="cpc_blocks_unit.pas" />
     <DCCReference Include="cpc_common_unit.pas" />
     <DCCReference Include="cpc_constant_expression_unit.pas" />
@@ -57,7 +83,6 @@
     <DCCReference Include="cpc_term_expression_unit.pas" />
     <DCCReference Include="cpc_types_unit.pas" />
     <DCCReference Include="test_access_syntax_unit.pas" />
-    <DCCReference Include="test_block_synax_unit.pas" />
     <DCCReference Include="test_block_syntax_unit.pas" />
     <DCCReference Include="test_constant_expression_unit.pas" />
     <DCCReference Include="test_cpu_unit.pas" />

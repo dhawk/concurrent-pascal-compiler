@@ -11,7 +11,7 @@
       </Flags>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
-      <Title Value="run_cpc_core_tests"/>
+      <Title Value="test_cpc_core"/>
       <UseAppBundle Value="False"/>
       <ResourceType Value="res"/>
     </General>
@@ -30,6 +30,7 @@
     <RunParams>
       <local>
         <FormatVersion Value="1"/>
+        <CommandLineParams Value="--debug-log=\temp\cpc_laz.txt"/>
       </local>
     </RunParams>
     <RequiredPackages Count="1">
@@ -37,9 +38,9 @@
         <PackageName Value="LCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="28">
+    <Units Count="29">
       <Unit0>
-        <Filename Value="run_cpc_core_tests.dpr"/>
+        <Filename Value="test_cpc_core.dpr"/>
         <IsPartOfProject Value="True"/>
       </Unit0>
       <Unit1>
@@ -115,12 +116,15 @@
         <IsPartOfProject Value="True"/>
       </Unit18>
       <Unit19>
-        <Filename Value="test_cpu_unit.pas"/>
+        <Filename Value="test_expression_syntax_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit19>
       <Unit20>
-        <Filename Value="test_expression_syntax_unit.pas"/>
+        <Filename Value="test_main_form_unit.pas"/>
         <IsPartOfProject Value="True"/>
+        <ComponentName Value="MainForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
       </Unit20>
       <Unit21>
         <Filename Value="test_multi_precision_integer_unit.pas"/>
@@ -135,37 +139,42 @@
         <IsPartOfProject Value="True"/>
       </Unit23>
       <Unit24>
-        <Filename Value="test_subroutines_unit.pas"/>
+        <Filename Value="..\lib\wirth_balanced_binary_tree_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit24>
       <Unit25>
-        <Filename Value="..\pic18x\ConverterBackup\dijkstra_smoothsort_unit.pas"/>
+        <Filename Value="..\lib\dijkstra_smoothsort_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit25>
       <Unit26>
-        <Filename Value="..\pic18x\ConverterBackup\mp_base.pas"/>
+        <Filename Value="test_cpu_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit26>
       <Unit27>
-        <Filename Value="..\pic18x\ConverterBackup\mp_types.pas"/>
+        <Filename Value="..\lib\mparith\mp_base.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit27>
+      <Unit28>
+        <Filename Value="..\lib\mparith\mp_types.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit28>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="11"/>
     <PathDelim Value="\"/>
     <Target>
-      <Filename Value="..\..\bin\run_cpc_core_tests"/>
+      <Filename Value="..\..\..\bin\test_cpc_core"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="..\lib;..\lib\mparith"/>
-      <UnitOutputDirectory Value="..\..\obj\run_cpc_core_tests"/>
+      <IncludeFiles Value="..\..\lib;..\..\lib\mparith;$(ProjOutDir)"/>
+      <OtherUnitFiles Value="..\..\lib;..\..\lib\mparith"/>
+      <UnitOutputDirectory Value="obj"/>
     </SearchPaths>
     <Parsing>
       <SyntaxOptions>
         <SyntaxMode Value="Delphi"/>
+        <CStyleOperator Value="False"/>
         <IncludeAssertionCode Value="True"/>
       </SyntaxOptions>
     </Parsing>
@@ -178,25 +187,23 @@
       </Checks>
       <VerifyObjMethodCallValidity Value="True"/>
     </CodeGeneration>
+    <Linking>
+      <Options>
+        <Win32>
+          <GraphicApplication Value="True"/>
+        </Win32>
+      </Options>
+    </Linking>
     <Other>
       <CustomOptions Value="-dBorland
 -dVer150
 -dDelphi7
 -dCompiler6_Up
--dPUREPASCAL
--dCONSOLE_TEST_MODE"/>
-      <OtherDefines Count="6">
-        <Define0 Value="Borland"/>
-        <Define1 Value="Ver150"/>
-        <Define2 Value="Delphi7"/>
-        <Define3 Value="Compiler6_Up"/>
-        <Define4 Value="PUREPASCAL"/>
-        <Define5 Value="CONSOLE_TEST_MODE"/>
-      </OtherDefines>
+-dPUREPASCAL"/>
     </Other>
   </CompilerOptions>
   <Debugging>
-    <Exceptions Count="11">
+    <Exceptions Count="12">
       <Item1>
         <Name Value="EAbort"/>
       </Item1>
@@ -222,14 +229,17 @@
         <Name Value="EPrimaryExpressionSimplification"/>
       </Item8>
       <Item9>
-        <Name Value="EDefinitelyNotASubRange"/>
+        <Name Value="EStatementSimplification"/>
       </Item9>
       <Item10>
-        <Name Value="EStatementSimplification"/>
+        <Name Value="EDefinitelyNotASubRange"/>
       </Item10>
       <Item11>
         <Name Value="RunError(219)"/>
       </Item11>
+      <Item12>
+        <Name Value="EInvalidCast"/>
+      </Item12>
     </Exceptions>
   </Debugging>
 </CONFIG>

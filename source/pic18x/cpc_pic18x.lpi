@@ -221,7 +221,7 @@
     <SearchPaths>
       <IncludeFiles Value="..\lib;..\lib\mparith;..\cpc_core;common;$(ProjOutDir)"/>
       <OtherUnitFiles Value="..\lib;..\lib\mparith;..\cpc_core;common"/>
-      <UnitOutputDirectory Value="..\..\obj\cpc_pic18x"/>
+      <UnitOutputDirectory Value="obj"/>
     </SearchPaths>
     <Parsing>
       <SyntaxOptions>

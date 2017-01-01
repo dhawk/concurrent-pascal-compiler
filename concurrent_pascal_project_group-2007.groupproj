@@ -4,14 +4,14 @@
   </PropertyGroup>
   <ItemGroup />
   <ItemGroup>
-    <Projects Include="source\cpc_core\run_cpc_core_tests.dproj" />
-    <Projects Include="source\cpc_core\test_cpc_core.dproj" />
+    <Projects Include="source\cpc_core\run_cpc_core_tests\run_cpc_core_tests.dproj" />
+    <Projects Include="source\cpc_core\test_cpc_core\test_cpc_core.dproj" />
     <Projects Include="source\pic18x\config_bit_editor\pic18x_config_bit_editor.dproj" />
     <Projects Include="source\pic18x\cpc_pic18x.dproj" />
-    <Projects Include="source\pic18x\run_pic18x_compiler_tests.dproj" />
-    <Projects Include="source\pic18x\run_pic18x_kernel_tests.dproj" />
-    <Projects Include="source\pic18x\run_pic18x_simulator_tests.dproj" />
-    <Projects Include="source\pic18x\test_cpc_pic18x.dproj" />
+    <Projects Include="source\pic18x\run_pic18x_compiler_tests\run_pic18x_compiler_tests.dproj" />
+    <Projects Include="source\pic18x\run_pic18x_kernel_tests\run_pic18x_kernel_tests.dproj" />
+    <Projects Include="source\pic18x\run_pic18x_simulator_tests\run_pic18x_simulator_tests.dproj" />
+    <Projects Include="source\pic18x\test_cpc_pic18x\test_cpc_pic18x.dproj" />
   </ItemGroup>
   <ProjectExtensions>
     <Borland.Personality>Default.Personality</Borland.Personality>
@@ -19,24 +19,6 @@
     <BorlandProject>
 <BorlandProject xmlns=""><Default.Personality></Default.Personality></BorlandProject></BorlandProject>
   </ProjectExtensions>
-  <Target Name="test_cpc_core">
-    <MSBuild Projects="source\cpc_core\test_cpc_core.dproj" Targets="" />
-  </Target>
-  <Target Name="test_cpc_core:Clean">
-    <MSBuild Projects="source\cpc_core\test_cpc_core.dproj" Targets="Clean" />
-  </Target>
-  <Target Name="test_cpc_core:Make">
-    <MSBuild Projects="source\cpc_core\test_cpc_core.dproj" Targets="Make" />
-  </Target>
-  <Target Name="test_cpc_pic18x">
-    <MSBuild Projects="source\pic18x\test_cpc_pic18x.dproj" Targets="" />
-  </Target>
-  <Target Name="test_cpc_pic18x:Clean">
-    <MSBuild Projects="source\pic18x\test_cpc_pic18x.dproj" Targets="Clean" />
-  </Target>
-  <Target Name="test_cpc_pic18x:Make">
-    <MSBuild Projects="source\pic18x\test_cpc_pic18x.dproj" Targets="Make" />
-  </Target>
   <Target Name="cpc_pic18x">
     <MSBuild Projects="source\pic18x\cpc_pic18x.dproj" Targets="" />
   </Target>
@@ -56,49 +38,67 @@
     <MSBuild Projects="source\pic18x\config_bit_editor\pic18x_config_bit_editor.dproj" Targets="Make" />
   </Target>
   <Target Name="run_cpc_core_tests">
-    <MSBuild Projects="source\cpc_core\run_cpc_core_tests.dproj" Targets="" />
+    <MSBuild Projects="source\cpc_core\run_cpc_core_tests\run_cpc_core_tests.dproj" Targets="" />
   </Target>
   <Target Name="run_cpc_core_tests:Clean">
-    <MSBuild Projects="source\cpc_core\run_cpc_core_tests.dproj" Targets="Clean" />
+    <MSBuild Projects="source\cpc_core\run_cpc_core_tests\run_cpc_core_tests.dproj" Targets="Clean" />
   </Target>
   <Target Name="run_cpc_core_tests:Make">
-    <MSBuild Projects="source\cpc_core\run_cpc_core_tests.dproj" Targets="Make" />
+    <MSBuild Projects="source\cpc_core\run_cpc_core_tests\run_cpc_core_tests.dproj" Targets="Make" />
   </Target>
-  <Target Name="run_pic18x_simulator_tests">
-    <MSBuild Projects="source\pic18x\run_pic18x_simulator_tests.dproj" Targets="" />
+  <Target Name="test_cpc_core">
+    <MSBuild Projects="source\cpc_core\test_cpc_core\test_cpc_core.dproj" Targets="" />
   </Target>
-  <Target Name="run_pic18x_simulator_tests:Clean">
-    <MSBuild Projects="source\pic18x\run_pic18x_simulator_tests.dproj" Targets="Clean" />
+  <Target Name="test_cpc_core:Clean">
+    <MSBuild Projects="source\cpc_core\test_cpc_core\test_cpc_core.dproj" Targets="Clean" />
   </Target>
-  <Target Name="run_pic18x_simulator_tests:Make">
-    <MSBuild Projects="source\pic18x\run_pic18x_simulator_tests.dproj" Targets="Make" />
+  <Target Name="test_cpc_core:Make">
+    <MSBuild Projects="source\cpc_core\test_cpc_core\test_cpc_core.dproj" Targets="Make" />
+  </Target>
+  <Target Name="test_cpc_pic18x">
+    <MSBuild Projects="source\pic18x\test_cpc_pic18x\test_cpc_pic18x.dproj" Targets="" />
+  </Target>
+  <Target Name="test_cpc_pic18x:Clean">
+    <MSBuild Projects="source\pic18x\test_cpc_pic18x\test_cpc_pic18x.dproj" Targets="Clean" />
+  </Target>
+  <Target Name="test_cpc_pic18x:Make">
+    <MSBuild Projects="source\pic18x\test_cpc_pic18x\test_cpc_pic18x.dproj" Targets="Make" />
   </Target>
   <Target Name="run_pic18x_compiler_tests">
-    <MSBuild Projects="source\pic18x\run_pic18x_compiler_tests.dproj" Targets="" />
+    <MSBuild Projects="source\pic18x\run_pic18x_compiler_tests\run_pic18x_compiler_tests.dproj" Targets="" />
   </Target>
   <Target Name="run_pic18x_compiler_tests:Clean">
-    <MSBuild Projects="source\pic18x\run_pic18x_compiler_tests.dproj" Targets="Clean" />
+    <MSBuild Projects="source\pic18x\run_pic18x_compiler_tests\run_pic18x_compiler_tests.dproj" Targets="Clean" />
   </Target>
   <Target Name="run_pic18x_compiler_tests:Make">
-    <MSBuild Projects="source\pic18x\run_pic18x_compiler_tests.dproj" Targets="Make" />
+    <MSBuild Projects="source\pic18x\run_pic18x_compiler_tests\run_pic18x_compiler_tests.dproj" Targets="Make" />
   </Target>
   <Target Name="run_pic18x_kernel_tests">
-    <MSBuild Projects="source\pic18x\run_pic18x_kernel_tests.dproj" Targets="" />
+    <MSBuild Projects="source\pic18x\run_pic18x_kernel_tests\run_pic18x_kernel_tests.dproj" Targets="" />
   </Target>
   <Target Name="run_pic18x_kernel_tests:Clean">
-    <MSBuild Projects="source\pic18x\run_pic18x_kernel_tests.dproj" Targets="Clean" />
+    <MSBuild Projects="source\pic18x\run_pic18x_kernel_tests\run_pic18x_kernel_tests.dproj" Targets="Clean" />
   </Target>
   <Target Name="run_pic18x_kernel_tests:Make">
-    <MSBuild Projects="source\pic18x\run_pic18x_kernel_tests.dproj" Targets="Make" />
+    <MSBuild Projects="source\pic18x\run_pic18x_kernel_tests\run_pic18x_kernel_tests.dproj" Targets="Make" />
+  </Target>
+  <Target Name="run_pic18x_simulator_tests">
+    <MSBuild Projects="source\pic18x\run_pic18x_simulator_tests\run_pic18x_simulator_tests.dproj" Targets="" />
+  </Target>
+  <Target Name="run_pic18x_simulator_tests:Clean">
+    <MSBuild Projects="source\pic18x\run_pic18x_simulator_tests\run_pic18x_simulator_tests.dproj" Targets="Clean" />
+  </Target>
+  <Target Name="run_pic18x_simulator_tests:Make">
+    <MSBuild Projects="source\pic18x\run_pic18x_simulator_tests\run_pic18x_simulator_tests.dproj" Targets="Make" />
   </Target>
   <Target Name="Build">
-    <CallTarget Targets="test_cpc_core;test_cpc_pic18x;cpc_pic18x;pic18x_config_bit_editor;run_cpc_core_tests;run_pic18x_simulator_tests;run_pic18x_compiler_tests;run_pic18x_kernel_tests" />
+    <CallTarget Targets="cpc_pic18x;pic18x_config_bit_editor;run_cpc_core_tests;test_cpc_core;test_cpc_pic18x;run_pic18x_compiler_tests;run_pic18x_kernel_tests;run_pic18x_simulator_tests" />
   </Target>
   <Target Name="Clean">
-    <CallTarget Targets="test_cpc_core:Clean;test_cpc_pic18x:Clean;cpc_pic18x:Clean;pic18x_config_bit_editor:Clean;run_cpc_core_tests:Clean;run_pic18x_simulator_tests:Clean;run_pic18x_compiler_tests:Clean;run_pic18x_kernel_tests:Clean" />
+    <CallTarget Targets="cpc_pic18x:Clean;pic18x_config_bit_editor:Clean;run_cpc_core_tests:Clean;test_cpc_core:Clean;test_cpc_pic18x:Clean;run_pic18x_compiler_tests:Clean;run_pic18x_kernel_tests:Clean;run_pic18x_simulator_tests:Clean" />
   </Target>
   <Target Name="Make">
-    <CallTarget Targets="test_cpc_core:Make;test_cpc_pic18x:Make;cpc_pic18x:Make;pic18x_config_bit_editor:Make;run_cpc_core_tests:Make;run_pic18x_simulator_tests:Make;run_pic18x_compiler_tests:Make;run_pic18x_kernel_tests:Make" />
+    <CallTarget Targets="cpc_pic18x:Make;pic18x_config_bit_editor:Make;run_cpc_core_tests:Make;test_cpc_core:Make;test_cpc_pic18x:Make;run_pic18x_compiler_tests:Make;run_pic18x_kernel_tests:Make;run_pic18x_simulator_tests:Make" />
   </Target>
   <Import Condition="Exists('$(MSBuildBinPath)\Borland.Group.Targets')" Project="$(MSBuildBinPath)\Borland.Group.Targets" />
 </Project>
