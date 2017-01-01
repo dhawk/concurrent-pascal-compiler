@@ -61,38 +61,9 @@
     <DCCReference Include="..\test_constant_expression_unit.pas" />
     <DCCReference Include="..\test_cpu_unit.pas" />
     <DCCReference Include="..\test_expression_syntax_unit.pas" />
-    <DCCReference Include="test_main_form_unit.pas">
-      <Form>MainForm</Form>
-    </DCCReference>
     <DCCReference Include="..\test_multi_precision_integer_unit.pas" />
     <DCCReference Include="..\test_statement_syntax_unit.pas" />
     <DCCReference Include="..\test_subroutines_unit.pas" />
     <DCCReference Include="..\test_type_syntax_unit.pas" />
-    <DCCReference Include="cpc_blocks_unit.pas" />
-    <DCCReference Include="cpc_common_unit.pas" />
-    <DCCReference Include="cpc_constant_expression_unit.pas" />
-    <DCCReference Include="cpc_core_objects_unit.pas" />
-    <DCCReference Include="cpc_definitions_unit.pas" />
-    <DCCReference Include="cpc_expressions_unit.pas" />
-    <DCCReference Include="cpc_main_compiler_unit.pas" />
-    <DCCReference Include="cpc_multi_precision_integer_unit.pas" />
-    <DCCReference Include="cpc_simple_expression_unit.pas" />
-    <DCCReference Include="cpc_source_analysis_unit.pas" />
-    <DCCReference Include="cpc_statements_unit.pas" />
-    <DCCReference Include="cpc_target_cpu_unit.pas" />
-    <DCCReference Include="cpc_term_expression_unit.pas" />
-    <DCCReference Include="cpc_types_unit.pas" />
-    <DCCReference Include="test_access_syntax_unit.pas" />
-    <DCCReference Include="test_block_syntax_unit.pas" />
-    <DCCReference Include="test_constant_expression_unit.pas" />
-    <DCCReference Include="test_cpu_unit.pas" />
-    <DCCReference Include="test_expression_syntax_unit.pas" />
-    <DCCReference Include="test_main_form_unit.pas">
-      <Form>MainForm</Form>
-    </DCCReference>
-    <DCCReference Include="test_multi_precision_integer_unit.pas" />
-    <DCCReference Include="test_statement_syntax_unit.pas" />
-    <DCCReference Include="test_subroutines_unit.pas" />
-    <DCCReference Include="test_type_syntax_unit.pas" />
   </ItemGroup>
 </Project>

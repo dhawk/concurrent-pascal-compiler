@@ -58,6 +58,8 @@ var
    html_file: TextFile;
    untested: boolean;
 
+{$R *.res}
+
 begin
    number_of_tests := 0;
    number_of_errors := 0;

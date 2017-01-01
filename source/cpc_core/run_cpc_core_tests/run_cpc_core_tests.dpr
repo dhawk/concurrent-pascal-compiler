@@ -37,6 +37,8 @@ uses
    test_type_syntax_unit in '..\test_type_syntax_unit.pas',
    test_subroutines_unit in '..\test_subroutines_unit.pas';
 
+{$R *.res}
+
 begin
    tests_failed := 0;
    try

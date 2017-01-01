@@ -52,6 +52,8 @@ uses
    test_pic18x_simulator_unit in '..\test_pic18x_simulator_unit.pas',
    pic18x_ram_map_unit in '..\pic18x_ram_map_unit.pas';
 
+{$R *.res}
+
 begin
    try
       number_of_tests := 0;
