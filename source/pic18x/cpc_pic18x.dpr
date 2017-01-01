@@ -9,6 +9,9 @@ program cpc_pic18x;
 {$R *.res}
 
 uses
+{$IFNDEF FPC}
+   FastMM4,
+{$ENDIF}
    dijkstra_smoothsort_unit in '..\lib\dijkstra_smoothsort_unit.pas',
    wirth_balanced_binary_tree_unit in '..\lib\wirth_balanced_binary_tree_unit.pas',
    btypes in '..\lib\mparith\btypes.pas',

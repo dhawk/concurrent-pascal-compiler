@@ -1,4 +1,4 @@
-program run_pic18x_simulator_tests;
+program run_pic18x_compiler_tests;
 
 {$IFDEF FPC}
   {$MODE Delphi}
@@ -46,17 +46,17 @@ uses
    pic18x_string_unit in '..\pic18x_string_unit.pas',
    pic18x_term_expression_unit in '..\pic18x_term_expression_unit.pas',
    pic18x_types_unit in '..\pic18x_types_unit.pas',
-   test_pic18x_compiler_unit in '..\test_pic18x_compiler_unit.pas',
-   test_pic18x_subroutines_unit in '..\test_pic18x_subroutines_unit.pas',
    test_pic18x_kernel_unit in '..\test_pic18x_kernel_unit.pas',
+   test_pic18x_subroutines_unit in '..\test_pic18x_subroutines_unit.pas',
+   test_pic18x_compiler_unit in '..\test_pic18x_compiler_unit.pas',
    test_pic18x_simulator_unit in '..\test_pic18x_simulator_unit.pas',
    pic18x_ram_map_unit in '..\pic18x_ram_map_unit.pas';
 
 begin
+   number_of_tests := 0;
+   number_of_errors := 0;
    try
-      number_of_tests := 0;
-      number_of_errors := 0;
-      run_instruction_simulation_tests;
+      RunTests
    except
       on E:Exception do
          begin
