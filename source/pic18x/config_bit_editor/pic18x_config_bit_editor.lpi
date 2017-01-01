@@ -15,6 +15,7 @@
       <Title Value="pic18x_config_bit_editor"/>
       <UseAppBundle Value="False"/>
       <ResourceType Value="res"/>
+      <Icon Value="0"/>
     </General>
     <i18n>
       <EnableI18N LFM="False"/>
@@ -188,9 +189,9 @@
       <Filename Value="..\..\..\bin\pic18x_config_bit_editor"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="..\common;..\..\lib;..\..\cpc_core;..\..\lib\mparith"/>
+      <IncludeFiles Value="..\common;..\..\lib;..\..\cpc_core;..\..\lib\mparith;$(ProjOutDir)"/>
       <OtherUnitFiles Value="..\..\lib;..\common;..\..\cpc_core;..\..\lib\mparith"/>
-      <UnitOutputDirectory Value="..\..\..\obj\pic18x_config_bit_editor"/>
+      <UnitOutputDirectory Value="obj"/>
     </SearchPaths>
     <Parsing>
       <SyntaxOptions>
