@@ -28,6 +28,7 @@
     <DCC_ResourcePath>..\..\lib;..\..\lib\fastmm;..\..\lib\mparith;..\..\cpc_core;..\common</DCC_ResourcePath>
     <DCC_ObjPath>..\..\lib;..\..\lib\fastmm;..\..\lib\mparith;..\..\cpc_core;..\common</DCC_ObjPath>
     <DCC_IncludePath>..\..\lib;..\..\lib\fastmm;..\..\lib\mparith;..\..\cpc_core;..\common</DCC_IncludePath>
+    <DCC_ConsoleTarget>True</DCC_ConsoleTarget>
   </PropertyGroup>
   <ProjectExtensions>
     <Borland.Personality>Delphi.Personality</Borland.Personality>
@@ -56,7 +57,6 @@
     <DCCReference Include="..\..\cpc_core\cpc_term_expression_unit.pas" />
     <DCCReference Include="..\..\cpc_core\cpc_types_unit.pas" />
     <DCCReference Include="..\..\lib\dijkstra_smoothsort_unit.pas" />
-    <DCCReference Include="..\..\lib\fastmm\fastmm4.pas" />
     <DCCReference Include="..\..\lib\mparith\btypes.pas" />
     <DCCReference Include="..\..\lib\mparith\isaac.pas" />
     <DCCReference Include="..\..\lib\mparith\mp_base.pas" />
