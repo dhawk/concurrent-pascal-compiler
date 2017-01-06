@@ -65,5 +65,8 @@
     <DCCReference Include="..\test_statement_syntax_unit.pas" />
     <DCCReference Include="..\test_subroutines_unit.pas" />
     <DCCReference Include="..\test_type_syntax_unit.pas" />
+    <DCCReference Include="test_main_form_unit.pas">
+      <Form>MainForm</Form>
+    </DCCReference>
   </ItemGroup>
 </Project>

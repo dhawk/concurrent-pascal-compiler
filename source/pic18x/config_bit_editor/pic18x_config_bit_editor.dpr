@@ -35,7 +35,8 @@ begin
 {$IFDEF MSWINDOWS}
    Application.MainFormOnTaskbar := True;
 {$ENDIF}
-   Application.CreateForm(TMainForm, MainForm);
+   Application.Title := 'PIC18x Configuration Bits Editor';
+  Application.CreateForm(TMainForm, MainForm);
    Application.CreateForm(TPic18xSelectionDialog, Pic18xSelectionDialog);
    Application.CreateForm(TAboutBox, AboutBox);
    Application.Run;

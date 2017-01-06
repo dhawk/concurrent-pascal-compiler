@@ -13,7 +13,6 @@
       <MainUnit Value="0"/>
       <Title Value="test_cpc_core"/>
       <UseAppBundle Value="False"/>
-      <ResourceType Value="res"/>
       <Icon Value="0"/>
     </General>
     <i18n>
@@ -186,7 +185,6 @@
         <OverflowChecks Value="True"/>
         <StackChecks Value="True"/>
       </Checks>
-      <VerifyObjMethodCallValidity Value="True"/>
     </CodeGeneration>
     <Linking>
       <Options>

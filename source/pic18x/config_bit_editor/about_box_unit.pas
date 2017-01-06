@@ -25,6 +25,9 @@ type
       ProductName: TLabel;
       WebsiteLabel: TLabel;
       AboutCreditFrame: TAboutCreditFrame;
+    Image1: TImage;
+    Label1: TLabel;
+    Label2: TLabel;
       procedure FormCreate(Sender: TObject);
    private
       { Private declarations }

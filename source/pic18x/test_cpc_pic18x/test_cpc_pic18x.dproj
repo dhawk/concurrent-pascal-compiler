@@ -56,6 +56,7 @@
     <DCCReference Include="..\..\cpc_core\cpc_target_cpu_unit.pas" />
     <DCCReference Include="..\..\cpc_core\cpc_term_expression_unit.pas" />
     <DCCReference Include="..\..\cpc_core\cpc_types_unit.pas" />
+    <DCCReference Include="..\common\pic18x_common_unit.pas" />
     <DCCReference Include="..\pic18x_access_unit.pas" />
     <DCCReference Include="..\pic18x_assignment_statement_unit.pas" />
     <DCCReference Include="..\pic18x_blocks_unit.pas" />
