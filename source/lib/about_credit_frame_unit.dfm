@@ -21,9 +21,9 @@ object AboutCreditFrame: TAboutCreditFrame
     object Label1: TLabel
       Left = 8
       Top = 95
-      Width = 155
+      Width = 147
       Height = 13
-      Caption = 'Additional Third-Party Software:'
+      Caption = 'Built with Third-Party Libraries:'
     end
     object BuiltUsingGroupBox: TGroupBox
       Left = 8

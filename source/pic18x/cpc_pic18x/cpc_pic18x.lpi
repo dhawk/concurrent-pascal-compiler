@@ -44,171 +44,171 @@
         <IsPartOfProject Value="True"/>
       </Unit0>
       <Unit1>
-        <Filename Value="..\lib\dijkstra_smoothsort_unit.pas"/>
+        <Filename Value="..\..\lib\dijkstra_smoothsort_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit1>
       <Unit2>
-        <Filename Value="..\lib\wirth_balanced_binary_tree_unit.pas"/>
+        <Filename Value="..\..\lib\wirth_balanced_binary_tree_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit2>
       <Unit3>
-        <Filename Value="..\lib\mparith\btypes.pas"/>
+        <Filename Value="..\..\lib\mparith\btypes.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit3>
       <Unit4>
-        <Filename Value="..\lib\mparith\isaac.pas"/>
+        <Filename Value="..\..\lib\mparith\isaac.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit4>
       <Unit5>
-        <Filename Value="..\lib\mparith\mp_base.pas"/>
+        <Filename Value="..\..\lib\mparith\mp_base.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit5>
       <Unit6>
-        <Filename Value="..\lib\mparith\mp_prng.pas"/>
+        <Filename Value="..\..\lib\mparith\mp_prng.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit6>
       <Unit7>
-        <Filename Value="..\lib\mparith\mp_types.pas"/>
+        <Filename Value="..\..\lib\mparith\mp_types.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit7>
       <Unit8>
-        <Filename Value="..\cpc_core\cpc_access_unit.pas"/>
+        <Filename Value="..\..\cpc_core\cpc_access_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit8>
       <Unit9>
-        <Filename Value="..\cpc_core\cpc_blocks_unit.pas"/>
+        <Filename Value="..\..\cpc_core\cpc_blocks_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit9>
       <Unit10>
-        <Filename Value="..\cpc_core\cpc_common_unit.pas"/>
+        <Filename Value="..\..\cpc_core\cpc_common_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit10>
       <Unit11>
-        <Filename Value="..\cpc_core\cpc_constant_expression_unit.pas"/>
+        <Filename Value="..\..\cpc_core\cpc_constant_expression_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit11>
       <Unit12>
-        <Filename Value="..\cpc_core\cpc_core_objects_unit.pas"/>
+        <Filename Value="..\..\cpc_core\cpc_core_objects_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit12>
       <Unit13>
-        <Filename Value="..\cpc_core\cpc_definitions_unit.pas"/>
+        <Filename Value="..\..\cpc_core\cpc_definitions_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit13>
       <Unit14>
-        <Filename Value="..\cpc_core\cpc_expressions_unit.pas"/>
+        <Filename Value="..\..\cpc_core\cpc_expressions_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit14>
       <Unit15>
-        <Filename Value="..\cpc_core\cpc_main_compiler_unit.pas"/>
+        <Filename Value="..\..\cpc_core\cpc_main_compiler_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit15>
       <Unit16>
-        <Filename Value="..\cpc_core\cpc_multi_precision_integer_unit.pas"/>
+        <Filename Value="..\..\cpc_core\cpc_multi_precision_integer_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit16>
       <Unit17>
-        <Filename Value="..\cpc_core\cpc_simple_expression_unit.pas"/>
+        <Filename Value="..\..\cpc_core\cpc_simple_expression_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit17>
       <Unit18>
-        <Filename Value="..\cpc_core\cpc_source_analysis_unit.pas"/>
+        <Filename Value="..\..\cpc_core\cpc_source_analysis_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit18>
       <Unit19>
-        <Filename Value="..\cpc_core\cpc_statements_unit.pas"/>
+        <Filename Value="..\..\cpc_core\cpc_statements_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit19>
       <Unit20>
-        <Filename Value="..\cpc_core\cpc_target_cpu_unit.pas"/>
+        <Filename Value="..\..\cpc_core\cpc_target_cpu_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit20>
       <Unit21>
-        <Filename Value="..\cpc_core\cpc_term_expression_unit.pas"/>
+        <Filename Value="..\..\cpc_core\cpc_term_expression_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit21>
       <Unit22>
-        <Filename Value="..\cpc_core\cpc_types_unit.pas"/>
+        <Filename Value="..\..\cpc_core\cpc_types_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit22>
       <Unit23>
-        <Filename Value="pic18x_access_unit.pas"/>
+        <Filename Value="..\pic18x_access_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit23>
       <Unit24>
-        <Filename Value="pic18x_assignment_statement_unit.pas"/>
+        <Filename Value="..\pic18x_assignment_statement_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit24>
       <Unit25>
-        <Filename Value="pic18x_blocks_unit.pas"/>
+        <Filename Value="..\pic18x_blocks_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit25>
       <Unit26>
-        <Filename Value="common\pic18x_common_unit.pas"/>
+        <Filename Value="..\common\pic18x_common_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit26>
       <Unit27>
-        <Filename Value="pic18x_core_objects_unit.pas"/>
+        <Filename Value="..\pic18x_core_objects_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit27>
       <Unit28>
-        <Filename Value="pic18x_cpu_unit.pas"/>
+        <Filename Value="..\pic18x_cpu_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit28>
       <Unit29>
-        <Filename Value="pic18x_expressions_unit.pas"/>
+        <Filename Value="..\pic18x_expressions_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit29>
       <Unit30>
-        <Filename Value="pic18x_floating_point_unit.pas"/>
+        <Filename Value="..\pic18x_floating_point_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit30>
       <Unit31>
-        <Filename Value="pic18x_instructions_unit.pas"/>
+        <Filename Value="..\pic18x_instructions_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit31>
       <Unit32>
-        <Filename Value="pic18x_kernel_unit.pas"/>
+        <Filename Value="..\pic18x_kernel_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit32>
       <Unit33>
-        <Filename Value="pic18x_macro_instructions_unit.pas"/>
+        <Filename Value="..\pic18x_macro_instructions_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit33>
       <Unit34>
-        <Filename Value="pic18x_main_compiler_unit.pas"/>
+        <Filename Value="..\pic18x_main_compiler_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit34>
       <Unit35>
-        <Filename Value="pic18x_microprocessor_information_unit.pas"/>
+        <Filename Value="..\pic18x_microprocessor_information_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit35>
       <Unit36>
-        <Filename Value="pic18x_multiply_divide_unit.pas"/>
+        <Filename Value="..\pic18x_multiply_divide_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit36>
       <Unit37>
-        <Filename Value="pic18x_run_time_error_check_unit.pas"/>
+        <Filename Value="..\pic18x_run_time_error_check_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit37>
       <Unit38>
-        <Filename Value="pic18x_simple_expression_unit.pas"/>
+        <Filename Value="..\pic18x_simple_expression_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit38>
       <Unit39>
-        <Filename Value="pic18x_statements_unit.pas"/>
+        <Filename Value="..\pic18x_statements_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit39>
       <Unit40>
-        <Filename Value="pic18x_string_unit.pas"/>
+        <Filename Value="..\pic18x_string_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit40>
       <Unit41>
-        <Filename Value="pic18x_term_expression_unit.pas"/>
+        <Filename Value="..\pic18x_term_expression_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit41>
       <Unit42>
-        <Filename Value="pic18x_types_unit.pas"/>
+        <Filename Value="..\pic18x_types_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit42>
     </Units>
@@ -217,11 +217,11 @@
     <Version Value="11"/>
     <PathDelim Value="\"/>
     <Target>
-      <Filename Value="..\..\bin\cpc_pic18x"/>
+      <Filename Value="..\..\..\bin\cpc_pic18x"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="..\lib;..\lib\mparith;..\cpc_core;common;$(ProjOutDir)"/>
-      <OtherUnitFiles Value="..\lib;..\lib\mparith;..\cpc_core;common"/>
+      <IncludeFiles Value="..\..\lib;..\..\lib\mparith;..\..\cpc_core;..\common;$(ProjOutDir)"/>
+      <OtherUnitFiles Value="..\..\lib;..\..\lib\mparith;..\..\cpc_core;..\common"/>
       <UnitOutputDirectory Value="obj"/>
     </SearchPaths>
     <Parsing>
