@@ -10,6 +10,7 @@ object MainForm: TMainForm
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
+  Menu = MainMenu1
   OldCreateOrder = False
   Position = poScreenCenter
   OnCreate = FormCreate
@@ -28,10 +29,6 @@ object MainForm: TMainForm
     TabOrder = 0
     object TabSheet1: TTabSheet
       Caption = 'Source'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 1172
-      ExplicitHeight = 717
       DesignSize = (
         1188
         731)
@@ -58,7 +55,6 @@ object MainForm: TMainForm
         ParentFont = False
         ScrollBars = ssBoth
         TabOrder = 0
-        ExplicitHeight = 481
       end
       object CompileResultsMemo: TMemo
         Left = 16
@@ -75,8 +71,6 @@ object MainForm: TMainForm
         ParentFont = False
         ScrollBars = ssBoth
         TabOrder = 1
-        ExplicitTop = 520
-        ExplicitWidth = 1145
       end
       object ClearMemoButton: TButton
         Left = 16
@@ -87,7 +81,6 @@ object MainForm: TMainForm
         Caption = 'Clear'
         TabOrder = 2
         OnClick = ClearMemoButtonClick
-        ExplicitTop = 689
       end
       object CompileMemoButton: TButton
         Left = 112
@@ -98,7 +91,6 @@ object MainForm: TMainForm
         Caption = 'Compile Memo'
         TabOrder = 3
         OnClick = CompileMemoButtonClick
-        ExplicitTop = 689
       end
       object RunButton: TButton
         Left = 528
@@ -109,7 +101,6 @@ object MainForm: TMainForm
         Caption = 'Run'
         TabOrder = 4
         OnClick = RunButtonClick
-        ExplicitTop = 688
       end
       object CleanupTestSrcButton: TButton
         Left = 721
@@ -120,8 +111,6 @@ object MainForm: TMainForm
         Caption = 'cleanup test src'
         TabOrder = 5
         OnClick = CleanupTestSrcButtonClick
-        ExplicitLeft = 705
-        ExplicitTop = 688
       end
       object SrcToClipboardForTestButton: TButton
         Left = 911
@@ -132,8 +121,6 @@ object MainForm: TMainForm
         Caption = 'Src->Clipboard 4 test'
         TabOrder = 6
         OnClick = SrcToClipboardForTestButtonClick
-        ExplicitLeft = 895
-        ExplicitTop = 689
       end
       object SrcToClipboardButton: TButton
         Left = 824
@@ -144,17 +131,11 @@ object MainForm: TMainForm
         Caption = 'Src->Clipboard'
         TabOrder = 7
         OnClick = SrcToClipboardButtonClick
-        ExplicitLeft = 808
-        ExplicitTop = 688
       end
     end
     object TabSheet2: TTabSheet
       Caption = 'Assembly'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 1172
-      ExplicitHeight = 717
       DesignSize = (
         1188
         731)
@@ -173,17 +154,11 @@ object MainForm: TMainForm
         ParentFont = False
         ScrollBars = ssVertical
         TabOrder = 0
-        ExplicitWidth = 1145
-        ExplicitHeight = 641
       end
     end
     object TabSheet3: TTabSheet
       Caption = 'Trace'
       ImageIndex = 4
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 1172
-      ExplicitHeight = 717
       object Label2: TLabel
         Left = 27
         Top = 27
@@ -219,10 +194,6 @@ object MainForm: TMainForm
     object TabSheet4: TTabSheet
       Caption = 'Compiler Tests'
       ImageIndex = 3
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 1172
-      ExplicitHeight = 717
       DesignSize = (
         1188
         731)
@@ -241,7 +212,6 @@ object MainForm: TMainForm
         ParentFont = False
         ScrollBars = ssVertical
         TabOrder = 0
-        ExplicitWidth = 1121
       end
       object TestCompilerButton: TButton
         Left = 24
@@ -252,7 +222,16 @@ object MainForm: TMainForm
         Caption = 'Test Compiler'
         TabOrder = 1
         OnClick = TestCompilerButtonClick
-        ExplicitTop = 672
+      end
+    end
+  end
+  object MainMenu1: TMainMenu
+    Left = 432
+    object About1: TMenuItem
+      Caption = 'About'
+      object AboutTestCPCPIC18x1: TMenuItem
+        Caption = 'About Test CPC PIC18x'
+        OnClick = AboutTestCPCPIC18x1Click
       end
     end
   end

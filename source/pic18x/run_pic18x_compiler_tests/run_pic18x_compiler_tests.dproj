@@ -37,10 +37,18 @@
 <BorlandProject><Delphi.Personality><Parameters><Parameters Name="UseLauncher">False</Parameters><Parameters Name="LoadAllSymbols">True</Parameters><Parameters Name="LoadUnspecifiedSymbols">False</Parameters></Parameters><VersionInfo><VersionInfo Name="IncludeVerInfo">False</VersionInfo><VersionInfo Name="AutoIncBuild">False</VersionInfo><VersionInfo Name="MajorVer">1</VersionInfo><VersionInfo Name="MinorVer">0</VersionInfo><VersionInfo Name="Release">0</VersionInfo><VersionInfo Name="Build">0</VersionInfo><VersionInfo Name="Debug">False</VersionInfo><VersionInfo Name="PreRelease">False</VersionInfo><VersionInfo Name="Special">False</VersionInfo><VersionInfo Name="Private">False</VersionInfo><VersionInfo Name="DLL">False</VersionInfo><VersionInfo Name="Locale">1033</VersionInfo><VersionInfo Name="CodePage">1252</VersionInfo></VersionInfo><VersionInfoKeys><VersionInfoKeys Name="CompanyName"></VersionInfoKeys><VersionInfoKeys Name="FileDescription"></VersionInfoKeys><VersionInfoKeys Name="FileVersion">1.0.0.0</VersionInfoKeys><VersionInfoKeys Name="InternalName"></VersionInfoKeys><VersionInfoKeys Name="LegalCopyright"></VersionInfoKeys><VersionInfoKeys Name="LegalTrademarks"></VersionInfoKeys><VersionInfoKeys Name="OriginalFilename"></VersionInfoKeys><VersionInfoKeys Name="ProductName"></VersionInfoKeys><VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys><VersionInfoKeys Name="Comments"></VersionInfoKeys></VersionInfoKeys><Source><Source Name="MainSource">run_pic18x_compiler_tests.dpr</Source></Source></Delphi.Personality></BorlandProject></BorlandProject>
   </ProjectExtensions>
   <Import Project="$(MSBuildBinPath)\Borland.Delphi.Targets" />
+  <PropertyGroup>
+    <PreBuildEvent>del run_pic18x_compiler_tests.res</PreBuildEvent>
+    <PostBuildEvent>resourcehacker.exe -script resourcehacker_script.txt
+del run_pic18x_compiler_tests.res</PostBuildEvent>
+  </PropertyGroup>
   <ItemGroup>
     <DelphiCompile Include="run_pic18x_compiler_tests.dpr">
       <MainSource>MainSource</MainSource>
     </DelphiCompile>
+    <DCCReference Include="..\..\common\aboutbox_unit.pas">
+      <Form>AboutBoxForm</Form>
+    </DCCReference>
     <DCCReference Include="..\..\cpc_core\cpc_access_unit.pas" />
     <DCCReference Include="..\..\cpc_core\cpc_blocks_unit.pas" />
     <DCCReference Include="..\..\cpc_core\cpc_common_unit.pas" />
@@ -56,6 +64,9 @@
     <DCCReference Include="..\..\cpc_core\cpc_target_cpu_unit.pas" />
     <DCCReference Include="..\..\cpc_core\cpc_term_expression_unit.pas" />
     <DCCReference Include="..\..\cpc_core\cpc_types_unit.pas" />
+    <DCCReference Include="..\common\pic18x_aboutbox_unit.pas">
+      <Form>PIC18xAboutBoxForm</Form>
+    </DCCReference>
     <DCCReference Include="..\pic18x_access_unit.pas" />
     <DCCReference Include="..\pic18x_assignment_statement_unit.pas" />
     <DCCReference Include="..\pic18x_blocks_unit.pas" />
@@ -81,5 +92,8 @@
     <DCCReference Include="..\test_pic18x_kernel_unit.pas" />
     <DCCReference Include="..\test_pic18x_simulator_unit.pas" />
     <DCCReference Include="..\test_pic18x_subroutines_unit.pas" />
+    <DCCReference Include="run_pic18x_compiler_tests_aboutbox_unit.pas">
+      <Form>PIC18xAboutBoxForm1</Form>
+    </DCCReference>
   </ItemGroup>
 </Project>

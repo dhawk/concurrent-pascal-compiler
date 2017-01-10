@@ -19,7 +19,7 @@ uses
    SysUtils, Classes, ComCtrls,
    pic18x_statements_unit, pic18x_blocks_unit, cpc_definitions_unit,
    Spin, Controls, StdCtrls,
-   Forms, Messages, ExtCtrls;
+   Forms, Messages, ExtCtrls, Menus;
 
 type
    TMainForm =
@@ -43,6 +43,9 @@ type
          TraceMemo: TMemo;
          Label2: TLabel;
          CleanupTestSrcButton: TButton;
+    MainMenu1: TMainMenu;
+    About1: TMenuItem;
+    AboutTestCPCPIC18x1: TMenuItem;
          procedure ClearMemoButtonClick
             (Sender: TObject
             );
@@ -55,6 +58,7 @@ type
          procedure SrcToClipboardForTestButtonClick(Sender: TObject);
          procedure SrcToClipboardButtonClick(Sender: TObject);
          procedure FormCreate(Sender: TObject);
+    procedure AboutTestCPCPIC18x1Click(Sender: TObject);
       end;
 
 var
@@ -70,7 +74,8 @@ uses
    cpc_multi_precision_integer_unit, pic18x_cpu_unit, test_pic18x_compiler_unit, test_pic18x_kernel_unit,
    pic18x_instructions_unit, test_pic18x_simulator_unit, pic18x_macro_instructions_unit, pic18x_multiply_divide_unit,
    pic18x_microprocessor_information_unit, pic18x_run_time_error_check_unit, cpc_source_analysis_unit,
-   cpc_common_unit, ClipBrd, pic18x_main_compiler_unit, test_pic18x_subroutines_unit;
+   cpc_common_unit, ClipBrd, pic18x_main_compiler_unit, test_pic18x_subroutines_unit, 
+  test_pic18x_compiler_aboutbox_unit;
 
 
 var
@@ -137,6 +142,11 @@ function all_ones (size: integer): uint64;
       for i := 0 to abs(size)-1 do
          ov.a[i] := $ff;
       result := ov.i
+   end;
+
+procedure TMainForm.AboutTestCPCPIC18x1Click(Sender: TObject);
+   begin
+      TestCPCPIC18xAboutBox.ShowModal
    end;
 
 procedure TMainForm.CleanupTestSrcButtonClick(Sender: TObject);

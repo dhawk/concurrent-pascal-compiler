@@ -84,7 +84,7 @@ uses
    Graphics, regular_expression_unit,
    pic18x_common_unit, pic18x_selection_dialog_unit, LibXmlComps,
    cpc_main_compiler_unit, cpc_definitions_unit, cpc_blocks_unit,
-   cpc_statements_unit, cpc_core_objects_unit, filectrl, about_box_unit;
+   cpc_statements_unit, cpc_core_objects_unit, filectrl, config_bit_editor_aboutbox_unit;
 
 {$R *.dfm}
 
@@ -602,7 +602,7 @@ procedure TMainForm.FileSaveAsMenuItemClick(Sender: TObject);
 
 procedure TMainForm.AboutMainMenuItemClick(Sender: TObject);
    begin
-      AboutBox.ShowModal
+      ConfigBitEditorAboutBoxForm.ShowModal
    end;
 
 procedure TMainForm.ExitMenuItemClick(Sender: TObject);

@@ -10,6 +10,7 @@ object MainForm: TMainForm
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
+  Menu = MainMenu1
   OldCreateOrder = True
   DesignSize = (
     1039
@@ -203,5 +204,16 @@ object MainForm: TMainForm
     Height = 19
     Caption = 'Lex'
     TabOrder = 18
+  end
+  object MainMenu1: TMainMenu
+    Left = 16
+    Top = 8
+    object About1: TMenuItem
+      Caption = 'About'
+      object AboutTestCPCCoreCompiler1: TMenuItem
+        Caption = 'About Test CPC Core Compiler'
+        OnClick = AboutTestCPCCoreCompiler1Click
+      end
+    end
   end
 end

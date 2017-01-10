@@ -1,42 +1,44 @@
-unit about_credit_frame_unit;
+UNIT aboutbox_unit;
 
-{$IFDEF FPC}
-  {$MODE Delphi}
-{$ENDIF}
-
-interface
+INTERFACE
 
 uses
-{$IFnDEF FPC}
-  Windows,
-{$ELSE}
-  LCLIntf, LCLType, LMessages,
-{$ENDIF}
-  Messages, SysUtils, Variants, Classes, wirth_balanced_binary_tree_unit,
-  Graphics, Controls, Forms, Dialogs, StdCtrls, ExtCtrls;
+   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+   Dialogs, StdCtrls, ExtCtrls, wirth_balanced_binary_tree_unit;
 
 type
-   TAboutCreditFrame =
-      class(TFrame)
-         Panel1: TPanel;
-    BuiltUsingGroupBox: TGroupBox;
-         BuiltUsingImage: TImage;
+   TAboutBoxForm =
+      class(TForm)
          BuilderLabel1: TLabel;
          BuilderLabel2: TLabel;
          BuilderLabel3: TLabel;
+         BuiltUsingGroupBox: TGroupBox;
          Label1: TLabel;
+         Label2: TLabel;
+         Label3: TLabel;
          Memo1: TMemo;
+         OKButton: TButton;
+         ProductName: TLabel;
+         WebsiteLabel: TLabel;
+         procedure FormCreate(Sender: TObject);
+         procedure OKButtonClick(Sender: TObject);
       private
+         built_using_image: TImage;
+         cpc_logo_image: TImage;
          credits: TBalancedBinaryTree;
-      public
-         procedure Init;
+      protected
          procedure AddThirdPartyCredit (s: string);
-         procedure SetThirdParyCredits;
+         procedure AddWirthCredit;
+         procedure AddFastMM4Credit;
+         procedure AddCommonThirdPartyCredits;
+         procedure AddThirdPartyCredits;
+            virtual; abstract;
+      public
          destructor Destroy;
             override;
       end;
 
-implementation
+IMPLEMENTATION
 
 {$R *.dfm}
 
@@ -45,18 +47,19 @@ uses
    LazarusVersionSupport;
 {$ENDIF}
 
+
+//===========
+//  tCredit
+//===========
+
 type
    tCredit =
       class (TBalancedTreeEntry)
          string_list: TStringList;
          constructor Create (s: string);
-         function compare
-            (a: TBalancedTreeEntry
-            ): Shortint;  // a < self :-1  a=self :0  a > self :+1
+         function compare (a: TBalancedTreeEntry): Shortint;  // a < self :-1  a=self :0  a > self :+1
             override;
-         procedure copy
-            (ToA: TBalancedTreeEntry
-            ); // data
+         procedure copy (ToA: TBalancedTreeEntry); // data
             override;
          destructor Destroy;
             override;
@@ -82,16 +85,12 @@ constructor tCredit.Create (s: string);
       string_list.Add (s)
    end;
 
-function tCredit.compare
-   (a: TBalancedTreeEntry
-   ): Shortint;  // a < self :-1  a=self :0  a > self :+1
+function tCredit.compare (a: TBalancedTreeEntry): Shortint;  // a < self :-1  a=self :0  a > self :+1
    begin
       result := CompareText (tCredit(a).string_list[0], string_list[0])
    end;
 
-procedure tCredit.copy
-   (ToA: TBalancedTreeEntry
-   ); // data
+procedure tCredit.copy(ToA: TBalancedTreeEntry);
    begin
       tCredit(ToA).string_list.Text := string_list.Text
    end;
@@ -102,10 +101,11 @@ destructor tCredit.Destroy;
       inherited
    end;
 
+
 {$IFNDEF FPC}
 function DelphiVersion: string;
    begin
-      result := 'Delphi 10+';  // default if no other define works
+      result := 'Delphi ???';  // default if no other define works
 {$IFDEF VER310}
       result := 'Delphi 10.1 Berlin';
 {$ENDIF}
@@ -181,20 +181,50 @@ function DelphiVersion: string;
    end;
 {$ENDIF}
 
-procedure TAboutCreditFrame.Init;
+procedure TAboutBoxForm.FormCreate(Sender: TObject);
 {$IFDEF FPC}
    procedure adj_top (c: TControl);
       begin
          c.Top := c.Top - 12
       end;
 {$ENDIF}
+   procedure sort_and_append_credits_to_memo (cr: tCredit);
+      begin
+         if cr.lesser_values <> nil then
+            sort_and_append_credits_to_memo (tCredit(cr.lesser_values));
+         Memo1.Lines.AddStrings (cr.string_list);
+         Memo1.Lines.Add ('------------------------------------------------------------');
+         if cr.greater_values <> nil then
+            sort_and_append_credits_to_memo (tCredit(cr.greater_values))
+      end;
    begin
+      cpc_logo_image := TImage.Create(Self);
+      with cpc_logo_image do
+         begin
+            Name := 'CPCLogoImage';
+            Parent := Self;
+            Left := 8;
+            Top := 8;
+            Width := 129;
+            Height := 129;
+         end;
+      built_using_image := TImage.Create(Self);
+      with built_using_image do
+         begin
+            Name := 'BuiltUsingImage';
+            Parent := BuiltUsingGroupBox;
+            Left := 13;
+            Top := 20;
+            Width := 60;
+            Height := 60
+         end;
       credits := TBalancedBinaryTree.Create;
+      cpc_logo_image.Picture.Bitmap.LoadFromResourceName(HInstance, 'CP_LOGO');
 {$IFDEF FPC}
       BuiltUsingGroupBox.Caption := 'Built with Lazrus/Free Pascal';
-      adj_top (BuiltUsingImage);
-      BuiltUsingImage.Picture.LoadFromFile (ExtractFilePath(ParamStr(0)) + 'images' + PathDelim + 'lazarus48x48.png');
+      adj_top (built_using_image);
       adj_top (BuilderLabel1);
+      built_using_image.Picture.Bitmap.LoadFromResourceName(HInstance, 'LAZARUS_LOGO');
       BuilderLabel1.caption := GetLCLVersion;
       adj_top (BuilderLabel2);
       BuilderLabel2.Caption := 'Compiled with ' + GetCompilerInfo;
@@ -202,44 +232,51 @@ procedure TAboutCreditFrame.Init;
       BuilderLabel3.caption := GetWidgetSet;
 {$ELSE}
       BuiltUsingGroupBox.Caption := 'Built with Delphi';
-      BuiltUsingImage.Picture.LoadFromFile (ExtractFilePath(ParamStr(0)) + 'images' + PathDelim + 'delphi52x52.gif');
+      built_using_image.Picture.Bitmap.LoadFromResourceName (HInstance, 'DELPHI_LOGO');
       BuilderLabel1.Caption := '';
       BuilderLabel2.Caption := 'Compiled with ' + DelphiVersion;
       BuilderLabel3.Caption := '';
 {$ENDIF}
-      AddThirdPartyCredit ('SmoothSort|Edsger Dijkstra|http://en.wikibooks.org/wiki/Algorithm_Implemenation/Sorting/Smoothsort');
-      AddThirdPartyCredit ('Balanced Binary Trees|Nicklaus Wirth|Algorithmen und Datenstrukturen, p. 250|Fixed By Giacomo Policicchio|pgiacomo@tiscalinet.it');
-      AddThirdPartyCredit ('FastMM4 - Fast Memory Manager|Pierre le Riche|https://github.com/pleriche/FastMM4');
-      AddThirdPartyCredit ('LibXmlParser|Stefan Heymann|www.destructor.de');
-      AddThirdPartyCredit ('MPArith - multi precision integer arithmetic|Wolfgang Ehrhardt|http://wolfgang-ehrhardt.de');
-      SetThirdParyCredits
+      AddThirdPartyCredits;
+      sort_and_append_credits_to_memo (tCredit(credits.root));
+      Memo1.Lines.Delete (Memo1.Lines.Count-1)   // delete last -------------
    end;
 
-procedure TAboutCreditFrame.AddThirdPartyCredit (s: string);
+procedure TAboutBoxForm.OKButtonClick(Sender: TObject);
+   begin
+      Close
+   end;
+
+procedure TAboutBoxForm.AddWirthCredit;
+   begin
+      AddThirdPartyCredit ('Balanced Binary Trees|Nicklaus Wirth|Algorithmen und Datenstrukturen, p. 250|Fixed By Giacomo Policicchio|pgiacomo@tiscalinet.it');
+   end;
+
+procedure TAboutBoxForm.AddFastMM4Credit;
+   begin
+{$IFNDEF FPC}
+      AddThirdPartyCredit ('FastMM4 - Fast Memory Manager|Pierre le Riche|https://github.com/pleriche/FastMM4');
+{$ENDIF}
+   end;
+
+procedure TAboutBoxForm.AddCommonThirdPartyCredits;
+   begin
+      AddThirdPartyCredit ('SmoothSort|Edsger Dijkstra|http://en.wikibooks.org/wiki/Algorithm_Implemenation/Sorting/Smoothsort');
+      AddThirdPartyCredit ('LibXmlParser|Stefan Heymann|www.destructor.de');
+      AddThirdPartyCredit ('MPArith - multi precision integer arithmetic|Wolfgang Ehrhardt|http://wolfgang-ehrhardt.de');
+      AddWirthCredit;
+      AddFastMM4Credit
+   end;
+
+procedure TAboutBoxForm.AddThirdPartyCredit (s: string);
    begin
       credits.Add (tCredit.Create (s))
    end;
 
-procedure TAboutCreditFrame.SetThirdParyCredits;
-   procedure append_credits (cr: tCredit);
-      begin
-         if cr.lesser_values <> nil then
-            append_credits (tCredit(cr.lesser_values));
-         Memo1.Lines.AddStrings (cr.string_list);
-         Memo1.Lines.Add ('-----------------------------------------------------------------');
-         if cr.greater_values <> nil then
-            append_credits (tCredit(cr.greater_values))
-      end;
-   begin
-      Memo1.Clear;
-      append_credits (tCredit(credits.root));
-      Memo1.Lines.Delete (Memo1.Lines.Count-1)   // delete last -------------
-   end;
-
-destructor TAboutCreditFrame.Destroy;
+destructor TAboutBoxForm.Destroy;
    begin
       credits.Free;
       inherited
    end;
 
-end.
+END.

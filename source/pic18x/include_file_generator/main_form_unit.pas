@@ -63,7 +63,7 @@ IMPLEMENTATION
 {$R *.dfm}
 
 uses
-   win32_utils, SysUtils, about_box_unit,
+   win32_utils, SysUtils, pic18x_include_file_generator_aboutbox_unit,
    ClipBrd, file_viewer_unit,
    process_all_pic_files_dlg_unit, pic18x_selection_dialog_unit,
    combo_type_dialog_unit, all_pic18x_sfr_field_info_unit, combo_type_unit,
@@ -134,7 +134,7 @@ procedure TMainForm.UnpackPICFilesfromMPLABX1Click(Sender: TObject);
 
 procedure TMainForm.About2Click(Sender: TObject);
    begin
-     AboutBox.ShowModal
+      PIC18xIncludeFileGeneratorAboutBoxForm.ShowModal
    end;
 
 procedure TMainForm.AppendToMemo1 (s: string);

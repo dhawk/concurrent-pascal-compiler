@@ -46,8 +46,8 @@ uses
   cpc_target_cpu_unit in '..\..\cpc_core\cpc_target_cpu_unit.pas',
   cpc_term_expression_unit in '..\..\cpc_core\cpc_term_expression_unit.pas',
   cpc_types_unit in '..\..\cpc_core\cpc_types_unit.pas',
-  about_credit_frame_unit in '..\..\lib\about_credit_frame_unit.pas' {AboutCreditFrame: TFrame},
-  about_box_unit in 'about_box_unit.pas' {AboutBox};
+  aboutbox_unit in '..\..\common\aboutbox_unit.pas' {AboutBoxForm},
+  pic18x_include_file_generator_aboutbox_unit in 'pic18x_include_file_generator_aboutbox_unit.pas' {PIC18xIncludeFileGeneratorAboutBoxForm};
 
 {$R *.res}
 
@@ -61,6 +61,6 @@ begin
   Application.CreateForm(TChooseCOrAssemblyTypeListingForm, ChooseCOrAssemblyTypeListingForm);
   Application.CreateForm(TProcessAllPICFilesDlg, ProcessAllPICFilesDlg);
   Application.CreateForm(TSyntaxCheckAllIncludeFilesDialog, SyntaxCheckAllIncludeFilesDialog);
-  Application.CreateForm(TAboutBox, AboutBox);
+  Application.CreateForm(TPIC18xIncludeFileGeneratorAboutBoxForm, PIC18xIncludeFileGeneratorAboutBoxForm);
   Application.Run;
 end.

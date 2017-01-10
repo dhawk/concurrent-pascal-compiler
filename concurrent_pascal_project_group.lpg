@@ -10,7 +10,7 @@
         <BuildModes Count="1"/>
         <Mode1 Name="Default"/>
       </Target1>
-      <Target2 FileName="source\pic18x\cpc_pic18x.lpi">
+      <Target2 FileName="source\pic18x\cpc_pic18x\cpc_pic18x.lpi">
         <BuildModes Count="1"/>
         <Mode1 Name="Default"/>
       </Target2>

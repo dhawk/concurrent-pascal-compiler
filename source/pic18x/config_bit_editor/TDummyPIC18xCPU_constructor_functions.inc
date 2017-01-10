@@ -188,6 +188,11 @@ function TDummyPIC18xCPU.TRoutineCallStatement_CreateFromSourceTokens (acc: TAcc
       result := TRoutineCallStatement.CreateFromSourceTokens (acc)
    end;
 
+function TDummyPIC18xCPU.TRoutineCallStatement_CreatePropertySetterCall (acc: TAccess; exp: TExpression; _src_loc: TSourceLocation): TRoutineCallStatement;
+   begin
+      result := TRoutineCallStatement.CreatePropertySetterCall (acc, exp, _src_loc)
+   end;
+
 function TDummyPIC18xCPU.TSetConstructorPrimary_CreateFromSourceTokens: TSetConstructorPrimary;
    begin
       result := TSetConstructorPrimary.CreateFromSourceTokens
@@ -297,4 +302,10 @@ function TDummyPIC18xCPU.TWithStatement_CreateFromSourceTokensStartingAtVariable
    begin
       result := TWithStatement.CreateFromSourceTokensStartingAtVariable
    end;
+
+function TDummyPIC18xCPU.TCallRecord_Create (called_name: string; called_access: TDefinition; call_type: TCallType): TCallRecord;
+   begin
+      result := TCallRecord.Create (called_name, called_access, call_type)
+   end;
+
 

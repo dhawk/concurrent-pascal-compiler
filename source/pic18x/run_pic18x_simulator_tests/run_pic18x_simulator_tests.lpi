@@ -15,6 +15,10 @@
       <UseAppBundle Value="False"/>
       <ResourceType Value="res"/>
       <Icon Value="0"/>
+      <Resources Count="2">
+        <Resource_0 FileName="..\..\common\cp_logo.bmp" Type="BITMAP" ResourceName="CP_LOGO"/>
+        <Resource_1 FileName="..\..\common\lazarus_logo.bmp" Type="BITMAP" ResourceName="LAZARUS_LOGO"/>
+      </Resources>
     </General>
     <i18n>
       <EnableI18N LFM="False"/>

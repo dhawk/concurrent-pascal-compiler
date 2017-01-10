@@ -37,10 +37,18 @@
 <BorlandProject><Delphi.Personality><Parameters><Parameters Name="UseLauncher">False</Parameters><Parameters Name="LoadAllSymbols">True</Parameters><Parameters Name="LoadUnspecifiedSymbols">False</Parameters></Parameters><VersionInfo><VersionInfo Name="IncludeVerInfo">False</VersionInfo><VersionInfo Name="AutoIncBuild">False</VersionInfo><VersionInfo Name="MajorVer">1</VersionInfo><VersionInfo Name="MinorVer">0</VersionInfo><VersionInfo Name="Release">0</VersionInfo><VersionInfo Name="Build">0</VersionInfo><VersionInfo Name="Debug">False</VersionInfo><VersionInfo Name="PreRelease">False</VersionInfo><VersionInfo Name="Special">False</VersionInfo><VersionInfo Name="Private">False</VersionInfo><VersionInfo Name="DLL">False</VersionInfo><VersionInfo Name="Locale">1033</VersionInfo><VersionInfo Name="CodePage">1252</VersionInfo></VersionInfo><VersionInfoKeys><VersionInfoKeys Name="CompanyName"></VersionInfoKeys><VersionInfoKeys Name="FileDescription"></VersionInfoKeys><VersionInfoKeys Name="FileVersion">1.0.0.0</VersionInfoKeys><VersionInfoKeys Name="InternalName"></VersionInfoKeys><VersionInfoKeys Name="LegalCopyright"></VersionInfoKeys><VersionInfoKeys Name="LegalTrademarks"></VersionInfoKeys><VersionInfoKeys Name="OriginalFilename"></VersionInfoKeys><VersionInfoKeys Name="ProductName"></VersionInfoKeys><VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys><VersionInfoKeys Name="Comments"></VersionInfoKeys></VersionInfoKeys><Source><Source Name="MainSource">cpc_pic18x.dpr</Source></Source></Delphi.Personality></BorlandProject></BorlandProject>
   </ProjectExtensions>
   <Import Project="$(MSBuildBinPath)\Borland.Delphi.Targets" />
+  <PropertyGroup>
+    <PreBuildEvent>del cpc_pic18x.res</PreBuildEvent>
+    <PostBuildEvent>resourcehacker.exe -script resourcehacker_script.txt
+del cpc_pic18x.res</PostBuildEvent>
+  </PropertyGroup>
   <ItemGroup>
     <DelphiCompile Include="cpc_pic18x.dpr">
       <MainSource>MainSource</MainSource>
     </DelphiCompile>
+    <DCCReference Include="..\..\common\aboutbox_unit.pas">
+      <Form>AboutBoxForm</Form>
+    </DCCReference>
     <DCCReference Include="..\..\cpc_core\cpc_access_unit.pas" />
     <DCCReference Include="..\..\cpc_core\cpc_blocks_unit.pas" />
     <DCCReference Include="..\..\cpc_core\cpc_common_unit.pas" />
@@ -62,7 +70,12 @@
     <DCCReference Include="..\..\lib\mparith\mp_base.pas" />
     <DCCReference Include="..\..\lib\mparith\mp_prng.pas" />
     <DCCReference Include="..\..\lib\mparith\mp_types.pas" />
-    <DCCReference Include="..\..\lib\wirth_balanced_binary_tree_unit.pas" />
+    <DCCReference Include="..\..\lib\wirth_balanced_binary_tree_unit.pas">
+      <Form>$R *.res</Form>
+    </DCCReference>
+    <DCCReference Include="..\common\pic18x_aboutbox_unit.pas">
+      <Form>PIC18xAboutBoxForm</Form>
+    </DCCReference>
     <DCCReference Include="..\common\pic18x_common_unit.pas" />
     <DCCReference Include="..\pic18x_access_unit.pas" />
     <DCCReference Include="..\pic18x_assignment_statement_unit.pas" />
@@ -84,5 +97,8 @@
     <DCCReference Include="..\pic18x_string_unit.pas" />
     <DCCReference Include="..\pic18x_term_expression_unit.pas" />
     <DCCReference Include="..\pic18x_types_unit.pas" />
+    <DCCReference Include="cpc_pic18x_aboutbox_unit.pas">
+      <Form>CPCPIC18xAboutBoxForm</Form>
+    </DCCReference>
   </ItemGroup>
 </Project>

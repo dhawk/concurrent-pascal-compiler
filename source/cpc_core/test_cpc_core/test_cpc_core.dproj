@@ -37,10 +37,18 @@
 <BorlandProject><Delphi.Personality><Parameters><Parameters Name="UseLauncher">False</Parameters><Parameters Name="LoadAllSymbols">True</Parameters><Parameters Name="LoadUnspecifiedSymbols">False</Parameters></Parameters><VersionInfo><VersionInfo Name="IncludeVerInfo">False</VersionInfo><VersionInfo Name="AutoIncBuild">False</VersionInfo><VersionInfo Name="MajorVer">1</VersionInfo><VersionInfo Name="MinorVer">0</VersionInfo><VersionInfo Name="Release">0</VersionInfo><VersionInfo Name="Build">0</VersionInfo><VersionInfo Name="Debug">False</VersionInfo><VersionInfo Name="PreRelease">False</VersionInfo><VersionInfo Name="Special">False</VersionInfo><VersionInfo Name="Private">False</VersionInfo><VersionInfo Name="DLL">False</VersionInfo><VersionInfo Name="Locale">1033</VersionInfo><VersionInfo Name="CodePage">1252</VersionInfo></VersionInfo><VersionInfoKeys><VersionInfoKeys Name="CompanyName"></VersionInfoKeys><VersionInfoKeys Name="FileDescription"></VersionInfoKeys><VersionInfoKeys Name="FileVersion">1.0.0.0</VersionInfoKeys><VersionInfoKeys Name="InternalName"></VersionInfoKeys><VersionInfoKeys Name="LegalCopyright"></VersionInfoKeys><VersionInfoKeys Name="LegalTrademarks"></VersionInfoKeys><VersionInfoKeys Name="OriginalFilename"></VersionInfoKeys><VersionInfoKeys Name="ProductName"></VersionInfoKeys><VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys><VersionInfoKeys Name="Comments"></VersionInfoKeys></VersionInfoKeys><Source><Source Name="MainSource">test_cpc_core.dpr</Source></Source></Delphi.Personality></BorlandProject></BorlandProject>
   </ProjectExtensions>
   <Import Project="$(MSBuildBinPath)\Borland.Delphi.Targets" />
+  <PropertyGroup>
+    <PreBuildEvent>del test_cpc_core.res</PreBuildEvent>
+    <PostBuildEvent>resourcehacker.exe -script resourcehacker_script.txt
+del test_cpc_core.res</PostBuildEvent>
+  </PropertyGroup>
   <ItemGroup>
     <DelphiCompile Include="test_cpc_core.dpr">
       <MainSource>MainSource</MainSource>
     </DelphiCompile>
+    <DCCReference Include="..\..\common\aboutbox_unit.pas">
+      <Form>AboutBoxForm</Form>
+    </DCCReference>
     <DCCReference Include="..\cpc_access_unit.pas" />
     <DCCReference Include="..\cpc_blocks_unit.pas" />
     <DCCReference Include="..\cpc_common_unit.pas" />
@@ -65,6 +73,9 @@
     <DCCReference Include="..\test_statement_syntax_unit.pas" />
     <DCCReference Include="..\test_subroutines_unit.pas" />
     <DCCReference Include="..\test_type_syntax_unit.pas" />
+    <DCCReference Include="test_cpc_core_aboutbox_unit.pas">
+      <Form>TestCPCCoreAboutBoxForm</Form>
+    </DCCReference>
     <DCCReference Include="test_main_form_unit.pas">
       <Form>MainForm</Form>
     </DCCReference>

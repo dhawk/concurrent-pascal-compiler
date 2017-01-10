@@ -1,0 +1,8 @@
+[FILENAMES]
+Open=..\..\..\bin\run_pic18x_simulator_tests.exe
+Save=..\..\..\bin\run_pic18x_simulator_tests.exe
+Log=ResourceHacker.log
+[COMMANDS]
+-addoverwrite ..\..\common\cp.ico, ICONGROUP,MAINICON, 
+-add ..\..\common\cp_logo.bmp, BITMAP,CP_LOGO,
+-add ..\..\common\delphi_logo.bmp, BITMAP,DELPHI_LOGO,
