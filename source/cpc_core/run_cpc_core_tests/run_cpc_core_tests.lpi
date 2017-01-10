@@ -15,6 +15,10 @@
       <UseAppBundle Value="False"/>
       <ResourceType Value="res"/>
       <Icon Value="0"/>
+      <Resources Count="2">
+        <Resource_0 FileName="..\..\common\cp_logo.bmp" Type="BITMAP" ResourceName="CP_LOGO"/>
+        <Resource_1 FileName="..\..\common\lazarus_logo.bmp" Type="BITMAP" ResourceName="LAZARUS_LOGO"/>
+      </Resources>
     </General>
     <i18n>
       <EnableI18N LFM="False"/>
@@ -38,7 +42,7 @@
         <PackageName Value="LCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="28">
+    <Units Count="26">
       <Unit0>
         <Filename Value="run_cpc_core_tests.dpr"/>
         <IsPartOfProject Value="True"/>
@@ -108,49 +112,43 @@
         <IsPartOfProject Value="True"/>
       </Unit16>
       <Unit17>
-        <Filename Value="..\test_block_synax_unit.pas"/>
+        <Filename Value="..\test_constant_expression_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit17>
       <Unit18>
-        <Filename Value="..\test_constant_expression_unit.pas"/>
+        <Filename Value="..\test_cpu_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit18>
       <Unit19>
-        <Filename Value="..\test_cpu_unit.pas"/>
+        <Filename Value="..\test_expression_syntax_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit19>
       <Unit20>
-        <Filename Value="..\test_expression_syntax_unit.pas"/>
+        <Filename Value="..\test_multi_precision_integer_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit20>
       <Unit21>
-        <Filename Value="..\test_multi_precision_integer_unit.pas"/>
+        <Filename Value="..\test_statement_syntax_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit21>
       <Unit22>
-        <Filename Value="..\test_statement_syntax_unit.pas"/>
+        <Filename Value="..\test_type_syntax_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit22>
       <Unit23>
-        <Filename Value="..\test_type_syntax_unit.pas"/>
+        <Filename Value="..\test_subroutines_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit23>
       <Unit24>
-        <Filename Value="..\test_subroutines_unit.pas"/>
+        <Filename Value="run_cpc_core_tests_aboutbox_unit.pas"/>
         <IsPartOfProject Value="True"/>
+        <HasResources Value="True"/>
       </Unit24>
       <Unit25>
-        <Filename Value="..\..\pic18x\ConverterBackup\dijkstra_smoothsort_unit.pas"/>
+        <Filename Value="..\..\common\aboutbox_unit.pas"/>
         <IsPartOfProject Value="True"/>
+        <HasResources Value="True"/>
       </Unit25>
-      <Unit26>
-        <Filename Value="..\..\pic18x\ConverterBackup\mp_base.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit26>
-      <Unit27>
-        <Filename Value="..\..\pic18x\ConverterBackup\mp_types.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit27>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -161,7 +159,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="..\..\lib;..\..\lib\mparith"/>
+      <OtherUnitFiles Value="..\..\lib;..\..\lib\mparith;..\..\common"/>
       <UnitOutputDirectory Value="obj"/>
     </SearchPaths>
     <Parsing>

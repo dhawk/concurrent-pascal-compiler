@@ -238,7 +238,8 @@ procedure TAboutBoxForm.FormCreate(Sender: TObject);
       BuilderLabel3.Caption := '';
 {$ENDIF}
       AddThirdPartyCredits;
-      sort_and_append_credits_to_memo (tCredit(credits.root));
+      if tCredit(credits.root) <> nil then
+         sort_and_append_credits_to_memo (tCredit(credits.root));
       Memo1.Lines.Delete (Memo1.Lines.Count-1)   // delete last -------------
    end;
 

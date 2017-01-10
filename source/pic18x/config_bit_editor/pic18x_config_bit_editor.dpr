@@ -18,7 +18,11 @@ uses
 *)
 
 uses
+{$IFDEF FPC}
+  Interfaces,
+{$ELSE}
   FastMM4,
+{$ENDIF}
   Forms,
   cpc_access_unit in '..\..\cpc_core\cpc_access_unit.pas',
   cpc_blocks_unit in '..\..\cpc_core\cpc_blocks_unit.pas',

@@ -14,6 +14,10 @@
       <Title Value="test_cpc_core"/>
       <UseAppBundle Value="False"/>
       <Icon Value="0"/>
+      <Resources Count="2">
+        <Resource_0 FileName="..\..\common\cp_logo.bmp" Type="BITMAP" ResourceName="CP_LOGO"/>
+        <Resource_1 FileName="..\..\common\lazarus_logo.bmp" Type="BITMAP" ResourceName="LAZARUS_LOGO"/>
+      </Resources>
     </General>
     <i18n>
       <EnableI18N LFM="False"/>
@@ -38,126 +42,107 @@
         <PackageName Value="LCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="29">
+    <Units Count="25">
       <Unit0>
         <Filename Value="test_cpc_core.dpr"/>
         <IsPartOfProject Value="True"/>
       </Unit0>
       <Unit1>
-        <Filename Value="cpc_access_unit.pas"/>
+        <Filename Value="..\cpc_multi_precision_integer_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit1>
       <Unit2>
-        <Filename Value="cpc_blocks_unit.pas"/>
+        <Filename Value="..\test_subroutines_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit2>
       <Unit3>
-        <Filename Value="cpc_common_unit.pas"/>
+        <Filename Value="..\cpc_access_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit3>
       <Unit4>
-        <Filename Value="cpc_constant_expression_unit.pas"/>
+        <Filename Value="..\cpc_blocks_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit4>
       <Unit5>
-        <Filename Value="cpc_core_objects_unit.pas"/>
+        <Filename Value="..\cpc_common_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit5>
       <Unit6>
-        <Filename Value="cpc_definitions_unit.pas"/>
+        <Filename Value="..\cpc_constant_expression_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit6>
       <Unit7>
-        <Filename Value="cpc_expressions_unit.pas"/>
+        <Filename Value="..\cpc_core_objects_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit7>
       <Unit8>
-        <Filename Value="cpc_main_compiler_unit.pas"/>
+        <Filename Value="..\cpc_definitions_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit8>
       <Unit9>
-        <Filename Value="cpc_multi_precision_integer_unit.pas"/>
+        <Filename Value="..\cpc_expressions_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit9>
       <Unit10>
-        <Filename Value="cpc_simple_expression_unit.pas"/>
+        <Filename Value="..\cpc_main_compiler_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit10>
       <Unit11>
-        <Filename Value="cpc_source_analysis_unit.pas"/>
+        <Filename Value="..\cpc_simple_expression_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit11>
       <Unit12>
-        <Filename Value="cpc_statements_unit.pas"/>
+        <Filename Value="..\cpc_source_analysis_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit12>
       <Unit13>
-        <Filename Value="cpc_target_cpu_unit.pas"/>
+        <Filename Value="..\cpc_statements_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit13>
       <Unit14>
-        <Filename Value="cpc_term_expression_unit.pas"/>
+        <Filename Value="..\cpc_target_cpu_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit14>
       <Unit15>
-        <Filename Value="cpc_types_unit.pas"/>
+        <Filename Value="..\cpc_term_expression_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit15>
       <Unit16>
-        <Filename Value="test_access_syntax_unit.pas"/>
+        <Filename Value="..\cpc_types_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit16>
       <Unit17>
-        <Filename Value="test_block_synax_unit.pas"/>
+        <Filename Value="..\test_access_syntax_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit17>
       <Unit18>
-        <Filename Value="test_constant_expression_unit.pas"/>
+        <Filename Value="..\test_block_syntax_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit18>
       <Unit19>
-        <Filename Value="test_expression_syntax_unit.pas"/>
+        <Filename Value="..\test_constant_expression_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit19>
       <Unit20>
-        <Filename Value="test_main_form_unit.pas"/>
+        <Filename Value="..\test_cpu_unit.pas"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="MainForm"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Form"/>
       </Unit20>
       <Unit21>
-        <Filename Value="test_multi_precision_integer_unit.pas"/>
+        <Filename Value="..\test_expression_syntax_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit21>
       <Unit22>
-        <Filename Value="test_statement_syntax_unit.pas"/>
+        <Filename Value="..\test_multi_precision_integer_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit22>
       <Unit23>
-        <Filename Value="test_type_syntax_unit.pas"/>
+        <Filename Value="..\test_statement_syntax_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit23>
       <Unit24>
-        <Filename Value="..\lib\wirth_balanced_binary_tree_unit.pas"/>
+        <Filename Value="..\test_type_syntax_unit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit24>
-      <Unit25>
-        <Filename Value="..\lib\dijkstra_smoothsort_unit.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit25>
-      <Unit26>
-        <Filename Value="test_cpu_unit.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit26>
-      <Unit27>
-        <Filename Value="..\lib\mparith\mp_base.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit27>
-      <Unit28>
-        <Filename Value="..\lib\mparith\mp_types.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit28>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -168,7 +153,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="..\..\lib;..\..\lib\mparith;$(ProjOutDir)"/>
-      <OtherUnitFiles Value="..\..\lib;..\..\lib\mparith"/>
+      <OtherUnitFiles Value="..\..\lib;..\..\lib\mparith;.."/>
       <UnitOutputDirectory Value="obj"/>
     </SearchPaths>
     <Parsing>

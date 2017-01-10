@@ -20,7 +20,11 @@ uses
 *)
 
 uses
+{$IFDEF FPC}
+  Interfaces,
+{$ELSE}
   FastMM4,
+{$ENDIF}
   Forms,
   SysUtils,
   aboutbox_unit in '..\..\common\aboutbox_unit.pas' {AboutBoxForm},

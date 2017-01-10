@@ -23,8 +23,10 @@ implementation
 
 procedure TPIC18xSimulatorTestsAboutBoxForm.AddThirdPartyCredits;
    begin
-      AddWirthCredit;
-      AddFastMM4Credit
+{$IFNDEF FPC}
+      AddFastMM4Credit;
+{$ENDIF}
+      AddWirthCredit
    end;
 
 end.
