@@ -42,7 +42,7 @@ IMPLEMENTATION
 
 uses
 {$IFNDEF CONSOLE_TEST_MODE}
-   test_main_form_unit,
+   main_form_unit,
 {$ENDIF}
    cpc_statements_unit, cpc_target_cpu_unit, cpc_source_analysis_unit,
    cpc_core_objects_unit, cpc_common_unit, cpc_main_compiler_unit, classes;

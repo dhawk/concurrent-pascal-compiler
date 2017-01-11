@@ -1,4 +1,4 @@
-UNIT test_cpc_core_aboutbox_unit;
+UNIT cpc_core_dev_aboutbox_unit;
 
 INTERFACE
 
@@ -7,7 +7,7 @@ uses
    Dialogs, aboutbox_unit, StdCtrls;
 
 type
-   TTestCPCCoreAboutBoxForm =
+   TCPCCoreDevAboutBoxForm =
       class(TAboutBoxForm)
       protected
          procedure AddThirdPartyCredits;
@@ -15,13 +15,13 @@ type
       end;
 
 var
-   TestCPCCoreAboutBoxForm: TTestCPCCoreAboutBoxForm;
+   CPCCoreDevAboutBoxForm: TCPCCoreDevAboutBoxForm;
 
 IMPLEMENTATION
 
 {$R *.dfm}
 
-procedure TTestCPCCoreAboutBoxForm.AddThirdPartyCredits;
+procedure TCPCCoreDevAboutBoxForm.AddThirdPartyCredits;
    begin
       AddCommonThirdPartyCredits
    end;

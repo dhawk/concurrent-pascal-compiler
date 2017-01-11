@@ -1,4 +1,4 @@
-unit test_pic18x_compiler_aboutbox_unit;
+unit pic18x_compiler_dev_aboutbox_unit;
 
 interface
 
@@ -7,7 +7,7 @@ uses
   Dialogs, pic18x_aboutbox_unit, StdCtrls;
 
 type
-  TTestCPCPIC18xAboutBox = class(TPIC18xAboutBoxForm)
+  TCPCPIC18xDevAboutBox = class(TPIC18xAboutBoxForm)
   private
     { Private declarations }
   public
@@ -15,7 +15,7 @@ type
   end;
 
 var
-  TestCPCPIC18xAboutBox: TTestCPCPIC18xAboutBox;
+  CPCPIC18xDevAboutBox: TCPCPIC18xDevAboutBox;
 
 implementation
 

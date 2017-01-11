@@ -1,7 +1,7 @@
 object MainForm: TMainForm
   Left = 174
   Top = 210
-  Caption = 'Concurrent Pascal Compiler Core Syntax Analysis Test'
+  Caption = 'Concurrent Pascal Compiler Core Dev'
   ClientHeight = 511
   ClientWidth = 1039
   Color = clBtnFace

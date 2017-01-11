@@ -34,7 +34,7 @@ IMPLEMENTATION
 
 uses
 {$IFNDEF CONSOLE_TEST_MODE}
-   test_pic18x_compiler_main_form_unit,
+   main_form_unit,
 {$ENDIF}
    Classes, pic18x_instructions_unit, pic18x_macro_instructions_unit,
    test_pic18x_kernel_unit, cpc_main_compiler_unit, SysUtils,

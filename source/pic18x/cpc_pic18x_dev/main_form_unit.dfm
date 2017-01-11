@@ -1,7 +1,7 @@
 object MainForm: TMainForm
   Left = 0
   Top = 0
-  Caption = 'PIC18x Concurrent Pascal Compiler Test'
+  Caption = 'PIC18x Concurrent Pascal Compiler Dev'
   ClientHeight = 775
   ClientWidth = 1212
   Color = clBtnFace
@@ -159,6 +159,10 @@ object MainForm: TMainForm
     object TabSheet3: TTabSheet
       Caption = 'Trace'
       ImageIndex = 4
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Label2: TLabel
         Left = 27
         Top = 27

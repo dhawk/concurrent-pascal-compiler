@@ -1,4 +1,4 @@
-UNIT test_pic18x_compiler_main_form_unit;
+UNIT main_form_unit;
 
 {$ifdef FPC}
 {$MODE Delphi}
@@ -43,9 +43,9 @@ type
          TraceMemo: TMemo;
          Label2: TLabel;
          CleanupTestSrcButton: TButton;
-    MainMenu1: TMainMenu;
-    About1: TMenuItem;
-    AboutTestCPCPIC18x1: TMenuItem;
+         MainMenu1: TMainMenu;
+         About1: TMenuItem;
+         AboutTestCPCPIC18x1: TMenuItem;
          procedure ClearMemoButtonClick
             (Sender: TObject
             );
@@ -75,7 +75,7 @@ uses
    pic18x_instructions_unit, test_pic18x_simulator_unit, pic18x_macro_instructions_unit, pic18x_multiply_divide_unit,
    pic18x_microprocessor_information_unit, pic18x_run_time_error_check_unit, cpc_source_analysis_unit,
    cpc_common_unit, ClipBrd, pic18x_main_compiler_unit, test_pic18x_subroutines_unit, 
-  test_pic18x_compiler_aboutbox_unit;
+   pic18x_compiler_dev_aboutbox_unit;
 
 
 var
@@ -146,7 +146,7 @@ function all_ones (size: integer): uint64;
 
 procedure TMainForm.AboutTestCPCPIC18x1Click(Sender: TObject);
    begin
-      TestCPCPIC18xAboutBox.ShowModal
+      CPCPIC18xDevAboutBox.ShowModal
    end;
 
 procedure TMainForm.CleanupTestSrcButtonClick(Sender: TObject);

@@ -675,27 +675,29 @@ constructor TAssignmentStatement.CreateFromSourceTokens
          set_type:
             expression := CreateExpressionFromSourceTokens;
          string_type:  // string assignment allows constant expressions (i.e. "+"), otherwise must be a single primary
-            try
+            begin
                start_idx := lex.token_idx;
                call_record_len := Length(BlockStack.tos.call_record_list);
-               expression := CreateExpressionFromSourceTokens;
-               if not expression.contains_constant then
-                  begin
-                     expression.Release;
-                     raise compile_error.Create ('')
-                  end;
-            except
-               on e: compile_error do
-                  begin
-                     lex.token_idx := start_idx;
-                     while Length(BlockStack.tos.call_record_list) > call_record_len do
-                        begin
-                           i := Length(BlockStack.tos.call_record_list)-1;
-                           BlockStack.tos.call_record_list[i].Free;
-                           SetLength (BlockStack.tos.call_record_list, i)
-                        end;
-                     expression := CreatePrimaryFromSourceTokens
-                  end
+               try
+                  expression := CreateExpressionFromSourceTokens;
+                  if not expression.contains_constant then
+                     begin
+                        expression.Release;
+                        raise compile_error.Create ('')
+                     end;
+               except
+                  on e: compile_error do
+                     begin
+                        lex.token_idx := start_idx;
+                        while Length(BlockStack.tos.call_record_list) > call_record_len do
+                           begin
+                              i := Length(BlockStack.tos.call_record_list)-1;
+                              BlockStack.tos.call_record_list[i].Free;
+                              SetLength (BlockStack.tos.call_record_list, i)
+                           end;
+                        expression := CreatePrimaryFromSourceTokens
+                     end
+               end
             end;
          record_type,
          array_type,

@@ -11,7 +11,7 @@
       </Flags>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
-      <Title Value="test_cpc_core"/>
+      <Title Value="cpc_core_dev"/>
       <UseAppBundle Value="False"/>
       <Icon Value="0"/>
       <Resources Count="2">
@@ -44,7 +44,7 @@
     </RequiredPackages>
     <Units Count="25">
       <Unit0>
-        <Filename Value="test_cpc_core.dpr"/>
+        <Filename Value="cpc_core_dev.dpr"/>
         <IsPartOfProject Value="True"/>
       </Unit0>
       <Unit1>
@@ -149,7 +149,7 @@
     <Version Value="11"/>
     <PathDelim Value="\"/>
     <Target>
-      <Filename Value="..\..\..\bin\test_cpc_core"/>
+      <Filename Value="..\..\..\bin\cpc_core_dev"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="..\..\lib;..\..\lib\mparith;$(ProjOutDir)"/>
