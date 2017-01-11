@@ -9,10 +9,10 @@
       <Title Value="cpc_pic18x_dev"/>
       <ResourceType Value="res"/>
       <UseXPManifest Value="True"/>
-      <Icon Value="0"/>
-      <Resources Count="2">
+      <Resources Count="3">
         <Resource_0 FileName="..\..\common\cp_logo.bmp" Type="BITMAP" ResourceName="CP_LOGO"/>
         <Resource_1 FileName="..\..\common\lazarus_logo.bmp" Type="BITMAP" ResourceName="LAZARUS_LOGO"/>
+        <Resource_2 FileName="..\..\common\mainicon.ico" Type="ICON" ResourceName="MAINICON"/>
       </Resources>
     </General>
     <i18n>
@@ -216,7 +216,9 @@
       <Unit42>
         <Filename Value="main_form_unit.pas"/>
         <IsPartOfProject Value="True"/>
+        <ComponentName Value="MainForm"/>
         <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
       </Unit42>
       <Unit43>
         <Filename Value="pic18x_compiler_dev_aboutbox_unit.pas"/>

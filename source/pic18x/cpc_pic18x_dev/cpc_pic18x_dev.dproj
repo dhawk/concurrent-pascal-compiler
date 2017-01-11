@@ -92,9 +92,7 @@
     <DCCReference Include="..\test_pic18x_compiler_unit.pas" />
     <DCCReference Include="..\test_pic18x_kernel_unit.pas" />
     <DCCReference Include="..\test_pic18x_simulator_unit.pas" />
-    <DCCReference Include="..\test_pic18x_subroutines_unit.pas">
-      <Form>$R *.res</Form>
-    </DCCReference>
+    <DCCReference Include="..\test_pic18x_subroutines_unit.pas" />
     <DCCReference Include="main_form_unit.pas">
       <Form>MainForm</Form>
     </DCCReference>

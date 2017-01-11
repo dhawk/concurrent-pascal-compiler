@@ -2,31 +2,31 @@
 <CONFIG>
   <ProjectGroup FileVersion="1">
     <Targets Count="8">
-      <Target0 FileName="source\cpc_core\run_cpc_core_tests\run_cpc_core_tests.lpi">
+      <Target0 FileName="source\cpc_core\cpc_core_dev\cpc_core_dev.lpi">
         <BuildModes Count="1"/>
         <Mode1 Name="Default"/>
       </Target0>
-      <Target1 FileName="source\cpc_core\test_cpc_core\test_cpc_core.lpi">
+      <Target1 FileName="source\cpc_core\run_cpc_core_tests\run_cpc_core_tests.lpi">
         <BuildModes Count="1"/>
         <Mode1 Name="Default"/>
       </Target1>
-      <Target2 FileName="source\pic18x\cpc_pic18x\cpc_pic18x.lpi">
+      <Target2 FileName="source\pic18x\run_pic18x_simulator_tests\run_pic18x_simulator_tests.lpi">
         <BuildModes Count="1"/>
         <Mode1 Name="Default"/>
       </Target2>
-      <Target3 FileName="source\pic18x\test_cpc_pic18x\test_cpc_pic18x.lpi">
+      <Target3 FileName="source\pic18x\run_pic18x_kernel_tests\run_pic18x_kernel_tests.lpi">
         <BuildModes Count="1"/>
         <Mode1 Name="Default"/>
       </Target3>
-      <Target4 FileName="source\pic18x\run_pic18x_simulator_tests\run_pic18x_simulator_tests.lpi">
+      <Target4 FileName="source\pic18x\run_pic18x_compiler_tests\run_pic18x_compiler_tests.lpi">
         <BuildModes Count="1"/>
         <Mode1 Name="Default"/>
       </Target4>
-      <Target5 FileName="source\pic18x\run_pic18x_kernel_tests\run_pic18x_kernel_tests.lpi">
+      <Target5 FileName="source\pic18x\cpc_pic18x_dev\cpc_pic18x_dev.lpi">
         <BuildModes Count="1"/>
         <Mode1 Name="Default"/>
       </Target5>
-      <Target6 FileName="source\pic18x\run_pic18x_compiler_tests\run_pic18x_compiler_tests.lpi">
+      <Target6 FileName="source\pic18x\cpc_pic18x\cpc_pic18x.lpi">
         <BuildModes Count="1"/>
         <Mode1 Name="Default"/>
       </Target6>
