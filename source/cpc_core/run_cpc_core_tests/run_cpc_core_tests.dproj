@@ -78,8 +78,5 @@ del run_cpc_core_tests.res</PostBuildEvent>
     <DCCReference Include="run_cpc_core_tests_aboutbox_unit.pas">
       <Form>RunCPCCoreTestsAboutBoxForm</Form>
     </DCCReference>
-    <RcCompile Include="..\..\common\bitmaps_for_delphi.rc">
-      <Form>..\..\common\bitmaps_for_delphi.res</Form>
-    </RcCompile>
   </ItemGroup>
 </Project>

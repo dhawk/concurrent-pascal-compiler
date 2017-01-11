@@ -77,8 +77,5 @@ del pic18x_config_bit_editor.res</PostBuildEvent>
     <DCCReference Include="main_form_unit.pas">
       <Form>MainForm</Form>
     </DCCReference>
-    <RcCompile Include="..\..\common\bitmaps_for_delphi.rc">
-      <Form>..\..\common\bitmaps_for_delphi.res</Form>
-    </RcCompile>
   </ItemGroup>
 </Project>
