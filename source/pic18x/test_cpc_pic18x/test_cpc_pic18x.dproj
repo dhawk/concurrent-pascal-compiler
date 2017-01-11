@@ -39,7 +39,7 @@
   </ProjectExtensions>
   <Import Project="$(MSBuildBinPath)\Borland.Delphi.Targets" />
   <PropertyGroup>
-    <PreBuildEvent>del test_cpc_pic18x.res</PreBuildEvent>
+    <PreBuildEvent>copy /y res\*.* .</PreBuildEvent>
     <PostBuildEvent>resourcehacker.exe -script resourcehacker_script.txt</PostBuildEvent>
   </PropertyGroup>
   <ItemGroup>

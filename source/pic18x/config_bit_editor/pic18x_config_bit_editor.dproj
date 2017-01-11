@@ -38,7 +38,7 @@
   </ProjectExtensions>
   <Import Project="$(MSBuildBinPath)\Borland.Delphi.Targets" />
   <PropertyGroup>
-    <PreBuildEvent>del pic18x_config_bit_editor.res</PreBuildEvent>
+    <PreBuildEvent>copy /y res\*.* .</PreBuildEvent>
     <PostBuildEvent>resourcehacker.exe -script resourcehacker_script.txt
 del pic18x_config_bit_editor.res</PostBuildEvent>
   </PropertyGroup>
