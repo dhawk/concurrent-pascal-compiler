@@ -29,6 +29,10 @@ object MainForm: TMainForm
     TabOrder = 0
     object TabSheet1: TTabSheet
       Caption = 'Source'
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         1188
         731)
@@ -136,6 +140,10 @@ object MainForm: TMainForm
     object TabSheet2: TTabSheet
       Caption = 'Assembly'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         1188
         731)
@@ -198,6 +206,10 @@ object MainForm: TMainForm
     object TabSheet4: TTabSheet
       Caption = 'Compiler Tests'
       ImageIndex = 3
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         1188
         731)

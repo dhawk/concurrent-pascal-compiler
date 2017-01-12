@@ -76,6 +76,7 @@ uses
 begin
    if ParamCount = 0 then
       begin
+         SetCurrentDir (ExtractFilePath(ParamStr(0)) + 'pic18x' + PathDelim + 'compiler_test_cases');
          number_of_tests := 0;
          number_of_errors := 0;
          try
