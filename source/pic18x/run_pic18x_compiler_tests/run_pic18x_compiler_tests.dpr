@@ -87,7 +87,7 @@ begin
                   number_of_errors := number_of_errors + 1
                end
          end;
-
+         writeln ('number of errors = ' + IntToStr(number_of_errors));
          ExitCode := number_of_errors
       end
    else if LowerCase(ParamStr(1)) = '-about' then

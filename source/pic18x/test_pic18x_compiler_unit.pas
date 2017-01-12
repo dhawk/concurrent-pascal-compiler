@@ -6786,8 +6786,13 @@ procedure test134;
 procedure test135;   // test includes
    begin
       add ('type');
+{$IFDEF CONSOLE_TEST_MODE}
+      add ('{$include ''pic18x\compiler_test_cases\include_test1\c2.inc''}');
+      add ('{$include ''pic18x\compiler_test_cases\include_test1\c3.inc''}');
+{$ELSE}
       add ('{$include ''include_test1\c2.inc''}');
       add ('{$include ''include_test1\c3.inc''}');
+{$ENDIF}
       add ('var');
       add (' c1: tc1;');
       add (' c2: tc2;');
