@@ -7,7 +7,9 @@ UNIT cpc_source_analysis_unit;
 INTERFACE
 
 uses
-   SysUtils, cpc_multi_precision_integer_unit, Classes;
+   Classes,
+   cpc_multi_precision_integer_unit,
+   SysUtils;
 
 type
    TSourceLocation =
@@ -258,7 +260,10 @@ function symbol_id (symbol: string): integer;
 
 IMPLEMENTATION
 
-uses wirth_balanced_binary_tree_unit, cpc_target_cpu_unit, cpc_common_unit;
+uses
+   cpc_common_unit,
+   cpc_target_cpu_unit,
+   wirth_balanced_binary_tree_unit;
 
 type
    TSymbolInfo =

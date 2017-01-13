@@ -12,12 +12,12 @@ uses
 {$ELSE}
    Windows,
 {$ENDIF}
+   Classes,
    Controls,
-   Forms,
-   StdCtrls,
-   ExtCtrls,
    dijkstra_smoothsort_unit,
-   Classes;
+   ExtCtrls,
+   Forms,
+   StdCtrls;
 
 type
    TStringClass =
@@ -54,7 +54,9 @@ function ComparePICNames (L, R: string): integer;
 IMPLEMENTATION
 
 uses
-   regular_expression_unit, SysUtils, win32_utils;
+   regular_expression_unit,
+   SysUtils,
+   win32_utils;
 
 {$R *.dfm}
 

@@ -10,8 +10,11 @@ UNIT pic18x_floating_point_unit;
 
 INTERFACE
 
-uses pic18x_instructions_unit, cpc_core_objects_unit, cpc_source_analysis_unit,
-   pic18x_core_objects_unit;
+uses
+   cpc_core_objects_unit,
+   cpc_source_analysis_unit,
+   pic18x_core_objects_unit,
+   pic18x_instructions_unit;
 
 const
    bool_size  = 1;
@@ -277,8 +280,12 @@ type
 IMPLEMENTATION
 
 uses
-   pic18x_microprocessor_information_unit, pic18x_macro_instructions_unit, pic18x_expressions_unit,
-   cpc_target_cpu_unit, pic18x_cpu_unit, pic18x_run_time_error_check_unit;
+   cpc_target_cpu_unit,
+   pic18x_cpu_unit,
+   pic18x_expressions_unit,
+   pic18x_macro_instructions_unit,
+   pic18x_microprocessor_information_unit,
+   pic18x_run_time_error_check_unit;
 
 const
    attribution_header = 'This subroutine is derived from:';

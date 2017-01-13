@@ -12,7 +12,9 @@ UNIT cpc_blocks_unit;
 INTERFACE
 
 uses
-   cpc_definitions_unit, cpc_source_analysis_unit, cpc_core_objects_unit;
+   cpc_core_objects_unit,
+   cpc_definitions_unit,
+   cpc_source_analysis_unit;
 
 type
    TParamListContext =
@@ -269,8 +271,13 @@ procedure process_type_definition_part;
 IMPLEMENTATION
 
 uses
-   cpc_common_unit, cpc_access_unit, cpc_target_cpu_unit, cpc_types_unit, cpc_expressions_unit,
-   cpc_constant_expression_unit, cpc_statements_unit;
+   cpc_access_unit,
+   cpc_common_unit,
+   cpc_constant_expression_unit,
+   cpc_expressions_unit,
+   cpc_statements_unit,
+   cpc_target_cpu_unit,
+   cpc_types_unit;
 
 procedure check_for_valid_ioreg_type (typedef: TTypeDef; typedef_src_loc: TSourceLocation);
    var

@@ -7,7 +7,9 @@ UNIT cpc_common_unit;
 INTERFACE
 
 uses
-  Classes, SysUtils, cpc_source_analysis_unit;
+  Classes,
+  cpc_source_analysis_unit,
+  SysUtils;
 
 const
    err_all_ioreg_overlay_type_packed_records_must_be_same_width = 'all ioreg overlay type packed records must be same width';

@@ -10,10 +10,16 @@ procedure run_instruction_simulation_tests;
 
 IMPLEMENTATION
 
-uses test_pic18x_subroutines_unit, SysUtils, pic18x_instructions_unit, pic18x_microprocessor_information_unit,
+uses
+   Classes,
+   pic18x_cpu_unit,
+   pic18x_instructions_unit,
+   pic18x_macro_instructions_unit,
+   pic18x_microprocessor_information_unit,
+   SysUtils,
+   test_pic18x_kernel_unit,
    test_pic18x_simulator_unit,
-   Classes, pic18x_macro_instructions_unit, pic18x_cpu_unit,
-   test_pic18x_kernel_unit;
+   test_pic18x_subroutines_unit;
 
 var
    current_test: string;

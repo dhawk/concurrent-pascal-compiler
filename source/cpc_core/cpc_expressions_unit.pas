@@ -7,8 +7,12 @@ UNIT cpc_expressions_unit;
 INTERFACE
 
 uses
-  SysUtils, cpc_core_objects_unit, cpc_definitions_unit, cpc_access_unit,
-  cpc_source_analysis_unit, cpc_multi_precision_integer_unit;
+   cpc_access_unit,
+   cpc_core_objects_unit,
+   cpc_definitions_unit,
+   cpc_multi_precision_integer_unit,
+   cpc_source_analysis_unit,
+   SysUtils;
 
 type
    TAbsFunctionPrimary =
@@ -274,8 +278,11 @@ function CreatePrimaryFromSourceTokens: TExpression;
 
 IMPLEMENTATION
 
-uses cpc_target_cpu_unit, cpc_common_unit,
-  cpc_blocks_unit, cpc_simple_expression_unit;
+uses
+   cpc_blocks_unit,
+   cpc_common_unit,
+   cpc_simple_expression_unit,
+   cpc_target_cpu_unit;
 
 function CreateExpressionFromSourceTokens: TExpression;
    begin

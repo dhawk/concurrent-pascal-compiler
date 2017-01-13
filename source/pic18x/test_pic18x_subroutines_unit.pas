@@ -36,12 +36,20 @@ uses
 {$IFNDEF CONSOLE_TEST_MODE}
    main_form_unit,
 {$ENDIF}
-   Classes, pic18x_instructions_unit, pic18x_macro_instructions_unit,
-   test_pic18x_kernel_unit, cpc_main_compiler_unit, SysUtils,
-   pic18x_blocks_unit, test_pic18x_simulator_unit, pic18x_kernel_unit,
-   cpc_multi_precision_integer_unit, cpc_source_analysis_unit,
-   pic18x_run_time_error_check_unit, pic18x_main_compiler_unit,
-   pic18x_microprocessor_information_unit;
+   Classes,
+   cpc_main_compiler_unit,
+   cpc_multi_precision_integer_unit,
+   cpc_source_analysis_unit,
+   pic18x_blocks_unit,
+   pic18x_instructions_unit,
+   pic18x_kernel_unit,
+   pic18x_macro_instructions_unit,
+   pic18x_main_compiler_unit,
+   pic18x_microprocessor_information_unit,
+   pic18x_run_time_error_check_unit,
+   SysUtils,
+   test_pic18x_kernel_unit,
+   test_pic18x_simulator_unit;
 
 var
    src: TStringList;

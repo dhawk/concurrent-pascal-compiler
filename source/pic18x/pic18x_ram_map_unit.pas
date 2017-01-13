@@ -3,7 +3,8 @@ UNIT pic18x_ram_map_unit;
 INTERFACE
 
 uses
-   cpc_definitions_unit, pic18x_instructions_unit;
+   cpc_definitions_unit,
+   pic18x_instructions_unit;
 
 type
    TPIC18x_CallRecord =
@@ -18,11 +19,21 @@ procedure generate_memory_map;
 IMPLEMENTATION
 
 uses
-   cpc_core_objects_unit, pic18x_kernel_unit, SysUtils, pic18x_blocks_unit,
-   cpc_types_unit, pic18x_core_objects_unit, cpc_blocks_unit, pic18x_types_unit,
-   cpc_source_analysis_unit, pic18x_macro_instructions_unit, pic18x_access_unit,
-   cpc_access_unit, wirth_balanced_binary_tree_unit, dijkstra_smoothsort_unit, 
-   Math;
+   cpc_access_unit,
+   cpc_blocks_unit,
+   cpc_core_objects_unit,
+   cpc_source_analysis_unit,
+   cpc_types_unit,
+   dijkstra_smoothsort_unit,
+   Math,
+   pic18x_access_unit,
+   pic18x_blocks_unit,
+   pic18x_core_objects_unit,
+   pic18x_kernel_unit,
+   pic18x_macro_instructions_unit,
+   pic18x_types_unit,
+   SysUtils,
+   wirth_balanced_binary_tree_unit;
 
 const
    max_mpasm_label_len = 32;

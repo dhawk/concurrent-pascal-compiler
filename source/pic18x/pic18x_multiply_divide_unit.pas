@@ -6,7 +6,10 @@ UNIT pic18x_multiply_divide_unit;
 
 INTERFACE
 
-uses SysUtils, cpc_common_unit, pic18x_core_objects_unit;
+uses
+   cpc_common_unit,
+   pic18x_core_objects_unit,
+   SysUtils;
 
 type
    TIntegerInfo =
@@ -28,8 +31,12 @@ procedure GenerateMathRoutines;
 
 IMPLEMENTATION
 
-uses pic18x_macro_instructions_unit, pic18x_microprocessor_information_unit, cpc_multi_precision_integer_unit,
-   pic18x_cpu_unit, pic18x_instructions_unit;
+uses
+   cpc_multi_precision_integer_unit,
+   pic18x_cpu_unit,
+   pic18x_instructions_unit,
+   pic18x_macro_instructions_unit,
+   pic18x_microprocessor_information_unit;
 
 constructor TIntegerInfo.Create (info: TIntegerInfo);
    begin

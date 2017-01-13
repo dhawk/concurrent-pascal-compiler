@@ -7,7 +7,8 @@ UNIT test_subroutines_unit;
 INTERFACE
 
 uses
-  cpc_definitions_unit, cpc_blocks_unit;
+   cpc_blocks_unit,
+   cpc_definitions_unit;
 
 type
    TTestGenerator = function: TDefinition;
@@ -44,8 +45,13 @@ uses
 {$IFNDEF CONSOLE_TEST_MODE}
    main_form_unit,
 {$ENDIF}
-   cpc_statements_unit, cpc_target_cpu_unit, cpc_source_analysis_unit,
-   cpc_core_objects_unit, cpc_common_unit, cpc_main_compiler_unit, classes;
+   classes,
+   cpc_common_unit,
+   cpc_core_objects_unit,
+   cpc_main_compiler_unit,
+   cpc_source_analysis_unit,
+   cpc_statements_unit,
+   cpc_target_cpu_unit;
 
 procedure display (s: string);
    begin

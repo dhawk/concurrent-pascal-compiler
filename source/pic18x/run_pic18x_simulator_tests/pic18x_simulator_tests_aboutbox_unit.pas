@@ -3,8 +3,18 @@ unit pic18x_simulator_tests_aboutbox_unit;
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, aboutbox_unit, StdCtrls, pic18x_aboutbox_unit;
+   aboutbox_unit,
+   Classes,
+   Controls,
+   Dialogs,
+   Forms,
+   Graphics,
+   Messages,
+   pic18x_aboutbox_unit,
+   StdCtrls,
+   SysUtils,
+   Variants,
+   Windows;
 
 type
    TPIC18xSimulatorTestsAboutBoxForm =

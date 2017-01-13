@@ -8,18 +8,28 @@ INTERFACE
 
 uses
 {$ifdef FPC}
-   LCLType, LMessages,
-   LCLIntf, LResources,
+   LCLIntf,
+   LCLType,
+   LMessages,
+   LResources,
 {$ELSE}
-   Windows,
    ActiveX,
    OleCtrls,
    SHDocVw,
+   Windows,
 {$endif}
-   SysUtils, Classes, ComCtrls,
-   pic18x_statements_unit, pic18x_blocks_unit, cpc_definitions_unit,
-   Spin, Controls, StdCtrls,
-   Forms, Messages, ExtCtrls, Menus;
+   Classes,
+   ComCtrls,
+   Controls,
+   ExtCtrls,
+   Forms,
+   Menus,
+   Messages,
+   pic18x_blocks_unit,
+   pic18x_statements_unit,
+   Spin,
+   StdCtrls,
+   SysUtils;
 
 type
    TMainForm =
@@ -70,12 +80,26 @@ IMPLEMENTATION
 {$R *.dfm}
 
 uses
-   cpc_target_cpu_unit, pic18x_instruction_simulation_test_unit, cpc_main_compiler_unit, pic18x_kernel_unit,
-   cpc_multi_precision_integer_unit, pic18x_cpu_unit, test_pic18x_compiler_unit, test_pic18x_kernel_unit,
-   pic18x_instructions_unit, test_pic18x_simulator_unit, pic18x_macro_instructions_unit, pic18x_multiply_divide_unit,
-   pic18x_microprocessor_information_unit, pic18x_run_time_error_check_unit, cpc_source_analysis_unit,
-   cpc_common_unit, ClipBrd, pic18x_main_compiler_unit, test_pic18x_subroutines_unit, 
-   pic18x_compiler_dev_aboutbox_unit;
+   ClipBrd,
+   cpc_common_unit,
+   cpc_main_compiler_unit,
+   cpc_multi_precision_integer_unit,
+   cpc_source_analysis_unit,
+   cpc_target_cpu_unit,
+   pic18x_compiler_dev_aboutbox_unit,
+   pic18x_cpu_unit,
+   pic18x_instruction_simulation_test_unit,
+   pic18x_instructions_unit,
+   pic18x_kernel_unit,
+   pic18x_macro_instructions_unit,
+   pic18x_main_compiler_unit,
+   pic18x_microprocessor_information_unit,
+   pic18x_multiply_divide_unit,
+   pic18x_run_time_error_check_unit,
+   test_pic18x_compiler_unit,
+   test_pic18x_kernel_unit,
+   test_pic18x_simulator_unit,
+   test_pic18x_subroutines_unit;
 
 
 var

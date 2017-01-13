@@ -7,9 +7,16 @@ UNIT pic18x_kernel_unit;
 INTERFACE
 
 uses
-   cpc_expressions_unit, cpc_statements_unit, cpc_core_objects_unit, pic18x_microprocessor_information_unit,
-   pic18x_core_objects_unit, pic18x_instructions_unit, cpc_blocks_unit,
-   pic18x_blocks_unit, Classes, pic18x_cpu_unit;
+   Classes,
+   cpc_blocks_unit,
+   cpc_core_objects_unit,
+   cpc_expressions_unit,
+   cpc_statements_unit,
+   pic18x_blocks_unit,
+   pic18x_core_objects_unit,
+   pic18x_cpu_unit,
+   pic18x_instructions_unit,
+   pic18x_microprocessor_information_unit;
 
 const
    initial_process_stk_init = ord('S');
@@ -229,13 +236,16 @@ IMPLEMENTATION
 
 uses
 {$ifdef INCLUDE_SIMULATION}
+   test_pic18x_kernel_unit,
    test_pic18x_simulator_unit,
    test_pic18x_subroutines_unit,
-   test_pic18x_kernel_unit,
 {$endif}
-   SysUtils, pic18x_access_unit,
-   pic18x_macro_instructions_unit, cpc_source_analysis_unit,
-   pic18x_run_time_error_check_unit, cpc_target_cpu_unit;
+   cpc_source_analysis_unit,
+   cpc_target_cpu_unit,
+   pic18x_access_unit,
+   pic18x_macro_instructions_unit,
+   pic18x_run_time_error_check_unit,
+   SysUtils;
 
 const
    ready_state_offset = 1;

@@ -7,7 +7,8 @@ UNIT cpc_term_expression_unit;
 INTERFACE
 
 uses
-   cpc_core_objects_unit, cpc_source_analysis_unit;
+   cpc_core_objects_unit,
+   cpc_source_analysis_unit;
 
 type
    TMulOp =
@@ -56,7 +57,10 @@ function CreateTermFromSourceTokens: TExpression;
 IMPLEMENTATION
 
 uses
-   cpc_expressions_unit, cpc_target_cpu_unit, cpc_common_unit, cpc_multi_precision_integer_unit;
+   cpc_common_unit,
+   cpc_expressions_unit,
+   cpc_multi_precision_integer_unit,
+   cpc_target_cpu_unit;
 
 
 type

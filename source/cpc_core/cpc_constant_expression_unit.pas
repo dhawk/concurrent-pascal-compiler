@@ -43,7 +43,11 @@ type
 IMPLEMENTATION
 
 uses
-   cpc_source_analysis_unit, cpc_common_unit, cpc_definitions_unit, cpc_target_cpu_unit, cpc_access_unit;
+   cpc_access_unit,
+   cpc_common_unit,
+   cpc_definitions_unit,
+   cpc_source_analysis_unit,
+   cpc_target_cpu_unit;
 
 
 constructor Tcprimary.CreateFromSourceTokens;

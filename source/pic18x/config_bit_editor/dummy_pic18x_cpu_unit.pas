@@ -6,8 +6,17 @@ UNIT dummy_pic18x_cpu_unit;
 
 INTERFACE
 
-uses Classes, cpc_target_cpu_unit, cpc_source_analysis_unit, cpc_definitions_unit, cpc_expressions_unit,
-   cpc_statements_unit, cpc_blocks_unit, cpc_access_unit, cpc_core_objects_unit, cpc_simple_expression_unit,
+uses
+   Classes,
+   cpc_access_unit,
+   cpc_blocks_unit,
+   cpc_core_objects_unit,
+   cpc_definitions_unit,
+   cpc_expressions_unit,
+   cpc_simple_expression_unit,
+   cpc_source_analysis_unit,
+   cpc_statements_unit,
+   cpc_target_cpu_unit,
    cpc_term_expression_unit;
 
 type
@@ -68,7 +77,9 @@ type
 
 IMPLEMENTATION
 
-uses cpc_common_unit, SysUtils;
+uses
+   cpc_common_unit,
+   SysUtils;
 
 type
    TTestSystemType =

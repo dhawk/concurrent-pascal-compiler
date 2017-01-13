@@ -7,7 +7,7 @@ UNIT pic18x_types_unit;
 INTERFACe
 
 uses
-  cpc_definitions_unit;
+   cpc_definitions_unit;
 
 type
    TPIC18x_RecordFieldInfo =
@@ -62,7 +62,10 @@ type
 IMPLEMENTATION
 
 uses
-  cpc_types_unit, pic18x_core_objects_unit, pic18x_blocks_unit;
+   cpc_types_unit,
+   pic18x_blocks_unit,
+   pic18x_core_objects_unit;
+
 
 function TPIC18x_RecordFieldInfo.Offset: integer;
    var

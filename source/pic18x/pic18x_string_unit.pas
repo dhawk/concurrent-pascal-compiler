@@ -6,7 +6,9 @@ UNIT pic18x_string_unit;
 
 INTERFACE
 
-uses cpc_source_analysis_unit, pic18x_instructions_unit;
+uses
+   cpc_source_analysis_unit,
+   pic18x_instructions_unit;
 
 
 //============================
@@ -733,8 +735,12 @@ IMPLEMENTATION
 // expected to be only lightly used in most applications.
 
 uses
-   pic18x_cpu_unit, math, pic18x_kernel_unit, pic18x_microprocessor_information_unit,
-   pic18x_macro_instructions_unit, pic18x_run_time_error_check_unit;
+   Math,
+   pic18x_cpu_unit,
+   pic18x_kernel_unit,
+   pic18x_macro_instructions_unit,
+   pic18x_microprocessor_information_unit,
+   pic18x_run_time_error_check_unit;
 
 
 //----------------------

@@ -7,8 +7,17 @@ UNIT main_form_unit;
 INTERFACE
 
 uses
-  SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, cpc_definitions_unit, cpc_blocks_unit, Menus;
+   Classes,
+   Controls,
+   cpc_blocks_unit,
+   cpc_definitions_unit,
+   Dialogs,
+   Forms,
+   Graphics,
+   Menus,
+   StdCtrls,
+   SysUtils,
+   Variants;
 
 type
   TMainForm = class(TForm)
@@ -48,10 +57,22 @@ IMPLEMENTATION
 
 {$R *.dfm}
 
-uses cpc_main_compiler_unit, cpc_source_analysis_unit, cpc_target_cpu_unit, test_constant_expression_unit,
-   cpc_statements_unit, test_statement_syntax_unit, test_access_syntax_unit, test_multi_precision_integer_unit,
-   cpc_core_objects_unit, cpc_common_unit, test_type_syntax_unit, test_expression_syntax_unit,
-   test_block_syntax_unit, test_subroutines_unit, cpc_core_dev_aboutbox_unit;
+uses
+   cpc_common_unit,
+   cpc_core_dev_aboutbox_unit,
+   cpc_core_objects_unit,
+   cpc_main_compiler_unit,
+   cpc_source_analysis_unit,
+   cpc_statements_unit,
+   cpc_target_cpu_unit,
+   test_access_syntax_unit,
+   test_block_syntax_unit,
+   test_constant_expression_unit,
+   test_expression_syntax_unit,
+   test_multi_precision_integer_unit,
+   test_statement_syntax_unit,
+   test_subroutines_unit,
+   test_type_syntax_unit;
 
 procedure TMainForm.AboutTestCPCCoreCompiler1Click(Sender: TObject);
    begin

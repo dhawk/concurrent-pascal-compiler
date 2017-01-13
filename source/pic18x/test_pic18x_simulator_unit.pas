@@ -6,7 +6,10 @@ UNIT test_pic18x_simulator_unit;
 
 INTERFACE
 
-uses pic18x_instructions_unit, cpc_common_unit, pic18x_microprocessor_information_unit;
+uses
+   cpc_common_unit,
+   pic18x_instructions_unit,
+   pic18x_microprocessor_information_unit;
 
 type
    TFSR =
@@ -118,9 +121,13 @@ var
 
 IMPLEMENTATION
 
-uses SysUtils, test_pic18x_subroutines_unit,
-   pic18x_macro_instructions_unit, pic18x_cpu_unit,
-   cpc_target_cpu_unit;
+uses
+   cpc_target_cpu_unit,
+   pic18x_cpu_unit,
+   pic18x_macro_instructions_unit,
+   SysUtils,
+   test_pic18x_subroutines_unit;
+
 
 constructor TFSR.Create;
    begin

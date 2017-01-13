@@ -6,7 +6,9 @@ UNIT cpc_definitions_unit;
 
 INTERFACE
 
-uses cpc_common_unit, cpc_source_analysis_unit;
+uses
+   cpc_common_unit,
+   cpc_source_analysis_unit;
 
 type
    TDefinition = class;
@@ -158,7 +160,9 @@ var
 
 IMPLEMENTATION
 
-uses SysUtils, cpc_target_cpu_unit;
+uses
+   cpc_target_cpu_unit,
+   SysUtils;
 
 
 //==============

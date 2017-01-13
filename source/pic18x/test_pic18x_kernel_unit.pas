@@ -7,7 +7,8 @@ UNIT test_pic18x_kernel_unit;
 INTERFACE
 
 uses
-   Classes, pic18x_instructions_unit;
+   Classes,
+   pic18x_instructions_unit;
 
 var
    GenerateKernelTestCoverageMap: boolean;
@@ -27,9 +28,15 @@ procedure run_kernel_tests;
 IMPLEMENTATION
 
 uses
-   pic18x_kernel_unit, pic18x_blocks_unit, cpc_blocks_unit, SysUtils,
-   pic18x_core_objects_unit, cpc_core_objects_unit, test_pic18x_simulator_unit,
-   test_pic18x_subroutines_unit, cpc_common_unit;
+   cpc_blocks_unit,
+   cpc_common_unit,
+   cpc_core_objects_unit,
+   pic18x_blocks_unit,
+   pic18x_core_objects_unit,
+   pic18x_kernel_unit,
+   SysUtils,
+   test_pic18x_simulator_unit,
+   test_pic18x_subroutines_unit;
 
 procedure construct_kernel_test (nop: TPIC18x_NOP; tokens: TStringList);
 

@@ -6,7 +6,8 @@ UNIT cpc_multi_precision_integer_unit;
 
 INTERFACE
 
-uses mp_types;
+uses
+   mp_types;
 
 type
    TLargestPascalSupportedInt = Int64;
@@ -106,7 +107,8 @@ type
 IMPLEMENTATION
 
 uses
-   SysUtils, mp_base;
+   mp_base,
+   SysUtils;
 
 var
    max_integer, min_integer, max_unsigned, lsb_mask, temp: TMultiPrecisionInteger;

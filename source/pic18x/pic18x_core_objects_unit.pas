@@ -7,8 +7,10 @@ UNIT pic18x_core_objects_unit;
 INTERFACE
 
 uses
-  cpc_core_objects_unit, cpc_definitions_unit, pic18x_instructions_unit,
-  pic18x_macro_instructions_unit;
+   cpc_core_objects_unit,
+   cpc_definitions_unit,
+   pic18x_instructions_unit,
+   pic18x_macro_instructions_unit;
 
 type
    TPIC18x_Variable =
@@ -76,9 +78,18 @@ type
 
 IMPLEMENTATION
 
-uses Math, cpc_types_unit, pic18x_cpu_unit, pic18x_blocks_unit, pic18x_floating_point_unit,
-   cpc_blocks_unit, pic18x_types_unit, cpc_multi_precision_integer_unit,
-   SysUtils, cpc_target_cpu_unit, pic18x_kernel_unit;
+uses
+   cpc_blocks_unit,
+   cpc_multi_precision_integer_unit,
+   cpc_target_cpu_unit,
+   cpc_types_unit,
+   Math,
+   pic18x_blocks_unit,
+   pic18x_cpu_unit,
+   pic18x_floating_point_unit,
+   pic18x_kernel_unit,
+   pic18x_types_unit,
+   SysUtils;
 
 var
    temp, temp2: TMultiPrecisionInteger;

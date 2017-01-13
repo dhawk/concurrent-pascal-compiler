@@ -7,7 +7,8 @@ unit test_type_syntax_unit;
 interface
 
 uses
-  cpc_core_objects_unit, cpc_definitions_unit;
+   cpc_core_objects_unit,
+   cpc_definitions_unit;
 
 type
    Told_TROMConstant =
@@ -20,8 +21,12 @@ function create_TROMConstant: TDefinition;
 
 implementation
 
-uses cpc_common_unit, cpc_source_analysis_unit, SysUtils, cpc_types_unit, 
-  test_subroutines_unit;
+uses
+   cpc_common_unit,
+   cpc_source_analysis_unit,
+   cpc_types_unit,
+   SysUtils,
+   test_subroutines_unit;
 
 constructor Told_TROMConstant.CreateFromSourceTokens;
    begin

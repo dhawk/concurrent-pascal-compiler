@@ -7,7 +7,9 @@ UNIT cpc_main_compiler_unit;
 INTERFACE
 
 uses
-  Classes, cpc_definitions_unit, cpc_source_analysis_unit;
+   Classes,
+   cpc_definitions_unit,
+   cpc_source_analysis_unit;
 
 type
    TDefinitionGenerator = function: TDefinition;
@@ -38,7 +40,10 @@ type
 
 IMPLEMENTATION
 
-uses SysUtils, cpc_target_cpu_unit, cpc_common_unit;
+uses
+   cpc_common_unit,
+   cpc_target_cpu_unit,
+   SysUtils;
 
 procedure TCompilation.run_compiler (ReadinSource: TProc; Generator: TDefinitionGenerator; ResultsListing: TStrings);
    var

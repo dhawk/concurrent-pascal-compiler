@@ -7,8 +7,9 @@ UNIT pic18x_macro_instructions_unit;
 INTERFACE
 
 uses
-  pic18x_instructions_unit, cpc_source_analysis_unit,
-  Classes;
+   Classes,
+   cpc_source_analysis_unit,
+   pic18x_instructions_unit;
 
 type
 
@@ -347,8 +348,10 @@ uses
 {$ifdef INCLUDE_SIMULATION}
    test_pic18x_simulator_unit,
 {$endif}
+   cpc_target_cpu_unit,
+   pic18x_cpu_unit,
    pic18x_microprocessor_information_unit,
-   SysUtils, cpc_target_cpu_unit, pic18x_cpu_unit;
+   SysUtils;
 
 procedure set_absolute (addr, value: integer);
    begin

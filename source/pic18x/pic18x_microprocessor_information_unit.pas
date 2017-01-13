@@ -7,7 +7,9 @@ UNIT pic18x_microprocessor_information_unit;
 INTERFACE
 
 uses
-  cpc_source_analysis_unit, LibXmlParser, wirth_balanced_binary_tree_unit;
+   cpc_source_analysis_unit,
+   LibXmlParser,
+   wirth_balanced_binary_tree_unit;
 
 const
    max_ram_addr = $FFF;   // 4K
@@ -145,7 +147,9 @@ procedure pic_info_Free;
 IMPLEMENTATION
 
 uses
-   LibXmlComps, SysUtils, cpc_common_unit;
+   cpc_common_unit,
+   LibXmlComps,
+   SysUtils;
 
 var f_pic_info: t_pic_info;
 

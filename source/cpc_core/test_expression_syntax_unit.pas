@@ -15,9 +15,18 @@ procedure test_TRelationalExpression;
 
 implementation
 
-uses SysUtils, Math, cpc_target_cpu_unit, test_cpu_unit, cpc_core_objects_unit,
-  cpc_common_unit, cpc_definitions_unit, cpc_expressions_unit,
-  cpc_simple_expression_unit, cpc_term_expression_unit, test_subroutines_unit;
+uses
+   cpc_common_unit,
+   cpc_core_objects_unit,
+   cpc_definitions_unit,
+   cpc_expressions_unit,
+   cpc_simple_expression_unit,
+   cpc_target_cpu_unit,
+   cpc_term_expression_unit,
+   Math,
+   SysUtils,
+   test_cpu_unit,
+   test_subroutines_unit;
 
 function approximately_equal 
    (r1,r2: real

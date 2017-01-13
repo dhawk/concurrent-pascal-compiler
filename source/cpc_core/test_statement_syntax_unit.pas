@@ -10,8 +10,12 @@ procedure test_statements;
 
 implementation
 
-uses cpc_common_unit, cpc_blocks_unit, cpc_target_cpu_unit,
-  cpc_statements_unit, test_subroutines_unit;
+uses
+   cpc_blocks_unit,
+   cpc_common_unit,
+   cpc_statements_unit,
+   cpc_target_cpu_unit,
+   test_subroutines_unit;
 
 procedure test_routine_call_statement;
    begin

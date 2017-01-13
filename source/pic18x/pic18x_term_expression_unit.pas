@@ -6,7 +6,8 @@ UNIT pic18x_term_expression_unit;
 
 INTERFACE
 
-uses cpc_term_expression_unit;
+uses
+   cpc_term_expression_unit;
 
 type
    TPIC18x_Term =
@@ -18,10 +19,19 @@ type
 IMPLEMENTATION
 
 uses
-   pic18x_multiply_divide_unit, pic18x_cpu_unit, pic18x_instructions_unit, pic18x_core_objects_unit,
-   cpc_core_objects_unit, pic18x_microprocessor_information_unit, SysUtils, pic18x_expressions_unit,
-   cpc_multi_precision_integer_unit, pic18x_macro_instructions_unit, pic18x_run_time_error_check_unit,
-   pic18x_floating_point_unit, pic18x_access_unit;
+   cpc_core_objects_unit,
+   cpc_multi_precision_integer_unit,
+   pic18x_access_unit,
+   pic18x_core_objects_unit,
+   pic18x_cpu_unit,
+   pic18x_expressions_unit,
+   pic18x_floating_point_unit,
+   pic18x_instructions_unit,
+   pic18x_macro_instructions_unit,
+   pic18x_microprocessor_information_unit,
+   pic18x_multiply_divide_unit,
+   pic18x_run_time_error_check_unit,
+   SysUtils;
 
 var
    temp: TMultiPrecisionInteger;

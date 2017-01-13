@@ -7,7 +7,11 @@ UNIT cpc_access_unit;
 INTERFACE
 
 uses
-   cpc_definitions_unit, cpc_source_analysis_unit, cpc_core_objects_unit, cpc_types_unit, cpc_blocks_unit;
+   cpc_blocks_unit,
+   cpc_core_objects_unit,
+   cpc_definitions_unit,
+   cpc_source_analysis_unit,
+   cpc_types_unit;
 
 // TAccess handles source token sequences like "a.b[4].c.d[3]" (or even just "a")
 // where you don't know what "it" (the node) is until you parse the whole thing.
@@ -143,7 +147,12 @@ type
 
 IMPLEMENTATION
 
-uses SysUtils, cpc_expressions_unit, cpc_common_unit, cpc_statements_unit, cpc_target_cpu_unit;
+uses
+   cpc_common_unit,
+   cpc_expressions_unit,
+   cpc_statements_unit,
+   cpc_target_cpu_unit,
+   SysUtils;
 
 // ==========
 // TAccess

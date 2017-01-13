@@ -7,9 +7,12 @@ UNIT pic18x_instructions_unit;
 INTERFACE
 
 uses
-  Classes, cpc_common_unit, cpc_source_analysis_unit,
-  cpc_core_objects_unit, pic18x_microprocessor_information_unit,
-  cpc_definitions_unit;
+   Classes,
+   cpc_common_unit,
+   cpc_core_objects_unit,
+   cpc_definitions_unit,
+   cpc_source_analysis_unit,
+   pic18x_microprocessor_information_unit;
 
 type
    THexArray = array of byte;
@@ -1274,13 +1277,23 @@ IMPLEMENTATION
 
 uses
 {$ifdef INCLUDE_SIMULATION}
+   test_pic18x_kernel_unit,
    test_pic18x_simulator_unit,
    test_pic18x_subroutines_unit,
-   test_pic18x_kernel_unit,
 {$endif}
-   Math, pic18x_floating_point_unit, pic18x_macro_instructions_unit, cpc_target_cpu_unit,
-   pic18x_kernel_unit, pic18x_core_objects_unit, pic18x_blocks_unit, SysUtils, pic18x_cpu_unit,
-   cpc_blocks_unit, pic18x_access_unit, cpc_types_unit, pic18x_common_unit;
+   cpc_blocks_unit,
+   cpc_target_cpu_unit,
+   cpc_types_unit,
+   Math,
+   pic18x_access_unit,
+   pic18x_blocks_unit,
+   pic18x_common_unit,
+   pic18x_core_objects_unit,
+   pic18x_cpu_unit,
+   pic18x_floating_point_unit,
+   pic18x_kernel_unit,
+   pic18x_macro_instructions_unit,
+   SysUtils;
 
 var
    InterruptsOffCodeSegments: array of TInterruptsOffCodeSegment;

@@ -10,7 +10,10 @@ procedure test_block_syntax;
 
 implementation
 
-uses cpc_common_unit, SysUtils, test_subroutines_unit;
+uses
+   cpc_common_unit,
+   SysUtils,
+   test_subroutines_unit;
 
 procedure test_TRoutine;
    begin

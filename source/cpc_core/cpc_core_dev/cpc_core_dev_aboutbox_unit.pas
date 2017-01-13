@@ -3,8 +3,17 @@ UNIT cpc_core_dev_aboutbox_unit;
 INTERFACE
 
 uses
-   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-   Dialogs, aboutbox_unit, StdCtrls;
+   aboutbox_unit,
+   Classes,
+   Controls,
+   Dialogs,
+   Forms,
+   Graphics,
+   Messages,
+   StdCtrls,
+   SysUtils,
+   Variants,
+   Windows;
 
 type
    TCPCCoreDevAboutBoxForm =

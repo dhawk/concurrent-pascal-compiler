@@ -8,12 +8,10 @@ INTERFACE
 
 uses
    Classes,
-
    cpc_access_unit,
    cpc_core_objects_unit,
    cpc_source_analysis_unit,
    cpc_statements_unit,
-
    pic18x_instructions_unit;
 
 type
@@ -152,17 +150,31 @@ uses
 {$ifdef INCLUDE_SIMULATION}
    test_pic18x_kernel_unit,
 {$endif}
-   SysUtils, Math, pic18x_expressions_unit, pic18x_core_objects_unit, wirth_balanced_binary_tree_unit,
    cpc_blocks_unit,
-   cpc_expressions_unit,
+   cpc_common_unit,
    cpc_constant_expression_unit,
+   cpc_definitions_unit,
+   cpc_expressions_unit,
+   cpc_multi_precision_integer_unit,
+   cpc_target_cpu_unit,
+   cpc_term_expression_unit,
+   Math,
+   pic18x_access_unit,
+   pic18x_assignment_statement_unit,
+   pic18x_blocks_unit,
+   pic18x_core_objects_unit,
    pic18x_cpu_unit,
+   pic18x_expressions_unit,
+   pic18x_kernel_unit,
    pic18x_macro_instructions_unit,
-   pic18x_microprocessor_information_unit, pic18x_run_time_error_check_unit, pic18x_access_unit,
-   pic18x_blocks_unit, cpc_target_cpu_unit, cpc_multi_precision_integer_unit,
-   pic18x_kernel_unit, pic18x_string_unit, pic18x_types_unit, cpc_common_unit, cpc_definitions_unit,
-   pic18x_assignment_statement_unit, pic18x_term_expression_unit, 
-   cpc_term_expression_unit, pic18x_ram_map_unit;
+   pic18x_microprocessor_information_unit,
+   pic18x_ram_map_unit,
+   pic18x_run_time_error_check_unit,
+   pic18x_string_unit,
+   pic18x_term_expression_unit,
+   pic18x_types_unit,
+   SysUtils,
+   wirth_balanced_binary_tree_unit;
 
 var
    expression_lower_fence, expression_upper_fence, temp: TMultiPrecisionInteger;

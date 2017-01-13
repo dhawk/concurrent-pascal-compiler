@@ -11,10 +11,14 @@ procedure test_TAccess;
 implementation
 
 uses
-   test_subroutines_unit,
-   cpc_definitions_unit, cpc_access_unit, cpc_target_cpu_unit,
-   cpc_statements_unit, cpc_core_objects_unit, cpc_expressions_unit,
-   cpc_common_unit;
+   cpc_access_unit,
+   cpc_common_unit,
+   cpc_core_objects_unit,
+   cpc_definitions_unit,
+   cpc_expressions_unit,
+   cpc_statements_unit,
+   cpc_target_cpu_unit,
+   test_subroutines_unit;
 
 function access_generator: TDefinition;
    begin

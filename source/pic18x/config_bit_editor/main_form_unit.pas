@@ -8,14 +8,14 @@ INTERFACE
 
 uses
    Classes,
-   SysUtils,
    Comctrls,
+   Controls,
    Dialogs,
    Forms,
-   StdCtrls,
+   LibXmlParser,
    Menus,
-   Controls,
-   LibXmlParser;
+   StdCtrls,
+   SysUtils;
 
 type
    TRadioButtonWithValue =
@@ -81,10 +81,18 @@ var
 IMPLEMENTATION
 
 uses
-   Graphics, regular_expression_unit,
-   pic18x_common_unit, pic18x_selection_dialog_unit, LibXmlComps,
-   cpc_main_compiler_unit, cpc_definitions_unit, cpc_blocks_unit,
-   cpc_statements_unit, cpc_core_objects_unit, filectrl, config_bit_editor_aboutbox_unit;
+   config_bit_editor_aboutbox_unit,
+   cpc_blocks_unit,
+   cpc_core_objects_unit,
+   cpc_definitions_unit,
+   cpc_main_compiler_unit,
+   cpc_statements_unit,
+   filectrl,
+   Graphics,
+   LibXmlComps,
+   pic18x_common_unit,
+   pic18x_selection_dialog_unit,
+   regular_expression_unit;
 
 {$R *.dfm}
 

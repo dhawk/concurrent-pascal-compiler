@@ -7,7 +7,7 @@ UNIT pic18x_main_compiler_unit;
 INTERFACE
 
 uses
-  cpc_definitions_unit;
+   cpc_definitions_unit;
 
 var
    source_file_name: string;
@@ -17,8 +17,13 @@ function ProgramGenerator: TDefinition;
 IMPLEMENTATION
 
 uses
-  pic18x_macro_instructions_unit, pic18x_instructions_unit, pic18x_run_time_error_check_unit,
-  cpc_target_cpu_unit, pic18x_blocks_unit, SysUtils, pic18x_cpu_unit;
+   cpc_target_cpu_unit,
+   pic18x_blocks_unit,
+   pic18x_cpu_unit,
+   pic18x_instructions_unit,
+   pic18x_macro_instructions_unit,
+   pic18x_run_time_error_check_unit,
+   SysUtils;
 
 function ProgramGenerator: TDefinition;
    var

@@ -7,10 +7,18 @@ UNIT pic18x_cpu_unit;
 INTERFACE
 
 uses
-   Classes, SysUtils, cpc_target_cpu_unit,
-   cpc_source_analysis_unit, cpc_blocks_unit, cpc_expressions_unit,
-   cpc_access_unit, cpc_core_objects_unit, cpc_statements_unit,
-   cpc_definitions_unit, cpc_simple_expression_unit, cpc_term_expression_unit;
+   Classes,
+   cpc_access_unit,
+   cpc_blocks_unit,
+   cpc_core_objects_unit,
+   cpc_definitions_unit,
+   cpc_expressions_unit,
+   cpc_simple_expression_unit,
+   cpc_source_analysis_unit,
+   cpc_statements_unit,
+   cpc_target_cpu_unit,
+   cpc_term_expression_unit,
+   SysUtils;
 
 type
    TInitialValueBytes =
@@ -268,12 +276,26 @@ uses
 {$ifdef INCLUDE_SIMULATION}
    test_pic18x_simulator_unit,
 {$endif}
-   pic18x_expressions_unit, math, pic18x_multiply_divide_unit, pic18x_macro_instructions_unit, pic18x_run_time_error_check_unit,
-   pic18x_Statements_unit, cpc_multi_precision_integer_unit, pic18x_microprocessor_information_unit,
-   cpc_types_unit, pic18x_access_unit, pic18x_term_expression_unit, pic18x_kernel_unit,
-   pic18x_simple_expression_unit, pic18x_types_unit, cpc_common_unit, pic18x_ram_map_unit,
-   pic18x_core_objects_unit, pic18x_instructions_unit,
-   pic18x_assignment_statement_unit, pic18x_blocks_unit;
+   cpc_common_unit,
+   cpc_multi_precision_integer_unit,
+   cpc_types_unit,
+   Math,
+   pic18x_access_unit,
+   pic18x_assignment_statement_unit,
+   pic18x_blocks_unit,
+   pic18x_core_objects_unit,
+   pic18x_expressions_unit,
+   pic18x_instructions_unit,
+   pic18x_kernel_unit,
+   pic18x_macro_instructions_unit,
+   pic18x_microprocessor_information_unit,
+   pic18x_multiply_divide_unit,
+   pic18x_ram_map_unit,
+   pic18x_run_time_error_check_unit,
+   pic18x_simple_expression_unit,
+   pic18x_Statements_unit,
+   pic18x_term_expression_unit,
+   pic18x_types_unit;
 
 const first_rom_constant_addr = 20;
 

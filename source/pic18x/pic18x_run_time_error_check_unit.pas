@@ -6,7 +6,10 @@ UNIT pic18x_run_time_error_check_unit;
 
 INTERFACE
 
-uses cpc_core_objects_unit, cpc_source_analysis_unit, pic18x_instructions_unit;
+uses
+   cpc_core_objects_unit,
+   cpc_source_analysis_unit,
+   pic18x_instructions_unit;
 
 type
    TSetErrorCodeRoutine =
@@ -131,9 +134,14 @@ procedure OutputRuntimeErrorInfo (fn: string);
 IMPLEMENTATION
 
 uses
-   pic18x_macro_instructions_unit, pic18x_expressions_unit, pic18x_kernel_unit,
-   cpc_multi_precision_integer_unit, pic18x_microprocessor_information_unit, SysUtils,
-   pic18x_cpu_unit, pic18x_core_objects_unit;
+   cpc_multi_precision_integer_unit,
+   pic18x_core_objects_unit,
+   pic18x_cpu_unit,
+   pic18x_expressions_unit,
+   pic18x_kernel_unit,
+   pic18x_macro_instructions_unit,
+   pic18x_microprocessor_information_unit,
+   SysUtils;
 
 function rterr_assignment_range_check_error (lo, hi: integer): string;
    begin

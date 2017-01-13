@@ -7,9 +7,13 @@ UNIT cpc_statements_unit;
 INTERFACE
 
 uses
-  cpc_definitions_unit, cpc_source_analysis_unit, cpc_access_unit, cpc_core_objects_unit,
-  cpc_constant_expression_unit, cpc_blocks_unit,
-  wirth_balanced_binary_tree_unit;
+   cpc_access_unit,
+   cpc_blocks_unit,
+   cpc_constant_expression_unit,
+   cpc_core_objects_unit,
+   cpc_definitions_unit,
+   cpc_source_analysis_unit,
+   wirth_balanced_binary_tree_unit;
 
 type
    TStatementKind =
@@ -438,8 +442,13 @@ type
 IMPLEMENTATION
 
 uses
-   SysUtils, cpc_common_unit, cpc_expressions_unit, cpc_target_cpu_unit, cpc_types_unit,
-   dijkstra_smoothsort_unit, cpc_multi_precision_integer_unit;
+   cpc_common_unit,
+   cpc_expressions_unit,
+   cpc_multi_precision_integer_unit,
+   cpc_target_cpu_unit,
+   cpc_types_unit,
+   dijkstra_smoothsort_unit,
+   SysUtils;
 
 var
    CycleStatementStack: TDefinitionStack;

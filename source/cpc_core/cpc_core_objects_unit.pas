@@ -6,7 +6,10 @@ UNIT cpc_core_objects_unit;
 
 INTERFACE
 
-uses cpc_definitions_unit, cpc_multi_precision_integer_unit, cpc_source_analysis_unit,
+uses
+   cpc_definitions_unit,
+   cpc_multi_precision_integer_unit,
+   cpc_source_analysis_unit,
    SysUtils;
 
 const
@@ -564,8 +567,13 @@ procedure check_for_write_access (v: TVariable; src_loc: TSourceLocation);
 
 IMPLEMENTATION
 
-uses Math, cpc_expressions_unit, cpc_common_unit, cpc_constant_expression_unit,
-  cpc_target_cpu_unit, cpc_types_unit;
+uses
+   cpc_common_unit,
+   cpc_constant_expression_unit,
+   cpc_expressions_unit,
+   cpc_target_cpu_unit,
+   cpc_types_unit,
+   Math;
 
 function SetByte (constant: TConstant; byteno: cardinal): byte;
    function bit_in_set (bitno: cardinal): boolean;

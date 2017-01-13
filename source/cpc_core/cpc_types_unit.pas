@@ -6,7 +6,10 @@ UNIT cpc_types_unit;
 
 INTERFACE
 
-uses cpc_definitions_unit, cpc_core_objects_unit, cpc_source_analysis_unit;
+uses
+   cpc_core_objects_unit,
+   cpc_definitions_unit,
+   cpc_source_analysis_unit;
 
 type
    TRecordType = class;

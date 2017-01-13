@@ -6,7 +6,8 @@ UNIT pic18x_simple_expression_unit;
 
 INTERFACE
 
-uses cpc_simple_expression_unit;
+uses
+   cpc_simple_expression_unit;
 
 type
    TPIC18x_SimpleExpression =
@@ -18,10 +19,16 @@ type
 IMPLEMENTATION
 
 uses
-  SysUtils, Math, pic18x_cpu_unit, pic18x_expressions_unit,
-  pic18x_instructions_unit, pic18x_microprocessor_information_unit, cpc_core_objects_unit,
-  pic18x_floating_point_unit, pic18x_core_objects_unit, 
-  pic18x_macro_instructions_unit;
+   cpc_core_objects_unit,
+   Math,
+   pic18x_core_objects_unit,
+   pic18x_cpu_unit,
+   pic18x_expressions_unit,
+   pic18x_floating_point_unit,
+   pic18x_instructions_unit,
+   pic18x_macro_instructions_unit,
+   pic18x_microprocessor_information_unit,
+   SysUtils;
 
 
 function TPIC18x_SimpleExpression.Generate (param1, param2: integer): integer;

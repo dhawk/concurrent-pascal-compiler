@@ -7,7 +7,9 @@ UNIT cpc_simple_expression_unit;
 INTERFACE
 
 uses
-  cpc_core_objects_unit, cpc_source_analysis_unit, cpc_expressions_unit;
+   cpc_core_objects_unit,
+   cpc_expressions_unit,
+   cpc_source_analysis_unit;
 
 type
    TAddOp =
@@ -59,7 +61,9 @@ function CreateSimpleExpressionFromSourceTokens: TExpression;
 IMPLEMENTATION
 
 uses
-   cpc_target_cpu_unit, cpc_common_unit, cpc_term_expression_unit;
+   cpc_common_unit,
+   cpc_target_cpu_unit,
+   cpc_term_expression_unit;
 
 function CreateSimpleExpressionFromSourceTokens: TExpression;
    begin

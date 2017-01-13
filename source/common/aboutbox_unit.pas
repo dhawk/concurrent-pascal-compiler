@@ -3,8 +3,18 @@ UNIT aboutbox_unit;
 INTERFACE
 
 uses
-   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-   Dialogs, StdCtrls, ExtCtrls, wirth_balanced_binary_tree_unit;
+   Classes,
+   Controls,
+   Dialogs,
+   ExtCtrls,
+   Forms,
+   Graphics,
+   Messages,
+   StdCtrls,
+   SysUtils,
+   Variants,
+   Windows,
+   wirth_balanced_binary_tree_unit;
 
 type
    TAboutBoxForm =
