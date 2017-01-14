@@ -1,5 +1,9 @@
 unit mp_types;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 {MPArith type definitions and constants}
 
 interface

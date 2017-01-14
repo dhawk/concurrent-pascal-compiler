@@ -1,19 +1,19 @@
 unit pic18x_compiler_dev_aboutbox_unit;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 interface
 
 uses
-   Classes,
-   Controls,
-   Dialogs,
-   Forms,
-   Graphics,
-   Messages,
-   pic18x_aboutbox_unit,
-   StdCtrls,
-   SysUtils,
-   Variants,
-   Windows;
+{$IFnDEF FPC}
+  Windows,
+{$ELSE}
+  LCLIntf, LCLType, LMessages,
+{$ENDIF}
+  Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, pic18x_aboutbox_unit, StdCtrls;
 
 type
    TCPCPIC18xDevAboutBox =

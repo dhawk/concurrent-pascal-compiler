@@ -1,5 +1,9 @@
 unit mp_base;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 {Multi precision integer arithmetic basic routines}
 
 interface

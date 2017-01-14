@@ -1,5 +1,9 @@
 UNIT pic18x_ram_map_unit;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 INTERFACE
 
 uses

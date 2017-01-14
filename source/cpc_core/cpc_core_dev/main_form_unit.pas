@@ -7,17 +7,8 @@ UNIT main_form_unit;
 INTERFACE
 
 uses
-   Classes,
-   Controls,
-   cpc_blocks_unit,
-   cpc_definitions_unit,
-   Dialogs,
-   Forms,
-   Graphics,
-   Menus,
-   StdCtrls,
-   SysUtils,
-   Variants;
+  SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, StdCtrls, cpc_definitions_unit, cpc_blocks_unit, Menus;
 
 type
   TMainForm = class(TForm)

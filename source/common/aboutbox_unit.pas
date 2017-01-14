@@ -1,20 +1,19 @@
 UNIT aboutbox_unit;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 INTERFACE
 
 uses
-   Classes,
-   Controls,
-   Dialogs,
-   ExtCtrls,
-   Forms,
-   Graphics,
-   Messages,
-   StdCtrls,
-   SysUtils,
-   Variants,
+{$IFnDEF FPC}
    Windows,
-   wirth_balanced_binary_tree_unit;
+{$ELSE}
+  LCLIntf, LCLType, LMessages,
+{$ENDIF}
+  Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+   Dialogs, StdCtrls, ExtCtrls, wirth_balanced_binary_tree_unit;
 
 type
    TAboutBoxForm =

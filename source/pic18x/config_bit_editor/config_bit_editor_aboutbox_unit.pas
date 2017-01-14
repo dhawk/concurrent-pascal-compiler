@@ -1,9 +1,18 @@
 UNIT config_bit_editor_aboutbox_unit;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 INTERFACE
 
 uses
-   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+{$IFnDEF FPC}
+  Windows,
+{$ELSE}
+  LCLIntf, LCLType, LMessages,
+{$ENDIF}
+  Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
    Dialogs, pic18x_aboutbox_unit, StdCtrls, ExtCtrls, aboutbox_unit;
 
 type

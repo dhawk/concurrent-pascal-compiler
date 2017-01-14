@@ -1,5 +1,9 @@
 unit BTypes;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 {Common basic type definitions}
 
 
