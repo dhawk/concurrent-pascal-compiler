@@ -7393,6 +7393,7 @@ procedure RunTests;
       test114;
       test115;
       test116;
+writeln (GetEnvironmentVariable('TESTNAME'));
       // TODO: the following fails in the CI batch environment but works everywhere else - why?
       if GetEnvironmentVariable('TESTNAME') <> 'Lazarus' then
          test117;
