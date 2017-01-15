@@ -680,7 +680,7 @@ procedure TPICFileParser.XmlScannerEndTag(Sender: TObject; TagName: String);
       mode: TSFRMode;
       field: TSFRField;
       t: TSFR;
-      i, bitno: integer;
+      bitno: integer;
    begin  // XmlScannerEndTag
       assert (stk[level].tag = identify_tag(TagName));
       case stk[level].tag of
