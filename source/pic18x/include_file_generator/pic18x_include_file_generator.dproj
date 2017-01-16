@@ -52,11 +52,11 @@
 			<DCC_RemoteDebug>true</DCC_RemoteDebug>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
+			<DCC_UnitAlias>WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;$(DCC_UnitAlias)</DCC_UnitAlias>
 			<DCC_RangeChecking>true</DCC_RangeChecking>
 			<DCC_IntegerOverflowCheck>true</DCC_IntegerOverflowCheck>
 			<DCC_ExeOutput>..\..\..\bin</DCC_ExeOutput>
 			<DCC_UnitSearchPath>..\..\lib;..\..\lib\fastmm;..\..\lib\mparith;..\..\lib\PerlRegEx;..\..\cpc_core;..\common;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
-			<DCC_DcuOutput>..\..\..\obj\</DCC_DcuOutput>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_2)'!=''">
 			<DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
@@ -68,13 +68,13 @@
 			<DelphiCompile Include="pic18x_include_file_generator.dpr">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
+			<DCCReference Include="..\..\lib\fastmm\FastMM4.pas"/>
 			<DCCReference Include="main_form_unit.pas">
 				<Form>MainForm</Form>
 			</DCCReference>
 			<DCCReference Include="pic18x_typedef_unit.pas"/>
 			<DCCReference Include="pic_file_parser_unit.pas"/>
 			<DCCReference Include="processing_frame_unit.pas">
-				<FormType>dfm</FormType>
 				<Form>ProcessingFrame</Form>
 				<DesignClass>TFrame</DesignClass>
 			</DCCReference>
@@ -119,11 +119,9 @@
 				<Form>ProcessAllPICFilesDlg</Form>
 			</DCCReference>
 			<DCCReference Include="syntax_check_all_include_files_dialog_unit.pas">
-				<FormType>dfm</FormType>
 				<Form>SyntaxCheckAllIncludeFilesDialog</Form>
 			</DCCReference>
 			<DCCReference Include="add_field_frame_unit.pas">
-				<FormType>dfm</FormType>
 				<Form>AddFieldFrame</Form>
 				<DesignClass>TFrame</DesignClass>
 			</DCCReference>

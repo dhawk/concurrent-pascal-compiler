@@ -7393,10 +7393,10 @@ procedure RunTests;
       test114;
       test115;
       test116;
-writeln (GetEnvironmentVariable('TESTNAME'));
-      // TODO: the following fails in the CI batch environment but works everywhere else - why?
       if GetEnvironmentVariable('TESTNAME') <> 'Lazarus' then
-         test117;
+         test117
+      else
+         display_test_result ('*** test117 skipped due to problem in CI environment - todo: need to find root cause');
       test118;
       test119;
       test120;
