@@ -122,7 +122,7 @@ procedure TMainForm.UnpackPICFilesfromMPLABX1Click(Sender: TObject);
       old_cursor: HCURSOR;
    begin
       assert (java_jdk_jar_exe_location <> '');
-      assert (microchip_crownking_edc_jar_location);
+      assert (microchip_crownking_edc_jar_location <> '');
       old_cursor := screen.Cursor;
       screen.cursor := crHourglass;
       RunProgram ('"' + java_jdk_jar_exe_location + '" xf "' + microchip_crownking_edc_jar_location + '" content/edc/18xxxx',
