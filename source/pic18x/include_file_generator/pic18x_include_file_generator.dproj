@@ -149,7 +149,6 @@
 		<Import Condition="Exists('$(BDS)\Bin\CodeGear.Delphi.Targets')" Project="$(BDS)\Bin\CodeGear.Delphi.Targets"/>
 		<Import Condition="Exists('$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj')" Project="$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj"/>
 		<PropertyGroup>
-			<PreBuildEvent><![CDATA[copy /y res\*.* .]]></PreBuildEvent>
 			<PostBuildEvent><![CDATA[resourcehacker.exe -script resourcehacker_script.txt]]></PostBuildEvent>
 		</PropertyGroup>
 		<ProjectExtensions>
