@@ -6875,7 +6875,7 @@ procedure test136;  // asserts
       conclude_test
    end;
 
-procedure test_137;
+procedure test137;
    // test opt if b&b - with BTFSx,BTFSy instr pair
    begin
       add ('function f (b: boolean): boolean;');
@@ -7087,7 +7087,7 @@ procedure test_137;
       conclude_test
    end;
 
-procedure test_138;
+procedure test138;
    begin
       add ('function f00 (a,b: uint1): boolean;');
       add (' var x: boolean;');
@@ -7163,7 +7163,7 @@ procedure test_138;
       conclude_test
    end;
 
-procedure test_139;
+procedure test139;
    begin   // test short-circuit and
       add ('function ft: boolean;');
       add ('  begin');
@@ -7219,7 +7219,7 @@ procedure test_139;
       conclude_test
    end;
 
-procedure test_140;
+procedure test140;
    begin   // test short-circuit and
       add ('function ft: boolean;');
       add ('  begin');
@@ -7393,10 +7393,10 @@ procedure RunTests;
       test114;
       test115;
       test116;
-      if GetEnvironmentVariable('TESTNAME') <> 'Lazarus' then
+//      if GetEnvironmentVariable('TESTNAME') <> 'Lazarus' then
          test117
-      else
-         display_test_result ('*** test117 skipped due to problem in CI environment - todo: need to find root cause');
+;//      else
+//         display_test_result ('*** test117 skipped due to problem in CI environment - todo: need to find root cause');
       test118;
       test119;
       test120;
@@ -7416,10 +7416,10 @@ procedure RunTests;
       test134;
       test135;
       test136;
-      test_137;
-      test_138;
-      test_139;
-      test_140;
+      test137;
+      test138;
+      test139;
+      test140;
       display_test_result ('all tests done')
    end;
 
