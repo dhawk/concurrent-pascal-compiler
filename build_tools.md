@@ -1,4 +1,9 @@
-# Compiler Build Environment
+---
+layout: default
+title: Compiler Build Environment`
+---
+
+<h1><center>{{title}}</center></h1>
 
 The following tools are needed to build the compiler:
 
