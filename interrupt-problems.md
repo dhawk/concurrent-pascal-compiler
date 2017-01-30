@@ -15,15 +15,13 @@ This article will examine three approaches to interrupts:
 2. **Interrupt Subroutine Approach:** Some traditional non-concurrent programming languages such as C or Basic implement "interrupt subroutines" that are "called by the hardware".  This can work but requires careful attention to detail and a keen understanding of the potential pitfalls.
 3. **Concurrent Pascal:** Concurrent Pascal makes interrupts easy.  It supports multiple cyclic processes with multiple priority levels. Monitors provide the means for safe inter-process communication. A process may be tightly coupled to a hardware module by using the interrupt as the synchronization mechanism.  A high priority interrupt process will respond quickly when its associated hardware operation completes and will preempt lower priority processes already running.  
 
-To illustrate these approaches we will implement a simplistic cruise control module with a PIC18 microcontroller. The PIC's Analog to Digital Converter (ADC) will be utilized to  measure the vehicle's velocity in units of inches per second (in/sec).  A timer (TMR0) will be used to time periodic reads of the ADC.  In these highly simplified examples many necessary details will be omitted in order to focus on the essential points.
+To illustrate these approaches we will implement a simplistic cruise control module with a PIC18 microcontroller. The PIC's Analog to Digital Converter (ADC) will be utilized to  measure the vehicle's velocity in units of inches per second (in/sec).  A timer (TMR0) will be used to time periodic reads of the ADC.  In these highly simplified examples many necessary details are omitted in order to focus on the essential points.
 
 # Busy Loop Approach  
 
 Users of traditional non-concurrent programming languages such as C and Basic are often advised to forgo using interrupts altogether and instead implement a single-threaded program that busy-loops around looking at hardware completion flags and running a handler when a flag is set.  
 
 ~~~
-int velocity;
-
 void control_throttle (int vel)
 {
     ...    
@@ -31,6 +29,8 @@ void control_throttle (int vel)
 
 int main(int argc, char** argv)
 {
+    int velocity;
+
     ...
     while(1)
     {   
@@ -51,17 +51,17 @@ int main(int argc, char** argv)
 }
 ~~~
 
-The first if statement in the main loop checks the TMR0 flag.  If the flag is set it means that the ADC period has completed.  If completed the velocity value is read from the ADCRES registers.  Then the ADC and TMR0 are restarted for another cycle (details not shown).
+The first if statement in the main loop checks the TMR0 flag.  If the flag is set it means that the ADC period has completed and the velocity value is read from the ADRES registers.  Then the ADC and TMR0 are restarted for another cycle (details not shown).
 
 For illustrative purposes a second hardware module flag is tested and handled in the second if statement of the main loop.
 
 Lastly the `control_throttle` subroutine is called with the latest velocity reading.
 
-The busy-loop approach can be adequate for simple applications but may be insufficient for hardware modules requiring quick response times.  A common problem will be that a low priority hardware handler is already executing when a high priority hardware operation completes but its flag won't even be examined until the low priority handler finishes and the main loop cycles back around to look at it.  Ideally the higher priority handler would run immediately, however in a single threaded language that is difficult to do without resorting to spaghetti code.
+The busy-loop approach can be adequate for simple applications but may be insufficient for hardware modules requiring quick response times.  A common problem will be that a low priority hardware handler is already executing when a high priority hardware operation completes, but the high priority flag won't even be examined until the low priority handler finishes and the main loop cycles back around to look at it.  Ideally the higher priority handler would run immediately, but in a single threaded language that is difficult to do without resorting to spaghetti code.
 
 # Interrupt Subroutine Approach
 
-Although C and Basic are single-threaded (non-concurrent) languages, some implementations provide an "interrupt subroutine" that can be "called from the hardware" in response to an interrupt.  The compiler generates special code for these interrupt subroutines to save all CPU registers on entry and re-load them on exit.  When an interrupt occurs the main program thread is briefly suspended while the interrupt subroutine runs and then resumed when it completes.  The register saving guarantees that the interupted main program thread is not corrupted.  Adding interrupt subroutines to a single-threaded language provides a limited concurrency capability.
+Although C and Basic are single-threaded (non-concurrent) languages, some implementations provide an "interrupt subroutine" that can be "called from the hardware" in response to an interrupt.  The compiler generates special code for these interrupt subroutines that saves all CPU registers on entry and re-loads them on exit.  When an interrupt occurs the main program thread is briefly suspended while the interrupt subroutine runs and then resumed when it completes.  The register saving guarantees that the interupted main program thread is not corrupted.  Adding interrupt subroutines to a single-threaded language provides a limited concurrency capability.
 
 An abbreviated outline of the cruise control embedded software using this approach is as follows:
 
@@ -95,9 +95,9 @@ int main(int argc, char** argv)
 }
 ~~~
 
-The most recent velocity measurement is kept in a global variable.
+The most recent velocity measurement is kept in a global variable `velocity`.
 
-TMR0 has been set up to interrupt upon the completion of each ADC reading (details not shown).  Upon each of these interrupts the ADC value is saved to the global velocity variable and then another ADC reading is started (details not shown).
+TMR0 has been set up to interrupt upon the completion of each ADC reading (details not shown).  Upon each of these interrupts the ADC value is saved to the global `velocity` variable and then another ADC reading is started (details not shown).
 
 The main code continuously updates the throttle setting based on the latest velocity reading and desired speed setting.
 
@@ -106,10 +106,10 @@ Seems simple enough. *What could possibly go wrong?*
 We'll start by examining the assembly code that Microchip's XC8 compiler generates for the call to control_throttle in main.  Here the current value of the velocity variable is transferred to the location of the parameter variable and then the subroutine itself is called:
 
 ~~~
-                          ;example.c: control_throttle (velocity);
-0000A0  C016  F00F         	movff	_velocity,control_throttle@vel      ;volatile
-0000A4  C017  F010         	movff	_velocity+1,control_throttle@vel+1  ;volatile
-0000A8  EC5A  F000         	call	_control_throttle	;wreg free
+                  ;example.c: control_throttle (velocity);
+0000A0  C016  F00F   movff	_velocity,control_throttle@vel      
+0000A4  C017  F010   movff	_velocity+1,control_throttle@vel+1  
+0000A8  EC5A  F000   call	_control_throttle	;wreg free
 ~~~
 
 In this code fragment it needs to be understood that the LSB is transferred in the first movff instruction and the MSB is transferred in the second[^little-endian].
@@ -146,9 +146,9 @@ The C language has no means of identifying concurrently accessed data structures
 
 # Concurrent Pascal
 
-Now we will examine how the above problem would be implemented using Concurrent Pascal.  First we identify the sites of concurrency.  In this case there are two: the ADC reader (the interrupt routine above) and main.  Each of these will be implemented as a *cyclic sequential process*.  Then we will identify the shared data - in this case the velocity reading.  This will be implemented as a *monitor*.  Thus our example will be implemented with three components - two processes and a monitor.
+Now we will examine how the above problem would be implemented using Concurrent Pascal.  First we identify the sites of concurrency.  In this case there are two: the ADC reader (the interrupt routine above) and main.  Each of these will be implemented as a *cyclic sequential process*.  Then we will identify the shared data - in this case the velocity reading.  This will be implemented as a *monitor*.  Thus our example will be implemented with three components - two processes and a monitor. Below is a directed graph showing the *access rights* for these three components:
 
-In Concurrent Pascal there is no such thing as a global variable with unrestricted concurrent access.  Instead the only access to shared data is via monitors.  This is important because the compiler can correctly generate consistent and safe shared variable access for all critical sections.  A Concurrent Pascal program that attempts unsafe shared variable access via global variables won't even compile!
+![](interrupt-problems/access-rights.png)
 
 First we will examine the monitor code:
 
@@ -168,7 +168,7 @@ var
    velocity: t_velocity;
 ~~~
 
-The monitor keeps the current velocity value in private variable `v`.  It can only be read or written through the velocity property.  Each set or get operation is a critical section and the compiler generates appropriate code to ensure that the  operation is atomic.
+The monitor keeps the current velocity value in private variable `v`.  It can only be read or written through the `velocity` property.  Each set or get operation is a critical section and the compiler generates appropriate code to ensure that the  operation is atomic.
 
 Next we will look at the ADC reader process:
 
@@ -210,7 +210,7 @@ var
 
 It runs at a lower priority (priority 0) than the interrupt process.  It too is a cyclic sequential process that loops continuously feeding the latest velocity measurement to the `control_throttle` algorithm.
 
-Thus the program consists of three components: two processes (ADC_reader and main) and one monitor (velocity). The components are connected to each other in the system initialization section of the program:
+A component has access to another component only if it is passed as a parameter in an init statement. The three components are connected to each other in the system initialization section of the program:
 
 ~~~
 begin
@@ -219,11 +219,9 @@ begin
 end.
 ~~~
 
-Below is a directed graph showing the *access rights* for these three components:
+In Concurrent Pascal there is no such thing as a global variable with unrestricted concurrent access.  Instead the only access to shared data is via monitors.  This is important because the compiler can correctly generate consistent and safe shared variable access for all critical sections.  A Concurrent Pascal program that attempts unsafe shared variable access via global variables won't even compile!
 
-![](interrupt-problems/access-rights.png)
-
-A component has access to another component only if it is passed as a parameter in an init statement, and the only way to access that component is via its public methods.  *There are no global variables involved in inter-process communication in a Concurrent Pascal program.*
+>  ***There are no global variables involved in inter-process communication in a Concurrent Pascal program.***
   
 
     
