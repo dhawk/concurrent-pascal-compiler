@@ -5,19 +5,17 @@ title: The Interrupt Problem
 
 <h1><center>{{title}}</center></h1>
 
-# Introduction
-
 Interrupts are a mechanism by which a hardware module signals the CPU that an operation has completed.  An embedded system that correctly utilizes interrupts can be very responsive since the appropriate software is tightly coupled to the hardware it controls.
 
 This article will examine three approaches to interrupts:
 
 1. **Busy-loop Approach:** here interrupts are avoided altogether.  This is often advised for users of traditional non-concurrent programming languages such as C or Basic.  This is fairly safe if performance requirements are modest.
 2. **Interrupt Subroutine Approach:** Some traditional non-concurrent programming languages such as C or Basic implement "interrupt subroutines" that are "called by the hardware" when an interrupt occurs.  This can work but requires careful attention to detail and a keen understanding of the potential pitfalls.
-3. **Concurrent Pascal:** Concurrent Pascal makes interrupts easy.  It supports multiple cyclic processes with multiple priority levels. Monitors provide the means for safe inter-process communication. A process may be tightly coupled to a hardware module by using the interrupt as the synchronization mechanism.  A high priority interrupt process will respond quickly when its associated hardware operation completes and will preempt lower priority processes already running.  
+3. **Concurrent Pascal:** Concurrent Pascal makes interrupts easy.  It supports multiple cyclic processes with multiple priority levels. A process may be tightly coupled to a hardware module by using the interrupt as the synchronization mechanism.  A high priority interrupt process will respond quickly when its associated hardware operation completes and will preempt lower priority processes already running. Monitors provide the means for safe inter-process communication.
 
 To illustrate these approaches we will implement a simplistic fragment of a cruise control module with a PIC18 microcontroller. The PIC's Analog to Digital Converter (ADC) will be utilized to measure the vehicle's velocity in units of inches per second (in/sec).  A timer (TMR0) will be used to time periodic updates of the current velocity.  A `control_throttle` routine will calculate the throttle setting based on the desired speed and the current velocity.  *In these highly simplified examples many necessary details will be omitted in order to focus attention on the essential points.*
 
-# Busy Loop Approach  
+## The Busy Loop Approach  
 
 Users of traditional non-concurrent programming languages such as C and Basic are often advised to forgo using interrupts altogether and instead implement a single-threaded program that busy-loops around looking at hardware completion flags and running a handler when a flag is set.  
 
@@ -63,7 +61,7 @@ Lastly the `control_throttle` subroutine is called with the latest velocity read
 
 The busy-loop approach can be adequate for simple applications but may be insufficient for hardware modules requiring quick response times.  A common problem will be that some other code (a low priority hardware handler or the control_throttle calculation) is already executing when a high priority hardware operation completes, but the high priority hardware flag won't even be examined until the other code finishes and the main loop cycles back around to look at it.  Ideally the higher priority handler would run immediately, but in a single threaded language that is difficult to do without resorting to spaghetti code.
 
-# Interrupt Subroutine Approach
+## The Interrupt Subroutine Approach
 
 Although C and Basic are single-threaded (non-concurrent) languages, some implementations provide an "interrupt subroutine" that can be "called from the hardware" in response to an interrupt.  The compiler generates special code for these interrupt subroutines that saves all CPU registers on entry and re-loads them on exit.  When an interrupt occurs the main program thread is briefly suspended while the interrupt subroutine runs and then resumed when it completes.  The register saving guarantees that the interupted main program thread is not corrupted.  Adding interrupt subroutines to a single-threaded language provides a limited concurrency capability.
 
@@ -99,7 +97,7 @@ int main(int argc, char** argv)
 }
 ~~~
 
-The most recent velocity measurement is kept in a global variable `velocity`.
+The most recent velocity measurement is kept in a global variable `velocity` (more on `volatile` below).
 
 TMR0 has been set up to interrupt upon the completion of each velocity measurement period *(details not shown)*.  Upon each of these interrupts the ADC value is saved to the global `velocity` variable.
 
@@ -136,11 +134,13 @@ This is an essential problem with interrupts.  An interrupt that occurs at the w
 
 In preventing this kind of problem the programmer must first recognize that the `velocity` variable is shared between two concurrent sites of activity (the main thread and the interrupt subroutine).  In an embedded system all such concurrently shared variables will need to be identified.  In this simple example the `velocity` variable consists of only two bytes, but often concurrently shared data structures will be more complex.
 
-A change to a concurrently shared data structure constitutes a *critical section* that needs to be performed as an *atomic* (indivisible) operation.  This operation must be implemented so as to ensure that the variable is internally consistent after each atomic  change.  In the cruise control example the two movff instructions constitute a critical section that must be performed atomically.
+A change to a concurrently shared data structure constitutes a *critical section* that needs to be performed as an *atomic* (indivisible) operation.  This operation must be implemented so as to ensure that the variable is internally consistent after each atomic  change.  In the cruise control example the two movff instructions constitute a critical section that must be performed atomically[^16bit_solution].
+
+[^16bit_solution]: If this exact same program was implemented on a CPU with 16 bit words the problem would be "solved" since only a single instruction would be required to read the ADC value and the single instruction would be atomic. However the general problem remains for non-trivial concurrently shared data structures.
 
 There are several mechanisms by which a programmer can correctly protect critical sections for concurrent data sharing.  One can surround the critical sections with semaphores, spin locks, or simply turn interrupts off.  This does require that the programmer understands the problem, correctly identifies all critical sections, and implements a consistent mechanism to protect each shared data structure.  This can be difficult enough for a lone programmer, but is even more difficult in a large system with multiple programmers, or when the initial programmer(s) on a project are gone and a new programmer inherits the project at a later time.  
 
-## Why not C?
+### Why not C?
 
 C is a low level language that was originally developed as an assembler replacement that provides constructs that map efficiently to typical CPU instructions.  It was popular because it was widely available and supported many computer architectures.  Some implementations provide interrupt subroutines.  These interrupt subroutines add primitive concurrency but without a mechanism for concurrent data sharing.  The widely misunderstood `volatile` keyword does **not** provide that mechanism[^volatile].  Indeed the XC8 compiler generates exactly the same code in the critical section examined above whether the velocity variable is declared as volatile or not.  
 
@@ -148,7 +148,7 @@ The C language has no means of identifying concurrently accessed data structures
 
 [^volatile]: the `volatile` keyword in C <https://en.wikipedia.org/wiki/Volatile_(computer_programming)>
 
-# Concurrent Pascal
+## Concurrent Pascal
 
 Now we will examine how the above problem would be implemented using Concurrent Pascal.  First we identify the sites of concurrency in our cruise control implementation.  In this case there are two: the `ADC_reader` (the interrupt routine above) and `main`.  Each of these will be implemented as a *cyclic sequential process*.  Then we will identify the shared data - in this case the `velocity` reading.  This will be implemented as a *monitor*.  Thus our example will be implemented with three components - two processes and a monitor. Below is a directed graph showing the *access rights* for these three components:
 
@@ -191,7 +191,7 @@ var
       end interrupt TMR0I_prio1_interrupt;
 ~~~
 
-This is an example of an interrupt process.  It accomplishes the same thing as the interrupt subroutine but has an important paradigm shift.  Instead of being a subroutine "called by  the hardware" it is instead a cyclic sequential process synchronized with the hardware via the interrupt (interrupts are best understood as being a signal that the hardware has completed an operation).  At the beginning of the cycle the ADC is set up to perform a measurement (details not shown). The process thread then blocks at the `await interrupt` statement until the TMR0 interrupt signals that the ADC measurement is ready.  At that point the ADC reading is written to the velocity monitor (passed as to the process as parameter `v` at system initialization) and then the cycle repeats.  The specific interrupt an interrupt process is synchronized to is specified at the end of the process variable type declaration (here `TMR0I_prio1_interrupt`).  This process runs at priority 1 which is equivalent to the PIC18 low priority interrupt (the high priority interrupt is priority 2). 
+This is an example of an interrupt process.  It accomplishes the same thing as the interrupt subroutine but has an important paradigm shift.  Instead of being a subroutine "called by  the hardware" it is instead a cyclic sequential process synchronized with the hardware via the interrupt (interrupts are best understood as being a signal that the hardware has completed an operation).  At the beginning of the cycle the ADC is set up to perform a measurement *(details not shown)*. The process thread then blocks at the `await interrupt` statement until the TMR0 interrupt signals that the ADC measurement is ready.  At that point the ADC reading is written to the velocity monitor (passed as to the process as parameter `v` at system initialization) and then the cycle repeats.  The specific interrupt an interrupt process is synchronized to is specified at the end of the process variable type declaration (here `TMR0I_prio1_interrupt`).  This process runs at priority 1 which is equivalent to the PIC18 low priority interrupt (the high priority interrupt is priority 2). 
 
 Next we will look at the main process.
 
@@ -227,6 +227,10 @@ end.
 In Concurrent Pascal there is no such thing as a global variable with unrestricted concurrent access.  Instead the only access to shared data is via monitors.  This is important because the compiler can correctly generate consistent and safe shared variable access code for all critical sections.  A Concurrent Pascal program that attempts unsafe shared variable access via global variables won't even compile!
 
 >  ***There are no global variables involved in inter-process communication in a Concurrent Pascal program.***
+
+<hr>
+
+### Footnotes:
   
 
     
