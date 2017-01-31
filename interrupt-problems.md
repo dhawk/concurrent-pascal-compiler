@@ -97,9 +97,9 @@ int main(int argc, char** argv)
 }
 ~~~
 
-The most recent velocity measurement is kept in a global variable `velocity` (more on `volatile` below).
+The most recent velocity measurement is kept in a global variable `velocity` *(more on* `volatile` *later).*
 
-TMR0 has been set up to interrupt upon the completion of each velocity measurement period *(details not shown)*.  Upon each of these interrupts the ADC value is saved to the global `velocity` variable.
+TMR0 has been set up to interrupt upon the completion of each velocity measurement period *(details not shown)*.  Upon each of these interrupts the ADC value is saved to the global `velocity` variable[^shift-needed].
 
 The main code continuously updates the throttle setting based on the latest velocity reading and desired speed setting.
 
@@ -120,15 +120,15 @@ In this code fragment the LSB is transferred in the first movff instruction and 
 
 Now suppose the vehicle is traveling at 20 mph and the cruise control setting is turned down to 10 mph.  Imagine that the ADC read interrupt randomly happens to occur between the two movff instructions just as the vehicle is slowing from 14.55 mph ($0100 in/sec) to 14.49 mph ($00FF in/sec). The following sequence of operations will occur:
 
-- the `velocity` variable already contains the previous value of 14.55 mph ($0100 in/sec).
+- the `velocity` variable already contains the previous value of $0100 in/sec.
 - the first movff instruction has just set the LSB of the `control_throttle` parameter to $00.
-- the interrupt occurs and a new value of 14.49 mph ($00FF in/sec) is written to the `velocity` variable.
+- the interrupt occurs and a new value of $00FF in/sec is written to the `velocity` variable.
 - the second movff instruction sets the MSB of the `control_throttle` parameter to $00.
 - the `control_throttle` routine is called with a parameter value of $0000.
 
 You can imagine what the `control_throttle` routine might do.  It has a setpoint of 10 mph and is being told the vehicle is currently stopped (even though it is actually moving at over 14 mph) - the throttle is opened wide and the vehicle lurches forward...  *Unintended acceleration, anyone?*
 
-This is an essential problem with interrupts.  An interrupt that occurs at the wrong time in the wrong place can lead to unpredictable results.  The programmer needs to realize that conventional testing is unlikely to reveal this kind of bug.  One could have tested this many times without the interrupt ever occurring at the critical spot between the two movff instructions.  Even if the interrupt does occur at the critical point during testing it will usually appear benign - joining the MSB of one reading to the LSB of the previous reading will often yield a "reasonable" value that might not be noticed in the testing.  Once deployed, however, the system may occasionally *glitch* and behave erratically and the product may achieve an undesired reputation for being *flaky*.  
+This is the essential problem with interrupts.  An interrupt that occurs at the wrong time in the wrong place can lead to unpredictable results.  The programmer needs to realize that conventional testing is unlikely to reveal this kind of bug.  One could have tested this many times without the interrupt ever occurring at the critical spot between the two movff instructions.  Even if the interrupt does occur at the critical point during testing it will usually appear benign - joining the MSB of one reading to the LSB of the previous reading will often yield a "reasonable" value that might not be noticed in the testing.  Once deployed, however, the system may occasionally *glitch* and behave erratically and the product may achieve an undesired reputation for being *flaky* or worse.  
 
 > ***Interrupts should be the first of the usual suspects examined when glitchy or flaky behavior is observed in an embedded system using interrupt subroutines.***
 
@@ -146,7 +146,7 @@ C is a low level language that was originally developed as an assembler replacem
 
 The C language has no means of identifying concurrently accessed data structures and therefore the compiler cannot automatically identify critical sections and insert the necessary protection mechanisms.  This must be done by the programmer.  A C program with incomplete, inconsistent, or totally missing critical section code will happily compile with no error messages or warnings.
 
-[^volatile]: the `volatile` keyword in C <https://en.wikipedia.org/wiki/Volatile_(computer_programming)>
+[^volatile]: See the discussion of the `volatile` keyword in C and C++: <https://en.wikipedia.org/wiki/Volatile_(computer_programming)>
 
 ## Concurrent Pascal
 
@@ -191,7 +191,9 @@ var
       end interrupt TMR0I_prio1_interrupt;
 ~~~
 
-This is an example of an interrupt process.  It accomplishes the same thing as the interrupt subroutine but has an important paradigm shift.  Instead of being a subroutine "called by  the hardware" it is instead a cyclic sequential process synchronized with the hardware via the interrupt (interrupts are best understood as being a signal that the hardware has completed an operation).  At the beginning of the cycle the ADC is set up to perform a measurement *(details not shown)*. The process thread then blocks at the `await interrupt` statement until the TMR0 interrupt signals that the ADC measurement is ready.  At that point the ADC reading is written to the velocity monitor (passed as to the process as parameter `v` at system initialization) and then the cycle repeats.  The specific interrupt an interrupt process is synchronized to is specified at the end of the process variable type declaration (here `TMR0I_prio1_interrupt`).  This process runs at priority 1 which is equivalent to the PIC18 low priority interrupt (the high priority interrupt is priority 2). 
+This is an example of an interrupt process.  It accomplishes the same thing as the interrupt subroutine but has an important paradigm shift.  Instead of being a subroutine "called by  the hardware" it is instead a cyclic sequential process synchronized with the hardware via the interrupt (interrupts are best understood as being a signal that the hardware has completed an operation).  At the beginning of the cycle the ADC is set up to perform a measurement *(details not shown)*. The process thread then blocks at the `await interrupt` statement until the TMR0 interrupt signals that the ADC measurement is ready.  At that point the ADC reading[^either-endian-SFRs] is written to the velocity monitor (passed as to the process as parameter `v` at system initialization) and then the cycle repeats.  The specific interrupt an interrupt process is synchronized to is specified at the end of the process variable type declaration (here `TMR0I_prio1_interrupt`).  This process runs at priority 1 which is equivalent to the PIC18 low priority interrupt (the high priority interrupt is priority 2).
+
+[^either-endian-SFRs]: The PIC18x Concurrent Pascal compiler can handle either big-endian or little-endian SFR layouts (both can occur in the same microcontroller!), so the byte shifting required by XC8 is unnecessary.
 
 Next we will look at the main process.
 
