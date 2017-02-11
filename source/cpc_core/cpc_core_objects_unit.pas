@@ -483,6 +483,7 @@ type
          interrupt_assigned: boolean;
          context: TDefinition;   // TProgram, TSystemType or TRoutine
          init_statement_called: boolean;  // for system types
+         is_ioreg_1bit_param: boolean;
          property address: integer read get_addr write set_addr;
          constructor CreateForLaterDefinition
             (_id_idx: TIdentifierIdx;
@@ -572,8 +573,7 @@ uses
    cpc_constant_expression_unit,
    cpc_expressions_unit,
    cpc_target_cpu_unit,
-   cpc_types_unit,
-   Math;
+   Math, cpc_types_unit;
 
 function SetByte (constant: TConstant; byteno: cardinal): byte;
    function bit_in_set (bitno: cardinal): boolean;

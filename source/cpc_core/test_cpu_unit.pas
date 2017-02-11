@@ -65,6 +65,8 @@ type
             override;
          procedure record_anonymous_string_constant (s: string);
             override;
+         function supports_ioreg_1bit_params: boolean;
+            override;
 
          {$include TTestCPU_constructor_function_overload_decls.inc}
 
@@ -218,6 +220,11 @@ function TTestCPU.round_trunc_result_type: TTypeDef;
 
 procedure TTestCPU.record_anonymous_string_constant (s: string);
    begin
+   end;
+
+function TTestCPU.supports_ioreg_1bit_params: boolean;
+   begin
+      result := true
    end;
 
 {$include TTestCPU_constructor_functions.inc}

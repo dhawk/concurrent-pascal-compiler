@@ -192,7 +192,7 @@ procedure test_TParamList;
       test_compile_error_generation('type tc=class(q: queue); procedure p; begin end; begin end; begin end.', err_queue_parameters_only_allowed_in_monitor_local_routines, 'queue);');
       test_compile_error_generation('type tm=monitor procedure p (q: queue); public procedure p2; begin end; begin end; begin end; begin end.', err_queue_param_must_be_var, 'queue);');
       test_only_for_successful_compilation('type tio=packed record a: 0..255 end; procedure p(io: tio); begin end; begin end.');
-      test_compile_error_generation('procedure p (ioreg i: int8); begin end; begin end.', err_packed_record_type_expected, 'int8); begin end; begin end.');
+      test_compile_error_generation('procedure p (ioreg i: int8); begin end; begin end.', err_packed_record_type_expected2, 'int8); begin end; begin end.');
       test_compile_error_generation('type tc=class public procedure p; begin end; begin end; procedure p(var c: tc); begin end; begin end.', err_system_type_parameter_must_be_constant_parameter, 'tc); begin end; begin end.');
 
       // test parsing of parameter assembly
@@ -369,7 +369,7 @@ procedure test_param_type_rules;
                                      err_string_dimension_not_allowed_for_eeprom_string_parameter,
                                      '[');
       test_compile_error_generation ('procedure p (ioreg s: string',
-                                     err_packed_record_type_expected,
+                                     err_packed_record_type_expected2,
                                      'string');
       test_only_for_successful_compilation ('procedure p (s: set of 0..3); begin end; begin end.');
       test_only_for_successful_compilation ('type te=(ea,eb,ec);tc=class public procedure p (s: set of te); begin end; begin end; begin end.');
@@ -380,7 +380,7 @@ procedure test_param_type_rules;
                                      err_anonymous_type_can_only_be_a_constant_parameter,
                                      'set of te');
       test_compile_error_generation ('type te=(ea,eb,ec,ed);procedure p (ioreg s: set of te); begin end;var ss: set of te;begin p (ss)end.',
-                                     err_packed_record_type_expected,
+                                     err_packed_record_type_expected2,
                                      'set of te');
       test_only_for_successful_compilation ('procedure p (i: 10..13); begin end; begin p(10) end.');
       test_only_for_successful_compilation ('type te=(ea,eb,ec,ed,ee);procedure p (e: eb..ed); begin end; begin p(ec) end.');
@@ -388,7 +388,7 @@ procedure test_param_type_rules;
                                      err_anonymous_type_can_only_be_a_constant_parameter,
                                      'eb..ed);');
       test_compile_error_generation ('type te=(ea,eb,ec,ed,ee);procedure p (ioreg e: eb..ed); begin end; begin p(ec) end.',
-                                     err_packed_record_type_expected,
+                                     err_packed_record_type_expected2,
                                      'eb..ed);');
       test_compile_error_generation ('procedure p (s: begin',
                                      err_type_definition_expected,

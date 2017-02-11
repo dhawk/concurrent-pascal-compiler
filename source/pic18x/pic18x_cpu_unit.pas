@@ -103,6 +103,8 @@ type
             override;
          function src_directory_relative_to_bin: string;
             override;
+         function supports_ioreg_1bit_params: boolean;
+            override;
 
          function TAbsFunctionPrimary_CreateFromSourceTokens: TAbsFunctionPrimary;
             override;
@@ -842,6 +844,11 @@ function TPIC18x_CPU.TCallRecord_Create (called_name: string; called_access: TDe
 function TPIC18x_CPU.src_directory_relative_to_bin: string;
    begin
       result := '..\source\pic18x'
+   end;
+
+function TPIC18x_CPU.supports_ioreg_1bit_params: boolean;
+   begin
+      result := true
    end;
 
 procedure TPIC18x_CPU.append_config_byte (b: byte; byte_no: integer; path, value: string; initialization_unnecessary: boolean);

@@ -279,10 +279,7 @@ uses
    cpc_target_cpu_unit,
    cpc_types_unit;
 
-procedure check_for_valid_ioreg_type (typedef: TTypeDef; typedef_src_loc: TSourceLocation);
-   var
-      i, j, overlay_width: integer;
-      prt: TPackedRecordType;
+procedure check_for_valid_ioreg_type (typedef: TTypeDef; typedef_src_loc: TSourceLocation; is_param: boolean);
    function max (a,b: integer): integer;
       begin
          if a > b then
@@ -290,8 +287,27 @@ procedure check_for_valid_ioreg_type (typedef: TTypeDef; typedef_src_loc: TSourc
          else
             result := b
       end;
+   var
+      i, j, overlay_width: integer;
+      prt: TPackedRecordType;
+      var_ioreg_bit_allowed: boolean;
    begin
+      var_ioreg_bit_allowed := is_param and target_cpu.supports_ioreg_1bit_params;
       case typedef.type_kind of
+         basic_data_type:
+            if var_ioreg_bit_allowed then
+               if typedef.IsOrdinal
+                  and
+                  (((typedef.info.min_value.AsInteger = 0) and (typedef.info.max_value.AsInteger = 1))
+                   or
+                   ((typedef.info.min_value.AsInteger = -1) and (typedef.info.max_value.AsInteger = 0))
+                  )
+               then
+                  {ok}
+               else
+                  raise compile_error.Create(err_packed_record_type_expected2, typedef_src_loc)
+            else
+               raise compile_error.Create(err_packed_record_type_expected, typedef_src_loc);
          packed_record_type:
             begin
                for i := 0 to System.Length(TPackedRecordType(typedef).fields) - 1 do
@@ -328,7 +344,10 @@ procedure check_for_valid_ioreg_type (typedef: TTypeDef; typedef_src_loc: TSourc
                   end;
             end;
       else
-         raise compile_error.Create(err_packed_record_type_expected, typedef_src_loc)
+         if var_ioreg_bit_allowed then
+            raise compile_error.Create(err_packed_record_type_expected2, typedef_src_loc)
+         else
+            raise compile_error.Create(err_packed_record_type_expected, typedef_src_loc)
       end
    end;
 
@@ -653,6 +672,7 @@ constructor TParamList.CreateFromSourceTokens
       allowed_param_descriptors, disallowed_param_descriptors: set of TVariableDescriptor;
       direct_address_mode, indirect_address_mode: TAddressMode;
       temp_src_loc: TSourceLocation;
+      is_ioreg_1bit_param: boolean;
    begin
       inherited Create(paramlist_definition);
       src_loc := lex.token.src_loc;
@@ -744,7 +764,17 @@ constructor TParamList.CreateFromSourceTokens
                         raise compile_error.Create(err_queue_param_must_be_var, typedef_src_loc);
 
                   if param_descriptor = rw_ioreg then
-                     check_for_valid_ioreg_type (typedef, typedef_src_loc);
+                     check_for_valid_ioreg_type (typedef, typedef_src_loc, true);
+
+                  is_ioreg_1bit_param :=
+                     (param_descriptor = rw_ioreg)
+                     and
+                     (typedef.IsOrdinal)
+                     and
+                     (((typedef.info.min_value.AsInteger = 0) and (typedef.info.max_value.AsInteger = 1))
+                      or
+                      ((typedef.info.min_value.AsInteger = -1) and (typedef.info.max_value.AsInteger = 0))
+                     );
 
                   for i := 1 to var_count do
                      begin
@@ -757,7 +787,8 @@ constructor TParamList.CreateFromSourceTokens
                         else if typedef.type_kind in [basic_data_type, set_type] then // small, pass by value
                            parameter_definitions[Length-i].address_mode := direct_address_mode
                         else // large, pass by addr
-                           parameter_definitions[Length-i].address_mode := indirect_address_mode
+                           parameter_definitions[Length-i].address_mode := indirect_address_mode;
+                        parameter_definitions[Length-i].is_ioreg_1bit_param := is_ioreg_1bit_param
                      end;
                finally
                   typedef.Release
@@ -895,7 +926,8 @@ function TParamList.AssembleAndCheckCallerParameterListFromSourceTokens: TArrayO
 
                               if (parameter_definitions[i].descriptor <> rw_const)
                                  and
-                                 (parameter_definitions[i].descriptor <> param_access.base_variable.descriptor) then
+                                 (parameter_definitions[i].descriptor <> param_access.base_variable.descriptor)
+                              then
                                  case parameter_definitions[i].descriptor of
                                     rw_var:
                                        raise compile_error.Create(err_ram_variable_expected, param_access.node_id_src_loc);
@@ -1243,7 +1275,7 @@ procedure TDataItemList.AddFromSourceTokens (context: TDefinition);
                         end
                   end;
                rw_ioreg:
-                  check_for_valid_ioreg_type (typedef, typedef_src_loc);
+                  check_for_valid_ioreg_type (typedef, typedef_src_loc, false);
                rw_rom:
                   begin
                      if typedef.ContainsQueueVariables

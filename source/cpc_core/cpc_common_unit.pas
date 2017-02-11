@@ -197,6 +197,7 @@ const
    err_packed_record_field_type_definition_expected = 'packed record field type definition expected';
    err_packed_record_larger_than_64_bits = 'packed record larger than 64 bits';
    err_packed_record_type_expected = 'packed record or overlay type expected';
+   err_packed_record_type_expected2 = 'packed record, overlay or bit type expected';
    err_paramters_for_interrupt_definition_not_allowed = 'paramters for interrupt definition not allowed';
    err_positive_priority_process_must_call_await_interrupt = 'interrupt process (positive priority) must call "await interrupt"';
    err_priority_expected = '"priority" expected';

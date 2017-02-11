@@ -86,6 +86,8 @@ type
             virtual; abstract;
          procedure release_anonymous_string_constants;
             virtual;
+         function supports_ioreg_1bit_params: boolean;
+            virtual;
 
          {$include TTargetCPU_constructor_function_abstract_decls.inc}
 
@@ -168,6 +170,11 @@ function TTargetCPUBaseClass.get_supported_data_type (id: string): TTypeDef;
 
 procedure TTargetCPUBaseClass.release_anonymous_string_constants;
    begin
+   end;
+
+function TTargetCPUBaseClass.supports_ioreg_1bit_params: boolean;
+   begin
+      result := false
    end;
 
 END.

@@ -7393,10 +7393,7 @@ procedure RunTests;
       test114;
       test115;
       test116;
-//      if GetEnvironmentVariable('TESTNAME') <> 'Lazarus' then
-         test117
-;//      else
-//         display_test_result ('*** test117 skipped due to problem in CI environment - todo: need to find root cause');
+      test117;
       test118;
       test119;
       test120;
