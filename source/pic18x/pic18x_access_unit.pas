@@ -1215,8 +1215,9 @@ procedure TPIC18x_Access.Generate_Load_Ptr2_Code (ptr: TPointer; offset: integer
                         total_offset := 0;  // to suppress compiler warning
                         case TWithVariable(path_start).record_field.definition_kind of
                            record_field_definition:
-                              total_offset := TPIC18x_RecordFieldInfo(TWithVariable(path_start).record_field.info).Offset + total_fixed_offsets + offset;
-                           packed_record_field_definition:
+                               total_offset := TPIC18x_RecordFieldInfo(TWithVariable(path_start).record_field.info).Offset + total_fixed_offsets + offset;
+                           packed_record_field_definition,
+                           overlay_field_definition:
                               total_offset := total_fixed_offsets + offset;
                         else
                            assert (false)

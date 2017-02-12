@@ -1962,7 +1962,8 @@ procedure TWithStatement.scan_starting_at_with_variable;
 
                if (access.node_typedef.type_kind = system_type)
                   and
-                  (TSystemType(access.node_typedef).system_type_kind = process_system_type) then
+                  (TSystemType(access.node_typedef).system_type_kind = process_system_type)
+               then
                   raise compile_error.Create(err_record_or_class_or_monitor_variable_expected, access.src_loc);
 
                with access do
@@ -1984,13 +1985,10 @@ procedure TWithStatement.scan_starting_at_with_variable;
                         end;
                      packed_record_type:
                         begin
-                           packed_record_typedef :=
-                           TPackedRecordType(access.node_typedef);
-                           for i := 0 to Length(packed_record_typedef.fields) - 1
-                           do
+                           packed_record_typedef := TPackedRecordType(access.node_typedef);
+                           for i := 0 to Length(packed_record_typedef.fields) - 1 do
                               begin
-                                 with_variable := TWithVariable.Create(Self,
-                                 packed_record_typedef.fields[i]);
+                                 with_variable := TWithVariable.Create(Self, packed_record_typedef.fields[i]);
                                  CurrentDefinitionTable.DefineForCurrentScope(packed_record_typedef.fields[i].identifier_idx, with_variable, lex.token.src_loc);
                                  with_variable.Release
                               end
@@ -1998,33 +1996,38 @@ procedure TWithStatement.scan_starting_at_with_variable;
                      overlay_type:
                         begin
                            overlay_typedef := TOverlayType(access.node_typedef);
-                           for i := 0 to Length(overlay_typedef.overlaid_variables) - 1 do
-                              if overlay_typedef.overlaid_variables[i].anonymous
-                              then
+                           for i := 0 to Length(overlay_typedef.overlaid_variables)-1 do
+                              if overlay_typedef.overlaid_variables[i].anonymous then
                                  case overlay_typedef.overlaid_variables[i].typedef.type_kind of
                                     record_type:
-                                       for j := 0 to Length(TRecordType(overlay_typedef.overlaid_variables[i].typedef).fields)-1 do
-                                          begin
-                                             with_variable := TWithVariable.Create(Self, TRecordType(overlay_typedef.overlaid_variables[i].typedef).fields[j]);
-                                             CurrentDefinitionTable.DefineForCurrentScope(TRecordType(overlay_typedef.overlaid_variables[i].typedef).fields[j].identifier_idx, with_variable, lex.token.src_loc);
-                                             with_variable.Release
-                                          end;
+                                       begin
+                                          record_typedef := TRecordType(overlay_typedef.overlaid_variables[i].typedef);
+                                          for j := 0 to Length(record_typedef.fields)-1 do
+                                             begin
+                                                with_variable := TWithVariable.Create(Self, record_typedef.fields[j]);
+                                                CurrentDefinitionTable.DefineForCurrentScope(record_typedef.fields[j].identifier_idx, with_variable, lex.token.src_loc);
+                                                with_variable.Release
+                                             end
+                                       end;
                                     packed_record_type:
-                                       for j := 0 to Length(TPackedRecordType(overlay_typedef.overlaid_variables[i].typedef).fields)-1 do
-                                          begin
-                                             with_variable := TWithVariable.Create(Self, TPackedRecordType(overlay_typedef.overlaid_variables[i].typedef).fields[j]);
-                                             CurrentDefinitionTable.DefineForCurrentScope(TPackedRecordType(overlay_typedef.overlaid_variables[i].typedef).fields[j].identifier_idx, with_variable, lex.token.src_loc);
-                                             with_variable.Release
-                                          end;
-                                    array_type, string_type:
+                                       begin
+                                          packed_record_typedef := TPackedRecordType(overlay_typedef.overlaid_variables[i].typedef);
+                                          for j := 0 to Length(packed_record_typedef.fields)-1 do
+                                             begin
+                                                with_variable := TWithVariable.Create(Self, packed_record_typedef.fields[j]);
+                                                CurrentDefinitionTable.DefineForCurrentScope(packed_record_typedef.fields[j].identifier_idx, with_variable, lex.token.src_loc);
+                                                with_variable.Release
+                                             end
+                                       end;
+                                    array_type,
+                                    string_type:
                                        ;  // does not expose any fields
-                                    else
-                                       assert(false)
+                                 else
+                                    assert(false)
                                  end
                               else // not anonymous
                                  begin
-                                    with_variable := TWithVariable.Create(Self,
-                                    overlay_typedef.overlaid_variables[i]);
+                                    with_variable := TWithVariable.Create(Self, overlay_typedef.overlaid_variables[i]);
                                     CurrentDefinitionTable.DefineForCurrentScope(overlay_typedef.overlaid_variables[i].identifier_idx, with_variable, lex.token.src_loc);
                                     with_variable.Release
                                  end
@@ -2032,14 +2035,14 @@ procedure TWithStatement.scan_starting_at_with_variable;
                      system_type:
                         begin
                            c := TSystemType(access.node_typedef);
-                           for i := 0 to Length(c.routines) - 1 do
+                           for i := 0 to Length(c.routines)-1 do
                               begin
                                  with_routine := TWithRoutine.Create(Self, c.routines[i]);
                                  if c.routines[i].entry then
                                     CurrentDefinitionTable.DefineForCurrentScope(c.routines[i].routine_id_idx, with_routine, lex.token.src_loc);
                                  with_routine.Release
                               end;
-                           for i := 0 to Length(c.properties) - 1 do
+                           for i := 0 to Length(c.properties)-1 do
                               if c.properties[i].entry then
                                  begin
                                     with_property := TWithProperty.Create(Self, c.properties[i]);
@@ -2047,14 +2050,13 @@ procedure TWithStatement.scan_starting_at_with_variable;
                                     with_property.Release
                                  end
                         end;
-                     else
-                        raise compile_error.Create(err_record_or_class_or_monitor_variable_expected)
+                  else
+                     raise compile_error.Create(err_record_or_class_or_monitor_variable_expected)
                   end;
 
                   if lex.token_is_symbol(sym_comma) then
                      begin
                         lex.advance_token;
-
                         statement := target_cpu.TWithStatement_CreateFromSourceTokensStartingAtVariable
                      end
                   else
@@ -2064,7 +2066,6 @@ procedure TWithStatement.scan_starting_at_with_variable;
                         last_access_src_loc := lex.previous_token_src_loc;
                         do_src_loc := lex.token.src_loc;
                         lex.advance_token;
-
                         statement := process_statement_from_source_tokens (false)
                      end;
 
@@ -2097,7 +2098,6 @@ procedure TWithStatement.scan_starting_at_with_variable;
                   if lex.token_is_symbol(sym_comma) then
                      begin
                         lex.advance_token;
-
                         statement := target_cpu.TWithStatement_CreateFromSourceTokensStartingAtVariable
                      end
                   else
@@ -2107,7 +2107,6 @@ procedure TWithStatement.scan_starting_at_with_variable;
                         last_access_src_loc := lex.previous_token_src_loc;
                         do_src_loc := lex.token.src_loc;
                         lex.advance_token;
-
                         statement := process_statement_from_source_tokens (false)
                      end;
 
