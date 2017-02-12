@@ -1976,22 +1976,23 @@ procedure TWithStatement.scan_starting_at_with_variable;
                      record_type:
                         begin
                            record_typedef := TRecordType(access.node_typedef);
-                           for i := 0 to Length(record_typedef.fields) - 1 do
+                           for i := 0 to Length(record_typedef.fields)-1 do
                               begin
                                  with_variable := TWithVariable.Create(Self, record_typedef.fields[i]);
-                                 CurrentDefinitionTable.DefineForCurrentScope(record_typedef.fields[i].identifier_idx, with_variable, lex.token.src_loc);
+                                 CurrentDefinitionTable.DefineForCurrentScope(record_typedef.fields[i].identifier_idx, with_variable, access.node_id_src_loc);
                                  with_variable.Release
                               end
                         end;
                      packed_record_type:
                         begin
                            packed_record_typedef := TPackedRecordType(access.node_typedef);
-                           for i := 0 to Length(packed_record_typedef.fields) - 1 do
-                              begin
-                                 with_variable := TWithVariable.Create(Self, packed_record_typedef.fields[i]);
-                                 CurrentDefinitionTable.DefineForCurrentScope(packed_record_typedef.fields[i].identifier_idx, with_variable, lex.token.src_loc);
-                                 with_variable.Release
-                              end
+                           for i := 0 to Length(packed_record_typedef.fields)-1 do
+                              if packed_record_typedef.fields[j].kind <> anonymous_packed_field then
+                                 begin
+                                    with_variable := TWithVariable.Create(Self, packed_record_typedef.fields[i]);
+                                    CurrentDefinitionTable.DefineForCurrentScope(packed_record_typedef.fields[i].identifier_idx, with_variable, access.node_id_src_loc);
+                                    with_variable.Release
+                                 end
                         end;
                      overlay_type:
                         begin
@@ -2005,7 +2006,7 @@ procedure TWithStatement.scan_starting_at_with_variable;
                                           for j := 0 to Length(record_typedef.fields)-1 do
                                              begin
                                                 with_variable := TWithVariable.Create(Self, record_typedef.fields[j]);
-                                                CurrentDefinitionTable.DefineForCurrentScope(record_typedef.fields[j].identifier_idx, with_variable, lex.token.src_loc);
+                                                CurrentDefinitionTable.DefineForCurrentScope(record_typedef.fields[j].identifier_idx, with_variable, access.node_id_src_loc);
                                                 with_variable.Release
                                              end
                                        end;
@@ -2013,11 +2014,12 @@ procedure TWithStatement.scan_starting_at_with_variable;
                                        begin
                                           packed_record_typedef := TPackedRecordType(overlay_typedef.overlaid_variables[i].typedef);
                                           for j := 0 to Length(packed_record_typedef.fields)-1 do
-                                             begin
-                                                with_variable := TWithVariable.Create(Self, packed_record_typedef.fields[j]);
-                                                CurrentDefinitionTable.DefineForCurrentScope(packed_record_typedef.fields[j].identifier_idx, with_variable, lex.token.src_loc);
-                                                with_variable.Release
-                                             end
+                                             if packed_record_typedef.fields[j].kind <> anonymous_packed_field then
+                                                begin
+                                                   with_variable := TWithVariable.Create(Self, packed_record_typedef.fields[j]);
+                                                   CurrentDefinitionTable.DefineForCurrentScope(packed_record_typedef.fields[j].identifier_idx, with_variable, access.node_id_src_loc);
+                                                   with_variable.Release
+                                                end
                                        end;
                                     array_type,
                                     string_type:
@@ -2028,7 +2030,7 @@ procedure TWithStatement.scan_starting_at_with_variable;
                               else // not anonymous
                                  begin
                                     with_variable := TWithVariable.Create(Self, overlay_typedef.overlaid_variables[i]);
-                                    CurrentDefinitionTable.DefineForCurrentScope(overlay_typedef.overlaid_variables[i].identifier_idx, with_variable, lex.token.src_loc);
+                                    CurrentDefinitionTable.DefineForCurrentScope(overlay_typedef.overlaid_variables[i].identifier_idx, with_variable, access.node_id_src_loc);
                                     with_variable.Release
                                  end
                         end;
@@ -2039,14 +2041,14 @@ procedure TWithStatement.scan_starting_at_with_variable;
                               begin
                                  with_routine := TWithRoutine.Create(Self, c.routines[i]);
                                  if c.routines[i].entry then
-                                    CurrentDefinitionTable.DefineForCurrentScope(c.routines[i].routine_id_idx, with_routine, lex.token.src_loc);
+                                    CurrentDefinitionTable.DefineForCurrentScope(c.routines[i].routine_id_idx, with_routine, access.node_id_src_loc);
                                  with_routine.Release
                               end;
                            for i := 0 to Length(c.properties)-1 do
                               if c.properties[i].entry then
                                  begin
                                     with_property := TWithProperty.Create(Self, c.properties[i]);
-                                    CurrentDefinitionTable.DefineForCurrentScope(c.properties[i].id, with_property, lex.token.src_loc);
+                                    CurrentDefinitionTable.DefineForCurrentScope(c.properties[i].id, with_property, access.node_id_src_loc);
                                     with_property.Release
                                  end
                         end;
