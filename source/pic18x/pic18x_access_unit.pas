@@ -33,6 +33,7 @@ type
          function complex_index_calculations_needed: boolean;
          procedure Generate_Push_Address1_Code (offset: integer; also_push_string_size: boolean);    // 1-byte address
          procedure Generate_Push_Address2_Code (offset: integer; also_push_string_size: boolean);    // 2-byte address
+         procedure Generate_Push_ioreg_1_bit_address;
          procedure Generate_Load_Ptr1_Code (ptr: TPointer; offset: integer);     // 1-byte address
          procedure Generate_Load_Ptr2_Code (ptr: TPointer; offset: integer);     // 2-byte address
          function absolute_address_with_no_indexing_required_mode: boolean;
@@ -947,6 +948,70 @@ procedure TPIC18x_Access.Generate_Push_Address2_Code (offset: integer; also_push
             assert (false)
          end
    end;    // Generate_Push_Address2_Code
+
+procedure TPIC18x_Access.Generate_Push_ioreg_1_bit_address;
+   var
+      total_offset: integer;
+      annotation: string;
+      prf_info: TPIC18x_PackedRecordFieldInfo;
+   begin
+      assert (base_variable.descriptor = rw_ioreg);
+      assert (node_is_packed_field);
+      prf_info := TPIC18x_PackedRecordFieldInfo(node_packed_record_field.info);
+      assert (prf_info.Width = 1);
+      annotation := 'push @' + path_src + ':bit' + IntToStr(prf_info.Position);
+      case path_start.definition_kind of
+         variable_definition:
+            begin
+   assert (base_variable.address_mode = absolute_address_mode);
+               total_offset := base_variable.address + total_fixed_offsets + prf_info.Offset;
+               TPIC18x_PUSHL.Create (lsb(total_offset)).annotation := annotation;
+               TPIC18x_PUSHL.Create ((prf_info.Position shl 5) + msb(total_offset));
+               StackUsageCounter.Push (2);
+               add_total_indexed_offsets (2)
+            end;
+         with_variable_definition:
+            begin
+               total_offset := total_fixed_offsets + prf_info.Offset;
+               if total_offset = 0 then
+                  begin
+                     TPIC18x_MOVF.Create (tos_relative_with_variable_address + 1, dest_w, access_mode).annotation := annotation;
+                     TPIC18x_MOVWF.Create (POSTDEC2, access_mode);
+                     StackUsageCounter.Push (1);
+                     TPIC18x_MOVF.Create (tos_relative_with_variable_address, dest_w, access_mode);
+                     TPIC18x_MOVWF.Create (POSTDEC2, access_mode);
+                     StackUsageCounter.Push (1)
+                  end
+               else
+                  begin
+                     TPIC18x_MOVLW.Create (lsb(total_offset)).annotation := annotation;
+                     TPIC18x_ADDWF.Create (tos_relative_with_variable_address + 1, dest_w, access_mode);
+                     TPIC18x_MOVWF.Create (POSTDEC2, access_mode);
+                     StackUsageCounter.Push (1);
+                     TPIC18x_MOVLW.Create (msb(total_offset));
+                     TPIC18x_ADDWFC.Create (tos_relative_with_variable_address, dest_w, access_mode);
+                     TPIC18x_MOVWF.Create (POSTDEC2, access_mode);
+                     StackUsageCounter.Push (1)
+                  end;
+               add_total_indexed_offsets (2);
+               case prf_info.Position of
+                  0: ;
+                  1: TPIC18x_BSF.Create (1, 5, access_mode);
+                  2: TPIC18x_BSF.Create (1, 6, access_mode);
+                  4: TPIC18x_BSF.Create (1, 7, access_mode);
+                  3,5,6,7:
+                     begin
+                        TPIC18x_MOVLW.Create (prf_info.Position shl 5);
+                        TPIC18x_IORWF.Create (1, dest_f, access_mode)
+                     end;
+               else
+                  assert (false)
+               end
+            end;
+      else
+         assert (false)
+      end
+   end;
 
 procedure TPIC18x_Access.Generate_Load_Ptr2_Code (ptr: TPointer; offset: integer);
    const

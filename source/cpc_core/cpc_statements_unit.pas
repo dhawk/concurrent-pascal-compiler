@@ -2014,7 +2014,7 @@ procedure TWithStatement.scan_starting_at_with_variable;
                                           begin
                                              with_variable := TWithVariable.Create(Self, TPackedRecordType(overlay_typedef.overlaid_variables[i].typedef).fields[j]);
                                              CurrentDefinitionTable.DefineForCurrentScope(TPackedRecordType(overlay_typedef.overlaid_variables[i].typedef).fields[j].identifier_idx, with_variable, lex.token.src_loc);
-                                             with_variable.Release
+                                              with_variable.Release
                                           end;
                                     array_type, string_type:
                                        ;  // does not expose any fields

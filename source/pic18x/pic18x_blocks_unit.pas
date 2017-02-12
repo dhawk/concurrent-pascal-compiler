@@ -265,6 +265,19 @@ procedure TPIC18x_ParamList.PushParameters (actual_parameters: TArrayOfTDefiniti
                   (parameter_definitions[i].descriptor = rw_var)
                then
                   TPIC18x_Access(actual_parameters[i]).Generate_Push_Address2_Code (0, true)
+               else if parameter_definitions[i].is_ioreg_1bit_param then
+                  case TPIC18x_Access(actual_parameters[i]).base_variable.address_mode of
+                     absolute_address_mode:
+                        begin
+                           assert (TPIC18x_Access(actual_parameters[i]).node_is_packed_field);
+                           TPIC18x_Access(actual_parameters[i]).Generate_Push_ioreg_1_bit_address
+                        end;
+                     system_type_indirect_address_mode,
+                     local_indirect_address_mode:
+                        TPIC18x_Access(actual_parameters[i]).Generate_Push_Address2_Code (0, false);  // addr already has bit#, just copy it to TOS
+                  else
+                     assert (false)
+                  end
                else
                   if (parameter_definitions[i].TypeDef.type_kind = string_type)
                      and
@@ -274,8 +287,8 @@ procedure TPIC18x_ParamList.PushParameters (actual_parameters: TArrayOfTDefiniti
                else
                   if parameter_definitions[i].descriptor = rw_eeprom then
                      TPIC18x_Access(actual_parameters[i]).Generate_Push_Address1_Code (0, false)
-                  else
-                     TPIC18x_Access(actual_parameters[i]).Generate_Push_Address2_Code (0, false);
+               else
+                  TPIC18x_Access(actual_parameters[i]).Generate_Push_Address2_Code (0, false);
          else
             assert (false)
          end
