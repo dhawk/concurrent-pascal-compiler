@@ -86,6 +86,7 @@ type
          anonymous: boolean;
          anonymous_array_first_index_ordinal_kind: TOrdinalBaseType;
          anonymous_array_first_index_enum_typedef: TEnumType;
+         constructor Create;
          procedure check_for_exposed_identifier_ambiguity
             (new_identifier_idx: TIdentifierIdx;
              new_identifier_src_loc, typedef_src_loc: TSourceLocation
@@ -524,6 +525,12 @@ procedure TPackedRecordType.CheckAssignmentCompatability
 // ===================
 // TOverlaidVariable
 // ===================
+
+constructor TOverlaidVariable.Create;
+   begin
+      inherited;
+      definition_kind := overlay_field_definition
+   end;
 
 procedure TOverlaidVariable.check_for_exposed_identifier_ambiguity
    (new_identifier_idx: TIdentifierIdx;

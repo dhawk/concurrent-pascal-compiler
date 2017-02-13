@@ -878,6 +878,8 @@ constructor TAccess.CreateFromSourceTokens;
                case TWithVariable(path_start).record_field.definition_kind of
                   record_field_definition:
                      parse_access_path(TRecordField(TWithVariable(path_start).record_field).typedef, variable_parse_object);
+                  overlay_field_definition:
+                     parse_access_path(TOverlaidVariable(TWithVariable(path_start).record_field).typedef, variable_parse_object);
                   packed_record_field_definition:
                      parse_access_path(TPackedRecordField(TWithVariable(path_start).record_field).ordtypedef, variable_parse_object);
                else
@@ -889,6 +891,8 @@ constructor TAccess.CreateFromSourceTokens;
                      case TWithVariable(path_start).record_field.definition_kind of
                         record_field_definition:
                            node_typedef := TRecordField(TWithVariable(path_start).record_field).typedef;
+                        overlay_field_definition:
+                           node_typedef := TOverlaidVariable(TWithVariable(path_start).record_field).typedef;
                         packed_record_field_definition:
                            node_typedef := TPackedRecordField(TWithVariable(path_start).record_field).ordtypedef;
                      else

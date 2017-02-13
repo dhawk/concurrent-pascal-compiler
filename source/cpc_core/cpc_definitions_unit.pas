@@ -15,7 +15,7 @@ type
 
    TCPUSpecificInfo =
       class (TReferenceCountedObject)
-         parent: TDefinition;
+          parent: TDefinition;
          constructor Create (_parent: TDefinition);
       end;
 
@@ -37,6 +37,7 @@ type
        constant_definition,
        data_item_list_definition,
        expression_definition,
+       overlay_field_definition,
        packed_record_field_definition,
        paramlist_definition,
        program_definition,
