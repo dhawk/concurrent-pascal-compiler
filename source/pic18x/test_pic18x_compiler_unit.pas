@@ -7278,6 +7278,7 @@ procedure test140;
 procedure test141;
    begin   // test assign to 1-bit ioreg param
            //   technically UFRM is read-only, my simulator doesn't know that...
+           //   so this test won't work on a real chip
       add ('{$processor ''pic18f65j94''}');
       add ('procedure psetc (ioreg i: uint1);');
       add ('  begin');
@@ -7297,6 +7298,11 @@ procedure test141;
       add ('  begin');
       add ('     i := j');
       add ('  end;');
+      add ('function f (ioreg i: uint1): uint1;');
+      add ('  begin');
+      add ('     result := i');
+      add ('  end;');
+      add ('var i0,i1: uint1;');
       add ('begin');
       add ('  psetc (UFRM.FRM7);');
       add ('  psetc (UFRM.FRM10);');
@@ -7305,13 +7311,16 @@ procedure test141;
       add ('  psetv (UFRM.FRM6);');
       add ('  psetv (UFRM.FRM9);');
       add ('  psetc (UFRM.FRM8);');
-      add ('  pclrv (UFRM.FRM8)');
+      add ('  pclrv (UFRM.FRM8);');
+      add ('  i0 := f(TMR3.TMRxCS0);');
+      add ('  i1 := f(UFRM.FRM9);');
       add ('end.');
-
       start_test (141);
       test_sfr_value ('UFRMH', $06);
       test_sfr_value ('UFRML', $C0);
       test_sfr_value ('T3CON', $80);
+      test_abs_value (0, 0);
+      test_abs_value (1, 1);
       conclude_test
    end;
 

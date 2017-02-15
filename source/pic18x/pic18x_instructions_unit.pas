@@ -2009,7 +2009,7 @@ procedure TSubroutine.check_stack_sizes (sw_push_count, sw_pop_count, hw_count: 
    procedure check (calc, expected: integer; n: string);
       begin
          if calc <> expected then
-            error ('Stack Calc Error in ' + ClassName + format (' %s: %d calculated, %d expected', [n, calc, expected]))
+            error ('Stack Calc Error in ' + ClassName + format (' %s: %d calc, %d expected', [n, calc, expected]))
       end;
    begin
       evaluate_additional_stack_use;

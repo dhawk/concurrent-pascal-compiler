@@ -140,8 +140,43 @@ uses
    pic18x_types_unit,
    SysUtils;
 
+type
+   Tpush_ioreg_1bit_param_Subroutine =
+      class (TSubroutine)
+      protected
+         procedure generate_subroutine_code;
+            override;
+{$ifdef INCLUDE_SIMULATION}
+         procedure report_stack_sizes;
+            override;
+{$endif}
+      end;
+
+procedure Tpush_ioreg_1bit_param_Subroutine.generate_subroutine_code;
+   var
+      bz: TPIC18x_BZ;
+   begin
+      TPIC18x_MOVSF.Create (1, FSR0H);
+      TPIC18x_MOVSF.Create (2, FSR0L);
+      TPIC18x_CLRF.Create (2, access_mode);
+      TPIC18x_SWAPF.Create (PREINC2, dest_w, access_mode);
+      TCallMacro.Create.dest := get_bit_mask_routine;
+      TPIC18x_ANDWF.Create (INDF0, dest_w, access_mode);
+      bz := TPIC18x_BZ.Create;
+      TPIC18x_INCF.Create (1, dest_f, access_mode);
+      bz.dest := TPIC18x_RETURN.Create
+   end;
+
+{$ifdef INCLUDE_SIMULATION}
+procedure Tpush_ioreg_1bit_param_Subroutine.report_stack_sizes;
+   begin
+      check_stack_sizes (0, 1, 1)
+   end;
+{$endif}
+
 var
    temp: TMultiPrecisionInteger;
+   push_ioreg_1bit_param_Subroutine: Tpush_ioreg_1bit_param_Subroutine;
 
 procedure gen_skip_instruction (bit_sense: boolean; addr, bit_position: integer; mode: TPIC18x_RAM_Access_Mode);
    begin
@@ -2529,7 +2564,12 @@ function TPIC18x_VariableAccessPrimary.Generate (param1, param2: integer): integ
          GenerateCode:
             begin
                annotation := 'push ' + lex.identifiers[access.node_id_idx] + '*' + IntToStr(param2);
-               if access.node_is_packed_field then
+               if access.base_variable.is_ioreg_1bit_param then
+                  begin
+                     TPIC18x_Access(access).Generate_Push_Address2_Code (0, false);
+                     push_ioreg_1bit_param_Subroutine.Call.annotation := 'push ioreg bit'
+                  end
+               else if access.node_is_packed_field then
                   begin
                      if TPIC18x_PackedRecordFieldInfo(access.node_packed_record_field.info).reversed_byte_order then
                         offset := TPIC18x_PackedRecordFieldInfo (TPIC18x_Access(access).node_packed_record_field.info).Offset
@@ -2693,8 +2733,10 @@ procedure PushRealExpression (expr: TExpression);
 
 INITIALIZATION
    temp := TMultiPrecisionInteger.Create;
+   push_ioreg_1bit_param_Subroutine := Tpush_ioreg_1bit_param_Subroutine.Create (0, 1, 'push ioreg 1-bit parameter');
 
 FINALIZATION
    temp.Free;
+   push_ioreg_1bit_param_Subroutine.Free;
 
 END.

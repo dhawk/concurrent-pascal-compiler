@@ -103,7 +103,7 @@ procedure Tset_ioreg_1bit_param_Subroutine.generate_subroutine_code;
 {$ifdef INCLUDE_SIMULATION}
 procedure Tset_ioreg_1bit_param_Subroutine.report_stack_sizes;
    begin
-      check_stack_sizes (0, 2, 2)
+      check_stack_sizes (0, 2, 1)
    end;
 {$endif}
 
@@ -122,7 +122,7 @@ procedure Tclear_ioreg_1bit_param_Subroutine.generate_subroutine_code;
 {$ifdef INCLUDE_SIMULATION}
 procedure Tclear_ioreg_1bit_param_Subroutine.report_stack_sizes;
    begin
-      check_stack_sizes (0, 2, 2)
+      check_stack_sizes (0, 2, 1)
    end;
 {$endif}
 
@@ -146,7 +146,7 @@ procedure Tassign_ioreg_1bit_param_Subroutine.generate_subroutine_code;
 {$ifdef INCLUDE_SIMULATION}
 procedure Tassign_ioreg_1bit_param_Subroutine.report_stack_sizes;
    begin
-      check_stack_sizes (0, pop_stk_size, 2)
+      check_stack_sizes (0, pop_stk_size, 1)
    end;
 {$endif}
 
@@ -1784,7 +1784,7 @@ function TPIC18x_AssignmentStatement.Generate (param1, param2: integer): integer
          GenerateCode:
             begin
                copy_from_base_class (assignee, expression);
-               TSourceSyncPoint.Create (last_token_src_loc);
+                TSourceSyncPoint.Create (last_token_src_loc);
 
                if assignee.node_property <> nil then
                   property_setter_routine_call.Generate (GenerateCode, 0)
