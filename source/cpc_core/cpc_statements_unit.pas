@@ -1987,7 +1987,7 @@ procedure TWithStatement.scan_starting_at_with_variable;
                         begin
                            packed_record_typedef := TPackedRecordType(access.node_typedef);
                            for i := 0 to Length(packed_record_typedef.fields)-1 do
-                              if packed_record_typedef.fields[j].kind <> anonymous_packed_field then
+                              if packed_record_typedef.fields[i].kind <> anonymous_packed_field then
                                  begin
                                     with_variable := TWithVariable.Create(Self, packed_record_typedef.fields[i]);
                                     CurrentDefinitionTable.DefineForCurrentScope(packed_record_typedef.fields[i].identifier_idx, with_variable, access.node_id_src_loc);

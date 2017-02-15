@@ -371,6 +371,7 @@ procedure TMainForm.UpdateConfigConstantDisplay(Sender: TObject);
                      s := '          ('
                   else
                      s := '           ';
+
                   if bytes[byte_idx].fields[field_idx].nop_field then
                      begin
                         assert (bytes[byte_idx].fields[field_idx].default_value = $F);
@@ -399,14 +400,14 @@ procedure TMainForm.UpdateConfigConstantDisplay(Sender: TObject);
                                  s := '              //    ' + bytes[byte_idx].fields[field_idx].values[value_idx].fieldvaluecname + ' = ' + bytes[byte_idx].fields[field_idx].values[value_idx].fieldvaluedesc;
                                  out (s)
                               end;
+                     end;
 
-                        if field_idx = 0 then
-                           begin
-                              s := '          )';
-                              if byte_idx < Length(bytes)-1 then
-                                 s := s + ',';
-                              out (s)
-                           end
+                  if field_idx = 0 then
+                     begin
+                        s := '          )';
+                        if byte_idx < Length(bytes)-1 then
+                           s := s + ',';
+                        out (s)
                      end
                end;
             if byte_idx = Length(bytes)-1 then

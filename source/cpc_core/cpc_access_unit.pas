@@ -133,14 +133,14 @@ type
          function is_strappend_attribute: boolean;
          function node_packed_record_field: TPackedRecordField;  // valid only if packed record field
          function node_is_packed_field: boolean;
+         function CheckForProhibitedDelayCall (err_msg: string): boolean;
+            override;
 
          constructor CreateFromSourceTokens;
          constructor CreateFromVariable
             (v: TVariable
             );
          destructor Destroy;
-            override;
-         function CheckForProhibitedDelayCall (err_msg: string): boolean;
             override;
       end;
 
@@ -1073,7 +1073,9 @@ function TAccess.is_strappend_attribute: boolean;
 
 function TAccess.node_is_packed_field: boolean;
    begin
-      if Length(path) = 0 then
+      if base_variable.is_ioreg_1bit_param then
+         result := true
+      else if Length(path) = 0 then
          result := (path_start.definition_kind = with_variable_definition)
                    and
                    (TWithVariable(path_start).record_field.definition_kind = packed_record_field_definition)

@@ -84,14 +84,27 @@ var
 begin
    if ParamCount = 0 then
       begin
-         if ParamCount >= 1 then
-            begin
-               source_file_name := ParamStr(1);
-               if Pos('.', source_file_name) = 0 then
-                  source_file_name := source_file_name + '.cp'
-               else if LowerCase(ExtractFileExt(source_file_name)) <> '.cp' then
-                  source_file_name := ChangeFileExt(source_file_name, '.cp')
-            end;
+         writeln;
+         writeln ('usage:');
+         writeln ('   ' + ExtractFileName(ParamStr(0)) + ' [-about] [filename]');
+         writeln ('      displays aboutbox if -about is specified,');
+         writeln ('      otherwise compiles a .cpas source file.');
+         writeln
+      end
+   else if LowerCase(ParamStr(1)) = '-about' then
+      begin
+         Application.Initialize;
+         Application.MainFormOnTaskbar := True;
+         Application.CreateForm(TCPCPIC18xAboutBoxForm, CPCPIC18xAboutBoxForm);
+         Application.Run
+      end
+   else
+      begin
+         source_file_name := ParamStr(1);
+         if Pos('.', source_file_name) = 0 then
+            source_file_name := source_file_name + '.cpas'
+         else if LowerCase(ExtractFileExt(source_file_name)) <> '.cpas' then
+            source_file_name := ChangeFileExt(source_file_name, '.cpas');
 
          try
             CompileResults := TStringList.Create;
@@ -106,22 +119,6 @@ begin
             on E: Exception do
                Writeln(E.ClassName, ': ', E.Message)
          end
-      end
-   else if LowerCase(ParamStr(1)) = '-about' then
-      begin
-         Application.Initialize;
-         Application.MainFormOnTaskbar := True;
-         Application.CreateForm(TCPCPIC18xAboutBoxForm, CPCPIC18xAboutBoxForm);
-         Application.Run
-      end
-   else
-      begin
-         writeln;
-         writeln ('usage:');
-         writeln ('   ' + ExtractFileName(ParamStr(0)) + ' [-about]');
-         writeln ('      displays aboutbox if -about is specified,');
-         writeln ('      otherwise compiles a .cpas source file.');
-         writeln
       end
 end.
 

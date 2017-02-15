@@ -103,6 +103,7 @@ type
       class
          name, desc: string;
          ishidden: boolean;
+         isidehidden: boolean;
          nop_marker: boolean;
          bitno, width, default_value: integer;
          values: array of TFuseByteFieldValues;
@@ -398,6 +399,8 @@ function TConfigByteField.empty_field: boolean;
                 (name = '-')
                 or
                 ishidden
+                or
+                isidehidden
    end;
 
 

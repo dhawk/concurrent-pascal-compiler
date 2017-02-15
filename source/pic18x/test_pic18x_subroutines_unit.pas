@@ -84,8 +84,6 @@ procedure check_instr_in_coverage_map_test (i: TInstruction);
       i.test_coverage_index := idx
    end;
 
-
-
 procedure add (s: string);
    begin
       src.Add (s)

@@ -161,6 +161,7 @@ procedure tConfigBits.AppendXMLFile (out: TOutStringProc);
       f: TConfigByteField;
       v: TFuseByteFieldValues;
       s: string;
+      default_value_defined: boolean;
    begin
       out ('   <ConfigBits>');
       for b in pic_info.config_bytes do
@@ -174,6 +175,22 @@ procedure tConfigBits.AppendXMLFile (out: TOutStringProc);
                out ('      <ConfigByte name="' + b.name + '">');
                for f in b.fields do
                   begin
+                     // Fixups for errors in .PIC files
+                     if (b.name = 'CONFIG3L')
+                        and
+                        (f.name = 'FSCM')
+                        and
+                        (f.default_value = 3)
+                     then
+                        f.default_value := 2
+                     else if (b.name = 'CONFIG4L')
+                             and
+                             (f.name = 'ICPRT')
+                             and
+                             (f.default_value = 1)
+                          then
+                             f.default_value := 0;
+
                      s := format ('         <ConfigField name="%s" desc="%s" default="%d" ishidden="%s" nop_marker="%s"',
                                   [f.name,
                                    sanitize_xml_strings(f.desc),
@@ -187,16 +204,23 @@ procedure tConfigBits.AppendXMLFile (out: TOutStringProc);
                      else
                         begin
                            out (s + '>');
+                           default_value_defined := false;
                            for v in f.values do
                               if v.cname <> '' then
-                                 out (format ('            <ConfigFieldValue name="%s" desc="%s" value="%d"/>',
-                                              [v.cname,
-                                               sanitize_xml_strings(v.desc),
-                                               v.value
-                                              ]
-                                             )
-                                     );
-                           out ('         </ConfigField>')
+                                 begin
+                                    out (format ('            <ConfigFieldValue name="%s" desc="%s" value="%d"/>',
+                                                 [v.cname,
+                                                  sanitize_xml_strings(v.desc),
+                                                  v.value
+                                                 ]
+                                                )
+                                        );
+                                    if v.value = f.default_value then
+                                       default_value_defined := true
+                                 end;
+                           out ('         </ConfigField>');
+                           if not default_value_defined then
+                              out (format ('<-- config byte %s field %s default value (%d) not defined -->', [b.name, f.name, f.default_value]))
                         end
                   end;
                out ('      </ConfigByte>')

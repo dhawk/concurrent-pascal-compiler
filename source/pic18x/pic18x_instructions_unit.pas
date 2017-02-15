@@ -209,6 +209,9 @@ type
 
    TPIC18x_CONFIG =
       class (TInstruction)
+      private const
+         src_base = 'CONFIG ';
+      public
          b: byte;
          sc: TStructuredConstant;
          constructor Create (_b: byte; _sc: TStructuredConstant);
@@ -4360,7 +4363,7 @@ function TPIC18x_CONFIG.assembly_code: string;
       i, j, last, ev: integer;
       et: TEnumType;
    begin
-      result := 'CONFIG ';
+      result := src_base;
       assert (sc.StructuredConstantKind = scPackedRecord);
 
       last := 0;
@@ -4398,7 +4401,10 @@ procedure TPIC18x_CONFIG.exec;
 
 function TPIC18x_CONFIG.IncludeInSourceFile: boolean;
    begin
-      result := sc.StructuredConstantKind = scPackedRecord
+      result :=
+         (sc.StructuredConstantKind = scPackedRecord)
+         and
+         (assembly_code <> src_base)
    end;
 
 // DW for unpacked CODE segments

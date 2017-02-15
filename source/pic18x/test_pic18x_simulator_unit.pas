@@ -174,17 +174,17 @@ constructor TIndirect_FSR.Create (_name: string; _kind: TIndirect_FSR_Kind; _get
 procedure TIndirect_FSR.set_value (b: byte);
    begin
       if kind = plusw then
-         cpu.ram[integer(fsr_getfunc) + ShortInt(cpu.w)] := b
+         cpu.ram[(integer(fsr_getfunc) + ShortInt(cpu.w)) and $FFF] := b
       else
-         cpu.ram[integer(fsr_getfunc)] := b
+         cpu.ram[integer(fsr_getfunc) and $FFF] := b
    end;
 
 function TIndirect_FSR.get_value: byte;
    begin
       if kind = plusw then
-         result := cpu.ram[integer(fsr_getfunc) + ShortInt(cpu.w)]
+         result := cpu.ram[(integer(fsr_getfunc) + ShortInt(cpu.w)) and $FFF]
       else
-         result := cpu.ram[integer(fsr_getfunc)]
+         result := cpu.ram[integer(fsr_getfunc) and $FFF]
    end;
 
 procedure TEECON1.set_value (b: byte);
@@ -386,7 +386,8 @@ procedure TPIC18x_Simulated_CPU.allocate_special_sfrs;
       if pic_info.TMR3L > 0 then
          begin
             f_ram[pic_info.TMR3L] := TFSR.Create ('TMR3L');
-            f_ram[pic_info.TMR3H] := TFSR.Create ('TMR3H')
+            f_ram[pic_info.TMR3H] := TFSR.Create ('TMR3H');
+            f_ram[pic_info.T3CON] := TFSR.Create ('T3CON')
          end;
       if pic_info.UFRML > 0 then
          begin
@@ -427,11 +428,14 @@ procedure TPIC18x_Simulated_CPU.deallocate_special_sfrs;
          begin
             f_ram[pic_info.TMR3L].Free;
             f_ram[pic_info.TMR3H].Free;
+            f_ram[pic_info.T3CON].Free;
             f_ram[pic_info.TMR3L] := nil;
-            f_ram[pic_info.TMR3H] := nil
+            f_ram[pic_info.TMR3H] := nil;
+            f_ram[pic_info.T3CON] := nil
          end;
       pic_info.TMR3L := -1;
       pic_info.TMR3H := -1;
+      pic_info.T3CON := -1;
 
       if pic_info.UFRML > 0 then
          begin
@@ -467,17 +471,17 @@ destructor TPIC18x_Simulated_CPU.Destroy;
 
 function TPIC18x_Simulated_CPU.get_fsr0: TDataMemoryAddress;
    begin
-      result := (ram[FSR0H] shl 8) + ram[FSR0L]
+      result := ((ram[FSR0H] and $F) shl 8) + ram[FSR0L]
    end;
 
 function TPIC18x_Simulated_CPU.get_fsr1: TDataMemoryAddress;
    begin
-      result := (ram[FSR1H] shl 8) + ram[FSR1L]
+      result := ((ram[FSR1H] and $F) shl 8) + ram[FSR1L]
    end;
 
 function TPIC18x_Simulated_CPU.get_fsr2: TDataMemoryAddress;
    begin
-      result := (ram[FSR2H] shl 8) + ram[FSR2L]
+      result := ((ram[FSR2H] and $F) shl 8) + ram[FSR2L]
    end;
 
 procedure TPIC18x_Simulated_CPU.set_fsr0 (v: TDataMemoryAddress);

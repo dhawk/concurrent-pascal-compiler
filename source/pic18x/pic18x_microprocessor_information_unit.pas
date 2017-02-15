@@ -71,9 +71,10 @@ type
          EECON2: integer;
          EEDATA: integer;
          {$ifdef INCLUDE_SIMULATION}
-         // for tests using PIC18F2520
+         // for tests using PIC18F2520 & PIC18F65J94
          TMR3H: integer;
          TMR3L: integer;
+         T3CON: integer;
          // for tests using PIC18F65J94
          UFRMH: integer;
          UFRML: integer;
@@ -446,6 +447,7 @@ constructor t_pic_info.Create (xml_fn: string);
 {$ifdef INCLUDE_SIMULATION}
       TMR3L := SFR_Address('TMR3L');
       TMR3H := SFR_Address('TMR3H');
+      T3CON := SFR_Address('T3CON');
       UFRML := SFR_Address('UFRML');
       UFRMH := SFR_Address('UFRMH');
       WDTCON := SFR_Address('WDTCON');

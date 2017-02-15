@@ -383,6 +383,7 @@ procedure TPICFileParser.XmlScannerStartTag(Sender: TObject; TagName: String; At
                   current_fuse_byte_field.name := get_attrs ('edc:cname');
                   current_fuse_byte_field.desc := get_attrs ('edc:desc');
                   current_fuse_byte_field.ishidden := LowerCase(get_attrs ('edc:ishidden')) = 'true';
+                  current_fuse_byte_field.isidehidden := LowerCase(get_attrs ('edc:isidehidden')) = 'true';
                   fuse_byte_bitno := fuse_byte_bitno + get_attri ('edc:nzwidth');
                   current_fuse_byte_field.bitno := fuse_byte_bitno;
                   current_fuse_byte_field.width := get_attri ('edc:nzwidth');

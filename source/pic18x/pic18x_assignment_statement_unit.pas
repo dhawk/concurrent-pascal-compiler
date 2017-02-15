@@ -50,6 +50,110 @@ uses
    pic18x_types_unit,
    SysUtils;
 
+type
+   Tset_ioreg_1bit_param_Subroutine =
+      class (TSubroutine)
+      protected
+         procedure generate_subroutine_code;
+            override;
+{$ifdef INCLUDE_SIMULATION}
+         procedure report_stack_sizes;
+            override;
+{$endif}
+      end;
+   Tclear_ioreg_1bit_param_Subroutine =
+      class (TSubroutine)
+      protected
+         procedure generate_subroutine_code;
+            override;
+{$ifdef INCLUDE_SIMULATION}
+         procedure report_stack_sizes;
+            override;
+{$endif}
+      end;
+   Tassign_ioreg_1bit_param_Subroutine =
+      class (TSubroutine)
+      private
+         const
+            // locations on stack at call
+            ptrH = 1;
+            ptrL = 2;
+            exp_result = 3;                           
+            pop_stk_size = 3;
+      protected
+         procedure generate_subroutine_code;
+            override;
+{$ifdef INCLUDE_SIMULATION}
+         procedure report_stack_sizes;
+            override;
+{$endif}
+      end;
+
+procedure Tset_ioreg_1bit_param_Subroutine.generate_subroutine_code;
+   begin
+      TPIC18x_MOVF.Create (PREINC2, dest_w, access_mode);
+      TPIC18x_MOVWF.Create (FSR0H, access_mode);
+      TPIC18x_MOVFF.Create (PREINC2, FSR0L);
+      TPIC18x_SWAPF.Create (WREG, dest_f, access_mode);
+      TCallMacro.Create.dest := get_bit_mask_routine;
+      TPIC18x_IORWF.Create (INDF0, dest_f, access_mode);
+      TPIC18x_RETURN.Create
+   end;
+
+{$ifdef INCLUDE_SIMULATION}
+procedure Tset_ioreg_1bit_param_Subroutine.report_stack_sizes;
+   begin
+      check_stack_sizes (0, 2, 2)
+   end;
+{$endif}
+
+procedure Tclear_ioreg_1bit_param_Subroutine.generate_subroutine_code;
+   begin
+      TPIC18x_MOVF.Create (PREINC2, dest_w, access_mode);
+      TPIC18x_MOVWF.Create (FSR0H, access_mode);
+      TPIC18x_MOVFF.Create (PREINC2, FSR0L);
+      TPIC18x_SWAPF.Create (WREG, dest_f, access_mode);
+      TCallMacro.Create.dest := get_bit_mask_routine;
+      TPIC18x_COMF.Create (WREG, dest_w, access_mode);
+      TPIC18x_ANDWF.Create (INDF0, dest_f, access_mode);
+      TPIC18x_RETURN.Create
+   end;
+
+{$ifdef INCLUDE_SIMULATION}
+procedure Tclear_ioreg_1bit_param_Subroutine.report_stack_sizes;
+   begin
+      check_stack_sizes (0, 2, 2)
+   end;
+{$endif}
+
+procedure Tassign_ioreg_1bit_param_Subroutine.generate_subroutine_code;
+   var
+      bra: TPIC18x_BRA;
+   begin
+      TPIC18x_MOVSF.Create (ptrH, FSR0H);
+      TPIC18x_MOVSF.Create (ptrL, FSR0L);
+      TPIC18x_SWAPF.Create (ptrH, dest_w, access_mode);
+      TCallMacro.Create.dest := get_bit_mask_routine;
+      TPIC18x_TSTFSZ.Create (exp_result, access_mode);
+      bra := TPIC18x_BRA.Create;
+      TPIC18x_COMF.Create (WREG, dest_w, access_mode);
+      TPIC18x_ANDWF.Create (INDF0, dest_f, access_mode);
+      TPIC18x_ADDULNK.Create (pop_stk_size);
+      bra.dest := TPIC18x_IORWF.Create (INDF0, dest_f, access_mode);
+      TPIC18x_ADDULNK.Create (pop_stk_size)
+   end;
+
+{$ifdef INCLUDE_SIMULATION}
+procedure Tassign_ioreg_1bit_param_Subroutine.report_stack_sizes;
+   begin
+      check_stack_sizes (0, pop_stk_size, 2)
+   end;
+{$endif}
+
+var
+   set_ioreg_1bit_param_Subroutine: Tset_ioreg_1bit_param_Subroutine;
+   clear_ioreg_1bit_param_Subroutine: Tclear_ioreg_1bit_param_Subroutine;
+   assign_ioreg_1bit_param_Subroutine: Tassign_ioreg_1bit_param_Subroutine;
 
 constructor TPIC18x_AssignmentStatement.Create (_assignee: TAccess; _expression: TExpression; _src_loc: TSourceLocation);
    begin
@@ -1088,6 +1192,24 @@ function TPIC18x_AssignmentStatement.Generate (param1, param2: integer): integer
          end
       end;
 
+   procedure generate_ioreg_1bit_param_assignment_code;
+      begin
+         if expression.contains_constant then
+            begin
+               TPIC18x_Access(assignee).Generate_Push_Address2_Code (0, false);
+               if expression.ordinal_constant_value = 0 then
+                  clear_ioreg_1bit_param_Subroutine.Call.annotation := 'clear ioreg bit'
+               else  // const value = 1 or -1
+                  set_ioreg_1bit_param_Subroutine.Call.annotation := 'set ioreg bit'
+            end
+         else  // non-constant expression
+            begin
+               expression.Generate (GenerateCode, 1);
+               TPIC18x_Access(assignee).Generate_Push_Address2_Code (0, false);
+               assign_ioreg_1bit_param_Subroutine.Call.annotation := 'assign ioreg bit'
+            end
+      end;
+
    procedure generate_constant_assignment_code;
 
       procedure put_real_constant_bytes (r: real);
@@ -1668,6 +1790,8 @@ function TPIC18x_AssignmentStatement.Generate (param1, param2: integer): integer
                   property_setter_routine_call.Generate (GenerateCode, 0)
                else if assignee.node_typedef.type_kind = string_type then
                   generate_string_assignment_code
+               else if assignee.base_variable.is_ioreg_1bit_param then
+                  generate_ioreg_1bit_param_assignment_code
                else
                   generate_assignment_code
             end;
@@ -1675,5 +1799,15 @@ function TPIC18x_AssignmentStatement.Generate (param1, param2: integer): integer
          assert (false, 'TPIC18x_AssignmentStatement.Generate(' + IntToStr(param1) + ') not implemented')
       end
    end;   // TAssignmentStatement.Generate
+
+INITIALIZATION
+   set_ioreg_1bit_param_Subroutine := Tset_ioreg_1bit_param_Subroutine.Create (0, 2, 'set ioreg 1-bit parameter');
+   clear_ioreg_1bit_param_Subroutine := Tclear_ioreg_1bit_param_Subroutine.Create (0, 2, 'clear ioreg 1-bit parameter');
+   assign_ioreg_1bit_param_Subroutine := Tassign_ioreg_1bit_param_Subroutine.Create (0, Tassign_ioreg_1bit_param_Subroutine.pop_stk_size, 'asssign ioreg 1-bit parameter');
+
+FINALIZATION
+   set_ioreg_1bit_param_Subroutine.Free;
+   clear_ioreg_1bit_param_Subroutine.Free;
+   assign_ioreg_1bit_param_Subroutine.Free;
 
 END.
