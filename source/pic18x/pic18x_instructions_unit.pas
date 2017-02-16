@@ -1666,9 +1666,6 @@ function load_ptr (src_ptr: TPointer; offset: integer; dest_ptr: TPointer): TIns
 function adjust_fsr (ptr: TPointer; offset: integer): TInstruction;
    var i: TInstruction;
    begin
-{$ifdef INCLUDE_SIMULATION}
-      TPIC18x_MOVLW.Create ($AA).annotation := 'trash W (for test purposes only)';   // this routine MAY trash W if offset is large enough, so ALWAYS trash it during testing
-{$endif}
       result := nil;
       if offset > $3F * 4 then
          begin

@@ -80,6 +80,7 @@ type
          UFRML: integer;
          // for tests using PIC18F65J50
          WDTCON: integer;
+         OSCCON: integer;
          REFOCON: integer;   // an alternate shared address SFR
          {$endif}
          data_regions:
@@ -452,6 +453,7 @@ constructor t_pic_info.Create (xml_fn: string);
       UFRMH := SFR_Address('UFRMH');
       WDTCON := SFR_Address('WDTCON');
       REFOCON := SFR_Address('REFOCON');
+      OSCCON := SFR_Address('OSCCON');
 {$endif}
    end;
 

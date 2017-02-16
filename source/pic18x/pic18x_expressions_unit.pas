@@ -151,6 +151,16 @@ type
             override;
 {$endif}
       end;
+   Talt_push_ioreg_1bit_param_Subroutine =
+      class (TSubroutine)
+      protected
+         procedure generate_subroutine_code;
+            override;
+{$ifdef INCLUDE_SIMULATION}
+         procedure report_stack_sizes;
+            override;
+{$endif}
+      end;
 
 procedure Tpush_ioreg_1bit_param_Subroutine.generate_subroutine_code;
    var
@@ -174,9 +184,41 @@ procedure Tpush_ioreg_1bit_param_Subroutine.report_stack_sizes;
    end;
 {$endif}
 
+procedure Talt_push_ioreg_1bit_param_Subroutine.generate_subroutine_code;
+   const
+      ptrH = 1;
+      ptrL = 2;
+      result = 2;
+   var
+      bz: TPIC18x_BZ;
+   begin
+      TPIC18x_BTFSC.Create (ptrH, 4, access_mode);   // test 13th addr bit (alt sfr)
+      TPIC18x_BSF.Create (pic_info.SFR_Address('WDTCON'), 4, access_mode);
+      TPIC18x_MOVSF.Create (ptrH, FSR0H);
+      TPIC18x_MOVSF.Create (ptrL, FSR0L);
+      TPIC18x_CLRF.Create (result, access_mode);
+      TPIC18x_SWAPF.Create (ptrH, dest_w, access_mode);
+      TCallMacro.Create.dest := get_bit_mask_routine;
+      TPIC18x_ANDWF.Create (INDF0, dest_w, access_mode);
+      bz := TPIC18x_BZ.Create;
+      TPIC18x_INCF.Create (result, dest_f, access_mode);
+      bz.dest := TPIC18x_BTFSC.Create (ptrH, 4, access_mode);   // test 13th addr bit (alt sfr)
+      TPIC18x_BCF.Create (pic_info.SFR_Address('WDTCON'), 4, access_mode);
+      TPIC18x_ADDFSR.Create (2, 1);
+      ExitKernel
+   end;
+
+{$ifdef INCLUDE_SIMULATION}
+procedure Talt_push_ioreg_1bit_param_Subroutine.report_stack_sizes;
+   begin
+      check_stack_sizes (0, 1, 1)
+   end;
+{$endif}
+
 var
    temp: TMultiPrecisionInteger;
    push_ioreg_1bit_param_Subroutine: Tpush_ioreg_1bit_param_Subroutine;
+   alt_push_ioreg_1bit_param_Subroutine: Talt_push_ioreg_1bit_param_Subroutine;
 
 procedure gen_skip_instruction (bit_sense: boolean; addr, bit_position: integer; mode: TPIC18x_RAM_Access_Mode);
    begin
@@ -2567,7 +2609,13 @@ function TPIC18x_VariableAccessPrimary.Generate (param1, param2: integer): integ
                if access.base_variable.is_ioreg_1bit_param then
                   begin
                      TPIC18x_Access(access).Generate_Push_Address2_Code (0, false);
-                     push_ioreg_1bit_param_Subroutine.Call.annotation := 'push ioreg bit'
+                     if TPIC18x_CPU(target_cpu).contains_alternate_address_sfrs then
+                        begin
+                           TurnInterruptsOff;
+                           alt_push_ioreg_1bit_param_Subroutine.Call.annotation := 'push ioreg bit'
+                        end
+                     else
+                        push_ioreg_1bit_param_Subroutine.Call.annotation := 'push ioreg bit'
                   end
                else if access.node_is_packed_field then
                   begin
@@ -2734,9 +2782,11 @@ procedure PushRealExpression (expr: TExpression);
 INITIALIZATION
    temp := TMultiPrecisionInteger.Create;
    push_ioreg_1bit_param_Subroutine := Tpush_ioreg_1bit_param_Subroutine.Create (0, 1, 'push ioreg 1-bit parameter');
+   alt_push_ioreg_1bit_param_Subroutine := Talt_push_ioreg_1bit_param_Subroutine.Create (0, 1, 'push ioreg 1-bit parameter');
 
 FINALIZATION
    temp.Free;
    push_ioreg_1bit_param_Subroutine.Free;
+   alt_push_ioreg_1bit_param_Subroutine.Free;
 
 END.

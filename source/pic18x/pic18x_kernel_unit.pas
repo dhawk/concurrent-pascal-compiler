@@ -188,7 +188,6 @@ procedure EnterMonitor (monitor_prio: integer);
 procedure LeaveMonitor (monitor_prio, pop_size: integer);
 
 function ExitKernel: TInstruction;
-function TurnInterruptsOn: TInstruction;
 function TurnInterruptsOff: TInstruction;
 
 var
@@ -257,12 +256,6 @@ function ExitKernel: TInstruction;
       result := TPIC18x_TSTFSZ.Create (kernel_exit_flags, bank_mode);
       TPIC18x_RETURN.Create.annotation := 'return and leave interrupts off';
       TPIC18x_RETFIE.Create.annotation := 'return and enable interrupts'
-   end;
-
-function TurnInterruptsOn: TInstruction;
-   begin
-      result := TPIC18x_BSF.Create (INTCON, intcon_gieh, access_mode);
-      result.annotation := 'turn interrupts on'
    end;
 
 function TurnInterruptsOff: TInstruction;

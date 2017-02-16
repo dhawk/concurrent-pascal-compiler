@@ -64,6 +64,7 @@ type
       class (TReferenceCountedObject)
       private
          f_ram: array [0..$FFF] of TFSR;
+         f_refocon_ram: TFSR;
          f_pc: integer;
          stk_u, stk_h, stk_l: array [0..31] of byte;
          function get_FSR (idx: TDataMemoryAddress): byte;
@@ -108,6 +109,7 @@ type
          constructor Create;
          destructor Destroy;
             override;
+         function refocon: byte;
          procedure push_return_address (return_addr: integer);
          function pop_return_address: integer;
          function ram_no_adshr_check (i: TDataMemoryAddress): byte;
@@ -200,22 +202,24 @@ function TEECON1.get_value: byte;
       result := 0
    end;
 
+function TPIC18x_Simulated_CPU.ram_no_adshr_check (i: TDataMemoryAddress): byte;
+   begin
+      result := f_ram[i].get_value
+   end;
+
 function TPIC18x_Simulated_CPU.get_FSR (idx: TDataMemoryAddress): byte;
    begin
       if (pic_info.REFOCON > 0)
          and
          (idx = (pic_info.REFOCON and $FFF))
+         and
+         (pic_info.WDTCON > 0)
+         and
+         (ram[pic_info.WDTCON] and $10 = $10)
       then
-         begin
-            assert (pic_info.WDTCON > 0);
-            assert (ram[pic_info.WDTCON] and $10 = $10)
-         end;
-      result := f_ram[idx].get_value
-   end;
-
-function TPIC18x_Simulated_CPU.ram_no_adshr_check (i: TDataMemoryAddress): byte;
-   begin
-      result := f_ram[i].get_value
+         result := f_refocon_ram.get_value
+      else
+         result := f_ram[idx].get_value
    end;
 
 procedure TPIC18x_Simulated_CPU.set_FSR (idx: TDataMemoryAddress; value: byte);
@@ -223,12 +227,14 @@ procedure TPIC18x_Simulated_CPU.set_FSR (idx: TDataMemoryAddress; value: byte);
       if (pic_info.REFOCON > 0)
          and
          (idx = (pic_info.REFOCON and $FFF))
+         and
+         (pic_info.WDTCON > 0)
+         and
+         (ram[pic_info.WDTCON] and $10 = $10)
       then
-         begin
-            assert (pic_info.WDTCON > 0);
-            assert (ram[pic_info.WDTCON] and $10 = $10)
-         end;
-      f_ram[idx].set_value (value)
+         f_refocon_ram.set_value (value)
+      else
+         f_ram[idx].set_value (value)
    end;
 
 function TPIC18x_Simulated_CPU.get_pc: integer;
@@ -394,10 +400,12 @@ procedure TPIC18x_Simulated_CPU.allocate_special_sfrs;
             f_ram[pic_info.UFRML] := TFSR.Create ('UFRML');
             f_ram[pic_info.UFRMH] := TFSR.Create ('UFRMH')
          end;
+      if pic_info.OSCCON > 0 then
+         f_ram[pic_info.OSCCON] := TFSR.Create ('OSCCON');
       if pic_info.WDTCON > 0 then
          f_ram[pic_info.WDTCON] := TFSR.Create ('WDTCON');
       if pic_info.REFOCON > 0 then
-         f_ram[pic_info.REFOCON and $FFF] := TFSR.Create ('REFOCON')
+         f_refocon_ram := TFSR.Create ('REFOCON')
    end;
 
 procedure TPIC18x_Simulated_CPU.deallocate_special_sfrs;
@@ -452,10 +460,16 @@ procedure TPIC18x_Simulated_CPU.deallocate_special_sfrs;
             f_ram[pic_info.WDTCON] := nil
          end;
       pic_info.WDTCON := -1;
+      if pic_info.OSCCON > 0 then
+         begin
+            f_ram[pic_info.OSCCON].Free;
+            f_ram[pic_info.OSCCON] := nil
+         end;
+      pic_info.OSCCON := -1;
       if pic_info.REFOCON > 0 then
          begin
-            f_ram[pic_info.REFOCON and $FFF].Free;
-            f_ram[pic_info.REFOCON and $FFF] := nil
+            f_refocon_ram.Free;
+            f_refocon_ram := nil
          end;
       pic_info.REFOCON := -1
    end;
@@ -500,6 +514,11 @@ procedure TPIC18x_Simulated_CPU.set_fsr2 (v: TDataMemoryAddress);
    begin
       ram[FSR2H] := v shr 8;
       ram[FSR2L] := v and $ff
+   end;
+
+function TPIC18x_Simulated_CPU.refocon: byte;
+   begin
+      result := f_refocon_ram.get_value
    end;
 
 procedure TPIC18x_Simulated_CPU.push_return_address (return_addr: integer);

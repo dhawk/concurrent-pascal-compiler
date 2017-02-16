@@ -50,6 +50,7 @@ uses
    pic18x_types_unit,
    SysUtils;
 
+// Three types for pics without alt address SFRs
 type
    Tset_ioreg_1bit_param_Subroutine =
       class (TSubroutine)
@@ -78,7 +79,47 @@ type
             // locations on stack at call
             ptrH = 1;
             ptrL = 2;
-            exp_result = 3;                           
+            exp_result = 3;
+            pop_stk_size = 3;
+      protected
+         procedure generate_subroutine_code;
+            override;
+{$ifdef INCLUDE_SIMULATION}
+         procedure report_stack_sizes;
+            override;
+{$endif}
+      end;
+
+// three types for pics with alt address sfrs
+type
+   Talt_set_ioreg_1bit_param_Subroutine =
+      class (TSubroutine)
+      protected
+         procedure generate_subroutine_code;
+            override;
+{$ifdef INCLUDE_SIMULATION}
+         procedure report_stack_sizes;
+            override;
+{$endif}
+      end;
+   Talt_clear_ioreg_1bit_param_Subroutine =
+      class (TSubroutine)
+      protected
+         procedure generate_subroutine_code;
+            override;
+{$ifdef INCLUDE_SIMULATION}
+         procedure report_stack_sizes;
+            override;
+{$endif}
+      end;
+   Talt_assign_ioreg_1bit_param_Subroutine =
+      class (TSubroutine)
+      private
+         const
+            // locations on stack at call
+            ptrH = 1;
+            ptrL = 2;
+            exp_result = 3;
             pop_stk_size = 3;
       protected
          procedure generate_subroutine_code;
@@ -94,7 +135,7 @@ procedure Tset_ioreg_1bit_param_Subroutine.generate_subroutine_code;
       TPIC18x_MOVF.Create (PREINC2, dest_w, access_mode);
       TPIC18x_MOVWF.Create (FSR0H, access_mode);
       TPIC18x_MOVFF.Create (PREINC2, FSR0L);
-      TPIC18x_SWAPF.Create (WREG, dest_f, access_mode);
+      TPIC18x_SWAPF.Create (WREG, dest_w, access_mode);
       TCallMacro.Create.dest := get_bit_mask_routine;
       TPIC18x_IORWF.Create (INDF0, dest_f, access_mode);
       TPIC18x_RETURN.Create
@@ -112,7 +153,7 @@ procedure Tclear_ioreg_1bit_param_Subroutine.generate_subroutine_code;
       TPIC18x_MOVF.Create (PREINC2, dest_w, access_mode);
       TPIC18x_MOVWF.Create (FSR0H, access_mode);
       TPIC18x_MOVFF.Create (PREINC2, FSR0L);
-      TPIC18x_SWAPF.Create (WREG, dest_f, access_mode);
+      TPIC18x_SWAPF.Create (WREG, dest_w, access_mode);
       TCallMacro.Create.dest := get_bit_mask_routine;
       TPIC18x_COMF.Create (WREG, dest_w, access_mode);
       TPIC18x_ANDWF.Create (INDF0, dest_f, access_mode);
@@ -150,10 +191,95 @@ procedure Tassign_ioreg_1bit_param_Subroutine.report_stack_sizes;
    end;
 {$endif}
 
+procedure Talt_set_ioreg_1bit_param_Subroutine.generate_subroutine_code;
+   const
+      ptrH = 1;
+      ptrL = 2;
+      stk_size = 2;
+   begin
+      TPIC18x_MOVSF.Create (ptrH, FSR0H);
+      TPIC18x_MOVSF.Create (ptrL, FSR0L);
+      TPIC18x_SWAPF.Create (ptrH, dest_w, access_mode);
+      TCallMacro.Create.dest := get_bit_mask_routine;
+      TPIC18x_BTFSC.Create (ptrH, 4, access_mode);   // test 13th addr bit (alt sfr)
+      TPIC18x_BSF.Create (pic_info.SFR_Address('WDTCON'), 4, access_mode);
+      TPIC18x_IORWF.Create (INDF0, dest_f, access_mode);
+      TPIC18x_BTFSC.Create (ptrH, 4, access_mode);
+      TPIC18x_BCF.Create (pic_info.SFR_Address('WDTCON'), 4, access_mode);
+      TPIC18x_ADDFSR.Create (2, stk_size);
+      ExitKernel
+   end;
+
+{$ifdef INCLUDE_SIMULATION}
+procedure Talt_set_ioreg_1bit_param_Subroutine.report_stack_sizes;
+   begin
+      check_stack_sizes (0, 2, 1)
+   end;
+{$endif}
+
+procedure Talt_clear_ioreg_1bit_param_Subroutine.generate_subroutine_code;
+   const
+      ptrH = 1;
+      ptrL = 2;
+      stk_size = 2;
+   begin
+      TPIC18x_MOVSF.Create (ptrH, FSR0H);
+      TPIC18x_MOVSF.Create (ptrL, FSR0L);
+      TPIC18x_BTFSC.Create (ptrH, 4, access_mode);   // test 13th addr bit (alt sfr)
+      TPIC18x_BSF.Create (pic_info.SFR_Address('WDTCON'), 4, access_mode);
+      TPIC18x_SWAPF.Create (ptrH, dest_w, access_mode);
+      TCallMacro.Create.dest := get_bit_mask_routine;
+      TPIC18x_COMF.Create (WREG, dest_w, access_mode);
+      TPIC18x_ANDWF.Create (INDF0, dest_f, access_mode);
+      TPIC18x_BTFSC.Create (ptrH, 4, access_mode);
+      TPIC18x_BCF.Create (pic_info.SFR_Address('WDTCON'), 4, access_mode);
+      TPIC18x_ADDFSR.Create (2, stk_size);
+      ExitKernel
+   end;
+
+{$ifdef INCLUDE_SIMULATION}
+procedure Talt_clear_ioreg_1bit_param_Subroutine.report_stack_sizes;
+   begin
+      check_stack_sizes (0, 2, 1)
+   end;
+{$endif}
+
+procedure Talt_assign_ioreg_1bit_param_Subroutine.generate_subroutine_code;
+   var
+      bra1,bra2: TPIC18x_BRA;
+   begin
+      TPIC18x_MOVSF.Create (ptrH, FSR0H);
+      TPIC18x_MOVSF.Create (ptrL, FSR0L);
+      TPIC18x_SWAPF.Create (ptrH, dest_w, access_mode);
+      TCallMacro.Create.dest := get_bit_mask_routine;
+      TPIC18x_BTFSC.Create (ptrH, 4, access_mode);   // test 13th addr bit (alt sfr)
+      TPIC18x_BSF.Create (pic_info.SFR_Address('WDTCON'), 4, access_mode);
+      TPIC18x_TSTFSZ.Create (exp_result, access_mode);
+      bra1 := TPIC18x_BRA.Create;
+      TPIC18x_COMF.Create (WREG, dest_w, access_mode);
+      TPIC18x_ANDWF.Create (INDF0, dest_f, access_mode);
+      bra2 := TPIC18x_BRA.Create;
+      bra1.dest := TPIC18x_IORWF.Create (INDF0, dest_f, access_mode);
+      bra2.dest := TPIC18x_BTFSC.Create (ptrH, 4, access_mode);   // test 13th addr bit (alt sfr)
+      TPIC18x_BCF.Create (pic_info.SFR_Address('WDTCON'), 4, access_mode);
+      TPIC18x_ADDFSR.Create (2, pop_stk_size);
+      ExitKernel
+   end;
+
+{$ifdef INCLUDE_SIMULATION}
+procedure Talt_assign_ioreg_1bit_param_Subroutine.report_stack_sizes;
+   begin
+      check_stack_sizes (0, pop_stk_size, 1)
+   end;
+{$endif}
+
 var
    set_ioreg_1bit_param_Subroutine: Tset_ioreg_1bit_param_Subroutine;
    clear_ioreg_1bit_param_Subroutine: Tclear_ioreg_1bit_param_Subroutine;
    assign_ioreg_1bit_param_Subroutine: Tassign_ioreg_1bit_param_Subroutine;
+   alt_set_ioreg_1bit_param_Subroutine: Talt_set_ioreg_1bit_param_Subroutine;
+   alt_clear_ioreg_1bit_param_Subroutine: Talt_clear_ioreg_1bit_param_Subroutine;
+   alt_assign_ioreg_1bit_param_Subroutine: Talt_assign_ioreg_1bit_param_Subroutine;
 
 constructor TPIC18x_AssignmentStatement.Create (_assignee: TAccess; _expression: TExpression; _src_loc: TSourceLocation);
    begin
@@ -1198,15 +1324,33 @@ function TPIC18x_AssignmentStatement.Generate (param1, param2: integer): integer
             begin
                TPIC18x_Access(assignee).Generate_Push_Address2_Code (0, false);
                if expression.ordinal_constant_value = 0 then
-                  clear_ioreg_1bit_param_Subroutine.Call.annotation := 'clear ioreg bit'
+                  if TPIC18x_CPU(target_cpu).contains_alternate_address_sfrs then
+                     begin
+                        TurnInterruptsOff;
+                        alt_clear_ioreg_1bit_param_Subroutine.Call.annotation := 'clear ioreg bit'
+                     end
+                  else
+                     clear_ioreg_1bit_param_Subroutine.Call.annotation := 'clear ioreg bit'
                else  // const value = 1 or -1
-                  set_ioreg_1bit_param_Subroutine.Call.annotation := 'set ioreg bit'
+                  if TPIC18x_CPU(target_cpu).contains_alternate_address_sfrs then
+                     begin
+                        TurnInterruptsOff;
+                        alt_set_ioreg_1bit_param_Subroutine.Call.annotation := 'set ioreg bit'
+                     end
+                  else
+                     set_ioreg_1bit_param_Subroutine.Call.annotation := 'set ioreg bit'
             end
          else  // non-constant expression
             begin
                expression.Generate (GenerateCode, 1);
                TPIC18x_Access(assignee).Generate_Push_Address2_Code (0, false);
-               assign_ioreg_1bit_param_Subroutine.Call.annotation := 'assign ioreg bit'
+               if TPIC18x_CPU(target_cpu).contains_alternate_address_sfrs then
+                  begin
+                     TurnInterruptsOff;
+                     alt_assign_ioreg_1bit_param_Subroutine.Call.annotation := 'assign ioreg bit'
+                  end
+               else
+                  assign_ioreg_1bit_param_Subroutine.Call.annotation := 'assign ioreg bit'
             end
       end;
 
@@ -1804,10 +1948,16 @@ INITIALIZATION
    set_ioreg_1bit_param_Subroutine := Tset_ioreg_1bit_param_Subroutine.Create (0, 2, 'set ioreg 1-bit parameter');
    clear_ioreg_1bit_param_Subroutine := Tclear_ioreg_1bit_param_Subroutine.Create (0, 2, 'clear ioreg 1-bit parameter');
    assign_ioreg_1bit_param_Subroutine := Tassign_ioreg_1bit_param_Subroutine.Create (0, Tassign_ioreg_1bit_param_Subroutine.pop_stk_size, 'asssign ioreg 1-bit parameter');
+   alt_set_ioreg_1bit_param_Subroutine := Talt_set_ioreg_1bit_param_Subroutine.Create (0, 2, 'set ioreg 1-bit parameter');
+   alt_clear_ioreg_1bit_param_Subroutine := Talt_clear_ioreg_1bit_param_Subroutine.Create (0, 2, 'clear ioreg 1-bit parameter');
+   alt_assign_ioreg_1bit_param_Subroutine := Talt_assign_ioreg_1bit_param_Subroutine.Create (0, Tassign_ioreg_1bit_param_Subroutine.pop_stk_size, 'asssign ioreg 1-bit parameter');
 
 FINALIZATION
    set_ioreg_1bit_param_Subroutine.Free;
    clear_ioreg_1bit_param_Subroutine.Free;
    assign_ioreg_1bit_param_Subroutine.Free;
+   alt_set_ioreg_1bit_param_Subroutine.Free;
+   alt_clear_ioreg_1bit_param_Subroutine.Free;
+   alt_assign_ioreg_1bit_param_Subroutine.Free;
 
 END.

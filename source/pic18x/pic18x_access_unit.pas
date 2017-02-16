@@ -93,6 +93,8 @@ function TPIC18x_Access.can_be_evaluated_with_simple_bit_test: boolean;
                       (TPIC18x_TypeInfo(base_variable.typedef.info).is_in_alternate_shared_address_space)
                      )
                 )
+                and
+                (not base_variable.is_ioreg_1bit_param)
    end;
 
 function TPIC18x_Access.total_fixed_offsets: integer;

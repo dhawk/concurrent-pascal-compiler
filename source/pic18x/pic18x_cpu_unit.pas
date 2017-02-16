@@ -53,6 +53,7 @@ type
          Round24, Round32: TRoutine;
          Trunc24, Trunc32: TRoutine;
          reset_TMRn_cycle: array of Treset_TMRn_cycle;
+         contains_alternate_address_sfrs: boolean;
 {$ifdef INCLUDE_SIMULATION}
          Test: TRoutine;
 {$endif}
@@ -1026,6 +1027,7 @@ procedure TPIC18x_CPU.generate_machine_code (_prog: TProgram);
    begin   // TPIC18x_CPU.generate_machine_code
       prog := TPIC18x_Program(_prog);
       try
+         contains_alternate_address_sfrs := false;
          for i := 0 to prog.ioregisters.Length-1 do
             if prog.ioregisters[i].typedef.src_loc.in_preamble then
                begin
@@ -1033,6 +1035,7 @@ procedure TPIC18x_CPU.generate_machine_code (_prog: TProgram);
                      TPIC18x_TypeInfo(prog.ioregisters[i].typedef.info).set_reversed_byte_order;
                   if (prog.ioregisters[i].address and $1000) = $1000 then
                      begin
+                        contains_alternate_address_sfrs := true;
                         TPIC18x_TypeInfo(prog.ioregisters[i].typedef.info).is_in_alternate_shared_address_space := true
                            // include file generator guarantees that alternate shared address sfr types are
                            //    distinct from normal ioreg types, so the above modification of a type is permissible

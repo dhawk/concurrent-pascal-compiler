@@ -347,16 +347,7 @@ function TPIC18x_SimpleExpression.Generate (param1, param2: integer): integer;
          idx: integer;
          lbl: TInstruction;
       begin
-//         first_term.Generate (GenerateCode, 1);
-//         for i := 0 to Length(additional_terms)-1 do
-//            begin
-//               additional_terms[i].right_term.Generate(GenerateCode, 1);
-//               assert (additional_terms[i].addop = addop_boolean_or);
-//               TPIC18x_MOVF.Create (PREINC2, dest_w, access_mode).annotation := 'or tos*1 with (tos-1)*1, pop tos*1';
-//               StackUsageCounter.Pop (1);
-//               TPIC18x_IORWF.Create (1, dest_f, access_mode)
-//            end
-         TPIC18x_PUSHL.Create (1);
+          TPIC18x_PUSHL.Create (1);
          StackUsageCounter.Push(1);
          generate_term_code (first_term, false);
          add_bra;

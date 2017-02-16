@@ -233,7 +233,12 @@ procedure test_abs_value (addr: integer; value0, value1, value2, value3, value4:
 procedure test_sfr_value (sfr_name: string; value: byte);
    begin
       sfr_name := uppercase (sfr_name);
-      if cpu.ram_no_adshr_check(pic_info.SFR_Address(sfr_name) and $FFF) <> value then
+      if sfr_name = 'REFOCON' then
+         begin  // the only simulated alt address sfr 
+            if cpu.refocon <> value then
+               error (format ('sfr %s: %X expected, %X found', [sfr_name, value, cpu.refocon]))
+         end
+      else if cpu.ram_no_adshr_check(pic_info.SFR_Address(sfr_name) and $FFF) <> value then
          error (format ('sfr %s: %X expected, %X found', [sfr_name, value, cpu.ram_no_adshr_check (pic_info.SFR_Address(sfr_name) and $FFF)]))
    end;
 
