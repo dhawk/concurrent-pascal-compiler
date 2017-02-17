@@ -1715,12 +1715,6 @@ function TPIC18x_RoutineCallStatement.Generate (param1, param2: integer): intege
 function TPIC18x_StatementList.Generate (param1, param2: integer): integer;
    var
       current_stack_level: integer;
-   procedure generate_stmt_and_check_stack (stmt: TDefinition);
-      begin
-         stmt.Generate (GenerateCode, 0);
-         assert (current_stack_level = StackUsageCounter.Current)
-      end;
-   var
       i: integer;
    begin
       result := 0;  // to suppress compiler warning
@@ -1729,7 +1723,10 @@ function TPIC18x_StatementList.Generate (param1, param2: integer): integer;
             begin
                current_stack_level := StackUsageCounter.Current;
                for i := 0 to Length(stmts)-1 do
-                  generate_stmt_and_check_stack (stmts[i]);
+                  begin
+                     stmts[i].Generate (GenerateCode, 0);
+                     assert (current_stack_level = StackUsageCounter.Current)
+                  end;
             end;
       else
          assert (false, 'TPIC18x_StatementList.Generate(' + IntToStr(param1) + ') not implemented')

@@ -1040,10 +1040,11 @@ function TPIC18x_RelationalExpression.Generate (param1, param2: integer): intege
 
    procedure generate_ordinal_relational_expression_code;
 
-      procedure generate_1_byte_equal_not_equal_ordinal_relational_expression_code;
+      procedure generate_1_byte_equal_or_not_equal_ordinal_relational_expression_code;
          var
             bz: TPIC18x_BZ;
-         begin  // generate_1_byte_equal_not_equal_ordinal_relational_expression_code
+         begin  // generate_1_byte_equal_or_not_equal_ordinal_relational_expression_code
+            // try special cases for 1-bit to constant comparisons first
             if right_simple_expression.contains_constant
                and
                (left_simple_expression.info.min_value.AsInteger = 0)
@@ -1117,7 +1118,7 @@ function TPIC18x_RelationalExpression.Generate (param1, param2: integer): intege
                      assert (false)
                   end
                end
-         end;   // generate_1_byte_equal_not_equal_ordinal_relational_expression_code
+         end;   // generate_1_byte_equal_or_not_equal_ordinal_relational_expression_code
 
       var
          a_size, b_size, result_size: integer;
@@ -1138,7 +1139,7 @@ function TPIC18x_RelationalExpression.Generate (param1, param2: integer): intege
             and
             (relop in [relop_equals, relop_notequals])
          then
-            generate_1_byte_equal_not_equal_ordinal_relational_expression_code
+            generate_1_byte_equal_or_not_equal_ordinal_relational_expression_code
          else
             begin
                case relop of

@@ -1342,7 +1342,11 @@ function TPIC18x_AssignmentStatement.Generate (param1, param2: integer): integer
             end
          else  // non-constant expression
             begin
-               expression.Generate (GenerateCode, 1);
+               expression_result_size := TPIC18x_TypeInfo (expression.info).Size;
+               expression.Generate (GenerateCode, expression_result_size);
+               GenerateRangeCheckCode (TOrdinalDataType(assignee.node_typedef), expression_result_size, expression.info, assignment_operator_src_loc, rterr_assignment_of_out_of_range_value);
+               if expression_result_size > 1 then
+                  get_and_discard (expression_result_size-1);
                TPIC18x_Access(assignee).Generate_Push_Address2_Code (0, false);
                if TPIC18x_CPU(target_cpu).contains_alternate_address_sfrs then
                   begin
