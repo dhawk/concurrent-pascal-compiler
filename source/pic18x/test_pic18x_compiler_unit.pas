@@ -7328,7 +7328,7 @@ procedure test141;
    end;
 
 procedure test142;
-   begin  // test assign & push 1-bit ioreg param in alt sfr
+   begin  // test assign & push 1-bit ioreg param in alt addr sfr
       add ('{$processor ''pic18f65j50''}');
       add ('procedure psetc (ioreg i: uint1);');
       add ('  begin');
@@ -7366,7 +7366,6 @@ procedure test142;
       add ('  i2 := f(refocon.rosel);');
       add ('  i3 := f(refocon.rodiv3);');
       add ('end.');
-
       start_test (142);
       test_sfr_value ('OSCCON', $08);
       test_sfr_value ('REFOCON', $90);
@@ -7377,6 +7376,52 @@ procedure test142;
       conclude_test
    end;
 
+procedure test143;
+   begin
+      add ('var');
+      add ('  b0,b1,b2,b3: boolean;');
+      add ('  b4,b5,b6,b7: boolean;');
+      add ('  b8,b9,b10,b11: boolean;');
+      add ('  b12,b13,b14,b15: boolean;');
+      add ('  u: uint1;');
+      add ('  i: int1;');
+      add ('begin');
+      add ('  u :=  0; b0 := u=0;');
+      add ('  u :=  1; b1 := u=0;');
+      add ('  u :=  0; b2 := u=1;');
+      add ('  u :=  1; b3 := u=1;');
+      add ('  i :=  0; b4 := i=0;');
+      add ('  i := -1; b5 := i=0;');
+      add ('  i :=  0; b6 := i=-1;');
+      add ('  i := -1; b7 := i=-1;');
+      add ('  u :=  0; b8 := 0=u;');
+      add ('  u :=  1; b9 := 0=u;');
+      add ('  u :=  0; b10 := 1=u;');
+      add ('  u :=  1; b11 := 1=u;');
+      add ('  i :=  0; b12 := 0=i;');
+      add ('  i := -1; b13 := 0=i;');
+      add ('  i :=  0; b14 := -1=i;');
+      add ('  i := -1; b15 := -1=i;');
+      add ('end.');
+      start_test (143);
+      test_abs_value (0, 1);
+      test_abs_value (1, 0);
+      test_abs_value (2, 0);
+      test_abs_value (3, 1);
+      test_abs_value (4, 1);
+      test_abs_value (5, 0);
+      test_abs_value (6, 0);
+      test_abs_value (7, 1);
+      test_abs_value (8, 1);
+      test_abs_value (9, 0);
+      test_abs_value (10, 0);
+      test_abs_value (11, 1);
+      test_abs_value (12, 1);
+      test_abs_value (13, 0);
+      test_abs_value (14, 0);
+      test_abs_value (15, 1);
+      conclude_test
+   end;
 
 procedure RunTests;
    begin
@@ -7522,6 +7567,7 @@ procedure RunTests;
       test140;
       test141;
       test142;
+      test143;
       display_test_result ('all tests done')
    end;
 

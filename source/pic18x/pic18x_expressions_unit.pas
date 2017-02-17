@@ -1039,6 +1039,86 @@ function TPIC18x_PredFunctionPrimary.Generate (param1, param2: integer): integer
 function TPIC18x_RelationalExpression.Generate (param1, param2: integer): integer;
 
    procedure generate_ordinal_relational_expression_code;
+
+      procedure generate_1_byte_equal_not_equal_ordinal_relational_expression_code;
+         var
+            bz: TPIC18x_BZ;
+         begin  // generate_1_byte_equal_not_equal_ordinal_relational_expression_code
+            if right_simple_expression.contains_constant
+               and
+               (left_simple_expression.info.min_value.AsInteger = 0)
+               and
+               (left_simple_expression.info.max_value.AsInteger = 1)
+            then
+               begin
+                  left_simple_expression.Generate (GenerateCode, 1);
+                  if right_simple_expression.constant.AsOrdinal = 0 then
+                     TPIC18x_BTG.Create (1, 0, access_mode)
+               end
+            else if right_simple_expression.contains_constant
+                    and
+                    (left_simple_expression.info.min_value.AsInteger = -1)
+                    and
+                    (left_simple_expression.info.max_value.AsInteger = 0)
+                 then
+                    begin
+                       left_simple_expression.Generate (GenerateCode, 1);
+                       TPIC18x_MOVLW.Create ($01);
+                       TPIC18x_ANDWF.Create (1, dest_f, access_mode);
+                       if right_simple_expression.constant.AsOrdinal = 0 then
+                          TPIC18x_BTG.Create (1, 0, access_mode)
+                    end
+            else if left_simple_expression.contains_constant
+                    and
+                    (right_simple_expression.info.min_value.AsInteger = 0)
+                    and
+                    (right_simple_expression.info.max_value.AsInteger = 1)
+                 then
+                    begin
+                       right_simple_expression.Generate (GenerateCode, 1);
+                       if left_simple_expression.constant.AsOrdinal = 0 then
+                          TPIC18x_BTG.Create (1, 0, access_mode)
+                    end
+            else if left_simple_expression.contains_constant
+                    and
+                    (right_simple_expression.info.min_value.AsInteger = -1)
+                    and
+                    (right_simple_expression.info.max_value.AsInteger = 0)
+                 then
+                    begin
+                       right_simple_expression.Generate (GenerateCode, 1);
+                       TPIC18x_MOVLW.Create ($01);
+                       TPIC18x_ANDWF.Create (1, dest_f, access_mode);
+                       if left_simple_expression.constant.AsOrdinal = 0 then
+                          TPIC18x_BTG.Create (1, 0, access_mode)
+                    end
+            else  // general case
+               begin
+                  left_simple_expression.Generate (GenerateCode, 1);
+                  right_simple_expression.Generate (GenerateCode, 1);
+                  TPIC18x_MOVF.Create (PREINC2, dest_w, access_mode);
+                  StackUsageCounter.Pop (1);
+                  TPIC18x_SUBWF.Create (1, dest_f, access_mode);    // sets N,Z status
+                  case relop of
+                     relop_equals:
+                        begin
+                           TPIC18x_TSTFSZ.Create (1, access_mode);
+                           TPIC18x_SETF.Create (1, access_mode);
+                           TPIC18x_INCF.Create (1, dest_f, access_mode);   // -1 -> 0  or  0 -> 1
+                        end;
+                     relop_notequals:
+                        begin
+                           bz := TPIC18x_BZ.Create;
+                           TPIC18x_MOVLW.Create (1);
+                           TPIC18x_MOVWF.Create (1, access_mode);
+                           bz.dest := TAssemblyLabel.Create
+                        end;
+                  else
+                     assert (false)
+                  end
+               end
+         end;   // generate_1_byte_equal_not_equal_ordinal_relational_expression_code
+
       var
          a_size, b_size, result_size: integer;
          b_info: TTypeInfo;
@@ -1047,7 +1127,7 @@ function TPIC18x_RelationalExpression.Generate (param1, param2: integer): intege
          bn: TPIC18x_BN;
          bnn: TPIC18x_BNN;
          bz: TPIC18x_BZ;
-      begin
+      begin  // generate_ordinal_relational_expression_code
          b_size := 0;  // suppress compiler warning
          b_info := nil; // suppress compiler warning
          result_size := 0;  // suppress compiler warning
@@ -1056,31 +1136,9 @@ function TPIC18x_RelationalExpression.Generate (param1, param2: integer): intege
             and
             (TPIC18x_TypeInfo(right_simple_expression.info).Size = 1)
             and
-            (relop in [relop_equals, relop_notequals]) then
-            begin
-               left_simple_expression.Generate (GenerateCode, 1);
-               right_simple_expression.Generate (GenerateCode, 1);
-               TPIC18x_MOVF.Create (PREINC2, dest_w, access_mode);
-               StackUsageCounter.Pop (1);
-               TPIC18x_SUBWF.Create (1, dest_f, access_mode);    // sets N,Z status
-               case relop of
-                  relop_equals:
-                     begin
-                        TPIC18x_TSTFSZ.Create (1, access_mode);
-                        TPIC18x_SETF.Create (1, access_mode);
-                        TPIC18x_INCF.Create (1, dest_f, access_mode);   // -1 -> 0  or  0 -> 1
-                     end;
-                  relop_notequals:
-                     begin
-                        bz := TPIC18x_BZ.Create;
-                        TPIC18x_MOVLW.Create (1);
-                        TPIC18x_MOVWF.Create (1, access_mode);
-                        bz.dest := TAssemblyLabel.Create
-                     end;
-               else
-                  assert (false)
-               end
-            end
+            (relop in [relop_equals, relop_notequals])
+         then
+            generate_1_byte_equal_not_equal_ordinal_relational_expression_code
          else
             begin
                case relop of
@@ -1224,7 +1282,7 @@ function TPIC18x_RelationalExpression.Generate (param1, param2: integer): intege
                   assert (false)
                end
             end
-      end;
+      end;  // generate_ordinal_relational_expression_code
 
    procedure generate_set_relational_expression_code;
       var
