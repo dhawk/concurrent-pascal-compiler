@@ -118,7 +118,7 @@ In this code fragment the LSB is transferred in the first movff instruction and 
 
 [^little-endian]: The XC8 compiler is little-endian.  The LSB is stored at the variable's address and the MSB is stored at address+1.
 
-Now suppose the vehicle is traveling at 20 mph and the cruise control setting is turned down to 10 mph.  Imagine that the ADC read interrupt randomly happens to occur between the two movff instructions just as the vehicle is slowing from 14.55 mph ($0100 in/sec) to 14.49 mph ($00FF in/sec). The following sequence of operations will occur:
+Now suppose the vehicle is traveling at 20 mph and the cruise control setting is turned down to 10 mph.  Imagine that the TMR0 interrupt randomly happens to occur between the two movff instructions just as the vehicle is slowing from 14.55 mph ($0100 in/sec) to 14.49 mph ($00FF in/sec). The following sequence of operations will occur:
 
 - the `velocity` variable already contains the previous value of $0100 in/sec.
 - the first movff instruction has just set the LSB of the `control_throttle` parameter to $00.
@@ -174,24 +174,26 @@ var
 
 The monitor keeps the current velocity value in private variable `v`.  It can only be read or written through the `velocity` property.  Each set or get operation is a critical section and the compiler generates appropriate code to ensure that the  operation is atomic.
 
-Next we will look at the ADC reader process:
+Next we will look at the ADC reader process. It is an example of an interrupt process.  It accomplishes the same thing as the interrupt subroutine but there is an important paradigm shift.  Instead of being a subroutine "called by  the hardware" it is instead a cyclic sequential process synchronized with the hardware via the interrupt (interrupts are best understood as being a signal that the hardware has completed an operation). 
 
 ~~~
 var
    adc_reader:
       process (v: t_velocity); priority 1;
-      begin
-         ...
-         cycle
+         begin
             ...
-            await interrupt;
-            v.velocity := AD.ADRES;
-            ...
-         repeat
-      end interrupt TMR0I_prio1_interrupt;
+            cycle
+               ...
+               await interrupt;
+               v.velocity := AD.ADRES;
+               ...
+            repeat
+         end interrupt TMR0I_prio1_interrupt;
 ~~~
 
-This is an example of an interrupt process.  It accomplishes the same thing as the interrupt subroutine but there is an important paradigm shift.  Instead of being a subroutine "called by  the hardware" it is instead a cyclic sequential process synchronized with the hardware via the interrupt (interrupts are best understood as being a signal that the hardware has completed an operation).  At the beginning of the cycle the ADC is set up to perform a measurement *(details not shown)*. The process thread then blocks at the `await interrupt` statement until the TMR0 interrupt signals that the ADC measurement is ready.  At that point the ADC reading[^either-endian-SFRs] is written to the velocity monitor (passed as to the process as parameter `v` at system initialization) and then the cycle repeats.  The specific interrupt an interrupt process is synchronized to is specified at the end of the process variable type declaration (here `TMR0I_prio1_interrupt`).  This process runs at priority 1 which is equivalent to the PIC18 low priority interrupt (the high priority interrupt is priority 2).
+ 
+
+At the beginning of the cycle the ADC is set up to perform a measurement *(details not shown)*. The process thread then blocks at the `await interrupt` statement until the TMR0 interrupt signals that the ADC measurement is ready.  At that point the ADC reading[^either-endian-SFRs] is written to the velocity monitor (passed to the process as parameter `v` at system initialization) and then the cycle repeats.  The specific interrupt an interrupt process is synchronized to is specified at the end of the process variable type declaration (here `TMR0I_prio1_interrupt`).  This process runs at priority 1 which is equivalent to the PIC18 low priority interrupt (the high priority interrupt is priority 2).
 
 [^either-endian-SFRs]: The PIC18x Concurrent Pascal compiler can handle either big-endian or little-endian SFR layouts (both can occur in the same microcontroller!), so the byte shifting required by XC8 is unnecessary.
 
@@ -206,6 +208,7 @@ var
                ...
             end;
          begin
+            ...
             cycle 
                ...
                control_throttle (v.velocity);

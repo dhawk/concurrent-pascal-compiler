@@ -13,11 +13,7 @@ This document assumes the reader is already familiar with:
 * Concurrent Pascal Language Reference,
 * The MicroChip Datasheet for your PIC18x microcontroller. 
 
-# Table of Contents
-{:.no_toc}
 
-* TOC
-{:toc}
 
 # Compiler Output Files
 
@@ -38,13 +34,13 @@ The binary file **xxxxx.hex** contains the executable machine code for the micro
 The runtime error file **xxxxx.rterr** is an XML file that contains an entry for each possible  ErrorCode value that can occur in the program.  For each ErrorCode the following information is provided:
 
 * ErrorCode - an integer value in decimal format.
-* HexErrorCode - the ErrorCode value in hex format.  The ErrorCode value is derived from the program counter value where the error occurred. For some operations (notably floating point divide) small offsets are added to the PC to allow different errors to be distinguished - this may result in odd values for ErrorCode (unlike the PIC18 PC which is always even). 
+* ErrorLocation - this is the ErrorCode value in hex format.  The ErrorLocation value is derived from the program counter value where the error occurred. For some operations (notably floating point divide) small offsets are added to the PC to allow different errors to be distinguished - this may result in odd values for ErrorLocation (unlike the PIC18 PC which is always even). 
 * ErrorMessage - the explanation for the run time error.  For assert failures this is the assert message .
 * SourceFile - the name of the source file containing the line where the error occurred.  
 * LineNo - the line number in the source file where the error occurred (line numbers start at 1).
 * Pos - the position on the line where the error occurred (first character is position 1).
 
-Normally the error location is found in the Concurrent Pascal source using the SourceFile and LineNo values for the reported ErrorCode. In some cases you may also want to consult the assembly listing produced when the assembly source file is assembled by MPASM (this has to be done as an extra step - the Concurrent Pascal Compiler does not run MPASM as part of the compilation process).  This listing shows program locations in hex and the error location can be found using the Addr value. 
+Normally the error location is found in the Concurrent Pascal source using the SourceFile and LineNo values for the reported ErrorCode. In some cases you may also want to consult the assembly listing produced when the assembly source file is assembled by MPASM (this has to be done as an extra step - the Concurrent Pascal Compiler does not run MPASM as part of the compilation process).  This listing shows program locations in hex and the error location can be found using the ErrorLocation value. 
 
 ## Linker Script File
 
@@ -187,7 +183,7 @@ Some PIC18x microcontrollers (e.g. USB controllers) have dual-ported GPRs.  This
 
 # Special Function Registers (SFRs)
 
-The microprocessor include file referenced by the $processor directive contains type definitions for the SFRs.  
+Special Function Registers, either singly or in combination, are accessed as ioreg variables. The microprocessor include file referenced by the $processor directive contains type definitions for the ioregs for the specified PIC18x.  
 
 For example, the datasheet for the PIC18F2525 describes the BAUDCON SFR bits as follows:
 
@@ -224,7 +220,7 @@ ioreg
    BAUDCON: tBAUDCON at $FB8;
 ~~~
 
-In addition to the fields defined by the datasheet, there are also occassionally some additional overlaid fields taken from Microchip documentation such as the RCMT, RXCKP and SCKP fields above.  These may or may not be useful.  Sometimes they are alternate field names used in earlier PIC microcontrollers that may be helpful when studying source code examples in C or assembler.
+In addition to the fields defined by the datasheet, there are sometimes additional overlaid fields taken from Microchip documentation such as the RCMT, RXCKP and SCKP fields above.  These may or may not be useful.  Sometimes they are alternative field names used in earlier PIC microcontrollers that may be helpful when studying source code examples in C or assembler.
 
 ## Combo SFR types
 
@@ -328,9 +324,9 @@ In addition to ADRES, ADRESH and ADRESL, the following special fields are define
    ADRES_12R: uint12;
 ~~~
 
-Each of these fields provides access to the exact bits of a particular configurable ADC result.  Depending on the microcontroller, ADCs can be configured to provide 8, 10 or 12 bit results either left or right justified.  Using one of these fields instead of the 16 bit ADRES field will allow the compiler to generate more compact code than if a 16-bit result field (ADRES) were used.
+Each of these fields provides access to the exact bits of a particular configurable ADC result.  Depending on the microcontroller, ADCs can be configured to provide 8, 10 or 12 bit results either left or right justified.  Using one of these fields instead of the 16 bit ADRES field can allow the compiler to generate more compact code than if a 16-bit result field (ADRES) were used.
 
-Note that the compiler does not automatically configure the ADC to load a specific result field, it assumes the programmer has already done so before accessing that field.  Note also that only a few of the PICs have 12-bit ADCs - presence of a 12-bit ADRES field in the type definition does not guarantee that a particular PIC has a 12-bit ADC (see the datasheet!). 
+Note that the compiler does not automatically configure the ADC to load a specific result field, it assumes the programmer has already done so before accessing that field.  Note also that only a few of the PICs have 12-bit ADCs - the presence of a 12-bit ADRES field in the type definition does not guarantee that a particular PIC has a 12-bit ADC (see the datasheet!). 
 
 ### Multiple Instances of an SFR ioreg variable type
 
@@ -370,7 +366,7 @@ A perusal of the datasheets will reveal that Microchip's chip designers helpfull
 
 The compiler normally lays out multi-byte ordinal variables in big-endian format.  Little-endian SFR combinations are considered to be "Reversed byte order".
 
-The compiler transparently handles both normal and reversed order SFR combinations.  All type definitions are laid out as  big-endian and the compiler generates the correct code to handle reversed byte order types.  Reversed combo SFR types are flagged in the processor definition xml file.
+The compiler transparently handles both normal and reversed order SFR combinations.  All type definitions are laid out as  big-endian and the compiler generates the correct code to handle reversed byte order types.  
 
 ## Shared Address SFRs
 
@@ -411,13 +407,19 @@ Similarly, to correctly write a 16-bit value to TMR1 the upper byte is written i
 
 For multi-byte SFR read operations the Concurrent Pascal compiler always emits code that reads the low byte first and writes the low byte last (this is true for both normal and reversed types).
 
+## Single-bit ioreg parameters
+
+The PIC18x Concurrent Pascal compiler implements single-bit ioreg parameters.  This allows an individual bit from an ioreg to be passed by reference to a component, procedure or function.  
+
+This is most useful when a component is being designed to handle multiple instances of a hardware module.  
+
 # Process Priority Mapping
 
 Process level 2 is mapped to the high priority interrupt level.  Processes and monitors running at priority level 2 run with interrupts off.
 
 Process level 1 is mapped to the low priority interrupt level.  Processes and monitors running at priority level 1 run with the low priority interrupts off and high priority interrupts on.
 
-Process and monitors running at levels 0 and below run with interrupts on.
+Process and monitors running between levels 0 and and -6 (lowest priority) run with interrupts on.
 
 
 # Interrupt Variables
