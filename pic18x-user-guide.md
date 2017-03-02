@@ -13,7 +13,11 @@ This document assumes the reader is already familiar with:
 * Concurrent Pascal Language Reference,
 * The MicroChip Datasheet for your PIC18x microcontroller. 
 
+<h1>Table of Contents</h1>
 
+
+* toc placeholder
+{:toc}
 
 # Compiler Output Files
 
