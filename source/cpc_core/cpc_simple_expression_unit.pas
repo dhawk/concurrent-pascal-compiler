@@ -535,9 +535,7 @@ constructor TSimpleExpression.CreateFromSourceTokens;
       while lex.token_is_symbol([sym_plus, sym_minus])
             or
             lex.token_is_reserved_word(rw_or)
-            or
-            lex.token_is_reserved_word(rw_xor) do
-         begin
+      do begin
             term_idx := Length(additional_terms);
             SetLength(additional_terms, term_idx + 1);
 
@@ -570,11 +568,6 @@ constructor TSimpleExpression.CreateFromSourceTokens;
             else if lex.token_is_reserved_word(rw_or) then
                if expression_kind = boolean_expression then
                   additional_terms[term_idx].addop := addop_boolean_or
-               else
-                  raise compile_error.Create(err_invalid_operator_for_operand)
-            else if lex.token_is_reserved_word(rw_xor) then
-               if expression_kind = boolean_expression then
-                  additional_terms[term_idx].addop := addop_boolean_xor
                else
                   raise compile_error.Create(err_invalid_operator_for_operand)
             else

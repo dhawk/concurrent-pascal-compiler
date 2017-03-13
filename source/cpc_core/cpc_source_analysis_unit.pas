@@ -141,7 +141,6 @@ type
        rw_trunc,
        rw_type,
        rw_until,
-       rw_xor,
        rw_while,
        rw_with
       );
@@ -910,8 +909,6 @@ function reserved_word_to_string
             result := 'until';
          rw_var:
             result := 'var';
-         rw_xor:
-            result := 'xor';
          rw_while:
             result := 'while';
          rw_with:

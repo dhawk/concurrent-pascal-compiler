@@ -6,7 +6,6 @@
   <ItemGroup>
     <Projects Include="source\cpc_core\cpc_core_dev\cpc_core_dev.dproj" />
     <Projects Include="source\cpc_core\run_cpc_core_tests\run_cpc_core_tests.dproj" />
-    <Projects Include="source\pic18x\config_bit_editor\pic18x_config_bit_editor.dproj" />
     <Projects Include="source\pic18x\cpc_pic18x\cpc_pic18x.dproj" />
     <Projects Include="source\pic18x\cpc_pic18x_dev\cpc_pic18x_dev.dproj" />
     <Projects Include="source\pic18x\run_pic18x_compiler_tests\run_pic18x_compiler_tests.dproj" />
@@ -19,15 +18,6 @@
     <BorlandProject>
 <BorlandProject xmlns=""><Default.Personality></Default.Personality></BorlandProject></BorlandProject>
   </ProjectExtensions>
-  <Target Name="pic18x_config_bit_editor">
-    <MSBuild Projects="source\pic18x\config_bit_editor\pic18x_config_bit_editor.dproj" Targets="" />
-  </Target>
-  <Target Name="pic18x_config_bit_editor:Clean">
-    <MSBuild Projects="source\pic18x\config_bit_editor\pic18x_config_bit_editor.dproj" Targets="Clean" />
-  </Target>
-  <Target Name="pic18x_config_bit_editor:Make">
-    <MSBuild Projects="source\pic18x\config_bit_editor\pic18x_config_bit_editor.dproj" Targets="Make" />
-  </Target>
   <Target Name="run_cpc_core_tests">
     <MSBuild Projects="source\cpc_core\run_cpc_core_tests\run_cpc_core_tests.dproj" Targets="" />
   </Target>
@@ -92,13 +82,13 @@
     <MSBuild Projects="source\cpc_core\cpc_core_dev\cpc_core_dev.dproj" Targets="Make" />
   </Target>
   <Target Name="Build">
-    <CallTarget Targets="pic18x_config_bit_editor;run_cpc_core_tests;run_pic18x_compiler_tests;run_pic18x_kernel_tests;run_pic18x_simulator_tests;cpc_pic18x;cpc_pic18x_dev;cpc_core_dev" />
+    <CallTarget Targets="run_cpc_core_tests;run_pic18x_compiler_tests;run_pic18x_kernel_tests;run_pic18x_simulator_tests;cpc_pic18x;cpc_pic18x_dev;cpc_core_dev" />
   </Target>
   <Target Name="Clean">
-    <CallTarget Targets="pic18x_config_bit_editor:Clean;run_cpc_core_tests:Clean;run_pic18x_compiler_tests:Clean;run_pic18x_kernel_tests:Clean;run_pic18x_simulator_tests:Clean;cpc_pic18x:Clean;cpc_pic18x_dev:Clean;cpc_core_dev:Clean" />
+    <CallTarget Targets="run_cpc_core_tests:Clean;run_pic18x_compiler_tests:Clean;run_pic18x_kernel_tests:Clean;run_pic18x_simulator_tests:Clean;cpc_pic18x:Clean;cpc_pic18x_dev:Clean;cpc_core_dev:Clean" />
   </Target>
   <Target Name="Make">
-    <CallTarget Targets="pic18x_config_bit_editor:Make;run_cpc_core_tests:Make;run_pic18x_compiler_tests:Make;run_pic18x_kernel_tests:Make;run_pic18x_simulator_tests:Make;cpc_pic18x:Make;cpc_pic18x_dev:Make;cpc_core_dev:Make" />
+    <CallTarget Targets="run_cpc_core_tests:Make;run_pic18x_compiler_tests:Make;run_pic18x_kernel_tests:Make;run_pic18x_simulator_tests:Make;cpc_pic18x:Make;cpc_pic18x_dev:Make;cpc_core_dev:Make" />
   </Target>
   <Import Condition="Exists('$(MSBuildBinPath)\Borland.Group.Targets')" Project="$(MSBuildBinPath)\Borland.Group.Targets" />
 </Project>

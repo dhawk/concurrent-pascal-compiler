@@ -115,6 +115,7 @@ type
    TConfigByte =
       class
          name: string;
+         addr: integer;
          fields: array of TConfigByteField;
          default_value: integer;
          mode_count: integer;  // never exceeds one?
@@ -135,6 +136,7 @@ type
       public
          chip_name: string;
          config_bytes: array of TConfigByte;
+         config_start_addr, config_end_addr: integer;
          sfrs: array of TSFR;
          data_space_sectors: array of TDataSpaceSector;
          eeadr, eeadrh, eecon1, eecon2, eedata, wdtcon: integer;
@@ -142,6 +144,8 @@ type
          first_access_bank_absolute_address: integer;
          is_extended: boolean;
          rom_size: integer;
+         constructor Create;
+            reintroduce;
          procedure AppendXMLFile (out: TOutStringProc);
          destructor Destroy;
             override;
@@ -428,6 +432,12 @@ destructor TConfigByte.Destroy;
 
 //==============
 //  TPICXMLInfo
+
+constructor TPICInfo.Create;
+   begin
+      config_start_addr := maxint;
+      config_end_addr := 0
+   end;
 
 procedure TPICInfo.AppendXMLFile (out: TOutStringProc);
    var

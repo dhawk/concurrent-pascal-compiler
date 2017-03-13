@@ -163,7 +163,7 @@ procedure tConfigBits.AppendXMLFile (out: TOutStringProc);
       s: string;
       default_value_defined: boolean;
    begin
-      out ('   <ConfigBits>');
+      out (format ('   <ConfigBits start_addr="%d" end_addr="%d">', [pic_info.config_start_addr, pic_info.config_end_addr]));
       for b in pic_info.config_bytes do
          if Length(b.fields) = 0 then
             begin
@@ -172,7 +172,7 @@ procedure tConfigBits.AppendXMLFile (out: TOutStringProc);
             end
          else
             begin
-               out ('      <ConfigByte name="' + b.name + '">');
+               out ('      <ConfigByte name="' + b.name + '" addr="' + IntToStr(b.addr) +'">');
                for f in b.fields do
                   begin
                      // Fixups for errors in .PIC files
@@ -220,7 +220,7 @@ procedure tConfigBits.AppendXMLFile (out: TOutStringProc);
                                  end;
                            out ('         </ConfigField>');
                            if not default_value_defined then
-                              out (format ('<-- config byte %s field %s default value (%d) not defined -->', [b.name, f.name, f.default_value]))
+                              out (format ('<!-- config byte %s field %s default value (%d) not defined -->', [b.name, f.name, f.default_value]))
                         end
                   end;
                out ('      </ConfigByte>')

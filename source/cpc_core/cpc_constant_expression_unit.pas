@@ -873,9 +873,7 @@ constructor Tcsimple_expression.CreateFromSourceTokens;
       while (lex.token_is_symbol([sym_plus, sym_minus]))
             or
             (lex.token_is_reserved_word(rw_or))
-            or
-            (lex.token_is_reserved_word(rw_xor)) do
-         begin
+      do begin
             operator_source_location := lex.token.src_loc;
             if lex.token_is_reserved_word(rw_or) then
                begin
@@ -888,21 +886,6 @@ constructor Tcsimple_expression.CreateFromSourceTokens;
                      if not (right_operand.constant_kind = boolean_constant) then
                         raise compile_error.Create(err_right_operand_must_be_boolean, right_operand_source_location);
                      b := b or right_operand.b
-                  finally
-                     right_operand.Release
-                  end
-               end
-            else if lex.token_is_reserved_word(rw_xor) then
-               begin
-                  lex.advance_token;
-                  right_operand_source_location := lex.token.src_loc;
-                  right_operand := Tcterm.CreateFromSourceTokens;
-                  try
-                     if not (constant_kind = boolean_constant) then
-                        raise compile_error.Create(err_left_operand_must_be_boolean, left_operand_source_location);
-                     if not (right_operand.constant_kind = boolean_constant) then
-                        raise compile_error.Create(err_right_operand_must_be_boolean, right_operand_source_location);
-                     b := b xor right_operand.b
                   finally
                      right_operand.Release
                   end

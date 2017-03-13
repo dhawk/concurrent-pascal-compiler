@@ -343,11 +343,12 @@ function TPIC18x_SimpleExpression.Generate (param1, param2: integer): integer;
                   StackUsageCounter.Pop (1)
                end
          end;
+
       var
          idx: integer;
          lbl: TInstruction;
-      begin
-          TPIC18x_PUSHL.Create (1);
+      begin   // generate_simple_boolean_expression_code
+         TPIC18x_PUSHL.Create (1);
          StackUsageCounter.Push(1);
          generate_term_code (first_term, false);
          add_bra;
@@ -361,7 +362,7 @@ function TPIC18x_SimpleExpression.Generate (param1, param2: integer): integer;
          lbl := TAssemblyLabel.Create;
          for idx := 0 to Length(bras)-1 do
             bras[idx].dest := lbl
-      end;
+      end;    // generate_simple_boolean_expression_code
 
    procedure generate_simple_set_expression_code;
       var

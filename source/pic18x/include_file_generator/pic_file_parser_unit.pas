@@ -73,8 +73,6 @@ type
          fuse_offset: integer;
          level: integer;
          is_pic18_with_extended_instruction_set: boolean;
-         constructor Create;
-            reintroduce;
          procedure XmlScannerStartTag(Sender: TObject; TagName: String; Attributes: TAttrList);
          procedure XmlScannerEndTag(Sender: TObject; TagName: String);
          procedure XmlScannerEmptyTag(Sender: TObject; TagName: String; Attributes: TAttrList);
@@ -192,10 +190,6 @@ function identify_tag (s: string): TTag;
       end;
    begin
       result := r (TTagInfo(tags.root))
-   end;
-
-constructor TPICFileParser.Create;
-   begin
    end;
 
 procedure TPICFileParser.parse (FileName: string);
@@ -365,6 +359,11 @@ procedure TPICFileParser.XmlScannerStartTag(Sender: TObject; TagName: String; At
                begin
                   current_fuse_byte := TConfigByte.Create;
                   current_fuse_byte.name := get_attrs ('edc:cname');
+                  current_fuse_byte.addr := get_attri ('edc:_addr');
+                  if get_attri ('edc:_addr') < config_start_addr then
+                     config_start_addr := get_attri ('edc:_addr');
+                  if get_attri ('edc:_addr') > config_end_addr then
+                     config_end_addr := get_attri ('edc:_addr');
                   current_fuse_byte.default_value := get_attri('edc:default');
                   fuse_byte_bitno := -1;
                   assert (get_attri('edc:nzwidth') = 8);   // only width ever seen
