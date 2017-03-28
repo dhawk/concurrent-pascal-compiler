@@ -857,6 +857,7 @@ procedure test_Tcprimary;
       test_integer_expected('begin 3 end', 3);
       test_real_expected('begin 3.14 end', 3.14);
       test_string_expected('begin ''asdf'' end', 'asdf');
+      test_string_expected('begin #55 end', '7');
       test_boolean_expected('begin true end', true);
       test_boolean_expected('begin false end', false);
       test_boolean_expected('begin not true end', false);
@@ -933,6 +934,9 @@ procedure test_Tcprimary;
       test_compile_error_generation_for_program_fragment('begin [''''] end', create_cprimary, err_null_chars_not_allowed_in_sets, '''''] end');
       test_compile_error_generation_for_program_fragment('begin[-1,2]end', create_cprimary, err_set_member_value_outside_legal_range, '-1,2]end');
       test_compile_error_generation_for_program_fragment('begin[256]end', create_cprimary, err_set_member_value_outside_legal_range, '256]end');
+      test_compile_error_generation_for_program_fragment('begin #', create_cprimary, err_char_constant_expected, '#');
+      test_compile_error_generation_for_program_fragment('begin #x', create_cprimary, err_char_constant_expected, '#x');
+      test_compile_error_generation_for_program_fragment('begin #666', create_cprimary, err_char_value_outside_legal_range, '#666');
    end;
 
 function create_Tcexponentiation: TDefinition;

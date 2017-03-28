@@ -261,6 +261,7 @@ IMPLEMENTATION
 
 uses
    cpc_common_unit,
+   cpc_core_objects_unit,
    cpc_target_cpu_unit,
    wirth_balanced_binary_tree_unit;
 
@@ -1396,6 +1397,30 @@ procedure TLexicalAnalysis.DoLexicalAnalysis;
                                           if line_idx > Length(line) then
                                              raise compile_error.Create(err_string_constant_multi_line, src_loc);
                                           line_idx := line_idx + 1;
+                                          put_string_constant (string_constant)
+                                       end;
+                                    '#':
+                                       begin
+                                          line_idx := line_idx + 1;
+                                          if (line_idx > Length(line))
+                                             or
+                                             (not CharInSet (line[line_idx], ['0'..'9']))
+                                          then
+                                             raise compile_error.Create (err_char_constant_expected, src_loc);
+                                          integer_constant.AsInteger := 0;
+                                          while (line_idx <= Length(line))
+                                                and
+                                                (CharInSet (line[line_idx], ['0'..'9']))
+                                          do begin
+                                                integer_constant.Multiply (10);
+                                                integer_constant.Add (ord(line[line_idx]) - ord('0'));
+                                                line_idx := line_idx + 1
+                                             end;
+                                          if integer_constant.gt (max_char)
+                                          then
+                                             raise compile_error.Create(err_char_value_outside_legal_range, src_loc);
+                                          string_constant := ' ';
+                                          string_constant[1] := chr(integer_constant.AsInteger);
                                           put_string_constant (string_constant)
                                        end;
                                     '_', 'A' .. 'Z', 'a' .. 'z':

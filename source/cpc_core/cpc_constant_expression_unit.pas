@@ -341,7 +341,8 @@ constructor Tcprimary.CreateFromSourceTokens;
                   raise compile_error.Create(err_integer_expected, cexpression_identifier_src_loc);
                if cexpression.ordinal_value.lt (min_char)
                   or
-                  cexpression.ordinal_value.gt (max_char) then
+                  cexpression.ordinal_value.gt (max_char)
+               then
                   raise compile_error.Create(err_char_value_outside_legal_range, cexpression_identifier_src_loc);
                constant_kind := string_constant;
                s := chr(cexpression.ordinal_value.AsInteger)
