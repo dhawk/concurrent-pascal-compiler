@@ -1661,7 +1661,7 @@ procedure test_lex_analysis;
       test_integer_constant_expected('begin ord($3_aB) end', create_TPrimary, 939);
       test_compile_error_generation ('begin $', err_improper_hex_constant, '$');
       test_compile_error_generation ('begin $x', err_improper_hex_constant, '$x');
-      test_compile_error_generation ('begin #', err_invalid_char, '#');
+      test_compile_error_generation ('begin #', err_char_constant_expected, '#');
       test_real_constant_expected ('begin 4.2e2 end', create_TPrimary, 4.2e2);
       test_real_constant_expected ('begin 4.2E2 end', create_TPrimary, 4.2E2);
       test_real_constant_expected ('begin 4.2e+2 end', create_TPrimary, 4.2e2);

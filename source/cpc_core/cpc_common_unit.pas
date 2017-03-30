@@ -37,7 +37,7 @@ const
    err_cant_open_include_file = 'can''t open include file: ''%s''';
    err_cant_open_source_file = 'can''t open source file: ''%s''';
    err_case_label_expected = 'case label expected';
-   err_char_constant_expected = 'char constan expected';
+   err_char_constant_expected = 'char constant expected';
    err_char_expected = 'char expected';
    err_char_expression_expected = 'char expression expected';
    err_class_type_not_allowed = 'class type not allowed';
