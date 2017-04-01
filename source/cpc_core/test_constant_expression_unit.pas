@@ -936,7 +936,7 @@ procedure test_Tcprimary;
       test_compile_error_generation_for_program_fragment('begin[256]end', create_cprimary, err_set_member_value_outside_legal_range, '256]end');
       test_compile_error_generation_for_program_fragment('begin #', create_cprimary, err_char_constant_expected, '#');
       test_compile_error_generation_for_program_fragment('begin #x', create_cprimary, err_char_constant_expected, '#x');
-      test_compile_error_generation_for_program_fragment('begin #6666', create_cprimary, err_char_value_outside_legal_range, '#666');
+      test_compile_error_generation_for_program_fragment('begin #666', create_cprimary, err_char_value_outside_legal_range, '#666');
    end;
 
 function create_Tcexponentiation: TDefinition;
