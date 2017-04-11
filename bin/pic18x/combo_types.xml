@@ -124,6 +124,12 @@
          <FieldNameFixup regex="^(C[12]SYNC)$" replacement="%s"/>
          <FieldNameFixup regex="^(MC[12]OUT)$" replacement="%s"/>
    </ComboType>
+   <ComboType TypeName="tCOMSTAT" VarNameFormatString="COMSTAT" Reversed="false">
+         <SFRPattern>
+            <SFR regex="^COMSTAT$"/>
+         </SFRPattern>
+         <FieldNameFixup regex="^RXBnOVFL$" replacement="-"/>
+   </ComboType>
    <ComboType TypeName="tECCP" VarNameFormatString="ECCP%s" Reversed="false">
          <SFRPattern>
             <SFR regex="^ECCP([0-9]+)AS$"/>
@@ -285,7 +291,12 @@
    </ComboType>
    <ComboType TypeName="tTMR16" VarNameFormatString="TMR%s" Reversed="true">
          <SFRPattern>
-            <SFR regex="^T([1-9]+[0-9]*)CON$"/>
+            <SFR regex="^TMR([1-9][0-9]*)L$"/>
+         </SFRPattern>
+   </ComboType>
+   <ComboType TypeName="tTMR16" VarNameFormatString="TMR%s" Reversed="true">
+         <SFRPattern>
+            <SFR regex="^T([1-9][0-9]*)CON$"/>
             <SFR regex="^TMR([0-9]+)L$"/>
             <SFR regex="^TMR([0-9]+)H$"/>
          </SFRPattern>

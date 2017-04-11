@@ -3,7 +3,7 @@ UNIT all_pic18x_sfr_field_info_unit;
 INTERFACE
 
 uses
-   SysUtils,
+   SysUtils, combo_type_unit,
    pic18x_information_unit, Generics.Collections,
    LibXmlParser;
 

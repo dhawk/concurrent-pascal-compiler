@@ -247,6 +247,7 @@ var
 
 function non_printable_char (c: char): boolean;
 function reserved_word_to_string (rw: TReservedWordEnum): string;
+function is_reserved_word (s: string): boolean;
 
 procedure output_source_line (st: TStrings; addr, s: string);
 procedure append_source_up_to (st: TStrings; src_loc: TSourceLocation);
@@ -264,6 +265,18 @@ uses
    cpc_core_objects_unit,
    cpc_target_cpu_unit,
    wirth_balanced_binary_tree_unit;
+
+function is_reserved_word (s: string): boolean;
+   var
+      rw: TReservedWordEnum;
+   begin
+      result := true;
+      s := LowerCase(Trim(s));
+      for rw := Low(TReservedWordEnum) to High(TReservedWordEnum) do
+         if s = reserved_word_to_string(rw) then
+            exit;
+      result := false
+   end;
 
 type
    TSymbolInfo =
@@ -1423,13 +1436,15 @@ procedure TLexicalAnalysis.DoLexicalAnalysis;
                                           string_constant[1] := chr(integer_constant.AsInteger);
                                           put_string_constant (string_constant)
                                        end;
-                                    '_', 'A' .. 'Z', 'a' .. 'z':
+                                    'A' .. 'Z', 'a' .. 'z', '_':
                                        begin
                                           symbol := '';
                                           repeat
                                              symbol := symbol + line[line_idx];
                                              line_idx := line_idx + 1
-                                          until (line_idx > length(line)) or not CharInSet (line[line_idx], ['_', 'A' .. 'Z', 'a' .. 'z', '0' .. '9']);
+                                          until (line_idx > length(line)) or not CharInSet (line[line_idx], ['A'..'Z', 'a'..'z', '0'..'9', '_']);
+                                          if symbol = '_' then
+                                             raise compile_error.Create (err_invalid_identifier, src_loc);
                                           symbol_item := symbol_table.find_symbol_table_entry(symbol);
                                           case symbol_item.token_kind of
                                              reserved_word_token:

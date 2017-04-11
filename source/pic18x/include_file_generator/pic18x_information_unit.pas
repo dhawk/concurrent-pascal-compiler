@@ -3,7 +3,7 @@ UNIT pic18x_information_unit;
 INTERFACE
 
 uses
-  Classes, common_unit;
+  Classes, common_unit, combo_type_unit;
 
 type
    TPICInfo = class;
@@ -50,6 +50,10 @@ type
          bit_access: string;  // --nnrr (should be len 8, but 9 seen) - (may be unreliable)
          modes: array of TSFRMode;
          when: string;   // used for mux'd SFRs
+         // the following fields are valid only if the SFR is included in a combo type
+         combo_var_name: string;
+         combo_group_1_match_value: string;
+         combo_combo_type: TComboType;
          function size: integer;
             override;
          constructor Create (pic_info: TPICInfo);
@@ -144,6 +148,7 @@ type
          first_access_bank_absolute_address: integer;
          is_extended: boolean;
          rom_size: integer;
+         ipen_bit_location: TIPENloc;
          constructor Create;
             reintroduce;
          procedure AppendXMLFile (out: TOutStringProc);
@@ -537,6 +542,14 @@ procedure TPICInfo.AppendXMLFile (out: TOutStringProc);
                    [eeprom_size, eeadr, eeadrh, eecon1, eecon2, eedata]
                   )
           );
+      case ipen_bit_location of
+         ipen_at_rcon_bit7:
+            out ('      <IPEN_Location sfr="RCON" bit="7"/>');
+         ipen_at_intcon_bit5:
+            out ('      <IPEN_Location sfr="INTCON" bit="5"/>');
+      else
+         assert (false)
+      end;
 
       for sfr in sfrs do
          case sfr.kind of

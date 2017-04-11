@@ -103,7 +103,7 @@ object ComboTypeDialog: TComboTypeDialog
         Left = 8
         Top = 58
         Width = 782
-        Height = 287
+        Height = 269
         HorzScrollBar.Tracking = True
         VertScrollBar.Tracking = True
         Anchors = [akLeft, akTop, akRight, akBottom]
@@ -182,7 +182,7 @@ object ComboTypeDialog: TComboTypeDialog
         Left = 112
         Top = 45
         Width = 676
-        Height = 228
+        Height = 210
         HorzScrollBar.Smooth = True
         HorzScrollBar.Tracking = True
         HorzScrollBar.Visible = False
@@ -202,7 +202,7 @@ object ComboTypeDialog: TComboTypeDialog
       end
       object TestFieldNameFixupsEdit: TEdit
         Left = 10
-        Top = 274
+        Top = 256
         Width = 87
         Height = 21
         Anchors = [akLeft, akBottom]
@@ -210,7 +210,7 @@ object ComboTypeDialog: TComboTypeDialog
       end
       object TestFieldNameFixupsButton: TButton
         Left = 18
-        Top = 316
+        Top = 298
         Width = 75
         Height = 25
         Anchors = [akLeft, akBottom]
@@ -239,7 +239,7 @@ object ComboTypeDialog: TComboTypeDialog
         Left = 103
         Top = 11
         Width = 685
-        Height = 316
+        Height = 298
         Anchors = [akLeft, akTop, akRight, akBottom]
         TabOrder = 1
       end
@@ -282,7 +282,7 @@ object ComboTypeDialog: TComboTypeDialog
         Left = 0
         Top = 0
         Width = 799
-        Height = 149
+        Height = 131
         VertScrollBar.Tracking = True
         Align = alCustom
         Anchors = [akLeft, akTop, akRight, akBottom]
@@ -291,7 +291,7 @@ object ComboTypeDialog: TComboTypeDialog
           Left = 0
           Top = 0
           Width = 795
-          Height = 145
+          Height = 127
           Align = alClient
           Indent = 19
           TabOrder = 0
@@ -332,6 +332,7 @@ object ComboTypeDialog: TComboTypeDialog
     Caption = 'Cancel'
     ModalResult = 2
     TabOrder = 1
+    OnClick = ExitDialog
   end
   object StatusBar: TStatusBar
     Left = 0
@@ -360,6 +361,7 @@ object ComboTypeDialog: TComboTypeDialog
       Caption = 'Save'
       ModalResult = 1
       TabOrder = 0
+      OnClick = ExitDialog
     end
   end
   object TypeNameEdit: TEdit

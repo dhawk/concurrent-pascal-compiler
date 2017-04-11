@@ -138,6 +138,7 @@ const
    err_invalid_char = 'invalid character';
    err_invalid_enumeration_definition = 'invalid enumeration definition';
    err_invalid_exponent = 'invalid exponent';
+   err_invalid_identifier = 'invalid identifier';
    err_invalid_ioregister_address = 'invalid ioregister address (out of range)';
    err_invalid_operator = 'invalid operator';
    err_invalid_operator_for_operand = 'invalid operator for operand(s)';

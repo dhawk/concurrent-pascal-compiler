@@ -17,31 +17,27 @@ type
          ProcessAllPICFilesMenuItem: TMenuItem;
          Memo1: TMemo;
          Button5: TButton;
-         Button4: TButton;
          ComboTypeMainMenuItem: TMenuItem;
          EditComboTypeMenuItem: TMenuItem;
          NewComboTypeMenuItem: TMenuItem;
-         Button1: TButton;
-         Button2: TButton;
          Label1: TLabel;
-         Button3: TButton;
          SyntaxCheckIncludeFilesMenuItem: TMenuItem;
          About1: TMenuItem;
          About2: TMenuItem;
          UnpackPICFilesfromMPLABX1: TMenuItem;
-         procedure Button4Click(Sender: TObject);
+         Label2: TLabel;
+         RunSingleThreadCheckBox: TCheckBox;
          procedure Button5Click(Sender: TObject);
          procedure ViewPICFileMenuItemClick(Sender: TObject);
          procedure ViewXMLFileMenuItemClick(Sender: TObject);
          procedure ViewIncFileMenuItemClick(Sender: TObject);
          procedure ProcessAllPICFilesMenuItemClick(Sender: TObject);
          procedure ComboTypeEditMenuItemClick(Sender: TObject);
-         procedure Button1Click(Sender: TObject);
          procedure SyntaxCheckIncludeFilesMenuItemClick(Sender: TObject);
          procedure NewComboTypeMenuItemClick(Sender: TObject);
-         procedure Button3Click(Sender: TObject);
          procedure About2Click(Sender: TObject);
          procedure UnpackPICFilesfromMPLABX1Click(Sender: TObject);
+         procedure FormCreate(Sender: TObject);
       public
          procedure AppendToMemo1 (s: string);
          procedure Discard (s: string);
@@ -74,33 +70,10 @@ uses
 //============
 //  TMainForm
 
-
-
-procedure TMainForm.Button1Click(Sender: TObject);
-var x: tAllPIC18xInfo;
-begin
-   x := tAllPIC18xInfo.CreateFromBinaryDataFile;
-   x.Free
-end;
-
-procedure TMainForm.Button3Click(Sender: TObject);
-var ctl: TComboTypeList;
-begin
-   ctl := TComboTypeList.Create;
-   ctl.Save;
-   ctl.Free
-end;
-
-procedure TMainForm.Button4Click(Sender: TObject);
-begin
-   try
-      RunProgram ('jar.exe', true);
-   except
-      on e: Exception do
-         if Pos ('Unable to run ', e.Message) = 1
-            then raise exception.create ('no jar')
-   end
-end;
+procedure TMainForm.FormCreate(Sender: TObject);
+   begin
+      label2.Caption := 'Last MPLABX version downloaded: ' + mplabx_version
+   end;
 
 procedure TMainForm.Button5Click(Sender: TObject);
    begin

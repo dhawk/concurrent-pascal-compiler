@@ -1673,6 +1673,7 @@ procedure test_lex_analysis;
       test_compile_error_generation ('begin ''', err_string_constant_multi_line, '''');
       test_compile_error_generation ('begin ''xxx', err_string_constant_multi_line, '''xxx');
       test_compile_error_generation ('begin 1e', err_improper_real_const, '1e');
+      test_compile_error_generation ('begin _ end', err_invalid_identifier, '_');
       display ('')
    end;
 

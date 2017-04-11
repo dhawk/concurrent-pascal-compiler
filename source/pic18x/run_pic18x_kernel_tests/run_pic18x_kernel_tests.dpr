@@ -135,7 +135,7 @@ begin
          Application.Initialize;
          Application.MainFormOnTaskbar := True;
          Application.CreateForm(TRunPIC18xKernelTestsAboutBoxForm, RunPIC18xKernelTestsAboutBoxForm);
-         Application.Run
+  Application.Run
       end
    else
       begin

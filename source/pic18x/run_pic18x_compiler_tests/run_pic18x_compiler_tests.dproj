@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProjectGuid>{9c486ddd-6075-46a8-9832-6317776944c1}</ProjectGuid>
@@ -91,7 +91,9 @@ del run_pic18x_compiler_tests.res</PostBuildEvent>
     <DCCReference Include="..\test_pic18x_compiler_unit.pas" />
     <DCCReference Include="..\test_pic18x_kernel_unit.pas" />
     <DCCReference Include="..\test_pic18x_simulator_unit.pas" />
-    <DCCReference Include="..\test_pic18x_subroutines_unit.pas" />
+    <DCCReference Include="..\test_pic18x_subroutines_unit.pas">
+      <Form>$R *.res</Form>
+    </DCCReference>
     <DCCReference Include="run_pic18x_compiler_tests_aboutbox_unit.pas">
       <Form>PIC18xAboutBoxForm1</Form>
     </DCCReference>

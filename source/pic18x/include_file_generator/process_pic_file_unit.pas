@@ -54,6 +54,7 @@ procedure process_pic_file (pic_file_name: string;
                   config_bits := tConfigBits.Create (pic_info);
                   typedefs := tTypeDefList.Create;
                   ioreg_list := tIoregList.Create (pic_info, pic_sfr_field_info, typedefs, combo_type_list);
+                  pic_info.ipen_bit_location := typedefs.IPENloc;
                   interrupt_variables := t_interrupt_variables.Create (pic_info);
                   timers := tTimer16List.Create (pic_info);
                   dataspacelist := tDataSpaceList.Create (pic_info);

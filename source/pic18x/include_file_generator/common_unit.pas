@@ -4,6 +4,7 @@ INTERFACE
 
 type
    TOutStringProc = procedure (s: string) of object;
+   TIPENloc = (ipen_loc_unknown, ipen_at_rcon_bit7, ipen_at_intcon_bit5);
 
 function sanitize_xml_strings (s: string): string;
 

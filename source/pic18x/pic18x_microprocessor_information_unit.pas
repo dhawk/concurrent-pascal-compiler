@@ -43,7 +43,6 @@ const
    PREINC2  = $FDC;
    PRODH    = $FF4;
    PRODL    = $FF3;
-   RCON     = $FD0;
    STATUS   = $FD8;
    STKPTR   = $FFC;
    TABLAT   = $FF5;
@@ -65,6 +64,7 @@ type
          available_SRAM: integer;
          available_eeprom_memory: integer;
          first_access_bank_absolute_address: integer;
+         RCON: integer;
          EEADR: integer;
          EEADRH: integer;
          EECON1: integer;
@@ -89,6 +89,7 @@ type
                   region_type: tDateRegionType;
                   start_addr, end_addr: integer
                end;
+         ipen_bit_location: (unknown_ipen_bit_location, rcon_bit7, intcon_bit5);
          sixteen_bit_timers: array of integer;
          constructor Create (xml_fn: string);
          constructor CreateWithDefaults;
@@ -337,11 +338,14 @@ procedure t_pic_info.add_fixed_SFR_Names;
       total: integer;
    procedure add_fixed_sfr (addr: integer);
       begin
-         fixed_sfrs := fixed_sfrs + [addr and $FF];
-         total := total + 1
+         if addr > 0 then
+            begin
+               fixed_sfrs := fixed_sfrs + [addr and $FF];
+               total := total + 1
+            end
       end;
    const
-      number_of_fixed_sfrs = 39;
+      number_of_fixed_sfrs = 38;
    begin
       total := 0;
       add_sfr_name (BSR, 'BSR'); total := total + 1;
@@ -372,7 +376,6 @@ procedure t_pic_info.add_fixed_SFR_Names;
       add_sfr_name (PREINC2, 'PREINC2'); total := total + 1;
       add_sfr_name (PRODH, 'PRODH'); total := total + 1;
       add_sfr_name (PRODL, 'PRODL'); total := total + 1;
-      add_sfr_name (RCON, 'RCON'); total := total + 1;
       add_sfr_name (STATUS, 'STATUS'); total := total + 1;
       add_sfr_name (STKPTR, 'STKPTR'); total := total + 1;
       add_sfr_name (TABLAT, 'TABLAT'); total := total + 1;
@@ -415,7 +418,6 @@ procedure t_pic_info.add_fixed_SFR_Names;
       add_fixed_sfr (PREINC2);
       add_fixed_sfr (PRODH);
       add_fixed_sfr (PRODL);
-      add_fixed_sfr (RCON);
       add_fixed_sfr (STATUS);
       add_fixed_sfr (STKPTR);
       add_fixed_sfr (TABLAT);
@@ -460,6 +462,8 @@ constructor t_pic_info.Create (xml_fn: string);
 constructor t_pic_info.CreateWithDefaults;
    begin
       microprocessor := '*unspecified*';
+      RCON := $FD0;
+      ipen_bit_location := rcon_bit7;
       sfr_names := TBalancedBinaryTree.Create;
       add_fixed_SFR_Names;
       available_program_memory := 32768;
@@ -501,12 +505,21 @@ procedure t_pic_info.XmlScannerEmptyTag(Sender: TObject; TagName: String; Attrib
             EECON2 := int_value('eecon2');
             EEDATA := int_value('eedata');
          end
+      else if TagName = 'IPEN_Location' then
+         begin
+            if (Attributes.Value('sfr') = 'RCON') and (int_value('bit') = 7) then
+               ipen_bit_location := rcon_bit7
+            else if (Attributes.Value('sfr') = 'INTCON') and (int_value('bit') = 5) then
+               ipen_bit_location := intcon_bit5
+            else
+               assert (false, 'IPEN value in XML file not recognized')
+         end
       else if TagName = 'SFR' then
          begin
             if Attributes.Value('name') = 'INTCON' then
                assert (INTCON = int_value('addr'))
             else if Attributes.Value('name') = 'RCON' then
-               assert (RCON = int_value('addr'))
+               RCON := int_value('addr')
             else
                try
                   add_sfr_name (int_value('addr'), Attributes.Value('name'))

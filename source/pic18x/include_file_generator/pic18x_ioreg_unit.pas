@@ -10,8 +10,8 @@ uses
 type
    tIoreg =
       class
-         sfr_name: string;
-         sfr_addr: integer;
+         name: string;
+         addr: integer;
          typedef: tTypeDef;
          constructor Create (_sfr_name: string; _sfr_addr: integer; _typedef: tTypeDef);
       end;
@@ -23,12 +23,12 @@ type
 
 IMPLEMENTATION
 
-uses SysUtils, RegularExpressions, Generics.Defaults;
+uses SysUtils, RegularExpressions, Generics.Defaults, Classes;
 
 constructor tIoreg.Create (_sfr_name: string; _sfr_addr: integer; _typedef: tTypeDef);
    begin
-      sfr_name := _sfr_name;
-      sfr_addr := _sfr_addr;
+      name := _sfr_name;
+      addr := _sfr_addr;
       typedef := _typedef
    end;
 
@@ -103,15 +103,15 @@ constructor tIoregList.Create (pic_info: TPICInfo; pic_sfr_field_info: tMicroCon
             Add (sfr.name, tIoreg.Create (sfr.name, sfr.addr, typedef));
          sfr.processed := true
       end;
+   function min (a, b: integer): integer;
+      begin
+         if a < b then
+            result := a
+         else
+            result := b
+      end;
 
    procedure process_sfr_pair (sfrH, sfrL: TSFRDef);
-      function min (a, b: integer): integer;
-         begin
-            if a < b then
-               result := a
-            else
-               result := b
-         end;
       var
          name: string;
          typedef: tTypeDef;
@@ -137,6 +137,38 @@ constructor tIoregList.Create (pic_info: TPICInfo; pic_sfr_field_info: tMicroCon
             Add (name, tIoreg.Create (name, $1000 + min(sfrH.addr, sfrL.addr), typedef))
          else
             Add (name, tIoreg.Create (name, min(sfrH.addr, sfrL.addr), typedef));
+         sfrH.processed := true;
+         sfrL.processed := true
+      end;
+
+   procedure process_sfr_triple (sfrU, sfrH, sfrL: TSFRDef);
+      var
+         name: string;
+         typedef: tTypeDef;
+      begin
+         assert (sfrH.processed = sfrL.processed);
+         assert (sfrU.processed = sfrL.processed);
+         if sfrH.processed then
+            exit;
+
+         assert (sfrU.kind = simple_sfr);
+         assert (sfrH.kind = simple_sfr);
+         assert (sfrL.kind = simple_sfr);
+
+         name := Copy (sfrU.name, 1, Length(sfrU.name)-1);
+         assert (sfrU.name[Length(sfrU.name)] = 'U', 'nameU:' + sfrU.name + ' nameH:' + sfrH.name + ' nameL:' + sfrL.name);
+         assert (sfrH.name = name + 'H', 'nameH is ' + sfrH.name);
+         assert (sfrL.name = name + 'L', 'nameL is ' + sfrL.name);
+         typedef := typedefs.GetTypeDef (name, 3, sfrU.addr > sfrL.addr);
+         typedef.AddSFRFields (sfrU, 0);
+         typedef.AddSFRFields (sfrH, 1);
+         typedef.AddSFRFields (sfrL, 2);
+         assert (sfrU.IsAlternateSharedAddressSFR = sfrH.IsAlternateSharedAddressSFR);
+         assert (sfrH.IsAlternateSharedAddressSFR = sfrL.IsAlternateSharedAddressSFR);
+         if sfrU.IsAlternateSharedAddressSFR then
+            Add (name, tIoreg.Create (name, $1000 + min(sfrU.addr, sfrL.addr), typedef))
+         else
+            Add (name, tIoreg.Create (name, min(sfrU.addr, sfrL.addr), typedef));
          sfrH.processed := true;
          sfrL.processed := true
       end;
@@ -222,10 +254,10 @@ constructor tIoregList.Create (pic_info: TPICInfo; pic_sfr_field_info: tMicroCon
             begin  // sfr_column_matches
                try
                   result := false;
-                  for y := 0 to Length(combo_type.SFRPatterns[x].sfrs)-1 do
+//                  for y := 0 to Length(combo_type.SFRPatterns[x].sfrs)-1 do
+                  for y := 0 to combo_type.Size-1 do
                      if not match_in_addr_slot then
                         exit;
-                  var_name := format (combo_type.VarNameFormatString, [group_1_match_value]);
                   result := true
                except
                   on e: EConvertError do
@@ -274,14 +306,24 @@ constructor tIoregList.Create (pic_info: TPICInfo; pic_sfr_field_info: tMicroCon
                         end
                   end
             end;   // record_field
+
          var
             add_field: TAddField;
+            i: integer;
          begin  // sfr_patterns_match
             result := true;
             for x := 0 to combo_type.SFRPatterns.Count-1 do
                if sfr_column_matches then
                   begin
                      var_name := format (combo_type.VarNameFormatString, [group_1_match_value]);
+                     for y := 0 to combo_type.Size-1 do
+                        for i := 0 to Length(pic_sfr_field_info.sfr_addr_slots[addr_slot_idx+y].sfrs)-1 do
+                           with pic_sfr_field_info.sfr_addr_slots[addr_slot_idx+y].sfrs[i].sfr do
+                              begin
+                                 combo_var_name := var_name;
+                                 combo_group_1_match_value := group_1_match_value;
+                                 combo_combo_type := combo_type
+                              end;
                      assert (combo_type.TypeName[1] = 't');
                      typedef := typedefs.GetTypeDef (Copy (combo_type.TypeName, 2, 9999), combo_type.Size, combo_type.Reversed);
                      for add_field in combo_type.AddFields do
@@ -344,22 +386,25 @@ constructor tIoregList.Create (pic_info: TPICInfo; pic_sfr_field_info: tMicroCon
                   begin
                      jsfr := TJoinedSFR(pic_info.sfrs[i]);
                      if jsfr.sfrU <> nil then
-                        assert ((jsfr.sfrU.name = '') or (jsfr.sfrU.isCPU_SFR) or (jsfr.sfrU.ishidden));
-                     assert (jsfr.sfrH.kind = jsfr.sfrL.kind);
-                     case jsfr.sfrL.kind of
-                        simple_sfr:
-                           process_sfr_pair (TSFRDef(jsfr.sfrH), TSFRDef(jsfr.sfrL));
-                        muxd_sfr:
-                           begin
-                              msfrH := TMuxdSFR(jsfr.sfrH);
-                              msfrL := TMuxdSFR(jsfr.sfrL);
-                              assert (Length(msfrH.sfrs) = Length(msfrL.sfrs));
-                              for j := 0 to Length(msfrH.sfrs)-1 do
-                                 process_sfr_pair (msfrH.sfrs[j], msfrL.sfrs[j])
-                           end
+                        process_sfr_triple (TSFRDef(jsfr.sfrU), TSFRDef(jsfr.sfrH), TSFRDef(jsfr.sfrL))
                      else
-                        assert (false)
-                     end;
+                        begin
+                           assert (jsfr.sfrH.kind = jsfr.sfrL.kind);
+                           case jsfr.sfrL.kind of
+                              simple_sfr:
+                                 process_sfr_pair (TSFRDef(jsfr.sfrH), TSFRDef(jsfr.sfrL));
+                              muxd_sfr:
+                                 begin
+                                    msfrH := TMuxdSFR(jsfr.sfrH);
+                                    msfrL := TMuxdSFR(jsfr.sfrL);
+                                    assert (Length(msfrH.sfrs) = Length(msfrL.sfrs));
+                                    for j := 0 to Length(msfrH.sfrs)-1 do
+                                       process_sfr_pair (msfrH.sfrs[j], msfrL.sfrs[j])
+                                 end
+                           else
+                              assert (false)
+                           end
+                        end;
                      jsfr.processed := true
                   end;
             else
@@ -429,7 +474,7 @@ procedure tIoregList.AppendIncludeFileSource (out: TOutStringProc);
 
                out ('ioreg');
                for ioreg_name in keyArray do
-                  out ('   ' + ioreg_name + ': t' + Self[ioreg_name].typedef.typename + ' at $' + format ('%3.3X', [Self[ioreg_name].sfr_addr]) + ';');
+                  out ('   ' + ioreg_name + ': t' + Self[ioreg_name].typedef.typename + ' at $' + format ('%3.3X', [Self[ioreg_name].addr]) + ';');
                out ('')
             end
       finally

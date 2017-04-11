@@ -90,7 +90,7 @@ var
 
 IMPLEMENTATION
 
-uses win32_utils;
+uses win32_utils, main_form_unit;
 
 {$R *.dfm}
 
@@ -242,6 +242,7 @@ procedure TMultiThreadedProcessingDialogBaseClass.update_elapsed_time (t: TTime)
 procedure TMultiThreadedProcessingDialogBaseClass.FormActivate(Sender: TObject);
    var
       i: integer;
+      n: integer;
    begin
       directory_list := TDirectoryList.Create (GetPathStarAndExt);
       stop_all_threads := false;
@@ -255,7 +256,11 @@ procedure TMultiThreadedProcessingDialogBaseClass.FormActivate(Sender: TObject);
       UpdateProgress;
       Label4.Caption := '';
       thread_count := 0;
-      for i := 0 to NumberOfProcessors-1 do
+      if MainForm.RunSingleThreadCheckBox.Checked then
+         n := 1
+      else
+         n := NumberOfProcessors;
+      for i := 0 to n-1 do
          begin
             processing_frame[i].Clear;
             thread_count := thread_count + 1;

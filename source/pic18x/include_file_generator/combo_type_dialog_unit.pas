@@ -90,6 +90,7 @@ type
          procedure AddAddFieldsButtonClick(Sender: TObject);
          procedure DeleteTypeButtonClick(Sender: TObject);
          procedure TestFieldNameFixupsButtonClick(Sender: TObject);
+         procedure ExitDialog(Sender: TObject);
       private
          offset_labels: array {sfr#} of TLabel;  // offset_labels[0] not used
          varname_labels: array {pattern#} of TLabel;
@@ -453,6 +454,8 @@ procedure TComboTypeDialog.DeleteTypeButtonClick(Sender: TObject);
    begin
       if MessageDlg ('Are you sure you want to permanently delete ' + TypeNameEdit.Text + '?', mtConfirmation, [mbYes,mbNo], 0) = mrNo then
          ModalResult := 0
+      else
+         ExitDialog(Sender)
    end;
 
 procedure TComboTypeDialog.DisplayHint(Sender: TObject);
@@ -1256,6 +1259,12 @@ function TComboTypeDialog.Replacement_Left: integer;
 function TComboTypeDialog.Test_Result_Left: integer;
    begin
       result := Label9.Left - FieldNameFixupsScrollbox.Left - 2
+   end;
+
+procedure TComboTypeDialog.ExitDialog(Sender: TObject);
+   begin
+      set_number_of_patterns(1);
+      set_number_of_sfrs(1)
    end;
 
 END.

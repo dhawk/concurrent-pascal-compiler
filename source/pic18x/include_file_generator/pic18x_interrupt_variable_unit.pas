@@ -34,11 +34,10 @@ type
 IMPLEMENTATION
 
 uses
-  SysUtils, Generics.Defaults, RegularExpressions;
+  SysUtils, Generics.Defaults, RegularExpressions, combo_type_unit;
 
 var
-   usart_transmit_interrupt_regex: TRegEx;
-   usart_receive_interrupt_regex: TRegEx;
+   interrupt_name_with_one_lower_case_letter: TRegEx;
 
 constructor t_interrupt_variables.Create (pic_info: TPICInfo);
 
@@ -48,6 +47,7 @@ constructor t_interrupt_variables.Create (pic_info: TPICInfo);
          f: TSFRField;
          possible_interrupt_name: string;
          possible_interrupt_info: t_possible_interrupt_info;
+         ioreg_name, fieldname: string;
       begin  // record_possible_sfr_interrupt_bits
          for m in sfr.modes do
             for f in m.fields do
@@ -66,19 +66,29 @@ constructor t_interrupt_variables.Create (pic_info: TPICInfo);
                            possible_interrupt_info := t_possible_interrupt_info.Create;
                            possible_interrupts.Add (possible_interrupt_name, possible_interrupt_info)
                         end;
+                     if sfr.combo_var_name = '' then
+                        begin
+                           ioreg_name := sfr.name;
+                           fieldname := f.fieldname
+                        end
+                     else
+                        begin
+                           ioreg_name := sfr.combo_var_name;
+                           fieldname := sfr.combo_combo_type.FieldNameFixups.FixFieldname (f.fieldname, sfr.combo_group_1_match_value, GetNew_TComboType_t_field_name_fixup_Object);
+                        end;
                      case f.fieldname[Length(f.fieldname)] of
                         'E': begin
-                                possible_interrupt_info.enable_bit := f.fieldname;
-                                possible_interrupt_info.enable_bit_sfr := sfr.name
+                                possible_interrupt_info.enable_bit := fieldname;
+                                possible_interrupt_info.enable_bit_sfr := ioreg_name
                              end;
                         'F': begin
-                                possible_interrupt_info.flag_bit := f.fieldname;
-                                possible_interrupt_info.flag_bit_sfr := sfr.name;
+                                possible_interrupt_info.flag_bit := fieldname;
+                                possible_interrupt_info.flag_bit_sfr := ioreg_name;
                                 possible_interrupt_info.flag_bit_access := f.bit_access
                              end;
                         'P': begin
-                                possible_interrupt_info.priority_bit := f.fieldname;
-                                possible_interrupt_info.priority_bit_sfr := sfr.name
+                                possible_interrupt_info.priority_bit := fieldname;
+                                possible_interrupt_info.priority_bit_sfr := ioreg_name
                              end;
                      else
                         assert (false)
@@ -139,7 +149,7 @@ constructor t_interrupt_variables.Create (pic_info: TPICInfo);
 procedure t_interrupt_variables.AppendIncludeFileSource (out: TOutStringProc);
 
    var
-      intr: string;
+      intr, adj_intr: string;
       keyArray: TArray<string>;
       keyCollection: TObjectDictionary<String, t_possible_interrupt_info>.TKeyCollection;
    begin
@@ -172,7 +182,11 @@ procedure t_interrupt_variables.AppendIncludeFileSource (out: TOutStringProc);
                for intr in keyArray do
                   with possible_interrupts[intr] do
                      begin
-                        out ('   ' + intr + '_prio2_interrupt:');
+                        if interrupt_name_with_one_lower_case_letter.IsMatch(intr) then
+                           adj_intr := '_' + intr
+                        else
+                           adj_intr := intr;
+                        out ('   ' + adj_intr + '_prio2_interrupt:');
                         out ('      interrupt priority 2;');
                         out ('         function signaled: boolean;');
                         out ('            begin');
@@ -196,7 +210,7 @@ procedure t_interrupt_variables.AppendIncludeFileSource (out: TOutStringProc);
                         out ('');
                         if priority_bit <> '' then
                            begin
-                              out ('   ' + intr + '_prio1_interrupt:');
+                              out ('   ' + adj_intr + '_prio1_interrupt:');
                               out ('      interrupt priority 1;');
                               out ('         function signaled: boolean;');
                               out ('            begin');
@@ -234,8 +248,7 @@ destructor t_interrupt_variables.Destroy;
    end;
 
 INITIALIZATION
-   usart_transmit_interrupt_regex := TRegEx.Create ('^TX[0-9]*I$');
-   usart_receive_interrupt_regex := TRegEx.Create ('^RC[0-9]*I$');
+   interrupt_name_with_one_lower_case_letter := TRegEx.Create ('^[A-Z0-9]+[a-z][A-Z0-9]+$');
 
 END.
 

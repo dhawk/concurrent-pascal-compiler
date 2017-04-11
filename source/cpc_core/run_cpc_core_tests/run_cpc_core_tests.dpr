@@ -20,11 +20,7 @@ uses
 *)
 
 uses
-{$IFDEF FPC}
-  Interfaces,
-{$ELSE}
   FastMM4,
-{$ENDIF}
   Forms,
   SysUtils,
   Classes,
@@ -89,7 +85,7 @@ BEGIN
          Application.Initialize;
          Application.MainFormOnTaskbar := True;
          Application.CreateForm(TRunCPCCoreTestsAboutBoxForm, RunCPCCoreTestsAboutBoxForm);
-         Application.Run
+  Application.Run
       end
    else
       begin

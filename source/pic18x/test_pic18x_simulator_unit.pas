@@ -347,7 +347,8 @@ constructor TPIC18x_Simulated_CPU.Create;
       f_ram[PCLATU] := TFSR.Create ('PCLATU');
       f_ram[PRODH] := TFSR.Create('PRODH');
       f_ram[PRODL] := TFSR.Create('PRODL');
-      f_ram[RCON] := TFSR.Create('RCON');
+      if pic_info.RCON > 0 then
+         f_ram[pic_info.RCON] := TFSR.Create('RCON');
       f_ram[STATUS] := TFSR.Create('STATUS');
       f_ram[STKPTR] := TFSR.Create('STKPTR');
       f_ram[TABLAT] := TFSR.Create ('TABLAT');

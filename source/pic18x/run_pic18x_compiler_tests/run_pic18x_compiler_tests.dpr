@@ -96,7 +96,7 @@ begin
          Application.Initialize;
          Application.MainFormOnTaskbar := True;
          Application.CreateForm(TPIC18xAboutBoxForm1, PIC18xAboutBoxForm1);
-         Application.Run
+  Application.Run
       end
    else
       begin

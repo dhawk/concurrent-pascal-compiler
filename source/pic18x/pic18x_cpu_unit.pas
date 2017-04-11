@@ -1066,12 +1066,24 @@ procedure TPIC18x_CPU.generate_machine_code (_prog: TProgram);
          output_config_bytes;
 
          // Enable Interrupt Priorities
-         with TPIC18x_BSF.Create (RCON, 7, access_mode) do
-            begin
-               rom_addr := 0;
-               annotation := 'reset vector';
-               instruction_kind := reset_vector_instruction
-            end;
+         case  pic_info.ipen_bit_location of
+            rcon_bit7:
+               with TPIC18x_BSF.Create (pic_info.RCON, 7, access_mode) do
+                  begin
+                     rom_addr := 0;
+                     annotation := 'reset vector';
+                     instruction_kind := reset_vector_instruction
+                  end;
+            intcon_bit5:
+               with TPIC18x_BSF.Create (INTCON, 5, access_mode) do
+                  begin
+                     rom_addr := 0;
+                     annotation := 'reset vector';
+                     instruction_kind := reset_vector_instruction
+                  end;
+         else
+            assert (false, 'unknown IPEN bit location')
+         end;
          reset_vector_goto := TPIC18x_GOTO.Create;
          with reset_vector_goto do
             begin

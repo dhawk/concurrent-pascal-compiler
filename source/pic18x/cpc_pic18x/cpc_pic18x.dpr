@@ -28,7 +28,7 @@ uses
   Classes,
   Forms,
   SysUtils,
-   aboutbox_unit in '..\..\common\aboutbox_unit.pas' {AboutBoxForm},
+  aboutbox_unit in '..\..\common\aboutbox_unit.pas' {AboutBoxForm},
   btypes in '..\..\lib\mparith\btypes.pas',
   cpc_access_unit in '..\..\cpc_core\cpc_access_unit.pas',
   cpc_blocks_unit in '..\..\cpc_core\cpc_blocks_unit.pas',
@@ -96,7 +96,7 @@ begin
          Application.Initialize;
          Application.MainFormOnTaskbar := True;
          Application.CreateForm(TCPCPIC18xAboutBoxForm, CPCPIC18xAboutBoxForm);
-         Application.Run
+  Application.Run
       end
    else
       begin

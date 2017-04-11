@@ -1,6 +1,6 @@
 UNIT combo_type_unit;
 
-INTERFACe
+INTERFACE
 
 uses
   RegularExpressions, Generics.Collections, LibXmlParser;
@@ -79,29 +79,29 @@ type
 
    TComboType =
       class
-      type
-         t_field_name_fixup =
-            class (TFieldNameFixup)
-            protected
-               regex_pattern: string;
-               replacement_format_string: string;
-               function get_regex_pattern: string;
-                  override;
-               procedure set_regex_pattern (pattern: string);
-                  override;
-               function get_replacement_format_string: string;
-                  override;
-               procedure set_replacement_format_string (fmt: string);
-                  override;
-            end;
-      var
-         TypeName: string;
-         VarNameFormatString: string;
-         Reversed: boolean;
-         SFRPatterns: TComboTypeSFRPatternList;
-         FieldNameFixups: TFieldNameFixupList;
-         AddFields: TAddFieldList;
-         typename_defined: boolean;
+         type
+            t_field_name_fixup =
+               class (TFieldNameFixup)
+               protected
+                  regex_pattern: string;
+                  replacement_format_string: string;
+                  function get_regex_pattern: string;
+                     override;
+                  procedure set_regex_pattern (pattern: string);
+                     override;
+                  function get_replacement_format_string: string;
+                     override;
+                  procedure set_replacement_format_string (fmt: string);
+                     override;
+               end;
+         var
+            TypeName: string;
+            VarNameFormatString: string;
+            Reversed: boolean;
+            SFRPatterns: TComboTypeSFRPatternList;
+            FieldNameFixups: TFieldNameFixupList;
+            AddFields: TAddFieldList;
+            typename_defined: boolean;
          constructor Create;
          constructor CreateNew;
          function Size: integer;

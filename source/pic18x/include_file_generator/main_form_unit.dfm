@@ -12,6 +12,7 @@ object MainForm: TMainForm
   Font.Style = []
   Menu = MainMenu1
   OldCreateOrder = False
+  OnCreate = FormCreate
   DesignSize = (
     871
     641)
@@ -23,6 +24,13 @@ object MainForm: TMainForm
     Width = 31
     Height = 13
     Caption = 'Label1'
+  end
+  object Label2: TLabel
+    Left = 552
+    Top = 16
+    Width = 31
+    Height = 13
+    Caption = 'Label2'
   end
   object Memo1: TMemo
     Left = 18
@@ -49,40 +57,13 @@ object MainForm: TMainForm
     TabOrder = 1
     OnClick = Button5Click
   end
-  object Button4: TButton
-    Left = 696
-    Top = 89
-    Width = 75
-    Height = 25
-    Caption = 'run jar.exe'
+  object RunSingleThreadCheckBox: TCheckBox
+    Left = 120
+    Top = 384
+    Width = 105
+    Height = 17
+    Caption = 'Run Single Thread'
     TabOrder = 2
-    OnClick = Button4Click
-  end
-  object Button1: TButton
-    Left = 568
-    Top = 192
-    Width = 75
-    Height = 25
-    Caption = 'load from xml'
-    TabOrder = 3
-    OnClick = Button1Click
-  end
-  object Button2: TButton
-    Left = 464
-    Top = 256
-    Width = 75
-    Height = 25
-    Caption = 'Button2'
-    TabOrder = 4
-  end
-  object Button3: TButton
-    Left = 176
-    Top = 232
-    Width = 75
-    Height = 25
-    Caption = 'Button3'
-    TabOrder = 5
-    OnClick = Button3Click
   end
   object MainMenu1: TMainMenu
     Left = 8
@@ -94,7 +75,7 @@ object MainForm: TMainForm
         OnClick = UnpackPICFilesfromMPLABX1Click
       end
       object ProcessAllPICFilesMenuItem: TMenuItem
-        Caption = 'all PIC Files'
+        Caption = 'all PIC Files -> Include Files'
         OnClick = ProcessAllPICFilesMenuItemClick
       end
       object SyntaxCheckIncludeFilesMenuItem: TMenuItem

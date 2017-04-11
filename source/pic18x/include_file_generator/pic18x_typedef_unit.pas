@@ -9,41 +9,42 @@ uses
 type
    tTypeDef =
       class
+      private const
+         max_variable_size = 20;  // in bytes
+         max_bitno = (max_variable_size*8)-1;
+      private type
+         t_bits_used = set of 0..max_bitno;
+         t_field =
+            class
+               name: string;
+               bits_used: t_bits_used;
+               bitno, f_width: integer;
+               function okay (pr_width: integer): boolean;
+               constructor Create (_name: string; _bitno, _f_width: integer);
+            end;
+         t_overlaid_packed_record =
+            class
+               initial_rank: integer;
+               pr_width: integer;    // in bits
+               fields: TObjectList<t_field>;
+               bits_used: t_bits_used;
+               keep_together: boolean;
+               constructor Create (_initial_rank, _pr_width: integer);
+               procedure add_field (f: t_field);
+               function extract_field (f: t_field): t_field;
+               procedure add_empty_bit_fields;
+               procedure sort_by_bitno;
+               destructor Destroy;
+                  override;
+            end;
+         t_overlaid_packed_record_list = TObjectList<t_overlaid_packed_record>;
+      private var
+         t_width: integer;    // in bits
+         overlaid_packed_records: t_overlaid_packed_record_list;
+         mode_order: TStringList;
+         intX_regex: TRegEx;
+         ipen_loc: TIPENloc;
       private
-         const
-            max_variable_size = 20;  // in bytes
-            max_bitno = (max_variable_size*8)-1;
-         type
-            t_bits_used = set of 0..max_bitno;
-            t_field =
-               class
-                  name: string;
-                  bits_used: t_bits_used;
-                  bitno, f_width: integer;
-                  function okay (pr_width: integer): boolean;
-                  constructor Create (_name: string; _bitno, _f_width: integer);
-               end;
-            t_overlaid_packed_record =
-               class
-                  initial_rank: integer;
-                  pr_width: integer;    // in bits
-                  fields: TObjectList<t_field>;
-                  bits_used: t_bits_used;
-                  keep_together: boolean;
-                  constructor Create (_initial_rank, _pr_width: integer);
-                  procedure add_field (f: t_field);
-                  function extract_field (f: t_field): t_field;
-                  procedure add_empty_bit_fields;
-                  procedure sort_by_bitno;
-                  destructor Destroy;
-                     override;
-               end;
-            t_overlaid_packed_record_list = TObjectList<t_overlaid_packed_record>;
-         var
-            t_width: integer;    // in bits
-            overlaid_packed_records: t_overlaid_packed_record_list;
-            mode_order: TStringList;
-            intX_regex: TRegEx;
          function field_exists (name: string): boolean;
             overload;
          function field_exists (name: string; bitno, width: integer): boolean;
@@ -65,6 +66,7 @@ type
          procedure AddField (mode, name: string; bitno, width: integer);
          procedure AddSFRFields (sfr: TSFRDef; offset: integer);   // offset in bytes
          procedure AppendIncludeFileSource (out: TOutStringProc);
+         function GetFieldInfo (name: string; var bit_no, width: integer): boolean;
          destructor Destroy;
             override;
       end;
@@ -73,6 +75,7 @@ type
       class (TObjectDictionary<string, tTypeDef>)
          constructor Create;
          function GetTypeDef (type_name: string; Size: integer; reversed: boolean): tTypeDef;   // typename should not include initial 't', that will be added when necessary
+         function IPENloc: TIPENloc;
          procedure AppendIncludeFileSource (out: TOutStringProc);
          procedure AppendXMLFile (out: TOutStringProc);
       end;
@@ -80,7 +83,7 @@ type
 IMPLEMENTATION
 
 uses
-   SysUtils, Generics.Defaults;
+   SysUtils, Generics.Defaults, cpc_source_analysis_unit;
 
 //===============
 //  tTypeDef.tField
@@ -196,6 +199,18 @@ procedure tTypeDef.AddField (mode, name: string; bitno, width: integer);
       pr: t_overlaid_packed_record;
       rank, i: integer;
    begin
+      if (typename = 'RCON') and (name = 'IPEN') then                 // reserved for kernel
+         begin
+            ipen_loc := ipen_at_rcon_bit7;
+            exit
+         end;
+
+      if (typename = 'INTCON') and (name = 'IPEN') then               // reserved for kernel
+         begin
+            ipen_loc := ipen_at_intcon_bit5;
+            exit
+         end;
+
       if (name = '-')
          or
          (name = '')
@@ -260,7 +275,7 @@ function tTypeDef.field_exists (name: string; bitno, width: integer): boolean;
       result := true;
       for pr in overlaid_packed_records do
          for f in pr.fields do
-            if (f.name = name)
+            if (UpperCase(f.name) = UpperCase(name))
                and
                (f.bitno = bitno)
                and
@@ -295,11 +310,12 @@ function tTypeDef.search_and_extract (ignore_field: t_field; fieldname: string):
 
 function tTypeDef.field_name_filter (fn: string): string;
    begin
-      // fix field names that conflict with Concurrent Pascal reserved identifiers
-      if intX_regex.IsMatch (fn) then
-         result := fn + '_'
-      else if fn = 'TO' then
-         result := 'TO_'
+      // fix field names that conflict with Concurrent Pascal
+      if is_reserved_word (fn)
+         or
+         intX_regex.IsMatch (fn)
+      then
+         result := '_' + fn
       else
          result := fn
    end;
@@ -352,6 +368,7 @@ procedure tTypeDef.combine_related_single_bit_fields_into_single_mode;
                            bitno := bitno + 1
                         end
                   until fn = nil;
+                  base := field_name_filter(base);
                   if (highest_bitno > 1)
                      and
                      (not field_exists (base))
@@ -388,9 +405,11 @@ procedure tTypeDef.combine_adjacent_HL_pairs;
                         assert ((fH.bitno - fH.f_width = fL.bitno), 'out of place field');
                         prL.add_field (fH);
                         prL.keep_together := true;
-                        if not field_exists (basename, fH.bitno, fH.f_width + fL.f_width) then
+                        if (not field_exists (basename, fH.bitno, fH.f_width + fL.f_width))
+                           and
+                           (not field_exists (basename))
+                        then
                            begin
-                              assert (not field_exists (basename));
                               prCombined := t_overlaid_packed_record.Create (0, t_width);
                               prCombined.add_field (t_field.Create (basename, fH.bitno, fH.f_width + fL.f_width));
                               overlaid_packed_records.Insert (0, prCombined)
@@ -545,6 +564,23 @@ procedure tTypeDef.AppendIncludeFileSource (out: TOutStringProc);
       end
    end;
 
+function tTypeDef.GetFieldInfo (name: string; var bit_no, width: integer): boolean;
+   var
+      pr: t_overlaid_packed_record;
+      f: t_field;
+   begin
+      result := true;
+      for pr in overlaid_packed_records do
+         for f in pr.fields do
+            if f.name = name then
+               begin
+                  bit_no := f.bitno;
+                  width := f.f_width;
+                  exit
+               end;
+      result := false
+   end;
+
 destructor tTypeDef.Destroy;
    begin
       overlaid_packed_records.Free;
@@ -565,6 +601,30 @@ function tTypeDefList.GetTypeDef (type_name: string; size: integer; reversed: bo
       if not ContainsKey (type_name) then
          Add (type_name, tTypeDef.Create (type_name, size*8, reversed));
       result := Self[type_name]
+   end;
+
+function tTypeDefList.IPENloc: TIPENloc;
+   var
+      typename: string;
+      keyArray: TArray<string>;
+      keyCollection: TObjectDictionary<string, tTypeDef>.TKeyCollection;
+   begin
+      result := ipen_loc_unknown;
+      keyCollection := nil;
+      if Count > 0 then
+         try
+            // output alphabetically
+            keyCollection := TObjectDictionary<string, tTypeDef>.TKeyCollection.Create (Self);
+            keyArray := keyCollection.ToArray;
+            for typename in keyArray do
+               if Self[typename].ipen_loc <> ipen_loc_unknown then
+                  begin
+                     result := Self[typename].ipen_loc;
+                     exit
+                  end
+         finally
+            keyCollection.Free
+         end
    end;
 
 procedure tTypeDefList.AppendIncludeFileSource (out: TOutStringProc);
@@ -630,6 +690,5 @@ procedure tTypeDefList.AppendXMLFile (out: TOutStringProc);
          keyCollection.Free
       end
    end;
-
 
 END.
