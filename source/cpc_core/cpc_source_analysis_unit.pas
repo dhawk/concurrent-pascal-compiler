@@ -241,9 +241,37 @@ type
             override;
       end;
 
+type
+   tCompilerFlag =
+      record
+      private
+         history:
+            array of
+               record
+                  src_idx: integer;
+                  event: (cfh_init, cfh_push, cfh_pop, cfh_enter, cfh_exit);
+                  flag: string;        // valid only for cfh_init, cfh_push, cfh_pop
+                  value: boolean;      // valid only for cfh_init and cfh_push,
+                                       // used as a temp in tCompilerFlag.Value for cfh_enter_include_file
+                  n: integer         // if cfh_exit_include_file contains history idx of corresponding cfh_enter_include_file
+                                       // used as a temp in tCompilerFlag.Value for cfh_enter_include_file
+               end;
+         // the following procedures are used within cpc_source_analysis_unit
+         procedure Push (flag: string; value: boolean);
+         procedure Pop (flag: string);
+         function EnterFile: integer;  // returns enter_idx for call to ExitIncludeFile
+         procedure ExitFile (enter_idx: integer);
+         function KnownFlag (flag: string): boolean;
+      public
+         procedure Clear;
+         procedure Init (flag: string; value: boolean);
+         function Value (flag: string; src_loc: TSourceLocation): boolean;
+      end;
+
 var
    lex: TLexicalAnalysis;
    current_dir: string;
+   CompilerFlag: tCompilerFlag;
 
 function non_printable_char (c: char): boolean;
 function reserved_word_to_string (rw: TReservedWordEnum): string;
@@ -257,6 +285,7 @@ function extract_quoted_compiler_directive_parameter (compiler_directive, simpli
 procedure read_in_file (full_path_fn: string; compiler_directives_allowed: boolean; src_location: TSourceLocation);
 procedure add_line_to_source (line: string; file_list_idx, line_no: integer; var in_preamble: boolean);
 function symbol_id (symbol: string): integer;
+
 
 IMPLEMENTATION
 
@@ -546,10 +575,22 @@ procedure append_remaining_source (st: TStrings);
 
 const
    include_directive = '{$include ';
+   push_directive = '{$push ';
+   pop_directive = '{$pop ';
 
 function is_include_directive (line: string): boolean;
    begin
       result := Pos(include_directive, LowerCase(line)) = 1
+   end;
+
+function is_push_directive (line: string): boolean;
+   begin
+      result := Pos(push_directive, LowerCase(line)) = 1
+   end;
+
+function is_pop_directive (line: string): boolean;
+   begin
+      result := Pos(pop_directive, LowerCase(line)) = 1
    end;
 
 function is_compiler_directive (line: string): boolean;
@@ -592,9 +633,76 @@ procedure handle_compiler_directive (source_idx: integer);
    var
       line: string;
       src_location: TSourceLocation;
-   var
       full_path_fn: string;
-   begin
+
+   function get_flag: string;
+      var
+         i: integer;
+      begin
+         result := '';
+         i := src_location.line_idx;
+         while (i <= Length(line))
+               and
+               (line[i] = ' ')
+         do i := i + 1;
+         src_location.line_idx := i;
+         while (i <= Length(line))
+               and
+               (line[i] in ['A'..'Z', 'a'..'z', '0'..'9', '_'])
+         do begin
+               result := result + line[i];
+               i := i + 1
+            end;
+         result := Lowercase(result);
+         if not CompilerFlag.KnownFlag(result) then
+            raise compile_error.Create (err_unknown_compiler_flag, src_location);
+         src_location.line_idx := i
+      end;
+
+   function get_on_or_off: boolean;
+      var
+         i: integer;
+         s: string;
+      begin
+         s := '';
+         i := src_location.line_idx;
+         while (i <= Length(line))
+               and
+               (line[i] = ' ')
+         do i := i + 1;
+         src_location.line_idx := i;
+         while (i <= Length(line))
+               and
+               (line[i] in ['A'..'Z', 'a'..'z', '0'..'9', '_'])
+         do begin
+               s := s + line[i];
+               i := i + 1
+            end;
+         s := Lowercase(s);
+         if s = 'on' then
+            result := true
+         else if s = 'off' then
+            result := false
+         else
+            raise compile_error.Create (err_on_or_off_expected, src_location);
+         src_location.line_idx := i
+      end;
+
+   procedure check_for_garbage;
+      var
+         i: integer;
+      begin
+         i := src_location.line_idx;
+         while (i <= Length(line))
+               and
+               (line[i] = ' ')
+         do i := i + 1;
+         src_location.line_idx := i;
+         if i <= Length(line) then
+            raise compile_error.Create (err_invalid_compiler_directive, src_location)
+      end;
+
+   begin   // handle_compiler_directive
       line := Trim (source[source_idx].line);
       src_location.source_idx := source_idx;
       src_location.line_idx := 1;
@@ -605,7 +713,7 @@ procedure handle_compiler_directive (source_idx: integer);
             src_location.line_idx := Length(line) + 1;
             raise compile_error.Create(err_closing_curly_bracket_required_for_compiler_directive, src_location)
          end;
-      // remove final }
+      // remove final '}'
       SetLength (line, Length(line)-1);
       line := Trim (Line);
 
@@ -625,14 +733,26 @@ procedure handle_compiler_directive (source_idx: integer);
             on ECantOpenFile do
                raise compile_error.Create(format (err_cant_open_include_file, [full_path_fn]), FileErrorSourceLocation);
          end
+      else if is_push_directive (line) then
+         begin
+            src_location.line_idx := Length(push_directive)+1;
+            CompilerFlag.Push (get_flag, get_on_or_off);
+            check_for_garbage
+         end
+      else if is_pop_directive (line) then
+         begin
+            src_location.line_idx := Length(pop_directive)+1;
+            CompilerFlag.Pop (get_flag);
+            check_for_garbage
+         end
       else
          if not target_cpu.process_compiler_directive (line, src_location)
          then
             begin
                src_location.line_idx := 3;
-               raise compile_error.Create ('unknown compiler directive', src_location)
+               raise compile_error.Create (err_unknown_compiler_directive, src_location)
             end
-   end;
+   end;    // handle_compiler_directive
 
 procedure add_line_to_source (line: string; file_list_idx, line_no: integer; var in_preamble: boolean);
    var
@@ -674,13 +794,19 @@ procedure add_line_to_source (line: string; file_list_idx, line_no: integer; var
                end
          end
       else  // not in preamble
-         if is_include_directive(line) then
+      //---
+         if is_compiler_directive(line) then
             begin
                src_location.source_idx := source_idx;
                handle_compiler_directive (source_idx)
             end
-         else if is_compiler_directive(line) then
-            raise compile_error.Create (err_compiler_directives_must_be_at_beginning_of_source, src_location)
+//         if is_include_directive(line) then
+//            begin
+//               src_location.source_idx := source_idx;
+//               handle_compiler_directive (source_idx)
+//            end
+//         else if is_compiler_directive(line) then
+//            raise compile_error.Create (err_compiler_directives_must_be_at_beginning_of_source, src_location)
    end;
 
 procedure read_in_file (full_path_fn: string; compiler_directives_allowed: boolean; src_location: TSourceLocation);
@@ -690,6 +816,7 @@ procedure read_in_file (full_path_fn: string; compiler_directives_allowed: boole
       line_no, file_list_idx, i: integer;
       in_preamble: boolean;
       old_current_dir: string;
+
    procedure mark_file_insertion (s: string);
       var i: integer;
       begin
@@ -706,6 +833,9 @@ procedure read_in_file (full_path_fn: string; compiler_directives_allowed: boole
          line_no := line_no + 1;
          add_line_to_source ('', file_list_idx-1, line_no, in_preamble)
       end;
+
+   var
+      compile_flag_idx: integer;
    begin
       old_current_dir := current_dir;
       current_dir := ExtractFilePath (full_path_fn);
@@ -730,6 +860,7 @@ procedure read_in_file (full_path_fn: string; compiler_directives_allowed: boole
 
       mark_file_insertion (' START FILE INSERTION ' + ExtractFileName(full_path_fn) + ' ');
 
+      compile_flag_idx := CompilerFlag.EnterFile;
       line_no := 1;
       while not eof(f) do
          begin
@@ -737,6 +868,7 @@ procedure read_in_file (full_path_fn: string; compiler_directives_allowed: boole
             line_no := line_no + 1;
             add_line_to_source (line, file_list_idx, line_no, in_preamble)
          end;
+      CompilerFlag.ExitFile (compile_flag_idx);
 
       mark_file_insertion (' END FILE INSERTION ' + ExtractFileName(full_path_fn) + ' ');
 
@@ -744,16 +876,17 @@ procedure read_in_file (full_path_fn: string; compiler_directives_allowed: boole
       current_dir := old_current_dir
    end;
 
-function source_token
-   (loc: TSourceLocation
-   ): string;
+function TTokenType.in_preamble: boolean;
+   begin
+      result := src_loc.source_idx < first_non_preamble_source_idx
+   end;
+
+function source_token (loc: TSourceLocation): string;
    begin
       result := Copy (source[loc.source_idx].line, loc.line_idx, loc.length)
    end;
 
-procedure read_in_source_for_test_case
-   (s: string
-   );
+procedure read_in_source_for_test_case (s: string);
    overload;
    var
       in_preamble: boolean;
@@ -764,9 +897,7 @@ procedure read_in_source_for_test_case
       add_line_to_source (s, 0, 0, in_preamble)
    end;
 
-procedure read_in_source_for_test_case
-   (lines: TStrings
-   );
+procedure read_in_source_for_test_case (lines: TStrings);
    overload;
    var
       i: integer;
@@ -780,9 +911,7 @@ procedure read_in_source_for_test_case
          add_line_to_source (lines[i], 0, i+1, in_preamble)
    end;
 
-function reserved_word_to_string
-   (rw: TReservedWordEnum
-   ): string;
+function reserved_word_to_string (rw: TReservedWordEnum): string;
    begin
       case rw of
          rw_abs:
@@ -1007,11 +1136,6 @@ procedure TLexicalAnalysis.ReadInTestCase (lines: TStrings);
       current_dir := IncludeTrailingPathDelimiter(GetCurrentDir);
       first_non_preamble_source_idx := Length(source);
       read_in_source_for_test_case (lines)
-   end;
-
-function TTokenType.in_preamble: boolean;
-   begin
-      result := src_loc.source_idx < first_non_preamble_source_idx
    end;
 
 procedure TLexicalAnalysis.LoadCPUBasicDataTypeIdentifiers;
@@ -1301,11 +1425,6 @@ procedure TLexicalAnalysis.DoLexicalAnalysis;
             end
          else
             expsign := false;
-         // if exponent > maxexponent then
-         // begin
-         // error(numbererror);
-         // exponent := 0
-         // end;
          for i := 1 to exponent do
             poweroften := poweroften * 10;
          { NOW EITHER MANTISSA=0.0 OR MANTISSA>=1.0 }
@@ -1314,13 +1433,7 @@ procedure TLexicalAnalysis.DoLexicalAnalysis;
          else if expsign then
             real_constant := mantissa / poweroften
          else // IF MANTISSA>=1.0 THEN WE MUST HAVE: MANTISSA*POWEROFTEM<=MAXREAL=> POWEROFTEN<=MAXREAL/MANTISSA<=MAXREAL
-         // if poweroften < maxreal / mantissa then
             real_constant := mantissa * poweroften;
-         // else
-         // begin
-         // error(numbererror);
-         // real_constant := real0
-         // end;
          put_real_constant(real_constant);
       end;
 
@@ -1557,9 +1670,6 @@ function TLexicalAnalysis.token_string (first_src_loc, last_src_loc: TSourceLoca
                and
                (a.length = b.length)
       end;
-   procedure add_whitespace;
-      begin
-      end;
    var
       i: integer;
       in_range: boolean;
@@ -1583,6 +1693,144 @@ function TLexicalAnalysis.token_string (first_src_loc, last_src_loc: TSourceLoca
                end;
             if eq (tokens[i].src_loc, last_src_loc) then
                in_range := false
+         end
+   end;
+
+
+//================
+//  tCompilerFlag
+//================
+
+//-----------------------------------------------------------------------
+// Usage of fields in history array
+//
+//             | cfh_init | cfh_push | cfh_pop | cfh_enter | cfh_exit
+//    ---------+----------+----------+---------+-----------+----------
+//     src_idx |    P     |     P    |    P    |     P     |    P
+//     event   |    P     |     P    |    P    |     P     |    P
+//     flag    |    P     |     P    |    P    |     -     |    -
+//     value   |    P     |     P    |    -    |    T[1]   |    -
+//     n       |    -     |     -    |    -    |    T[2]   |   P[3]
+//
+//     P - permanent
+//     T - temporary use during call to tCompilerFlag.Value
+//     T[1] - value before entering include file (restore on exit)
+//     T[2] - stack size before entering include file (cut back on exit)
+//     P[3] - idx in history of corresponding enter include file
+//-----------------------------------------------------------------------
+
+procedure tCompilerFlag.Clear;
+   begin
+      SetLength (history, 0)
+   end;
+
+procedure tCompilerFlag.Init (flag: string; value: boolean);
+   var i: integer;
+   begin
+      i := Length(history);
+      SetLength (history, i+1);
+      history[i].src_idx := -1;  // before any possible real src_loc
+      history[i].event := cfh_init;
+      history[i].flag := Lowercase(flag);
+      history[i].value := value
+   end;
+
+procedure tCompilerFlag.Push (flag: string; value: boolean);
+   var i: integer;
+   begin
+      i := Length(history);
+      SetLength (history, i+1);
+      history[i].src_idx := Length(source)-1;
+      history[i].event := cfh_push;
+      history[i].flag := Lowercase(flag);
+      history[i].value := value
+   end;
+
+procedure tCompilerFlag.Pop (flag: string);
+   var i: integer;
+   begin
+      i := Length(history);
+      SetLength (history, i+1);
+      history[i].src_idx := Length(source)-1;
+      history[i].event := cfh_pop;
+      history[i].flag := Lowercase(flag)
+   end;
+
+function tCompilerFlag.EnterFile: integer;  // returns enter_idx
+   var i: integer;
+   begin
+      i := Length(history);
+      SetLength (history, i+1);
+      history[i].src_idx := Length(source)-1;
+      history[i].event := cfh_enter;
+      result := i
+   end;
+
+procedure tCompilerFlag.ExitFile (enter_idx: integer);
+   var i: integer;
+   begin
+      i := Length(history);
+      SetLength (history, i+1);
+      history[i].src_idx := Length(source)-1;
+      history[i].event := cfh_exit;
+      history[i].n := enter_idx
+   end;
+
+function tCompilerFlag.KnownFlag (flag: string): boolean;
+   var i: integer;
+   begin
+      result := true;
+      for i := 0 to Length(history)-1 do
+         if (history[i].event = cfh_init)
+            and
+            (history[i].flag = flag)
+         then
+            exit;
+      result := false
+   end;
+
+function tCompilerFlag.Value (flag: string; src_loc: TSourceLocation): boolean;
+   var
+      i,s: integer;
+      stack: array of boolean;
+   begin
+      value := false;  // to suppress compiler warning
+      for i := 0 to Length(history)-1 do
+         begin
+            if history[i].src_idx > src_loc.source_idx then
+               exit;
+            case history[i].event of
+               cfh_init:
+                  if history[i].flag = flag then
+                     result := history[i].value;
+               cfh_push:
+                  if history[i].flag = flag then
+                     begin
+                        s := Length(stack);
+                        SetLength(stack, s+1);
+                        stack[s] := result;
+                        result := history[i].value
+                     end;
+               cfh_pop:
+                  if history[i].flag = flag then
+                     begin
+                        s := Length(stack);
+                        result := stack[s-1];
+                        SetLength(stack, s-1)
+                     end;
+               cfh_enter:
+                  begin
+                     history[i].value := result;
+                     history[i].n := Length(stack)
+                  end;
+               cfh_exit:
+                  begin
+                     result := history[history[i].n].value;
+                     SetLength(stack, history[history[i].n].n)
+                  end;
+            else
+               assert (false)
+            end
          end
    end;
 

@@ -44,6 +44,8 @@ type
             virtual;
          procedure release_preamble;
             virtual;
+         procedure init_compiler_directive_flags;
+            virtual;
 
          procedure add_successful_compilation_info (results_listing: TStrings);
             virtual; abstract;
@@ -137,6 +139,10 @@ procedure TTargetCPUBaseClass.process_preamble;
    end;
 
 procedure TTargetCPUBaseClass.release_preamble;
+   begin
+   end;
+
+procedure TTargetCPUBaseClass.init_compiler_directive_flags;
    begin
    end;
 

@@ -8,7 +8,7 @@ INTERFACE
 
 uses
    cpc_blocks_unit,
-   cpc_definitions_unit;
+   cpc_definitions_unit, Classes;
 
 type
    TTestGenerator = function: TDefinition;
@@ -31,10 +31,18 @@ procedure test_only_for_successful_compilation
     generator: TTestGenerator
    );
    overload;
+procedure test_only_for_successful_compilation (src: TStringList);
+   overload;
 procedure test_compile_error_generation
    (src: string;
     expected_error_message, expected_error_message_location: string
    );  // generator is TProgram
+   overload;
+procedure test_compile_error_generation
+   (src: TStringList;
+    expected_error_message, expected_error_message_location: string
+   );  // generator is TProgram
+   overload;
 procedure record_bad_test_result;
 procedure display (s: string);
 function ProgramGenerator: TDefinition;
@@ -45,7 +53,6 @@ uses
 {$IFNDEF CONSOLE_TEST_MODE}
    main_form_unit,
 {$ENDIF}
-   classes,
    cpc_common_unit,
    cpc_core_objects_unit,
    cpc_main_compiler_unit,
@@ -259,6 +266,27 @@ procedure test_only_for_successful_compilation (src: string);
       st.Free
    end;
 
+procedure test_only_for_successful_compilation (src: TStringList);
+   var
+     compilation: TCompilation;
+     st: TStringList;
+     i: integer;
+   begin
+      st := TStringList.Create;
+      total_tests_run := total_tests_run + 1;
+
+      compilation := TCompilation.CreateFromStrings (src, ProgramGenerator, st);
+      if compilation.compilation_result <> compiled_ok then
+         begin
+            record_bad_test_result;
+            display ('unexpected compilation error in: ' + src.Text);
+            for i := 0 to st.Count-1 do
+               display (st[i])
+         end;
+      compilation.Free;
+      st.Free
+   end;
+
 procedure test_only_for_successful_compilation
    (src: string;
     generator: TTestGenerator
@@ -314,6 +342,43 @@ procedure test_compile_error_generation
                   record_bad_test_result;
                   display (src + ': wrong source location');
                   display (caret (Pos (expected_error_message_location, src)) + ' desired error location');
+                  display (compilation.compiler_error_source_location.caret + ' reported error location')
+               end
+         end;
+      compilation.Free;
+      st.Free
+   end;
+
+procedure test_compile_error_generation
+   (src: TStringList;
+    expected_error_message, expected_error_message_location: string
+   );  // generator is TProgram
+  var
+     compilation: TCompilation;
+     st: TStringList;
+   begin
+      st := TStringList.Create;
+      total_tests_run := total_tests_run + 1;
+
+      compilation := TCompilation.CreateFromStrings (src, ProgramGenerator, st);
+      if compilation.compilation_result <> compile_error_in_source then
+         begin
+            record_bad_test_result;
+            display (src.Text + ': failed to generate compile error: ' + expected_error_message)
+         end
+      else
+         begin
+            if compilation.compiler_error_message <> expected_error_message then
+               begin
+                  record_bad_test_result;
+                  display (src.Text + ': FAILED, expected error message was: ' + expected_error_message);
+                  display (caret (compilation.compiler_error_source_location.line_idx) + ' actual message was: ' + compilation.compiler_error_message)
+               end
+            else if Pos (expected_error_message_location, compilation.compiler_error_source_location.line) <> compilation.compiler_error_source_location.line_idx then
+               begin
+                  record_bad_test_result;
+                  display (src.Text + ': wrong source location');
+                  display (caret (Pos (expected_error_message_location, compilation.compiler_error_source_location.line)) + ' desired error location');
                   display (compilation.compiler_error_source_location.caret + ' reported error location')
                end
          end;

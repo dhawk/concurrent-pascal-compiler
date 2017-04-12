@@ -52,6 +52,7 @@ procedure TCompilation.run_compiler (ReadinSource: TProc; Generator: TDefinition
       ResultsListing.Add (target_cpu.processor_name + ' Concurrent Pascal Compiler');
       ResultsListing.Add ('');
       try
+         target_cpu.init_compiler_directive_flags;
          lex := TLexicalAnalysis.Create;
          lex.LoadCPUBasicDataTypeIdentifiers;
          lex.ReadInPreamble (target_cpu.Preamble);
@@ -61,6 +62,7 @@ procedure TCompilation.run_compiler (ReadinSource: TProc; Generator: TDefinition
 
             CurrentDefinitionTable := TCurrentDefinitionTable.Create;
             CurrentDefinitionTable.DefineCPUBasicDataTypesForCurrentScope;
+
 
             compiled_object := Generator;
             compilation_result := compiled_ok;

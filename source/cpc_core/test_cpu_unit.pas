@@ -29,6 +29,8 @@ type
 
          function process_compiler_directive (simplified_line: string; src_location: TSourceLocation): boolean;
             override;
+         procedure init_compiler_directive_flags;
+            override;
 
          procedure add_successful_compilation_info (results_listing: TStrings);
             override;
@@ -139,6 +141,12 @@ function TTestCPU.process_compiler_directive (simplified_line: string; src_locat
          end
       else
          result := false
+   end;
+
+procedure TTestCPU.init_compiler_directive_flags;
+   begin
+      CompilerFlag.Init ('TeSt_FlAg_1', true);
+      CompilerFlag.Init ('tEsT_fLaG_2', false)
    end;
 
 procedure TTestCPU.add_successful_compilation_info (results_listing: TStrings);

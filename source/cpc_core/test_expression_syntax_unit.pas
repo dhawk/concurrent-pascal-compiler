@@ -26,7 +26,7 @@ uses
    Math,
    SysUtils,
    test_cpu_unit,
-   test_subroutines_unit;
+   test_subroutines_unit, Classes;
 
 function approximately_equal 
    (r1,r2: real
@@ -1653,6 +1653,50 @@ procedure test_TTerm;
       display ('')
    end;
 
+procedure test_compiler_flags;
+   procedure test_correct_directives;
+      var
+         src: TStringList;
+      begin
+         src := TStringList.Create;
+         src.Add ('begin');
+         src.Add ('{$push test_flag_1 on}');     // test normal
+         src.Add ('{$push test_flag_1 off}');
+         src.Add ('{$pop test_flag_1}');
+         src.Add ('{$Push Test_flag_1 On}');     // test case insensitivity
+         src.Add ('{$Push Test_flag_1 Off}');
+         src.Add ('{$Pop Test_flag_1}');
+         src.Add ('{$push   test_flag_2   on  }'); // test extra spaces ignored
+         src.Add ('{$pop  test_flag_1  }');
+         src.Add ('end.');
+         test_only_for_successful_compilation (src);
+         src.Free
+      end;
+   procedure test_bad_directive (bad_directive, expected_error_message, error_location: string);
+      var
+         src: TStringList;
+      begin
+         src := TStringList.Create;
+         src.Add ('begin');
+         src.Add (bad_directive);
+         src.Add ('end.');
+         test_compile_error_generation (src, expected_error_message, error_location);
+         src.Free
+      end;
+   begin
+      display ('======================');
+      display ('TESTING Compiler Flags');
+      display ('======================');
+      test_correct_directives;
+      test_bad_directive ('{$garbage}', err_unknown_compiler_directive, 'garbage');
+      test_bad_directive ('{$push garbage on}', err_unknown_compiler_flag, 'garbage');
+      test_bad_directive ('{$push test_flag_2 garbage}', err_on_or_off_expected, 'garbage');
+      test_bad_directive ('{$push test_flag_2 on garbage}', err_invalid_compiler_directive, 'garbage');
+      test_bad_directive ('{$pop garbage}', err_unknown_compiler_flag, 'garbage');
+      test_bad_directive ('{$pop test_flag_2 garbage}', err_invalid_compiler_directive, 'garbage');
+      display ('');
+   end;
+
 procedure test_lex_analysis;
    begin
       display ('=====================');
@@ -1674,7 +1718,8 @@ procedure test_lex_analysis;
       test_compile_error_generation ('begin ''xxx', err_string_constant_multi_line, '''xxx');
       test_compile_error_generation ('begin 1e', err_improper_real_const, '1e');
       test_compile_error_generation ('begin _ end', err_invalid_identifier, '_');
-      display ('')
+      display ('');
+      test_compiler_flags
    end;
 
 procedure test_TFactor;

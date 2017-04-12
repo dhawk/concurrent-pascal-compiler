@@ -136,6 +136,7 @@ const
    err_invalid_address = 'invalid address';
    err_invalid_anonymous_type_for_overlay = 'invalid anonymous type for overlay';
    err_invalid_char = 'invalid character';
+   err_invalid_compiler_directive = 'invalid compiler directive';
    err_invalid_enumeration_definition = 'invalid enumeration definition';
    err_invalid_exponent = 'invalid exponent';
    err_invalid_identifier = 'invalid identifier';
@@ -176,6 +177,7 @@ const
    err_numeric_constant_expected = 'err_numeric_constant_expected';
    err_numeric_expression_expected = 'numeric expression expected';
    err_of_expected = '"of" expected';
+   err_on_or_off_expected = '"on" or "off" expected';
    err_only_ioregister_types_allowed_in_ioreg_section = 'only ioregister types allowed in ioreg section';
    err_only_one_routine_allowed_in_interrupt_definition = 'only one routine (signaled) is allowed in interrupt definition';
    err_only_single_char_allowed = 'only single char allowed';
@@ -235,6 +237,7 @@ const
    err_recycle_only_allowed_inside_cycle = 'recycle only allowed inside cycle';
    err_reloop_only_allowed_inside_loop = '"reloop" only allowed inside loop';
    err_while_only_allowed_inside_loop = '"while" only allowed inside loop';
+   err_unknown_compiler_flag = 'unknown compiler flag';
    err_until_only_allowed_inside_loop = '"until" only allowed inside loop';
    err_repeat_expected = '"repeat" expected';
    err_result_will_be_out_of_range = 'result will be out of range';
@@ -303,6 +306,7 @@ const
    err_type_not_modifiable = 'type not modifiable';
    err_unary_operator_not_allowed_for_this_operand_type = 'unary operator not allowed for operand type to right';
    err_undefined_identifier = 'undefined identifier';
+   err_unknown_compiler_directive = 'unknown compiler directive';
    err_until_expected = '"until" expected';
    err_value_outside_legal_range = 'value outside legal range';
    err_var_parameters_not_allowed_here = 'var parameters not allowed here';
