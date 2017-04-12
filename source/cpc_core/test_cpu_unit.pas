@@ -79,6 +79,15 @@ type
          procedure set_mod_operator_implementation (impl: Tmod_operator_implementation);
       end;
 
+var
+   marked_src_locations:    // used for compiler flag tests
+      array of
+         record
+            mark: integer;
+            src_loc: TSourceLocation
+         end;
+
+
 IMPLEMENTATION
 
 uses
@@ -127,16 +136,40 @@ constructor TTestCPU.Create;
 
 function TTestCPU.process_compiler_directive (simplified_line: string; src_location: TSourceLocation): boolean;
    const
-      compiler_directive = '{$stmt';
+      stmt_directive = '{$stmt';
+      mark_directive = '{$mark';
+      allowed = ['A'..'Z', 'a'..'z', '_', '0'..'9'];
    var
       stmt: string;
       in_preamble: boolean;
+      mark: integer;
+      i: integer;
    begin
-      if Pos (compiler_directive, simplified_line) = 1 then
+      if Pos (stmt_directive, simplified_line) = 1 then
          begin
-            stmt := extract_quoted_compiler_directive_parameter (compiler_directive, simplified_line, 'stmt', src_location);
+            stmt := extract_quoted_compiler_directive_parameter (stmt_directive, simplified_line, 'stmt', src_location);
             in_preamble := true;
             add_line_to_source (stmt, 0, 0, in_preamble);
+            result := true
+         end
+      else if Pos (mark_directive, simplified_line) = 1 then
+         begin   // skip bounds checks - assume test code has right syntax...
+            i := Length(mark_directive)+1;
+            while simplified_line[i] = ' ' do
+               i := i + 1;
+            mark := 0;
+            while (i <= Length(simplified_line))
+                  and
+                  (simplified_line[i] in ['0'..'9'])
+            do begin
+                  mark := (mark*10) + ord(simplified_line[i]) - ord('0');
+                  i := i + 1
+               end;
+            assert (mark > 0);
+            i := Length(marked_src_locations);
+            SetLength(marked_src_locations, i+1);
+            marked_src_locations[i].mark := mark;
+            marked_src_locations[i].src_loc := src_location;
             result := true
          end
       else

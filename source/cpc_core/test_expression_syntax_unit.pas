@@ -26,7 +26,7 @@ uses
    Math,
    SysUtils,
    test_cpu_unit,
-   test_subroutines_unit, Classes;
+   test_subroutines_unit, Classes, cpc_source_analysis_unit;
 
 function approximately_equal 
    (r1,r2: real
@@ -1654,6 +1654,24 @@ procedure test_TTerm;
    end;
 
 procedure test_compiler_flags;
+   procedure test_flag (mark: integer; flag: string; value: boolean);
+      var
+         i: integer;
+         src_loc: TSourceLocation;
+         cval: string;
+      begin
+         src_loc := NonExistantSourceLocation;
+         for i := 0 to Length(marked_src_locations)-1 do
+            if marked_src_locations[i].mark = mark then
+               src_loc := marked_src_locations[i].src_loc;
+         assert (src_loc.source_idx <> NonExistantSourceLocation.source_idx);
+         if CompilerFlag.Value (flag, src_loc) <> value then
+            begin
+               record_bad_test_result;
+               if value then cval := 't' else cval := 'f';
+               display (format ('wrong compiler flag result: mark=%d flag=%s expected_value=%s', [mark, flag, cval]))
+            end
+      end;
    procedure test_correct_directives;
       var
          src: TStringList;
@@ -1683,6 +1701,58 @@ procedure test_compiler_flags;
          test_compile_error_generation (src, expected_error_message, error_location);
          src.Free
       end;
+   procedure test_push_pop;
+      var
+         src: TStringList;
+      begin
+         src := TStringList.Create;
+         SetLength (marked_src_locations, 0);
+         src.Add ('begin');
+         src.Add ('{$mark 1}');
+         src.Add ('{$push test_flag_1 off}');
+         src.Add ('{$mark 2}');
+         src.Add ('{$push test_flag_1 on}');
+         src.Add ('{$mark 3}');
+         src.Add ('{$push test_flag_2 on}');
+         src.Add ('{$mark 4}');
+         src.Add ('{$pop test_flag_1}');
+         src.Add ('{$mark 5}');
+         src.Add ('end.');
+         test_only_for_successful_compilation (src);
+         src.Free;
+         test_flag (1, 'test_flag_1', true);
+         test_flag (1, 'test_flag_2', false);
+         test_flag (2, 'test_flag_1', false);
+         test_flag (2, 'test_flag_2', false);
+         test_flag (3, 'test_flag_1', true);
+         test_flag (3, 'test_flag_2', false);
+         test_flag (4, 'test_flag_1', true);
+         test_flag (4, 'test_flag_2', true);
+         test_flag (5, 'test_flag_1', false);
+         test_flag (5, 'test_flag_2', true);
+      end;
+   procedure test_include_behavior;
+      var
+         src: TStringList;
+      begin
+         src := TStringList.Create;
+         SetLength (marked_src_locations, 0);
+         src.Add ('begin');
+         src.Add ('{$mark 1}');
+         src.Add ('{$include ''pic18x\compiler_test_cases\test_flag.inc''}');
+         src.Add ('{$mark 4}');
+         src.Add ('end.');
+         test_only_for_successful_compilation (src);
+         src.Free;
+         test_flag (1, 'test_flag_1', true);
+         test_flag (1, 'test_flag_2', false);
+         test_flag (2, 'test_flag_1', true);
+         test_flag (2, 'test_flag_2', false);
+         test_flag (3, 'test_flag_1', false);
+         test_flag (3, 'test_flag_2', false);
+         test_flag (4, 'test_flag_1', true);
+         test_flag (4, 'test_flag_2', false);
+      end;
    begin
       display ('======================');
       display ('TESTING Compiler Flags');
@@ -1694,6 +1764,8 @@ procedure test_compiler_flags;
       test_bad_directive ('{$push test_flag_2 on garbage}', err_invalid_compiler_directive, 'garbage');
       test_bad_directive ('{$pop garbage}', err_unknown_compiler_flag, 'garbage');
       test_bad_directive ('{$pop test_flag_2 garbage}', err_invalid_compiler_directive, 'garbage');
+      test_push_pop;
+      test_include_behavior;
       display ('');
    end;
 

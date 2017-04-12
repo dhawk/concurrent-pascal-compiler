@@ -51,6 +51,7 @@ procedure TCompilation.run_compiler (ReadinSource: TProc; Generator: TDefinition
    begin
       ResultsListing.Add (target_cpu.processor_name + ' Concurrent Pascal Compiler');
       ResultsListing.Add ('');
+      CompilerFlag.Clear;
       try
          target_cpu.init_compiler_directive_flags;
          lex := TLexicalAnalysis.Create;

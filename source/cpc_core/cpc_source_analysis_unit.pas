@@ -14,9 +14,7 @@ uses
 type
    TSourceLocation =
       record
-      private
          source_idx: integer; // index into source array where token was found (0..Length(source)-1)
-      public
          line_idx: integer; // position in line of token (1..Length(line))
          length: integer; // length of token
          function same_location (loc: TSourceLocation): boolean;
@@ -836,7 +834,7 @@ procedure read_in_file (full_path_fn: string; compiler_directives_allowed: boole
 
    var
       compile_flag_idx: integer;
-   begin
+   begin   // read_in_file
       old_current_dir := current_dir;
       current_dir := ExtractFilePath (full_path_fn);
 
@@ -859,7 +857,6 @@ procedure read_in_file (full_path_fn: string; compiler_directives_allowed: boole
          raise ECantOpenFile.Create('');
 
       mark_file_insertion (' START FILE INSERTION ' + ExtractFileName(full_path_fn) + ' ');
-
       compile_flag_idx := CompilerFlag.EnterFile;
       line_no := 1;
       while not eof(f) do
@@ -868,13 +865,12 @@ procedure read_in_file (full_path_fn: string; compiler_directives_allowed: boole
             line_no := line_no + 1;
             add_line_to_source (line, file_list_idx, line_no, in_preamble)
          end;
-      CompilerFlag.ExitFile (compile_flag_idx);
-
       mark_file_insertion (' END FILE INSERTION ' + ExtractFileName(full_path_fn) + ' ');
+      CompilerFlag.ExitFile (compile_flag_idx);
 
       CloseFile(f);
       current_dir := old_current_dir
-   end;
+   end;    // read_in_file
 
 function TTokenType.in_preamble: boolean;
    begin
@@ -1793,16 +1789,24 @@ function tCompilerFlag.Value (flag: string; src_loc: TSourceLocation): boolean;
    var
       i,s: integer;
       stack: array of boolean;
+      defined_flag: boolean;
    begin
       value := false;  // to suppress compiler warning
+      defined_flag := false;
       for i := 0 to Length(history)-1 do
          begin
             if history[i].src_idx > src_loc.source_idx then
-               exit;
+               begin
+                  assert (defined_flag);
+                  exit
+               end;
             case history[i].event of
                cfh_init:
                   if history[i].flag = flag then
-                     result := history[i].value;
+                     begin
+                        result := history[i].value;
+                        defined_flag := true
+                     end;
                cfh_push:
                   if history[i].flag = flag then
                      begin
@@ -1831,7 +1835,8 @@ function tCompilerFlag.Value (flag: string; src_loc: TSourceLocation): boolean;
             else
                assert (false)
             end
-         end
+         end;
+      assert (defined_flag)
    end;
 
 
