@@ -1788,9 +1788,21 @@ procedure test_compiler_flags;
          test_compile_error_generation (src, err_stack_underflow, 'pop  test_flag_1');
          src.Free
       end;
+   procedure test_underflow_after_include;
+      var
+         src: TStringList;
+      begin
+         src := TStringList.Create;
+         src.Add ('begin');
+         src.Add ('{$include ''pic18x\compiler_test_cases\test_flag_1.inc''}');
+         src.Add ('{$pop test_flag_1}');
+         src.Add ('end.');
+         test_compile_error_generation (src, err_stack_underflow, 'pop test_flag_1');
+         src.Free
+      end;
    begin  // test_compiler_flags
       display ('======================');
-      display ('TESTING Compiler Flags');
+      display ('Testing compiler flags');
       display ('======================');
       test_correct_directives;
       test_bad_directive ('{$garbage}', err_unknown_compiler_directive, 'garbage');
@@ -1803,6 +1815,7 @@ procedure test_compiler_flags;
       test_include_behavior;
       test_underflow_in_main;
       test_underflow_in_include;
+      test_underflow_after_include;
       display ('');
    end;   // test_compiler_flags
 
