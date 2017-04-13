@@ -18,7 +18,7 @@ Later versions of Delphi may also be used for development however no feature int
 
 The reason for developing with Delphi 2007 is the exponentially soaring cost of Embarcadero Delphi licenses.  Many people still have older Delphi licenses that could be used for compiler development and we want to minimize barriers for potential assistance from the open source community.  Presently Embarcadero is offering their Delphi Starter Edition for free on their website.  It is perfectly adequate for development of the compiler but it is unknown how long it will continue to be free.  We note that Turbo Delphi (a feature reduced version of Delphi 2006) was also free but it was withdrawn after a few years.  
 
-The compiler makes use of features introduced in Delphi 2006 so earlier versions of Delphi cannot be used.  In theory Delphi 2006/Turbo Delphi should be usable (indeed much of the early work on the compiler was done with Turbo Delphi), however there was an elusive bug that intermittently caused problems and attempts to work around it were unsuccessful.  This bug was not fixed until Delphi 2007 and no patch was ever released for the 2006 versions (thank you very much).
+The compiler makes use of features introduced in Delphi 2006 so earlier versions of Delphi cannot be used.  In theory Delphi 2006/Turbo Delphi should be usable (indeed much of the early work on the compiler was done with Turbo Delphi), however there was an elusive compiler bug that intermittently caused problems and attempts to work around it were unsuccessful.  This bug was not fixed until Delphi 2007 and no patch was ever released for the 2006 versions.
 
 ## .dproj and .dpr modifications
 

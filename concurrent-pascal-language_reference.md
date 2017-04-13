@@ -5,7 +5,10 @@ title: Concurrent Pascal Language Reference
 
 <h1><center>{{title}}</center></h1>
 
-It is assumed that the reader is already familiar with traditional Pascal, therefore explanations of Concurrent Pascal fundamentals are omitted in favor of simple examples where Concurrent Pascal and traditional Pascal are similar.  Extensive explanations will only appear where Concurrent Pascal differs from traditional Pascal.
+<h2><i>This reference is still being written and is missing major sections.</i></h2>
+
+
+It is assumed that the reader is already familiar with traditional Pascal, therefore explanations of Concurrent Pascal fundamentals are omitted in favor of simple examples where Concurrent Pascal and traditional Pascal are similar.  Explanations will only appear where Concurrent Pascal differs from traditional Pascal.
 
 The compiler was designed to support multiple microprocessor architectures by developing separate code generators for each. At the moment the only implementation is for MicroChip's PIC18x microcontrollers, however other microcontroller architectures may be developed in the future. This language reference is intended to describe the language in general without proscribing details of a specific implementation.    Implementations for other microcontrollers may or may not support all the features described here and may provide additional features specific to that microcontroller.  Each implementation should have a User Guide that describes specifics.
 
@@ -45,7 +48,7 @@ const
    d = 1.2;         // real numbers
    e = -3.4e7;
    f = 'c';         // a single char
-   lf = chr(10);    // a linefeed char
+   lf = #10;        // a linefeed char
    g = 'a string';  // a string
 ~~~
 
@@ -55,9 +58,9 @@ The compiler does extensive constant expression evaluation.  Whenever possible t
 
 ~~~
 const
-   h = (a+1)*(3*7);   // an integer constant expression
-   i = d-(1.2/3.7);   // a real constant expression
-   j = g + 'def';     // a string constant expression
+   h = (a+1)*(3*7);      // an integer constant expression
+   i = d-(1.2/3.7);      // a real constant expression
+   j = g + ' appended';  // a string constant expression
 ~~~
 
 `+` *can be used in string constant expressions, however* `strappend` *is used for string variables*
@@ -156,6 +159,12 @@ type
 
 This is similar to a variant record in traditional Pascal or a union in C.  All variants within the overlay occupy the same memory space and the size of an overlay variable is determined by the size of the largest variant.  Writing to one of the variants overwrites all the other variants.  Overlays are usually used for unchecked type conversions but may also be useful to reduce memory usage.
 
+# Structured Constants
+
+## ROM constants
+
+# System Component Types
+
 ## Class Types
 
 ~~~
@@ -217,9 +226,6 @@ type
 
 ## Process Types
  
-# Structured Constants
-
-## ROM constants
 
  
 
@@ -239,7 +245,43 @@ The first run-time error to occur sets ErrorCode, subsequent run-time errors do 
 
 Setting ErrorCode does not abort anything - the program continues running.  The idea is to allow the program to limp on long enough to somehow transmit the ErrorCode back to the programmer so that the underlying bug can be fixed before the code is released.  Ideally ErrorCode will never be set in released code.
 
-The ErrorCode variable may be directly read by Concurrent Pascal code for reporting, perhaps via a communications link or displayed in LEDs.  
+The ErrorCode variable may be directly read by Concurrent Pascal code for reporting, perhaps via a communications link or displayed in LEDs. 
+
+# Compiler Directives
+
+## Include Files
+
+~~~
+{$INCLUDE 'include_file_name.inc'}
+~~~
+
+## Compiler Flags
+
+Your compiler may define a set of compiler flags for controlling aspects of code generation.  For example a RANGE_CHECK flag would control whether or not range checking code is emitted.  Compiler flags may be **ON** or **OFF**.  Documentation for your compiler will provide a list of implemented compiler flags and the purpose of each.
+
+The initial value of the flags at the beginning of the program might be set by the build environment.  For example the flags may initially be turned on when compiled for debug and turned off for release.  Consult the documentation for your compiler for details.
+
+The programmer may specify flag settings for specific sections of the program by adding push and pop directives to the source.  The push directive pushes the current value of a flag onto a stack and then turns it on or off.  The pop directive restores the previous value of the flag.
+
+~~~
+{$PUSH RANGE_CHECK ON}
+// code in this section will have range checking on
+{$POP RANGE_CHECK}
+~~~
+ 
+The value of flags carry into include files.  If a flag is **ON** before an include directive, the flag will be **ON** at the beginning of the include file.  Include files may also contain their own push and pop directives.
+
+The value of a flag after an include directive is the same as it was before the include directive no matter what changes to the flag were made by the include file.  For example, if a flag is **ON** before the include directive, and the include file turns the flag **OFF**, the flag will revert to **ON** immediately after the include directive: 
+
+~~~
+// RANGE_CHECK is ON
+{$include 'include_file_that_turns_RANGE_CHECK_off.inc'}
+// RANGE CHECK reverts to ON here
+~~~
+
+Each source or include file has its own flag stacks.  The compiler automatically empties each flag stack at the end of the file by popping all un-popped flags pushed within that file.  Therefore the compiler does not require that each push flag directive be matched with a subsequent pop within that same file.
+
+Flag stack underflow is not allowed, therefore each pop flag directive must be preceded by push for that same flag within the same file.
 
 # Reserved Words
 
