@@ -224,7 +224,7 @@ ioreg
    BAUDCON: tBAUDCON at $FB8;
 ~~~
 
-In addition to the fields defined by the datasheet, there are often additional overlaid fields taken from Microchip processor definition files such as the RCMT, RXCKP and SCKP fields above.  Microchip's processor definition files seem to include all the variations of field names that have ever appeared in the various legacy C compilers and assemblers.  The down side of this is that the type definitions may have an unwieldy number of redundant overlaid fields, the upside is that any field name appearing in old C or assembler example code will probably be available in the include file.
+In addition to the fields defined by the datasheet, there are often additional overlaid fields taken from Microchip processor definition files such as the RCMT, RXCKP and SCKP fields above.  Microchip's processor definition files seem to include all the variations of field names that have ever appeared in all the various legacy C compilers and assemblers.  The down side of this is that the type definitions may have an unwieldy number of redundant overlaid fields, the upside is that any field name appearing in old C or assembler example code will probably be available in the include file.
 
 ## Combo SFR types
 
