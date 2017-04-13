@@ -251,15 +251,23 @@ type
                   flag: string;        // valid only for cfh_init, cfh_push, cfh_pop
                   value: boolean;      // valid only for cfh_init and cfh_push,
                                        // used as a temp in tCompilerFlag.Value for cfh_enter_include_file
-                  n: integer         // if cfh_exit_include_file contains history idx of corresponding cfh_enter_include_file
+                  n: integer           // if cfh_exit_include_file contains history idx of corresponding cfh_enter_include_file
                                        // used as a temp in tCompilerFlag.Value for cfh_enter_include_file
                end;
+
+         push_pop_check:
+            array of  // index is position of cfh_init event in history for flag
+               array of integer;   // a stack:
+                                   //   -each level represents an file (main and nested includes),
+                                   //   -value is cumulative push/pops (should never be negative)
+
          // the following procedures are used within cpc_source_analysis_unit
          procedure Push (flag: string; value: boolean);
          procedure Pop (flag: string);
          function EnterFile: integer;  // returns enter_idx for call to ExitIncludeFile
          procedure ExitFile (enter_idx: integer);
          function KnownFlag (flag: string): boolean;
+         function push_pop_check_index (flag: string): integer;
       public
          procedure Clear;
          procedure Init (flag: string; value: boolean);
@@ -1717,7 +1725,8 @@ function TLexicalAnalysis.token_string (first_src_loc, last_src_loc: TSourceLoca
 
 procedure tCompilerFlag.Clear;
    begin
-      SetLength (history, 0)
+      SetLength (history, 0);
+      SetLength (push_pop_check, 0)
    end;
 
 procedure tCompilerFlag.Init (flag: string; value: boolean);
@@ -1728,48 +1737,74 @@ procedure tCompilerFlag.Init (flag: string; value: boolean);
       history[i].src_idx := -1;  // before any possible real src_loc
       history[i].event := cfh_init;
       history[i].flag := Lowercase(flag);
-      history[i].value := value
+      history[i].value := value;
+      SetLength (push_pop_check, i+1);
+      SetLength (push_pop_check[i], 1)
    end;
 
 procedure tCompilerFlag.Push (flag: string; value: boolean);
-   var i: integer;
+   var i,j: integer;
    begin
       i := Length(history);
       SetLength (history, i+1);
       history[i].src_idx := Length(source)-1;
       history[i].event := cfh_push;
       history[i].flag := Lowercase(flag);
-      history[i].value := value
+      history[i].value := value;
+      i := push_pop_check_index(flag);
+      j := Length(push_pop_check[i])-1;
+      push_pop_check[i,j] := push_pop_check[i,j] + 1
    end;
 
 procedure tCompilerFlag.Pop (flag: string);
-   var i: integer;
+   var
+      i,j: integer;
+      src_loc: TSourceLocation;
    begin
       i := Length(history);
       SetLength (history, i+1);
       history[i].src_idx := Length(source)-1;
       history[i].event := cfh_pop;
-      history[i].flag := Lowercase(flag)
+      history[i].flag := Lowercase(flag);
+      i := push_pop_check_index(flag);
+      j := Length(push_pop_check[i])-1;
+      push_pop_check[i,j] := push_pop_check[i,j] - 1;
+      if push_pop_check[i,j] < 0 then
+         begin
+            src_loc.source_idx := Length(source)-1;
+            src_loc.line_idx := 3;
+            src_loc.length := 1;
+            raise compile_error.Create (err_stack_underflow, src_loc)
+         end;
    end;
 
 function tCompilerFlag.EnterFile: integer;  // returns enter_idx
-   var i: integer;
+   var i,j: integer;
    begin
       i := Length(history);
       SetLength (history, i+1);
       history[i].src_idx := Length(source)-1;
       history[i].event := cfh_enter;
-      result := i
+      result := i;
+      j := Length(push_pop_check[0]);
+      for i := 0 to Length(push_pop_check)-1 do
+         begin
+            SetLength(push_pop_check[i], j+1);
+            push_pop_check[i,j] := 0
+         end
    end;
 
 procedure tCompilerFlag.ExitFile (enter_idx: integer);
-   var i: integer;
+   var i,j: integer;
    begin
       i := Length(history);
       SetLength (history, i+1);
       history[i].src_idx := Length(source)-1;
       history[i].event := cfh_exit;
-      history[i].n := enter_idx
+      history[i].n := enter_idx;
+      j := Length(push_pop_check[0]);
+      for i := 0 to Length(push_pop_check)-1 do
+         SetLength(push_pop_check[i], j-1)
    end;
 
 function tCompilerFlag.KnownFlag (flag: string): boolean;
@@ -1839,5 +1874,16 @@ function tCompilerFlag.Value (flag: string; src_loc: TSourceLocation): boolean;
       assert (defined_flag)
    end;
 
+function tCompilerFlag.push_pop_check_index (flag: string): integer;
+   begin
+      for result := 0 to Length(history)-1 do
+         if (history[result].event = cfh_init)
+            and
+            (history[result].flag = flag)
+         then
+            exit;
+      result := 666;  // to suppress compiler warning
+      assert (false)
+   end;
 
 END.

@@ -316,6 +316,7 @@ const
    err_write_only_property = 'property is write-only ("get" not defined)';
    err_wrong_enum_type = 'wrong enum type';
    err_wrong_type = 'wrong type';
+   err_stack_underflow = 'stack underflow';
    err_string_dimension_not_allowed_for_rom_string_parameter = 'string dimension not allowed for rom string parameter';
    err_string_dimension_not_allowed_for_eeprom_string_parameter = 'string dimension not allowed for eeprom string parameter';
    err_string_dimension_not_allowed_for_var_string_parameter = 'string dimension not allowed for var string parameter';
