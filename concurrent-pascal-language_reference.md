@@ -172,20 +172,21 @@ type
    tClass =
       class
          const                        
-            len = 5;                  // const len is private to tClass
+            len = 5;                 // const len is private 
+                                     //    to tClass
          var
-            s: string [len];          // var s is private to tClass 
-         procedure a;                 // procedure a is private to tClass 
-            begin
+            s: string [len];         // var s is private to tClass 
+         procedure a;                // procedure a is private 
+            begin                    //    to tClass 
             end;
       public
-         procedure p (var i: int8);   // procedure p is public and can operate
-            begin                     //     on private class variables (e.g. s)
-            end;
+         procedure p (var i: int8);  // procedure p is public and 
+            begin                    //    can operate on private 
+            end;                     //    class variables (e.g. s)
          property length: uint8;
             set: begin end;
             get: begin end;
-      begin                           // initial statement
+      begin                          // initial statement
          s := 'abc' 
       end;
 ~~~
@@ -209,17 +210,18 @@ type
    tMonitor =
       monitor
          const                        
-            len = 5;                  // const len is private to tClass
+            len = 5;                 // const len is private 
+                                     //    to tClass
          var
-            s: string [len];          // var s is private to tClass 
-         procedure a;                 // procedure a is private to tClass 
-            begin
+            s: string [len];         // var s is private to tClass 
+         procedure a;                // procedure a is private  
+            begin                    //    to tClass
             end;
       public
-         procedure p (var i: int8);   // procedure p is public and can operate
-            begin                     //     on private class variables (e.g. s)
-            end;
-      begin                           // initial statement
+         procedure p (var i: int8);  // procedure p is public and can 
+            begin                    //     operate on private class 
+            end;                     //     variables (e.g. s)
+      begin                          // initial statement
          s := 'abc' 
       end;
 ~~~
@@ -279,9 +281,9 @@ The value of a flag after an include directive is the same as it was before the 
 // RANGE CHECK reverts to ON here
 ~~~
 
-Each source or include file has its own flag stacks.  The compiler automatically empties each flag stack at the end of the file by popping all un-popped flags pushed within that file.  Therefore the compiler does not require that each push flag directive be matched with a subsequent pop within that same file.
+The compiler internally maintains a separate set of flag stacks for each source or include file.  The compiler automatically empties each flag stack at the end of the file by popping all un-popped flags pushed within that file.  Therefore the compiler does not require that each push flag directive be matched with a subsequent pop within that same file.
 
-Flag stack underflow is not allowed, therefore each pop flag directive must be preceded by push for that same flag within the same file.
+On the other hand, flag stack underflow is not allowed. Therefore each pop flag directive must be preceded by a push for that same flag within the same file.
 
 # Reserved Words
 
