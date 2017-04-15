@@ -10,6 +10,9 @@ uses
    cpc_blocks_unit,
    cpc_definitions_unit, Classes;
 
+const
+   temp_dir = 'temp-fd4202aa-71fd-4998-b156-5e3d3198e2a5';
+
 type
    TTestGenerator = function: TDefinition;
 
@@ -46,6 +49,8 @@ procedure test_compile_error_generation
 procedure record_bad_test_result;
 procedure display (s: string);
 function ProgramGenerator: TDefinition;
+procedure CreateTempDir;
+procedure DeleteTempFiles;
 
 IMPLEMENTATION
 
@@ -58,7 +63,7 @@ uses
    cpc_main_compiler_unit,
    cpc_source_analysis_unit,
    cpc_statements_unit,
-   cpc_target_cpu_unit;
+   cpc_target_cpu_unit, SysUtils;
 
 procedure display (s: string);
    begin
@@ -390,6 +395,33 @@ procedure record_bad_test_result;
    begin
       display ('****************************');
       tests_failed := tests_failed + 1
+   end;
+
+procedure CreateTempDir;
+   begin
+      CreateDir (temp_dir)
+   end;
+
+procedure DeleteTempFiles;
+   procedure DeleteDirectory (dir: string);
+      var
+         sr: TSearchRec;
+      begin
+         if FindFirst(dir + pathdelim + '*.*', faAnyfile, sr) = 0 then
+            begin
+               repeat
+                  if (sr.Name <> '.') and (sr.Name <> '..') then
+                     if sr.Attr and faDirectory = faDirectory then
+                        DeleteDirectory (dir + pathdelim + sr.Name)
+                     else
+                        DeleteFile (dir + pathdelim + sr.Name)
+               until FindNext (sr) <> 0;
+               FindClose (sr)
+            end;
+         RmDir (dir)
+      end;
+   begin
+      DeleteDirectory (temp_dir)
    end;
 
 INITIALIZATION

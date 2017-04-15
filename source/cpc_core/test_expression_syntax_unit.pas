@@ -1654,6 +1654,30 @@ procedure test_TTerm;
    end;
 
 procedure test_compiler_flags;
+   procedure write_temp_test_files;
+      var f: TextFile;
+      begin
+         AssignFile (f, temp_dir + pathdelim + 'test_flag_1.inc');
+         Rewrite (f);
+         writeln (f, '{$mark 2}');
+         writeln (f, '{$push test_flag_1 off}');
+         writeln (f, '{$mark 3}');
+         CloseFile (f);
+
+         AssignFile (f, temp_dir + pathdelim + 'test_flag_2.inc');
+         Rewrite (f);
+         writeln (f, '{$mark 5}');
+         writeln (f, '{$push test_flag_1 on}');
+         writeln (f, '{$mark 6}');
+         CloseFile (f);
+
+         AssignFile (f, temp_dir + pathdelim + 'test_flag_3.inc');
+         Rewrite (f);
+         writeln (f, '{$push test_flag_1 on}');
+         writeln (f, '{$pop test_flag_1}');
+         writeln (f, '{$pop  test_flag_1}');
+         CloseFile (f)
+      end;
    procedure test_flag (mark: integer; flag: string; value: boolean);
       var
          i: integer;
@@ -1740,10 +1764,10 @@ procedure test_compiler_flags;
          SetLength (marked_src_locations, 0);
          src.Add ('begin');
          src.Add ('{$mark 1}');
-         src.Add ('{$include ''pic18x\compiler_test_cases\test_flag_1.inc''}');
+         src.Add ('{$include ''' + temp_dir + pathdelim + 'test_flag_1.inc''}');
          src.Add ('{$mark 4}');
          src.Add ('{$push test_flag_1 off}');
-         src.Add ('{$include ''pic18x\compiler_test_cases\test_flag_2.inc''}');
+         src.Add ('{$include ''' + temp_dir + pathdelim + 'test_flag_2.inc''}');
          src.Add ('{$mark 7}');
          src.Add ('end.');
          test_only_for_successful_compilation (src);
@@ -1761,7 +1785,7 @@ procedure test_compiler_flags;
          test_flag (6, 'test_flag_1', true);
          test_flag (6, 'test_flag_2', false);
          test_flag (7, 'test_flag_1', false);
-         test_flag (7, 'test_flag_2', false);
+         test_flag (7, 'test_flag_2', false)
       end;
    procedure test_underflow_in_main;
       var
@@ -1783,7 +1807,7 @@ procedure test_compiler_flags;
          src := TStringList.Create;
          src.Add ('begin');
          src.Add ('{$push test_flag_2 on}');
-         src.Add ('{$include ''pic18x\compiler_test_cases\test_flag_3.inc''}');
+         src.Add ('{$include ''' + temp_dir + pathdelim + 'test_flag_3.inc''}');
          src.Add ('end.');
          test_compile_error_generation (src, err_stack_underflow, 'pop  test_flag_1');
          src.Free
@@ -1794,13 +1818,14 @@ procedure test_compiler_flags;
       begin
          src := TStringList.Create;
          src.Add ('begin');
-         src.Add ('{$include ''pic18x\compiler_test_cases\test_flag_1.inc''}');
+         src.Add ('{$include ''' + temp_dir + pathdelim + 'test_flag_1.inc''}');
          src.Add ('{$pop test_flag_1}');
          src.Add ('end.');
          test_compile_error_generation (src, err_stack_underflow, 'pop test_flag_1');
          src.Free
       end;
    begin  // test_compiler_flags
+      write_temp_test_files;
       display ('======================');
       display ('Testing compiler flags');
       display ('======================');
@@ -1816,7 +1841,7 @@ procedure test_compiler_flags;
       test_underflow_in_main;
       test_underflow_in_include;
       test_underflow_after_include;
-      display ('');
+      display ('')
    end;   // test_compiler_flags
 
 procedure test_lex_analysis;

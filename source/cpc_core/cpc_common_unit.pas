@@ -182,7 +182,7 @@ const
    err_only_one_routine_allowed_in_interrupt_definition = 'only one routine (signaled) is allowed in interrupt definition';
    err_only_single_char_allowed = 'only single char allowed';
    err_only_single_chars_allowed_in_sets = 'only single chars allowed insets';
-   err_openning_quote_required_for_s_name = 'openning quote ('') required for %s name';
+   err_opening_quote_required_for_s_name = 'opening quote ('') required for %s name';
    err_operands_not_compatible_with_operator = 'operands not compatible with operator';
    err_operator_not_valid_for_sets = 'operator not valid for sets';
    err_operator_requires_unsigned_operands = 'operator requires unsigned operands';

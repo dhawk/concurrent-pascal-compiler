@@ -58,6 +58,7 @@ BEGIN
       begin
          tests_failed := 0;
          try
+            CreateTempDir;
             test_lex_analysis;
             test_constant_syntax_unit;
             test_type_syntax;
@@ -71,6 +72,7 @@ BEGIN
             test_TSimpleExpression;
             test_TRelationalExpression;
             test_TAccess;
+            DeleteTempFiles
          except
             on E:Exception do
                begin

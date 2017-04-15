@@ -618,7 +618,7 @@ function extract_quoted_compiler_directive_parameter (compiler_directive, simpli
       then
          begin
             src_location.line_idx := i;
-            raise compile_error.Create(format (err_openning_quote_required_for_s_name, [param_name]), src_location)
+            raise compile_error.Create(format (err_opening_quote_required_for_s_name, [param_name]), src_location)
          end;
       src_location.line_idx := i;   // location of quoted param name
       i := i + 1;
@@ -863,20 +863,21 @@ procedure read_in_file (full_path_fn: string; compiler_directives_allowed: boole
       {$I+}
       if IoResult <> 0 then
          raise ECantOpenFile.Create('');
-
-      mark_file_insertion (' START FILE INSERTION ' + ExtractFileName(full_path_fn) + ' ');
-      compile_flag_idx := CompilerFlag.EnterFile;
-      line_no := 1;
-      while not eof(f) do
-         begin
-            Readln(f, line);
-            line_no := line_no + 1;
-            add_line_to_source (line, file_list_idx, line_no, in_preamble)
-         end;
-      mark_file_insertion (' END FILE INSERTION ' + ExtractFileName(full_path_fn) + ' ');
-      CompilerFlag.ExitFile (compile_flag_idx);
-
-      CloseFile(f);
+      try
+         mark_file_insertion (' START FILE INSERTION ' + ExtractFileName(full_path_fn) + ' ');
+         compile_flag_idx := CompilerFlag.EnterFile;
+         line_no := 1;
+         while not eof(f) do
+            begin
+               Readln(f, line);
+               line_no := line_no + 1;
+               add_line_to_source (line, file_list_idx, line_no, in_preamble)
+            end;
+         mark_file_insertion (' END FILE INSERTION ' + ExtractFileName(full_path_fn) + ' ');
+         CompilerFlag.ExitFile (compile_flag_idx);
+      finally
+         CloseFile(f)
+      end;
       current_dir := old_current_dir
    end;    // read_in_file
 
@@ -1739,7 +1740,8 @@ procedure tCompilerFlag.Init (flag: string; value: boolean);
       history[i].flag := Lowercase(flag);
       history[i].value := value;
       SetLength (push_pop_check, i+1);
-      SetLength (push_pop_check[i], 1)
+      SetLength (push_pop_check[i], 1);
+      push_pop_check[i,0] := 0
    end;
 
 procedure tCompilerFlag.Push (flag: string; value: boolean);
