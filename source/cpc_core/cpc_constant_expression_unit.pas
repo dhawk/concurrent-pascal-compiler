@@ -1008,7 +1008,7 @@ procedure TCExpression.process_source_tokens;
       right_operand_source_location: TSourceLocation;
       compatible: boolean;
    begin
-      op := TSymbolEnum(0); // to suppress uniitialized variable warning
+      op := TSymbolEnum(0); // to suppress uninitialized variable warning
       left_operand_source_location := lex.token.src_loc;
       left := Tcsimple_expression.CreateFromSourceTokens;
       try

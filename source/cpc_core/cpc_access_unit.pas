@@ -716,7 +716,8 @@ constructor TAccess.CreateFromSourceTokens;
                            for idx := 0 to Length(TRecordType(sc.typedef).fields) - 1 do
                               if (not found)
                                  and
-                                 (TRecordType(sc.typedef).fields[idx] = path[path_idx].record_field) then
+                                 (TRecordType(sc.typedef).fields[idx] = path[path_idx].record_field)
+                              then
                                  begin
                                     sc := sc.record_fields[idx];
                                     found := true

@@ -746,7 +746,9 @@ procedure TOverlayType.CheckAssignmentCompatability
    var
       i: integer;
       compatable: boolean;
+sc:TStructuredConstant;
    begin
+sc:=TStructuredConstant(def);
       compatable := false;
       case def.definition_kind of
          constant_definition:

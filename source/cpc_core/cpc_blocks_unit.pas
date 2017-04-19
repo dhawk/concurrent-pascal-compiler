@@ -354,10 +354,13 @@ procedure check_for_valid_ioreg_type (typedef: TTypeDef; typedef_src_loc: TSourc
 procedure process_constant_definition_part;
    var
       cexpression: TCExpression;
+      acc: TAccess;
       typedef: TTypeDef;
       structured_constant: TStructuredConstant;
       id_idx: TIdentifierIdx;
       src_loc, typedef_src_loc: TSourceLocation;
+      def: TDefinition;
+      mark: integer;
    begin
       assert(lex.token_is_reserved_word(rw_const));
       lex.advance_token;
@@ -377,7 +380,8 @@ procedure process_constant_definition_part;
                try
                   if (typedef.type_kind = string_type)
                      and
-                     (TStringType(typedef).max_length = -1) then
+                     (TStringType(typedef).max_length = -1)
+                  then
                      raise compile_error.Create(err_left_bracket_expected);
                   if typedef.ContainsQueueVariables or typedef.ContainsSystemType
                   then
@@ -397,17 +401,61 @@ procedure process_constant_definition_part;
                end
             end
          else
-            begin // regular constant
+            begin
                if not lex.token_is_symbol(sym_equals) then
                   raise compile_error.Create(err_equals_expected);
                lex.advance_token;
 
-               cexpression := TCExpression.CreateFromSourceTokens;
-               try
-                  CurrentDefinitionTable.DefineForCurrentScope(id_idx, cexpression, src_loc)
-               finally
-                  cexpression.Release
-               end
+               def := nil;
+               if lex.token_is_identifier then
+                  def := CurrentDefinitionTable.GetDefinitionForIdentifier (lex.identifiers[lex.token.identifier_idx], true);
+
+               acc := nil;
+               cexpression := nil;
+               mark := lex.mark_token_position;
+               if (def <> nil)
+                  and
+                  (def.definition_kind = structured_constant_definition)
+               then  // first id is a structured constant
+                  try
+                     acc := TAccess.CreateFromSourceTokens;
+                     if acc.node_typedef <> nil then
+                        case acc.node_typedef.type_kind of
+                           basic_data_type,
+                           set_type,
+                           string_type:
+                              if lex.token_is_symbol(sym_semicolon) then
+                                  CurrentDefinitionTable.DefineForCurrentScope(id_idx, acc.node_structured_constant, src_loc)
+                              else  // back up and handle this as a cexpression
+                                 try
+                                    lex.backup (mark);
+                                    cexpression := TCExpression.CreateFromSourceTokens;
+                                    CurrentDefinitionTable.DefineForCurrentScope(id_idx, cexpression, src_loc)
+                                 finally
+                                    cexpression.Release
+                                 end;
+                           record_type,
+                           packed_record_type,
+                           array_type,
+                           overlay_type:
+                              CurrentDefinitionTable.DefineForCurrentScope(id_idx, acc.node_structured_constant, src_loc);
+                        else
+                           assert (false)
+                        end
+                     else if acc.node_constant <> nil then
+                        CurrentDefinitionTable.DefineForCurrentScope(id_idx, acc.node_constant, src_loc)
+                     else
+                        assert (false)
+                  finally
+                     acc.Release
+                  end
+               else
+                  try
+                     cexpression := TCExpression.CreateFromSourceTokens;
+                     CurrentDefinitionTable.DefineForCurrentScope(id_idx, cexpression, src_loc)
+                  finally
+                     cexpression.Release
+                  end
             end;
 
          if not lex.token_is_symbol(sym_semicolon) then

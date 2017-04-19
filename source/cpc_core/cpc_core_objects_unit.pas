@@ -1004,6 +1004,10 @@ procedure TIntegerDataType.CheckAssignmentCompatability
                   if info.min_value.gt(TConstant(def).ordinal_value) or info.max_value.lt(TConstant(def).ordinal_value) then
                      raise compile_error.Create(err_value_outside_legal_range, def.src_loc)
                end;
+            structured_constant_definition:
+               begin
+                  assert (false)
+               end;
             expression_definition:
                begin
                   if TExpression(def).expression_kind <> integer_expression then
@@ -2602,9 +2606,7 @@ procedure TStructuredConstant.set_StructuredConstantKind;
             StructuredConstantKind := scPackedRecord;
          array_type:
             StructuredConstantKind := scArray;
-         overlay_type,
-         system_type,
-         queue_type:
+         overlay_type:
             StructuredConstantKind := scOther;
       else
          assert (false)

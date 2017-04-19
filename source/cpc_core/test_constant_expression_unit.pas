@@ -1353,6 +1353,21 @@ procedure test_Tcsimple_expression;
       test_compile_error_generation_for_program_fragment('begin [1]+3 end', create_csimple_expression, err_set_expected, '3 end');
       test_compile_error_generation_for_program_fragment('begin [1,2]+[false] end', create_csimple_expression, err_both_operand_sets_must_be_of_same_type, '+[false] end');
       test_compile_error_generation_for_program_fragment('type x=(a,b,c);y=(d,e,f);begin [a,b]+[d,e] end', create_csimple_expression, err_both_operand_sets_must_be_of_same_type, '+[d,e] end');
+
+      // test constants derived from structured constants
+      test_integer_expected('type tsc=record i,j:int8 end;const sc:tsc=(i=1,j=2);i=sc.i;j=sc.i+2;begin sc.i end', 1);
+      test_integer_expected('type tsc=record i,j:int8 end;const sc:tsc=(i=1,j=2);i=sc.i;j=sc.i+2;begin i end.', 1);
+      test_integer_expected('type tsc=record i,j:int8 end;const sc:tsc=(i=1,j=2);i=sc.i;j=sc.i+2;begin j end.', 3);
+      test_integer_expected('type tsc=array[1..2]of record i,j:int8 end;const sc:tsc=([1]=(i=1,j=2),[2]=(i=3,j=4));a2=sc[2];i=a2.i;begin i end', 3);
+      test_integer_expected('type tsc=array[1..2]of packed record i:int8;j:int8 end;const sc:tsc=([1]=(i=1,j=2),[2]=(i=3,j=4));a2=sc[2];i=a2.i;begin i end', 3);
+      test_integer_expected('type tsc=record i:int8;a:array[1..2]of int8 end;const sc:tsc=(i=5,a=([1]=3,[2]=4));a=sc.a;i=a[1];begin i end', 3);
+      test_integer_expected('type tov=overlay j:int16;x:int8 end;tsc=record i:int8;o:tov end;const sc:tsc=(i=5,o=(j=6));o=sc.o;i=o.j begin i end', 6);
+      test_set_expected('type tsc=record i:int8;s:set of 0..7 end;const sc: tsc = (i=5,s=[2..3]);a=sc.s; b=[1]+sc.s;begin sc.s end', [2,3], ordinal_base_is_integer, '');
+      test_set_expected('type tsc=record i:int8;s:set of 0..7 end;const sc: tsc = (i=5,s=[2..3]);a=sc.s; b=[1]+sc.s;begin a end', [2,3], ordinal_base_is_integer, '');
+      test_set_expected('type tsc=record i:int8;s:set of 0..7 end;const sc: tsc = (i=5,s=[2..3]);a=sc.s; b=[1]+sc.s;begin b end', [1,2,3], ordinal_base_is_integer, '');
+      test_string_expected('type tsc=record i: int8; s: string[5] end;const sc:tsc=(i=5,s=''abc'');a=sc.s;b=sc.s+''d'';begin sc.s end', 'abc');
+      test_string_expected('type tsc=record i: int8; s: string[5] end;const sc:tsc=(i=5,s=''abc'');a=sc.s;b=sc.s+''d'';begin a end', 'abc');
+      test_string_expected('type tsc=record i: int8; s: string[5] end;const sc:tsc=(i=5,s=''abc'');a=sc.s;b=sc.s+''d'';begin b end', 'abcd');
    end;
 
 procedure test_constant_syntax_unit;
