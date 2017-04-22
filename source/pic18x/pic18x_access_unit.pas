@@ -122,7 +122,7 @@ function TPIC18x_Access.total_fixed_offsets: integer;
                then
                   result := result + path[i].index_expression.constant.AsOrdinal;
             system_type_access,
-            overlay_variable_access,
+            overlay_access,
             packed_record_field_access,
             string_attribute_access:
                ;   // offset is 0

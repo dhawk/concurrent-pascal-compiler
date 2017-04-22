@@ -76,7 +76,7 @@ type
        indexed_string_access,
        record_field_access,
        packed_record_field_access,
-       overlay_variable_access,
+       overlay_access,
        string_attribute_access,
        system_type_access
       );
@@ -97,7 +97,7 @@ type
             packed_record_field_access:
                (packed_record_field: TPackedRecordField
                );
-            overlay_variable_access:
+            overlay_access:
                (overlay_variable: TOverlaidVariable
                );
             system_type_access:
@@ -216,7 +216,7 @@ constructor TAccess.CreateFromSourceTokens;
                   end;
                overlay_type:
                   begin
-                     access_path_kind := overlay_variable_access;
+                     access_path_kind := overlay_access;
                      node_initialization_assumption_invalid := true;
                      legal_tokens := [sym_dot, sym_left_bracket]
                   end;
@@ -270,7 +270,7 @@ constructor TAccess.CreateFromSourceTokens;
             overlay_type:
                begin
                   node_initialization_assumption_invalid := true;
-                  access_path_kind := overlay_variable_access;
+                  access_path_kind := overlay_access;
                   legal_tokens := [sym_dot, sym_left_bracket]
                end;
             system_type:
@@ -338,7 +338,7 @@ constructor TAccess.CreateFromSourceTokens;
                                  if not lex.token_is_symbol(sym_right_bracket) then
                                     raise compile_error.Create(err_right_bracket_expected);
                                  lex.advance_token;
-                                 access_path_kind := overlay_variable_access;
+                                 access_path_kind := overlay_access;
                                  legal_tokens := [sym_dot]
                               end;
                            string_type:
@@ -511,7 +511,7 @@ constructor TAccess.CreateFromSourceTokens;
                         typedef := path[path_idx].packed_record_field.ordtypedef;
                         legal_tokens := []
                      end;
-                  overlay_variable_access:
+                  overlay_access:
                      case last_token.symbol of
                         sym_left_bracket:
                            begin
@@ -739,6 +739,11 @@ constructor TAccess.CreateFromSourceTokens;
                                  end;
                            assert(found)
                         end;
+                     overlay_access:
+                        begin
+                           assert (sc.StructuredConstantKind = scOverlay);
+                           result := sc.overlay_constant
+                        end;
                   else
                      assert(false)
                   end;
@@ -802,7 +807,7 @@ constructor TAccess.CreateFromSourceTokens;
                   node_typedef := path[node_idx].packed_record_field.ordtypedef;
                   node_typedef.AddRef
                end;
-            overlay_variable_access:
+            overlay_access:
                begin
                   node_access_kind := variable_access;
                   node_typedef := path[node_idx].overlay_variable.typedef;

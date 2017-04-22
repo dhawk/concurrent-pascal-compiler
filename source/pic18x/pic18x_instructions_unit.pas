@@ -4031,10 +4031,10 @@ destructor TPIC18x_Data.Destroy;
 
 function overlay_padding_needed (sc: TStructuredConstant): integer;
    begin
-      if sc.overlay_typedef = nil then
-         result := 0
+      if sc.StructuredConstantKind = scOverlay then
+         result := TPIC18x_Typedef_TypeInfo(sc.typedef.info).Size - TPIC18x_Typedef_TypeInfo(sc.overlay_constant.typedef.info).Size
       else
-         result := TPIC18x_Typedef_TypeInfo(sc.overlay_typedef.info).Size - TPIC18x_Typedef_TypeInfo(sc.typedef.info).Size
+         result := 0
    end;
 
 function TPIC18x_Data.hex_code: THexArray;

@@ -390,7 +390,7 @@ type
          path, value: string
       end;
    TSimpleConstantArray = array of TSimpleConstant;
-   TStructuredConstantKind = (scSimple, scArray, scRecord, scPackedRecord, scOther);
+   TStructuredConstantKind = (scSimple, scArray, scRecord, scPackedRecord, scOverlay, scOther);
    TStructuredConstant =
       class(TDefinition)
       private
@@ -406,26 +406,24 @@ type
          typedef: TTypeDef;
          typedef_src_loc: TSourceLocation;
          StructuredConstantKind: TStructuredConstantKind;
-         overlay_typedef: TDefinition;  // actually TOverlayType, is nil unless is an overlay constant
 
          // only one of the following will be used depending on StructuredConstantKind
-         simple_constant: TConstant;                    // only for if StructuredConstantKind is scSimple
-         array_elements: array of TStructuredConstant;  // only for StructuredConstantKind is scArray
+         simple_constant: TConstant;                    // only for if StructuredConstantKind = scSimple
+         array_elements: array of TStructuredConstant;  // only for StructuredConstantKind = scArray
          array_element_typedef: TTypeDef;
-         record_fields: array of TStructuredConstant;   // only for StructuredConstantKind is scRecord
-         packed_record_fields:                          // only for StructuredConstantKind is scPackedRecord
+         record_fields: array of TStructuredConstant;   // only for StructuredConstantKind = scRecord
+         packed_record_fields:                          // only for StructuredConstantKind = scPackedRecord
             array of
                record
                   c: TConstant;
                   ctyp: TOrdinalDataType
                end;
+         overlay_constant: TStructuredConstant;         // only for StructuredConstantKind = scOoverlay
+         overlay_annotation: string;
 
          property default_anonymous [idx: integer]: TSimpleConstant read get_const; default;   // linearly arranged
          function LengthOfSimpleConstants: integer;
-         constructor CreateFromSourceTokens
-            (typ: TTypeDef;
-             typ_src_loc: TSourceLocation
-            );
+         constructor CreateFromSourceTokens (typ: TTypeDef; typ_src_loc: TSourceLocation);
          constructor CreateFromConstant (_typedef: TTypeDef; _constant: TConstant);
          destructor Destroy;
             override;
@@ -2348,74 +2346,55 @@ constructor TStructuredConstant.CreateFromSourceTokens
 
    procedure handle_overlay_structured_constant;
       var
-         overlaydef: TOverlayType;
+         overlay_typedef: TOverlayType;
          i: integer;
          first_overlay_src_token_idx: integer;
-         furthest_compile_err_msg: string;
-         furthest_compile_err_src_loc: TSourceLocation;
+         last_compile_err_msg: string;
+         last_compile_err_src_loc: TSourceLocation;
       begin
-         overlaydef := TOverlayType(typedef);
-         overlay_typedef := overlaydef;   // has already been AddRef'd
-         furthest_compile_err_src_loc := NonExistantSourceLocation;
+         overlay_typedef := TOverlayType(typedef);
+         overlay_annotation := '???';
+         typ := typedef;
+         last_compile_err_src_loc := NonExistantSourceLocation;
          first_overlay_src_token_idx := lex.token_idx;
-         for i := 0 to Length(overlaydef.overlaid_variables)-1 do
+         for i := 0 to Length(overlay_typedef.overlaid_variables)-1 do
             begin
                lex.token_idx := first_overlay_src_token_idx;
-               if overlaydef.overlaid_variables[i].anonymous then
+               if overlay_typedef.overlaid_variables[i].anonymous then
                   try
-                     typedef := overlaydef.overlaid_variables[i].typedef;   // provisional
-                     typedef.AddRef;
-                     set_StructuredConstantKind;                            // provisional
-                     case overlaydef.overlaid_variables[i].typedef.type_kind of
-                        array_type:
-                           handle_array_structured_constant;
-                        record_type:
-                           handle_record_structured_constant;
-                        packed_record_type:
-                           handle_packed_record_structured_constant;
-                        string_type:
-                           handle_simple_constant;
-                     else
-                        assert (false)   // invalid anonymous type
-                     end;
-                     exit
+                     overlay_constant := TStructuredConstant.CreateFromSourceTokens (overlay_typedef.overlaid_variables[i].typedef, lex.token.src_loc);
+                     EXIT   // this overlaid variable matched
                   except
                      on e: compile_error do
                         begin
-                           typedef.Release;
-                           if e.source_location.beyond (furthest_compile_err_src_loc) then
+                           if e.source_location.beyond (last_compile_err_src_loc) then
                               begin
-                                 furthest_compile_err_src_loc := e.source_location;
-                                 furthest_compile_err_msg := e.Message
+                                 last_compile_err_src_loc := e.source_location;
+                                 last_compile_err_msg := e.Message
                               end;
                         end
                   end
                else  // not anonymous
                   begin
-                     typedef := nil;
                      if not lex.token_is_symbol(sym_left_parenthesis) then
                         raise compile_error.Create(err_left_parenthesis_expected);
                      lex.advance_token;
-                     if lex.token.identifier_idx = overlaydef.overlaid_variables[i].identifier_idx then
+                     if lex.token.identifier_idx = overlay_typedef.overlaid_variables[i].identifier_idx then
                         begin
-                           typedef := overlaydef.overlaid_variables[i].typedef;
-                           typedef.AddRef;
-                           set_StructuredConstantKind;
                            lex.advance_token;
                            if not lex.token_is_symbol(sym_equals) then
                               raise compile_error.Create(err_equals_expected);
                            lex.advance_token;
-                           handle_simple_constant;
+                           overlay_constant := TStructuredConstant.CreateFromSourceTokens (overlay_typedef.overlaid_variables[i].typedef, lex.token.src_loc);
                            if not lex.token_is_symbol(sym_right_parenthesis) then
                               raise compile_error.Create(err_right_parenthesis_expected);
                            lex.advance_token;
-                           exit
+                           EXIT   // this overlaid variable matched
                         end
                   end
             end;
          // should have exited by now, otherwise report furthest error message found
-         typedef := nil;
-         raise compile_error.Create (furthest_compile_err_msg, furthest_compile_err_src_loc)
+         raise compile_error.Create (last_compile_err_msg, last_compile_err_src_loc)
       end;
 
    begin    // TStructuredConstant.CreateFromSourceTokens
@@ -2462,6 +2441,8 @@ destructor TStructuredConstant.Destroy;
                   array_elements[i].Release;
                array_element_typedef.Release
             end;
+         scOverlay:
+            overlay_constant.Release;
          scOther:
             ;
       else
@@ -2483,7 +2464,6 @@ destructor TStructuredConstant.Destroy;
                   linearly_arranged_elements[i].constant.Release
                end;
       typedef.Release;
-      overlay_typedef.Release;
       inherited
    end;
 
@@ -2588,6 +2568,7 @@ procedure TStructuredConstant.add_elements_to_array
                      array_elements[i - arrdef.index_typedef.info.min_value.AsInteger].add_elements_to_array(arr, annotation + index_annotation)
                   end
             end;
+         scOverlay,
          scOther:
             add_simple_element_to_array (nil, typedef, true, annotation, 'null');
       else
@@ -2607,6 +2588,9 @@ procedure TStructuredConstant.set_StructuredConstantKind;
          array_type:
             StructuredConstantKind := scArray;
          overlay_type:
+            StructuredConstantKind := scOverlay;
+         system_type,
+         queue_type:
             StructuredConstantKind := scOther;
       else
          assert (false)
@@ -2655,7 +2639,7 @@ constructor TDefaultValue.CreateDefaultValue (typ: TTypeDef);
       arrtyp: TArrayType;
       rectyp: TRecordType;
       prectyp: TPackedRecordType;
-   begin
+   begin   // TDefaultValue.CreateDefaultValue
       inherited Create (structured_constant_definition);
       typedef := typ;
       set_StructuredConstantKind;
@@ -2721,6 +2705,7 @@ constructor TDefaultValue.CreateDefaultValue (typ: TTypeDef);
                      packed_record_fields[i].ctyp.AddRef
                   end
             end;
+         scOverlay,
          scOther:
             {nop};
       else
@@ -2729,7 +2714,7 @@ constructor TDefaultValue.CreateDefaultValue (typ: TTypeDef);
       add_elements_to_array (linearly_arranged_elements, '');
       if StructuredConstantKind = scSimple then
          typedef.Release
-   end;
+   end;    // TDefaultValue.CreateDefaultValue
 
 destructor TDefaultValue.Destroy;
    begin

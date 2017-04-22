@@ -150,7 +150,7 @@ type
 
 IMPLEMENTATION
 
-uses SysUtils, cpc_common_unit, cpc_blocks_unit;
+uses SysUtils, cpc_common_unit, cpc_blocks_unit, cpc_target_cpu_unit;
 
 function IsProcessType (typedef: TTypeDef): boolean;
    begin
@@ -746,9 +746,7 @@ procedure TOverlayType.CheckAssignmentCompatability
    var
       i: integer;
       compatable: boolean;
-sc:TStructuredConstant;
    begin
-sc:=TStructuredConstant(def);
       compatable := false;
       case def.definition_kind of
          constant_definition:

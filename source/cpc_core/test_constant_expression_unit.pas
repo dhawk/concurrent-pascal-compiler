@@ -1361,7 +1361,7 @@ procedure test_Tcsimple_expression;
       test_integer_expected('type tsc=array[1..2]of record i,j:int8 end;const sc:tsc=([1]=(i=1,j=2),[2]=(i=3,j=4));a2=sc[2];i=a2.i;begin i end', 3);
       test_integer_expected('type tsc=array[1..2]of packed record i:int8;j:int8 end;const sc:tsc=([1]=(i=1,j=2),[2]=(i=3,j=4));a2=sc[2];i=a2.i;begin i end', 3);
       test_integer_expected('type tsc=record i:int8;a:array[1..2]of int8 end;const sc:tsc=(i=5,a=([1]=3,[2]=4));a=sc.a;i=a[1];begin i end', 3);
-      test_integer_expected('type tov=overlay j:int16;x:int8 end;tsc=record i:int8;o:tov end;const sc:tsc=(i=5,o=(j=6));o=sc.o;i=o.j begin i end', 6);
+      test_integer_expected('type tov=overlay j:int16;x:int8 end;tsc=record i:int8;o:tov end;const sc:tsc=(i=5,o=(j=6));o=sc.o;i=o.j; begin i end', 6);
       test_set_expected('type tsc=record i:int8;s:set of 0..7 end;const sc: tsc = (i=5,s=[2..3]);a=sc.s; b=[1]+sc.s;begin sc.s end', [2,3], ordinal_base_is_integer, '');
       test_set_expected('type tsc=record i:int8;s:set of 0..7 end;const sc: tsc = (i=5,s=[2..3]);a=sc.s; b=[1]+sc.s;begin a end', [2,3], ordinal_base_is_integer, '');
       test_set_expected('type tsc=record i:int8;s:set of 0..7 end;const sc: tsc = (i=5,s=[2..3]);a=sc.s; b=[1]+sc.s;begin b end', [1,2,3], ordinal_base_is_integer, '');

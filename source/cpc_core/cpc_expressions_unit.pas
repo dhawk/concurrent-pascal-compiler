@@ -881,6 +881,8 @@ constructor TConstantPrimary.CreateFromStructuredConstantAccess
                expression_kind := string_expression;
             set_type:
                expression_kind := set_expression;
+            overlay_type:
+               expression_kind := overlay_expression;
          else
             assert(false)
          end;
@@ -894,9 +896,23 @@ constructor TConstantPrimary.CreateFromStructuredConstantAccess
          constant_access:
             handle_simple_constant (access.node_constant);
          structured_constant_access:
-            handle_structured_constant (access.node_structured_constant);
-         else
-            assert(false)
+            case access.node_structured_constant.StructuredConstantKind of
+               scSimple:
+                  handle_simple_constant (access.node_structured_constant.simple_constant);
+               scArray,
+               scRecord,
+               scPackedRecord:
+                  handle_structured_constant (access.node_structured_constant);
+               scOverlay:
+                  if access.node_structured_constant.overlay_constant.StructuredConstantKind = scSimple then
+                     handle_simple_constant (access.node_structured_constant.overlay_constant.simple_constant)
+                  else
+                     handle_structured_constant (access.node_structured_constant.overlay_constant);
+            else  
+               assert (false)
+            end;
+      else
+         assert(false)
       end
    end;     // TConstantPrimary.CreateFromStructuredConstantAccess
 

@@ -1788,11 +1788,14 @@ function tCompilerFlag.EnterFile: integer;  // returns enter_idx
       history[i].src_idx := Length(source)-1;
       history[i].event := cfh_enter;
       result := i;
-      j := Length(push_pop_check[0]);
-      for i := 0 to Length(push_pop_check)-1 do
-         begin
-            SetLength(push_pop_check[i], j+1);
-            push_pop_check[i,j] := 0
+      if Length(push_pop_check) > 0 then
+         begin  // at least one flag defined
+            j := Length(push_pop_check[0]);
+            for i := 0 to Length(push_pop_check)-1 do
+               begin
+                  SetLength(push_pop_check[i], j+1);
+                  push_pop_check[i,j] := 0
+               end
          end
    end;
 
@@ -1804,9 +1807,12 @@ procedure tCompilerFlag.ExitFile (enter_idx: integer);
       history[i].src_idx := Length(source)-1;
       history[i].event := cfh_exit;
       history[i].n := enter_idx;
-      j := Length(push_pop_check[0]);
-      for i := 0 to Length(push_pop_check)-1 do
-         SetLength(push_pop_check[i], j-1)
+      if Length(push_pop_check) > 0 then
+         begin  // at least one flag defined
+            j := Length(push_pop_check[0]);
+            for i := 0 to Length(push_pop_check)-1 do
+               SetLength(push_pop_check[i], j-1)
+         end
    end;
 
 function tCompilerFlag.KnownFlag (flag: string): boolean;
