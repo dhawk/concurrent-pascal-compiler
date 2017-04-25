@@ -760,9 +760,12 @@ procedure TOverlayType.CheckAssignmentCompatability
                      compatable := true
             end;
          structured_constant_definition:
-            for i := 0 to Length(overlaid_variables) - 1 do
-               if overlaid_variables[i].typedef = TStructuredConstant(def).typedef then
-                  compatable := true;
+            begin
+               compatable := TStructuredConstant(def).typedef = Self;
+               for i := 0 to Length(overlaid_variables) - 1 do
+                  if overlaid_variables[i].typedef = TStructuredConstant(def).typedef then
+                     compatable := true
+            end;
       else
          assert(false)
       end;
