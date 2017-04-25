@@ -224,7 +224,7 @@ constructor Tcprimary.CreateFromSourceTokens;
                      access := target_cpu.TAccess_CreateFromSourceTokens;
                      try
                         if (access.node_access_kind <> structured_constant_access)
-                           and
+                           or
                            (access.node_structured_constant.StructuredConstantKind <> scSimple)
                         then
                            raise compile_error.Create(err_constant_expected, access.src_loc);

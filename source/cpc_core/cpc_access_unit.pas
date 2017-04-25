@@ -742,7 +742,7 @@ constructor TAccess.CreateFromSourceTokens;
                      overlay_access:
                         begin
                            assert (sc.StructuredConstantKind = scOverlay);
-                           result := sc.overlay_constant
+                           sc := sc.overlay_constant
                         end;
                   else
                      assert(false)

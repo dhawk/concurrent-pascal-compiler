@@ -901,14 +901,10 @@ constructor TConstantPrimary.CreateFromStructuredConstantAccess
                   handle_simple_constant (access.node_structured_constant.simple_constant);
                scArray,
                scRecord,
-               scPackedRecord:
-                  handle_structured_constant (access.node_structured_constant);
+               scPackedRecord,
                scOverlay:
-                  if access.node_structured_constant.overlay_constant.StructuredConstantKind = scSimple then
-                     handle_simple_constant (access.node_structured_constant.overlay_constant.simple_constant)
-                  else
-                     handle_structured_constant (access.node_structured_constant.overlay_constant);
-            else  
+                  handle_structured_constant (access.node_structured_constant);
+            else
                assert (false)
             end;
       else
