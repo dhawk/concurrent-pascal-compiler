@@ -386,7 +386,9 @@ type
       record
          typedef: TTypeDef;
          dont_refcount_typedef: boolean;
-         constant: TDefinition;   // either TConstant or TStructuredConstant if packed array constant
+         variant_typedef: TTypeDef;   // only used for overlay padding
+         constant: TDefinition;
+             // either TConstant or TStructuredConstant (packed array constant + filler0
          path, value: string
       end;
    TSimpleConstantArray = array of TSimpleConstant;
@@ -2353,7 +2355,7 @@ constructor TStructuredConstant.CreateFromSourceTokens
          last_compile_err_src_loc: TSourceLocation;
       begin
          overlay_typedef := TOverlayType(typedef);
-         overlay_annotation := '???';
+         overlay_annotation := '';
          typ := typedef;
          last_compile_err_src_loc := NonExistantSourceLocation;
          first_overlay_src_token_idx := lex.token_idx;
@@ -2381,6 +2383,7 @@ constructor TStructuredConstant.CreateFromSourceTokens
                      lex.advance_token;
                      if lex.token.identifier_idx = overlay_typedef.overlaid_variables[i].identifier_idx then
                         begin
+                           overlay_annotation := overlay_annotation + '.' + lex.token_string (lex.token.src_loc);
                            lex.advance_token;
                            if not lex.token_is_symbol(sym_equals) then
                               raise compile_error.Create(err_equals_expected);
@@ -2450,7 +2453,8 @@ destructor TStructuredConstant.Destroy;
       end;
       if (StructuredConstantKind = scSimple)
          and
-         (Length (linearly_arranged_elements) = 1) then
+         (Length (linearly_arranged_elements) = 1)
+      then
          begin
             linearly_arranged_elements[0].typedef.Release;
             linearly_arranged_elements[0].constant.Release
@@ -2461,7 +2465,9 @@ destructor TStructuredConstant.Destroy;
                begin
                   if not linearly_arranged_elements[i].dont_refcount_typedef then
                      linearly_arranged_elements[i].typedef.Release;
-                  linearly_arranged_elements[i].constant.Release
+                  linearly_arranged_elements[i].variant_typedef.Release;
+                  if linearly_arranged_elements[i].constant <> Self then
+                     linearly_arranged_elements[i].constant.Release
                end;
       typedef.Release;
       inherited
@@ -2486,7 +2492,7 @@ procedure TStructuredConstant.add_elements_to_array
     annotation: string
    );
 
-   procedure add_simple_element_to_array (constant: TDefinition; typedef: TTypeDef; dont_refcount_typedef: boolean; path, value: string);
+   procedure add_simple_element_to_array (constant: TDefinition; typedef: TTypeDef; dont_refcount_typedef: boolean; path, value: string; variant_typedef: TTypeDef);
       var i: integer;
       begin  // add_simple_element_to_array
          i := Length(arr);
@@ -2497,8 +2503,17 @@ procedure TStructuredConstant.add_elements_to_array
          if not dont_refcount_typedef then
             arr[i].typedef.AddRef;
 
+         if variant_typedef <> nil then
+            begin
+               arr[i].variant_typedef := variant_typedef;
+               variant_typedef.AddRef
+            end;
+
          arr[i].constant := constant;
-         if constant <> nil then
+         if (constant <> nil)
+            and
+            (constant <> Self)
+         then
             arr[i].constant.AddRef;
 
          arr[i].path := path;
@@ -2516,7 +2531,7 @@ procedure TStructuredConstant.add_elements_to_array
    begin   // TStructuredConstant.add_elements_to_array
       case StructuredConstantKind of
          scSimple:
-            add_simple_element_to_array (simple_constant, typedef, false, annotation, simple_constant.AsString);
+            add_simple_element_to_array (simple_constant, typedef, false, annotation, simple_constant.AsString, nil);
          scRecord:
             begin
                recdef := TRecordType(typedef);
@@ -2565,12 +2580,19 @@ procedure TStructuredConstant.add_elements_to_array
                         else
                            assert(false)
                      end;
-                     array_elements[i - arrdef.index_typedef.info.min_value.AsInteger].add_elements_to_array(arr, annotation + index_annotation)
+                     array_elements[i-arrdef.index_typedef.info.min_value.AsInteger].add_elements_to_array(arr, annotation + index_annotation)
                   end
             end;
-         scOverlay,
+         scOverlay:
+            if overlay_constant <> nil then
+               begin
+                  overlay_constant.add_elements_to_array (arr, annotation + overlay_annotation);
+                  add_simple_element_to_array (nil, typedef, true, annotation + '.{padding}', '0', overlay_constant.typedef)
+               end
+            else
+               add_simple_element_to_array (nil, typedef, true, annotation + '.{padding}', '0', nil);
          scOther:
-            add_simple_element_to_array (nil, typedef, true, annotation, 'null');
+            add_simple_element_to_array (nil, typedef, true, annotation, 'null', nil);
       else
          assert(false)
       end
@@ -2931,7 +2953,7 @@ function TExpression.real_constant_value: real;
 
 function TExpression.boolean_constant_value: boolean;
    begin
-      result := false; // suppress compiler warning
+      result := false;  // suppress compiler warning
       assert(false, 'expression is not TConstantPrimary')
    end;
 

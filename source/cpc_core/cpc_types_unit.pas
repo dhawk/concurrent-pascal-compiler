@@ -752,18 +752,18 @@ procedure TOverlayType.CheckAssignmentCompatability
          constant_definition:
             {never compatable since constant doesn't have exact type, and there may be ambiguity within the overlay}
             ;
-         expression_definition:
-            begin
-               compatable := TExpression(def).typedef = Self;
-               for i := 0 to Length(overlaid_variables) - 1 do
-                  if overlaid_variables[i].typedef = TExpression(def).typedef then
-                     compatable := true
-            end;
          structured_constant_definition:
             begin
-               compatable := TStructuredConstant(def).typedef = Self;
+               compatable := Self = TStructuredConstant(def).typedef;
                for i := 0 to Length(overlaid_variables) - 1 do
                   if overlaid_variables[i].typedef = TStructuredConstant(def).typedef then
+                     compatable := true
+            end;
+         expression_definition:
+            begin
+               compatable := Self = TExpression(def).typedef;
+               for i := 0 to Length(overlaid_variables) - 1 do
+                  if overlaid_variables[i].typedef = TExpression(def).typedef then
                      compatable := true
             end;
       else

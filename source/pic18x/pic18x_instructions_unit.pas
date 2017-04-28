@@ -4094,7 +4094,10 @@ function TPIC18x_Data.hex_code: THexArray;
    begin
       SetLength (result, 0);
       for i := 0 to structured_constant.LengthOfSimpleConstants-1 do
-         if structured_constant[i].constant = nil then
+         if structured_constant[i].variant_typedef <> nil then   // overlay padding
+            for j := TPIC18x_TypeInfo(structured_constant[i].variant_typedef.info).Size+1 to TPIC18x_TypeInfo(structured_constant[i].typedef.info).Size do
+               output_byte (0)
+         else if structured_constant[i].constant = nil then
             for j := 1 to TPIC18x_TypeInfo(structured_constant[i].typedef.info).Size do
                output_byte (0)
          else
@@ -4185,15 +4188,36 @@ procedure TPIC18x_Data.generate_assembly_code;
          end
       end;  // output_simple_constant
 
+   function output_overlay_padding (overlay_typedef, variant_typedef: TTypeDef): boolean;
+      var
+         i: integer;
+         n: integer;
+      begin
+         n := TPIC18x_TypeInfo(overlay_typedef.info).Size - TPIC18x_TypeInfo(variant_typedef.info).Size;
+         if n = 0 then
+            result := true
+         else
+            begin
+               result := false;
+               s := s + byte_to_hex_string(0);
+               for i := 2 to n do
+                  s := s + ',' + byte_to_hex_string(0)
+            end
+      end;
+
    var
       i,j: integer;
       bytes: TDataByteArray;
+      suppress: boolean;
    begin   // TPIC18x_Data.generate_assembly_code
       sync_source (decl_end_src_loc);
       for i := 0 to structured_constant.LengthOfSimpleConstants-1 do
          begin
+            suppress := false;
             s := define_data_operator;
-            if structured_constant[i].constant = nil then
+            if structured_constant[i].variant_typedef <> nil then
+               suppress := output_overlay_padding (structured_constant[i].typedef, structured_constant[i].variant_typedef)
+            else if structured_constant[i].constant = nil then
                output_simple_constant (structured_constant[i].typedef, nil)
             else
                begin
@@ -4212,11 +4236,12 @@ procedure TPIC18x_Data.generate_assembly_code;
                               s := s + ',' + byte_to_hex_string(0)
                         end;
                      else
-                     assert (false)
+                        assert (false)
                   end
                end;
             annotation := identifier + structured_constant[i].path + ' ' + assign_operator + ' ' + structured_constant[i].value;
-            out (s);
+            if not suppress then
+               out (s);
             annotation := ''
          end
    end;   // TPIC18x_Data.generate_assembly_code

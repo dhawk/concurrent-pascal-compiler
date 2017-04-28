@@ -291,6 +291,7 @@ procedure TPIC18x_TypeDef_TypeInfo.enumerate_constant_bytes (path: string; const
             assert (false)
          end
       end;
+
    var
       typ: TTypeDef;
       i: integer;
@@ -321,16 +322,23 @@ procedure TPIC18x_TypeDef_TypeInfo.enumerate_constant_bytes (path: string; const
             structured_constant_definition:
                begin
                   sc := TStructuredConstant(constant);
-                  for i := 0 to sc.LengthOfSimpleConstants-1 do
-                     TPIC18x_TypeDef_TypeInfo(sc[i].typedef.info).enumerate_constant_bytes (path + sc[i].path, sc[i].constant, proc);
-                  if sc.StructuredConstantKind = scOverlay then
-                     for i := 1 to TPIC18x_TypeDef_TypeInfo(sc.typedef.info).Size - TPIC18x_TypeDef_TypeInfo(sc.typedef.info).Size do
-                        proc (0,  i, '(overlay padding)', '0', false)
+                  if sc.StructuredConstantKind <> scOverlay then
+                     for i := 0 to sc.LengthOfSimpleConstants-1 do
+                        TPIC18x_TypeDef_TypeInfo(sc[i].typedef.info).enumerate_constant_bytes (path + sc[i].path, sc[i].constant, proc)
+                  else if sc.overlay_constant = nil then
+                     for i := 1 to TPIC18x_TypeDef_TypeInfo(sc.typedef.info).Size do
+                        proc (0,  i, '', '0', false)
+                  else
+                     begin
+                        for i := 0 to sc.LengthOfSimpleConstants-2 do
+                           TPIC18x_TypeDef_TypeInfo(sc[i].typedef.info).enumerate_constant_bytes (path + sc[i].path, sc[i].constant, proc);
+                        for i := 1 to TPIC18x_TypeDef_TypeInfo(sc.typedef.info).Size - TPIC18x_TypeDef_TypeInfo(sc.overlay_constant.typedef.info).Size do
+                           proc (0,  i, '(overlay padding)', '0', false)
+                     end
                end;
          else
             assert (false)
-         end;
-
+         end
    end;
 
 function TPIC18x_Expression_TypeInfo.Size: integer;
