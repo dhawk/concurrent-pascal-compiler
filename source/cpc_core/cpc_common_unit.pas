@@ -191,6 +191,7 @@ const
    err_ordinal_type_expected = 'ordinal type expected';
    err_ordinal_value_wont_fit_in_field_width = 'ordinal value won''t fit in field width';
    err_out_of_order_index = 'index out of order: "%s" expected';
+   err_overlay_constant_not_allowed = 'overlay constant not allowed';
    err_overlay_may_not_contain_class_variables = 'overlay may not contain class variables';
    err_overlay_may_not_contain_monitor_variables = 'overlay may not contain monitor variables';
    err_overlay_may_not_contain_process_variables = 'overlay may not contain process variables';

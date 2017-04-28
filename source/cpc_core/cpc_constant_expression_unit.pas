@@ -228,6 +228,8 @@ constructor Tcprimary.CreateFromSourceTokens;
                            (access.node_structured_constant.StructuredConstantKind <> scSimple)
                         then
                            raise compile_error.Create(err_constant_expected, access.src_loc);
+                        if access.node_initialization_assumption_invalid then
+                           raise compile_error.Create(err_overlay_constant_not_allowed, access.src_loc);
                         CopyFrom(access.node_structured_constant.simple_constant)
                      finally
                         access.Release
