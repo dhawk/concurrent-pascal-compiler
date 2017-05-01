@@ -59,7 +59,7 @@ constructor Told_TROMConstant.CreateFromSourceTokens;
          raise compile_error.Create(err_equals_expected);
       lex.advance_token;
 
-      initial_value := TStructuredConstant.CreateFromSourceTokens(typedef, typedef_src_loc);
+      initial_value := CreateStructuredConstantFromSourceTokens(typedef, typedef_src_loc);
 
       if not lex.token_is_symbol(sym_semicolon) then
          compile_error.Create(err_semicolon_expected);

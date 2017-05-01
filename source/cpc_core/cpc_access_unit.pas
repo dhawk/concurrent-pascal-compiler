@@ -990,7 +990,7 @@ constructor TAccess.CreateFromSourceTokens;
                   raise compile_error.Create(err_colon_expected_for_anonymous_structured_constant);
                lex.advance_token;
 
-               sc := TStructuredConstant.CreateFromSourceTokens(sc_typedef, sc_typedef_src_loc);
+               sc := CreateStructuredConstantFromSourceTokens(sc_typedef, sc_typedef_src_loc);
                set_node_constant_info(sc);
                sc.Release
             end;

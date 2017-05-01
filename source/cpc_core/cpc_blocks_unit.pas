@@ -390,7 +390,7 @@ procedure process_constant_definition_part;
                      raise compile_error.Create(err_equals_expected);
                   lex.advance_token;
 
-                  structured_constant := TStructuredConstant.CreateFromSourceTokens(typedef, typedef_src_loc);
+                  structured_constant := CreateStructuredConstantFromSourceTokens(typedef, typedef_src_loc);
                   try
                      CurrentDefinitionTable.DefineForCurrentScope(id_idx, structured_constant, src_loc)
                   finally
@@ -1386,7 +1386,7 @@ procedure TDataItemList.AddFromSourceTokens (context: TDefinition);
                         lex.advance_token;
 
                         if lex.token_is_symbol(sym_left_parenthesis) then
-                           initial_value := TStructuredConstant.CreateFromSourceTokens (typedef, typedef_src_loc)
+                           initial_value := CreateStructuredConstantFromSourceTokens (typedef, typedef_src_loc)
                         else if lex.token_is_identifier
                                 and
                                 (CurrentDefinitionTable[lex.token.identifier_idx].definition_kind = structured_constant_definition) then
@@ -1567,7 +1567,7 @@ constructor TRoutine.CreateFromSourceTokens
                      if lex.token_is_symbol (sym_assign) then
                         begin   // initializer for function result
                            lex.advance_token;
-                           function_result.initial_value := TStructuredConstant.CreateFromSourceTokens (typedef, typedef_src_loc)
+                           function_result.initial_value := CreateStructuredConstantFromSourceTokens (typedef, typedef_src_loc)
                         end
                   end;
 

@@ -394,6 +394,7 @@ type
                constant: TDefinition;  // either nil, TConstant or TStructuredConstant (packed array constant + filler0)
                path, value: string
             end;
+         constructor CreateFromSourceTokens (typ: TTypeDef; typ_src_loc: TSourceLocation);
       private type
          TElementArray = array of TElement;
       private
@@ -425,7 +426,6 @@ type
 
          property default_anonymous [idx: integer]: TElement read get_element; default;   // elements
          function NumberOfElements: integer;
-         constructor CreateFromSourceTokens (typ: TTypeDef; typ_src_loc: TSourceLocation);
          constructor CreateFromConstant (_typedef: TTypeDef; _constant: TConstant);
          destructor Destroy;
             override;
@@ -563,6 +563,7 @@ type
 function SetByte (constant: TConstant; byteno: cardinal): byte;
 function CreateTypeDenoterFromSourceTokens: TTypeDef;
 function CreateExpressionFromSourceTokens: TExpression;
+function CreateStructuredConstantFromSourceTokens (typedef: TTypeDef; typedef_src_loc: TSourceLocation): TStructuredConstant;
 procedure check_for_write_access (v: TVariable; src_loc: TSourceLocation);
 
 
@@ -573,7 +574,7 @@ uses
    cpc_constant_expression_unit,
    cpc_expressions_unit,
    cpc_target_cpu_unit,
-   Math, cpc_types_unit;
+   Math, cpc_types_unit, cpc_access_unit;
 
 function SetByte (constant: TConstant; byteno: cardinal): byte;
    function bit_in_set (bitno: cardinal): boolean;
@@ -2183,7 +2184,7 @@ constructor TStructuredConstant.CreateFromSourceTokens
                   lex.advance_token;
 
                   array_items[i - arrdef.index_typedef.info.min_value.AsInteger] :=
-                     TStructuredConstant.CreateFromSourceTokens(arrdef.element_typedef, arrdef.element_typedef_src_loc);
+                     CreateStructuredConstantFromSourceTokens(arrdef.element_typedef, arrdef.element_typedef_src_loc);
 
                   if i < arrdef.index_typedef.info.max_value.AsInteger then
                      begin
@@ -2241,7 +2242,7 @@ constructor TStructuredConstant.CreateFromSourceTokens
                         raise compile_error.Create(err_equals_expected);
                      lex.advance_token;
 
-                     record_fields[i] := TStructuredConstant.CreateFromSourceTokens(recdef.fields[i].typedef, recdef.fields[i].typedef_src_loc);
+                     record_fields[i] := CreateStructuredConstantFromSourceTokens(recdef.fields[i].typedef, recdef.fields[i].typedef_src_loc);
 
                      all_remaining_fields_are_anonymous := true;
                      for j := i+1 to Length(recdef.fields) - 1 do
@@ -2364,7 +2365,7 @@ constructor TStructuredConstant.CreateFromSourceTokens
                lex.token_idx := first_overlay_src_token_idx;
                if overlay_typedef.overlaid_variables[i].anonymous then
                   try
-                     overlay_constant := TStructuredConstant.CreateFromSourceTokens (overlay_typedef.overlaid_variables[i].typedef, lex.token.src_loc);
+                     overlay_constant := CreateStructuredConstantFromSourceTokens(overlay_typedef.overlaid_variables[i].typedef, lex.token.src_loc);
                      EXIT   // this overlaid variable matched
                   except
                      on e: compile_error do
@@ -2388,7 +2389,7 @@ constructor TStructuredConstant.CreateFromSourceTokens
                            if not lex.token_is_symbol(sym_equals) then
                               raise compile_error.Create(err_equals_expected);
                            lex.advance_token;
-                           overlay_constant := TStructuredConstant.CreateFromSourceTokens (overlay_typedef.overlaid_variables[i].typedef, lex.token.src_loc);
+                           overlay_constant := CreateStructuredConstantFromSourceTokens (overlay_typedef.overlaid_variables[i].typedef, lex.token.src_loc);
                            if not lex.token_is_symbol(sym_right_parenthesis) then
                               raise compile_error.Create(err_right_parenthesis_expected);
                            lex.advance_token;
@@ -3043,6 +3044,33 @@ function CreateTypeDenoterFromSourceTokens: TTypeDef;
             result.last_src_loc := lex.previous_token_src_loc
          end;
       assert(result.IsTypeDefinition)
+   end;
+
+function CreateStructuredConstantFromSourceTokens (typedef: TTypeDef; typedef_src_loc: TSourceLocation): TStructuredConstant;
+   var
+      acc: TAccess;
+      mark: integer;
+   begin
+      mark := lex.mark_token_position;
+      if lex.token_is_identifier then
+         begin
+            acc := TAccess.CreateFromSourceTokens;
+            try
+               if acc.node_access_kind = structured_constant_access then
+                  if acc.node_typedef = typedef then
+                     begin
+                        result := acc.node_structured_constant;
+                        result.AddRef;
+                        exit
+                     end
+                  else
+                     raise compile_error.Create (err_wrong_type, acc.src_loc)
+            finally
+               acc.Release
+            end
+         end;
+      lex.backup (mark);
+      result := TStructuredConstant.CreateFromSourceTokens (typedef, typedef_src_loc)
    end;
 
 procedure check_for_write_access
