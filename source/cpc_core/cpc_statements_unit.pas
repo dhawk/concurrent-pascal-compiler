@@ -2088,13 +2088,13 @@ procedure TWithStatement.scan_starting_at_with_variable;
                   assert (access.node_structured_constant.StructuredConstantKind = scRecord);
                   for i := 0 to Length(record_typedef.fields) - 1 do
                      begin
-                        access.node_structured_constant.array_elements[i].AddRef;
+                        access.node_structured_constant.array_items[i].AddRef;
                         CurrentDefinitionTable.DefineForCurrentScope
                            (record_typedef.fields[i].identifier_idx,
-                            access.node_structured_constant.array_elements[i],
+                            access.node_structured_constant.array_items[i],
                             lex.token.src_loc
                            );
-                        access.node_structured_constant.array_elements[i].Release
+                        access.node_structured_constant.array_items[i].Release
                      end;
 
                   if lex.token_is_symbol(sym_comma) then

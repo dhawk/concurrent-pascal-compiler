@@ -4093,7 +4093,7 @@ function TPIC18x_Data.hex_code: THexArray;
       bytes: TDataByteArray;
    begin
       SetLength (result, 0);
-      for i := 0 to structured_constant.LengthOfSimpleConstants-1 do
+      for i := 0 to structured_constant.NumberOfElements-1 do
          if structured_constant[i].variant_typedef <> nil then   // overlay padding
             for j := TPIC18x_TypeInfo(structured_constant[i].variant_typedef.info).Size+1 to TPIC18x_TypeInfo(structured_constant[i].typedef.info).Size do
                output_byte (0)
@@ -4211,7 +4211,7 @@ procedure TPIC18x_Data.generate_assembly_code;
       suppress: boolean;
    begin   // TPIC18x_Data.generate_assembly_code
       sync_source (decl_end_src_loc);
-      for i := 0 to structured_constant.LengthOfSimpleConstants-1 do
+      for i := 0 to structured_constant.NumberOfElements-1 do
          begin
             suppress := false;
             s := define_data_operator;

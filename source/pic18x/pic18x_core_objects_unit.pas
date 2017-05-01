@@ -323,14 +323,14 @@ procedure TPIC18x_TypeDef_TypeInfo.enumerate_constant_bytes (path: string; const
                begin
                   sc := TStructuredConstant(constant);
                   if sc.StructuredConstantKind <> scOverlay then
-                     for i := 0 to sc.LengthOfSimpleConstants-1 do
+                     for i := 0 to sc.NumberOfElements-1 do
                         TPIC18x_TypeDef_TypeInfo(sc[i].typedef.info).enumerate_constant_bytes (path + sc[i].path, sc[i].constant, proc)
                   else if sc.overlay_constant = nil then
                      for i := 1 to TPIC18x_TypeDef_TypeInfo(sc.typedef.info).Size do
                         proc (0,  i, '', '0', false)
                   else
                      begin
-                        for i := 0 to sc.LengthOfSimpleConstants-2 do
+                        for i := 0 to sc.NumberOfElements-2 do
                            TPIC18x_TypeDef_TypeInfo(sc[i].typedef.info).enumerate_constant_bytes (path + sc[i].path, sc[i].constant, proc);
                         for i := 1 to TPIC18x_TypeDef_TypeInfo(sc.typedef.info).Size - TPIC18x_TypeDef_TypeInfo(sc.overlay_constant.typedef.info).Size do
                            proc (0,  i, '(overlay padding)', '0', false)

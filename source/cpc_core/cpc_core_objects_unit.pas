@@ -382,27 +382,27 @@ type
          procedure dont_reference_count_enum_typedef;
       end;
 
-   TSimpleConstant =
-      record
-         typedef: TTypeDef;
-         dont_refcount_typedef: boolean;
-         variant_typedef: TTypeDef;   // only used for overlay padding
-         constant: TDefinition;
-             // either TConstant or TStructuredConstant (packed array constant + filler0
-         path, value: string
-      end;
-   TSimpleConstantArray = array of TSimpleConstant;
    TStructuredConstantKind = (scSimple, scArray, scRecord, scPackedRecord, scOverlay, scOther);
    TStructuredConstant =
       class(TDefinition)
+      protected type
+         TElement =
+            record
+               Kind: (sceConstant, scePackedRecord, sceOverlayPadding, sceOther);
+               typedef: TTypeDef;
+               variant_typedef: TTypeDef;   // only used for overlay padding
+               constant: TDefinition;  // either nil, TConstant or TStructuredConstant (packed array constant + filler0)
+               path, value: string
+            end;
+      private type
+         TElementArray = array of TElement;
       private
-         linearly_arranged_elements: TSimpleConstantArray;
-         function get_const (i: integer): TSimpleConstant;
+         var elements: TElementArray;
          procedure add_elements_to_array
-            (var arr: TSimpleConstantArray;
+            (var arr: TElementArray;
              annotation: string
             );
-      protected
+         function get_element (i: integer): TElement;
          procedure set_StructuredConstantKind;
       public
          typedef: TTypeDef;
@@ -411,8 +411,8 @@ type
 
          // only one of the following will be used depending on StructuredConstantKind
          simple_constant: TConstant;                    // only for if StructuredConstantKind = scSimple
-         array_elements: array of TStructuredConstant;  // only for StructuredConstantKind = scArray
-         array_element_typedef: TTypeDef;
+         array_items: array of TStructuredConstant;     // only for StructuredConstantKind = scArray
+         array_item_typedef: TTypeDef;
          record_fields: array of TStructuredConstant;   // only for StructuredConstantKind = scRecord
          packed_record_fields:                          // only for StructuredConstantKind = scPackedRecord
             array of
@@ -423,8 +423,8 @@ type
          overlay_constant: TStructuredConstant;         // only for StructuredConstantKind = scOoverlay
          overlay_annotation: string;
 
-         property default_anonymous [idx: integer]: TSimpleConstant read get_const; default;   // linearly arranged
-         function LengthOfSimpleConstants: integer;
+         property default_anonymous [idx: integer]: TElement read get_element; default;   // elements
+         function NumberOfElements: integer;
          constructor CreateFromSourceTokens (typ: TTypeDef; typ_src_loc: TSourceLocation);
          constructor CreateFromConstant (_typedef: TTypeDef; _constant: TConstant);
          destructor Destroy;
@@ -2108,11 +2108,11 @@ constructor TStructuredConstant.CreateFromSourceTokens
 
          arrdef := TArrayType(typedef);
 
-         array_element_typedef := arrdef.element_typedef;
-         array_element_typedef.AddRef;
+         array_item_typedef := arrdef.element_typedef;
+         array_item_typedef.AddRef;
 
          try
-            SetLength(array_elements, arrdef.index_typedef.info.max_value.AsInteger - arrdef.index_typedef.info.min_value.AsInteger + 1);
+            SetLength(array_items, arrdef.index_typedef.info.max_value.AsInteger - arrdef.index_typedef.info.min_value.AsInteger + 1);
 
             for i := arrdef.index_typedef.info.min_value.AsInteger to arrdef.index_typedef.info.max_value.AsInteger do
                begin
@@ -2182,7 +2182,7 @@ constructor TStructuredConstant.CreateFromSourceTokens
                      raise compile_error.Create(err_equals_expected);
                   lex.advance_token;
 
-                  array_elements[i - arrdef.index_typedef.info.min_value.AsInteger] :=
+                  array_items[i - arrdef.index_typedef.info.min_value.AsInteger] :=
                      TStructuredConstant.CreateFromSourceTokens(arrdef.element_typedef, arrdef.element_typedef_src_loc);
 
                   if i < arrdef.index_typedef.info.max_value.AsInteger then
@@ -2199,11 +2199,11 @@ constructor TStructuredConstant.CreateFromSourceTokens
          except
             on e: compile_error do
                begin
-                  array_element_typedef.Release;
-                  array_element_typedef := nil;
-                  for i := 0 to Length(array_elements)-1 do
-                     array_elements[i].Release;
-                  SetLength (array_elements, 0);
+                  array_item_typedef.Release;
+                  array_item_typedef := nil;
+                  for i := 0 to Length(array_items)-1 do
+                     array_items[i].Release;
+                  SetLength (array_items, 0);
                   raise
                end
          end
@@ -2440,9 +2440,9 @@ destructor TStructuredConstant.Destroy;
                end;
          scArray:
             begin
-               for i := 0 to Length(array_elements)-1 do
-                  array_elements[i].Release;
-               array_element_typedef.Release
+               for i := 0 to Length(array_items)-1 do
+                  array_items[i].Release;
+               array_item_typedef.Release
             end;
          scOverlay:
             overlay_constant.Release;
@@ -2451,75 +2451,98 @@ destructor TStructuredConstant.Destroy;
       else
          assert (false)
       end;
-      if (StructuredConstantKind = scSimple)
-         and
-         (Length (linearly_arranged_elements) = 1)
-      then
-         begin
-            linearly_arranged_elements[0].typedef.Release;
-            linearly_arranged_elements[0].constant.Release
-         end
-      else
-         for i := 0 to Length(linearly_arranged_elements)-1 do
-            if linearly_arranged_elements[i].typedef.type_kind <> packed_record_type then
+
+      for i := 0 to Length(elements)-1 do
+         case elements[i].Kind of
+            sceConstant:
                begin
-                  if not linearly_arranged_elements[i].dont_refcount_typedef then
-                     linearly_arranged_elements[i].typedef.Release;
-                  linearly_arranged_elements[i].variant_typedef.Release;
-                  if linearly_arranged_elements[i].constant <> Self then
-                     linearly_arranged_elements[i].constant.Release
+                  elements[i].typedef.Release;
+                  elements[i].constant.Release
                end;
+            sceOverlayPadding:
+               elements[i].variant_typedef.Release;
+            scePackedRecord,
+            sceOther:
+               ;
+         else
+            assert (false)
+         end;
+
       typedef.Release;
       inherited
    end;
 
-function TStructuredConstant.get_const (i: integer): TSimpleConstant;
+function TStructuredConstant.get_element (i: integer): TElement;
    begin
-      if Length(linearly_arranged_elements) = 0 then
-         add_elements_to_array (linearly_arranged_elements, '');
-      result := linearly_arranged_elements[i]
+      if Length(elements) = 0 then
+         add_elements_to_array (elements, '');
+      result := elements[i]
    end;
 
-function TStructuredConstant.LengthOfSimpleConstants: integer;
+function TStructuredConstant.NumberOfElements: integer;
    begin
-      if Length(linearly_arranged_elements) = 0 then
-         add_elements_to_array (linearly_arranged_elements, '');
-      result := Length(linearly_arranged_elements)
+      if Length(elements) = 0 then
+         add_elements_to_array (elements, '');
+      result := Length(elements)
    end;
 
 procedure TStructuredConstant.add_elements_to_array
-   (var arr: TSimpleConstantArray;
+   (var arr: TElementArray;
     annotation: string
    );
 
-   procedure add_simple_element_to_array (constant: TDefinition; typedef: TTypeDef; dont_refcount_typedef: boolean; path, value: string; variant_typedef: TTypeDef);
+   procedure add_simple_constant_to_array (constant: TConstant; value: string);
       var i: integer;
-      begin  // add_simple_element_to_array
+      begin
          i := Length(arr);
          SetLength(arr, i+1);
-
+         arr[i].Kind := sceConstant;
          arr[i].typedef := typedef;
-         arr[i].dont_refcount_typedef := dont_refcount_typedef;
-         if not dont_refcount_typedef then
-            arr[i].typedef.AddRef;
+         arr[i].typedef.AddRef;
+         arr[i].constant := constant;
+         arr[i].constant.AddRef;
+         arr[i].path := annotation;
+         arr[i].value := value
+      end;
 
+   procedure add_packed_record_element_to_array (value: string);
+      var i: integer;
+      begin
+         i:= Length(arr);
+         SetLength(arr, i+1);
+         arr[i].Kind := scePackedRecord;
+         arr[i].typedef := typedef;
+         arr[i].constant := Self;
+         arr[i].path := annotation;
+         arr[i].value := value
+      end;
+
+   procedure add_overlay_padding_element_to_array (variant_typedef: TTypeDef);
+      var i: integer;
+      begin
+         i := Length(arr);
+         SetLength(arr, i+1);
+         arr[i].Kind := sceOverlayPadding;
+         arr[i].typedef := typedef;
          if variant_typedef <> nil then
             begin
                arr[i].variant_typedef := variant_typedef;
                variant_typedef.AddRef
             end;
+         arr[i].path := annotation + '.{padding}';
+         arr[i].value := '0'
+      end;
 
-         arr[i].constant := constant;
-         if (constant <> nil)
-            and
-            (constant <> Self)
-         then
-            arr[i].constant.AddRef;
-
-         arr[i].path := path;
-
-         arr[i].value := value
-      end;   // add_simple_element_to_array
+   procedure add_other_element_to_array;
+      var i: integer;
+      begin
+         i := Length(arr);
+         SetLength(arr, i+1);
+         arr[i].Kind := sceOther;
+         arr[i].typedef := typedef;
+         arr[i].path := annotation;
+         arr[i].value := 'null'
+      end;
 
    var
       i: integer;
@@ -2531,7 +2554,7 @@ procedure TStructuredConstant.add_elements_to_array
    begin   // TStructuredConstant.add_elements_to_array
       case StructuredConstantKind of
          scSimple:
-            add_simple_element_to_array (simple_constant, typedef, false, annotation, simple_constant.AsString, nil);
+            add_simple_constant_to_array (simple_constant, simple_constant.AsString);
          scRecord:
             begin
                recdef := TRecordType(typedef);
@@ -2548,12 +2571,8 @@ procedure TStructuredConstant.add_elements_to_array
                      if i < Length(precdef.fields)-1 then
                         value := value + ','
                   end;
-               i := Length(arr);
-               SetLength(arr, i+1);
-               arr[i].typedef := precdef;      // no AddRef here to prevent circle in reference count
-               arr[i].constant := Self;        // ditto
-               arr[i].path := annotation;
-               arr[i].value := value + ')'
+               value := value + ')';
+               add_packed_record_element_to_array (value)
             end;
          scArray:
             begin
@@ -2580,19 +2599,19 @@ procedure TStructuredConstant.add_elements_to_array
                         else
                            assert(false)
                      end;
-                     array_elements[i-arrdef.index_typedef.info.min_value.AsInteger].add_elements_to_array(arr, annotation + index_annotation)
+                     array_items[i-arrdef.index_typedef.info.min_value.AsInteger].add_elements_to_array(arr, annotation + index_annotation)
                   end
             end;
          scOverlay:
             if overlay_constant <> nil then
                begin
                   overlay_constant.add_elements_to_array (arr, annotation + overlay_annotation);
-                  add_simple_element_to_array (nil, typedef, true, annotation + '.{padding}', '0', overlay_constant.typedef)
+                  add_overlay_padding_element_to_array (overlay_constant.typedef)
                end
             else
-               add_simple_element_to_array (nil, typedef, true, annotation + '.{padding}', '0', nil);
+               add_overlay_padding_element_to_array (nil);
          scOther:
-            add_simple_element_to_array (nil, typedef, true, annotation, 'null', nil);
+            add_other_element_to_array;
       else
          assert(false)
       end
@@ -2697,13 +2716,13 @@ constructor TDefaultValue.CreateDefaultValue (typ: TTypeDef);
          scArray:
             begin
                arrtyp := TArrayType(typ);
-               SetLength (array_elements, arrtyp.index_typedef.info.max_value.AsInteger - arrtyp.index_typedef.info.min_value.AsInteger + 1);
-               array_element_typedef := arrtyp.element_typedef;
-               array_element_typedef.AddRef;
-               for i := 0 to Length(array_elements)-1 do
+               SetLength (array_items, arrtyp.index_typedef.info.max_value.AsInteger - arrtyp.index_typedef.info.min_value.AsInteger + 1);
+               array_item_typedef := arrtyp.element_typedef;
+               array_item_typedef.AddRef;
+               for i := 0 to Length(array_items)-1 do
                   begin
-                     array_elements[i] := arrtyp.element_typedef.info.DefaultValue;
-                     array_elements[i].AddRef
+                     array_items[i] := arrtyp.element_typedef.info.DefaultValue;
+                     array_items[i].AddRef
                   end
             end;
          scRecord:
@@ -2733,7 +2752,7 @@ constructor TDefaultValue.CreateDefaultValue (typ: TTypeDef);
       else
          assert (false)
       end;
-      add_elements_to_array (linearly_arranged_elements, '');
+      add_elements_to_array (elements, '');
       if StructuredConstantKind = scSimple then
          typedef.Release
    end;    // TDefaultValue.CreateDefaultValue
@@ -2742,7 +2761,7 @@ destructor TDefaultValue.Destroy;
    begin
       typedef := nil;   // prevents inherited Destroy from Releasing this
       if StructuredConstantKind = scSimple then
-         linearly_arranged_elements[0].typedef := nil;
+         elements[0].typedef := nil;
       inherited
    end;
 

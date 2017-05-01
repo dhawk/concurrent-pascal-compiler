@@ -706,8 +706,8 @@ constructor TAccess.CreateFromSourceTokens;
                         begin
                            assert (sc.StructuredConstantKind = scArray);
                            idx := path[path_idx].index_expression.ordinal_constant_value - path[path_idx].index_typedef.info.min_value.AsInteger;
-                           assert((0 <= idx) and (idx < Length(sc.array_elements)));
-                           sc := sc.array_elements[idx]
+                           assert((0 <= idx) and (idx < Length(sc.array_items)));
+                           sc := sc.array_items[idx]
                         end;
                      record_field_access:
                         begin
