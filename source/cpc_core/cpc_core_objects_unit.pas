@@ -3052,25 +3052,32 @@ function CreateStructuredConstantFromSourceTokens (typedef: TTypeDef; typedef_sr
       mark: integer;
    begin
       mark := lex.mark_token_position;
-      if lex.token_is_identifier then
-         begin
-            acc := TAccess.CreateFromSourceTokens;
-            try
-               if acc.node_access_kind = structured_constant_access then
-                  if acc.node_typedef = typedef then
-                     begin
-                        result := acc.node_structured_constant;
-                        result.AddRef;
-                        exit
+      try
+         result := TStructuredConstant.CreateFromSourceTokens (typedef, typedef_src_loc)
+      except
+         on compile_error do
+            begin
+               lex.backup (mark);
+               if lex.token_is_identifier then
+                  begin
+                     acc := TAccess.CreateFromSourceTokens;
+                     try
+                        if acc.node_access_kind = structured_constant_access then
+                           if acc.node_typedef = typedef then
+                              begin
+                                 result := acc.node_structured_constant;
+                                 result.AddRef;
+                                 EXIT
+                              end
+                           else
+                              raise compile_error.Create (err_wrong_type, acc.src_loc)
+                     finally
+                        acc.Release
                      end
-                  else
-                     raise compile_error.Create (err_wrong_type, acc.src_loc)
-            finally
-               acc.Release
+                  end;
+               raise
             end
-         end;
-      lex.backup (mark);
-      result := TStructuredConstant.CreateFromSourceTokens (typedef, typedef_src_loc)
+      end
    end;
 
 procedure check_for_write_access
