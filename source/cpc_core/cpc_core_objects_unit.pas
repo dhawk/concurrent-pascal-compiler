@@ -3058,7 +3058,7 @@ function CreateStructuredConstantFromSourceTokens (typedef: TTypeDef; typedef_sr
          on compile_error do
             begin
                lex.backup (mark);
-               if lex.token_is_identifier then
+               if lex.token_is_identifier  then
                   begin
                      acc := TAccess.CreateFromSourceTokens;
                      try
