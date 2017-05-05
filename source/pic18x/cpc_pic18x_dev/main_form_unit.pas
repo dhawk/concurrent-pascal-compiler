@@ -377,8 +377,7 @@ procedure TMainForm.RunButtonClick(Sender: TObject);
 
 procedure TMainForm.FormCreate(Sender: TObject);
    begin
-      PageControl1.ActivePageIndex := 0;
-      SetCurrentDir (ExtractFilePath(ParamStr(0)) + 'pic18x' + PathDelim + 'compiler_test_cases')
+      PageControl1.ActivePageIndex := 0
    end;
 
 END.

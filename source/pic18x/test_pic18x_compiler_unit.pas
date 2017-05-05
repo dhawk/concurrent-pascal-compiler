@@ -6790,10 +6790,65 @@ procedure test134;
    end;
 
 procedure test135;   // test includes
+   const
+      include_dir = 'bc421e40-f96e-4efc-98cb-b360fe5ac8eb';
+      c1_fn = include_dir + PathDelim + 'include_test2' + PathDelim + 'c1.inc';
+      c2_fn = include_dir + PathDelim + 'include_test1' + PathDelim + 'c2.inc';
+      c3_fn = include_dir + PathDelim + 'include_test1' + PathDelim + 'c3.inc';
+   procedure write_include_files;
+      var f: TextFile;
+      begin
+         mkdir (include_dir);
+         mkdir (include_dir + PathDelim + 'include_test1');
+         mkdir (include_dir + PathDelim + 'include_test2');
+
+         assignfile (f, c1_fn);
+         Rewrite (f);
+         writeln (f, ' tc1=class');
+         writeln (f, '     public');
+         writeln (f, '      procedure p;');
+         writeln (f, '        begin end;');
+         writeln (f, '    begin');
+         writeln (f, '    end;');
+         CloseFile (f);
+
+         assignfile (f, c2_fn);
+         Rewrite (f);
+         writeln (f, '{$include ''..\include_test2\c1.inc''}');
+         writeln (f, ' tc2=class');
+         writeln (f, '      var c1: tc1;');
+         writeln (f, '     public');
+         writeln (f, '      procedure p;');
+         writeln (f, '        begin end;');
+         writeln (f, '    begin');
+         writeln (f, '      init c1');
+         writeln (f, '    end;');
+         CloseFile (f);
+
+         assignfile (f, c3_fn);
+         Rewrite (f);
+         writeln (f, ' tc3=class');
+         writeln (f, '     public');
+         writeln (f, '      procedure p;');
+         writeln (f, '        begin end;');
+         writeln (f, '    begin');
+         writeln (f, '    end;');
+         CloseFile (f)
+      end;
+   procedure delete_include_files;
+      begin
+         DeleteFile (c1_fn);
+         DeleteFile (c2_fn);
+         DeleteFile (c3_fn);
+         rmdir (include_dir + PathDelim + 'include_test1');
+         rmdir (include_dir + PathDelim + 'include_test2');
+         rmdir (include_dir)
+      end;
    begin
+      write_include_files;
       add ('type');
-      add ('{$include ''include_test1\c2.inc''}');
-      add ('{$include ''include_test1\c3.inc''}');
+      add ('{$include ''' + c2_fn + '''}');
+      add ('{$include ''' + c3_fn + '''}');
       add ('var');
       add (' c1: tc1;');
       add (' c2: tc2;');
@@ -6802,7 +6857,8 @@ procedure test135;   // test includes
       add (' init c1, c2, c3');
       add ('end.');
       start_test (135);
-      conclude_test
+      conclude_test;
+      delete_include_files
    end;
 
 procedure test136;  // asserts
