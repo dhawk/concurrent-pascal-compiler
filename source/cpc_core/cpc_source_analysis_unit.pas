@@ -26,12 +26,6 @@ type
          function file_name: string;
          function NullSourceLocation: boolean;
       end;
-   EFileDoesntExist =
-      class (Exception)
-      end;
-   ECantOpenFile =
-      class (Exception)
-      end;
 
 const
    NonExistantSourceLocation: TSourceLocation = (source_idx: -1; line_idx: 0; length: 0);
@@ -239,7 +233,13 @@ type
             override;
       end;
 
-type
+   EFileDoesntExist =
+      class (Exception)
+      end;
+   ECantOpenFile =
+      class (Exception)
+      end;
+
    tCompilerFlag =
       record
       private

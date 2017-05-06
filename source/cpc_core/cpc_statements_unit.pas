@@ -1538,6 +1538,7 @@ constructor TInitStatement.CreateFromSourceTokens;
       access: TAccess;
       initlist_idx,param_idx: integer;
       done: boolean;
+      src_loc: TSourceLocation;
    begin
       inherited Create(init_statement);
 
@@ -1550,13 +1551,15 @@ constructor TInitStatement.CreateFromSourceTokens;
          access := target_cpu.TAccess_CreateFromSourceTokens;
          if (access.node_access_kind <> variable_access)
             or
-            (access.node_typedef.type_kind <> system_type) then
+            (access.node_typedef.type_kind <> system_type)
+         then
             raise compile_error.Create(err_system_type_variable_expected, access.src_loc);
 
          if not BlockStack.IsLocalRAMVariable(access.base_variable) then
             begin
+               src_loc := access.src_loc;
                access.Release;
-               raise compile_error.Create(err_system_type_variable_can_only_be_initialized_in_the_initial_statment_of_where_it_was_declared, access.src_loc)
+               raise compile_error.Create(err_system_type_variable_can_only_be_initialized_in_the_initial_statment_of_where_it_was_declared, src_loc)
             end;
 
          initlist[initlist_idx].access := access;
