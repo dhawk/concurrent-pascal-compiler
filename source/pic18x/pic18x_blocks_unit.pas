@@ -34,6 +34,8 @@ type
             override;
          function Generate (param1, param2: integer): integer;
             override;
+         procedure AssignAddresses;
+            override;
          procedure global_declarations_examination_hook;
             override;
       end;
@@ -55,6 +57,8 @@ type
          hw_stack_usage: integer;
          varlist_initialization: TDynamicByteArray;
          inline_code: TInstructionArray;     // only used for signaled function in interrupt variables
+         procedure AssignAddresses;
+            override;
          function Generate (param1, param2: integer): integer;
             override;
          procedure PushDefaultResultValue;
@@ -68,6 +72,8 @@ type
          initial_stmt_stack_usage: integer;
          initial_statement_hw_stack_usage: integer;
          inline_code: TInstructionArray;     // only used for initial statement of interrupt variables
+         procedure AssignAddresses;
+            override;
          function Generate (param1, param2: integer): integer;
             override;
          function process_stack_size: integer;
@@ -90,6 +96,8 @@ type
          procedure PushInitialValues;
          procedure EnumerateInitialValues (proc: TByteParamProcedureOfObject);
          procedure InitializeEEPROMValues (system_type_name: string);
+         procedure AssignAddresses;
+            override;
          function Generate (param1, param2: integer): integer;
             override;
       end;
@@ -300,51 +308,54 @@ destructor TPIC18x_Program.Destroy;
       inherited
    end;
 
-function TPIC18x_Program.Generate (param1, param2: integer): integer;
+procedure TPIC18x_Program.AssignAddresses;
    var
       i: integer;
       typ: TTypeDef;
    begin
+      // assign simple types first so as to be more likely to be in bank0
+      for i := 0 to program_vars.Length-1 do
+         if not system_type_or_array_of_system_type (program_vars[i].TypeDef) then
+            begin
+               program_vars[i].address := sdram_used;
+               sdram_used := sdram_used + TPIC18x_TypeInfo(program_vars[i].typedef.info).Size
+            end;
+      total_bank0_used := sdram_used;
+      // assign system and array type addresses
+      for i := 0 to program_vars.Length-1 do
+         if system_type_or_array_of_system_type (program_vars[i].TypeDef) then
+            begin
+               typ := program_vars[i].TypeDef;
+               if typ.type_kind = array_type then
+                  typ := TArrayType(typ).element_typedef;
+               assert (typ.type_kind = system_type);
+               if TSystemType(typ).system_type_kind <> interrupt_system_type then
+                  begin
+                     if TPIC18x_SystemType(typ).contains_eeprom_vars then
+                        program_vars[i].address := sdram_used + $3F
+                     else
+                        program_vars[i].address := sdram_used + $3E;
+                     sdram_used := sdram_used + TPIC18x_TypeInfo(program_vars[i].typedef.info).Size;
+                  end
+            end;
+      // assign process stack addresses
+      for i := 0 to program_vars.Length-1 do
+         if (program_vars[i].typedef.type_kind = system_type)
+            and
+            (TSystemType(program_vars[i].typedef).system_type_kind = process_system_type)
+         then
+            begin
+               TPIC18x_Variable(program_vars[i]).stack_address := sdram_used;
+               sdram_used := sdram_used + TPIC18x_SystemType(program_vars[i].typedef).process_stack_size
+            end
+   end;
+
+function TPIC18x_Program.Generate (param1, param2: integer): integer;
+   var
+      i: integer;
+   begin
       result := 0;  // to suppress compiler warning
       case param1 of
-         AssignAddresses:
-            begin
-               // assign simple types first so as to be more likely to be in bank0
-               for i := 0 to program_vars.Length-1 do
-                  if not system_type_or_array_of_system_type (program_vars[i].TypeDef) then
-                     begin
-                        program_vars[i].address := sdram_used;
-                        sdram_used := sdram_used + TPIC18x_TypeInfo(program_vars[i].typedef.info).Size
-                     end;
-               total_bank0_used := sdram_used;
-               // assign system and array type addresses
-               for i := 0 to program_vars.Length-1 do
-                  if system_type_or_array_of_system_type (program_vars[i].TypeDef) then
-                     begin
-                        typ := program_vars[i].TypeDef;
-                        if typ.type_kind = array_type then
-                           typ := TArrayType(typ).element_typedef;
-                        assert (typ.type_kind = system_type);
-                        if TSystemType(typ).system_type_kind <> interrupt_system_type then
-                           begin
-                              if TPIC18x_SystemType(typ).contains_eeprom_vars then
-                                 program_vars[i].address := sdram_used + $3F
-                              else
-                                 program_vars[i].address := sdram_used + $3E;
-                              sdram_used := sdram_used + TPIC18x_TypeInfo(program_vars[i].typedef.info).Size;
-                           end
-                     end;
-               // assign process stack addresses
-               for i := 0 to program_vars.Length-1 do
-                  if (program_vars[i].typedef.type_kind = system_type)
-                     and
-                     (TSystemType(program_vars[i].typedef).system_type_kind = process_system_type)
-                  then
-                     begin
-                        TPIC18x_Variable(program_vars[i]).stack_address := sdram_used;
-                        sdram_used := sdram_used + TPIC18x_SystemType(program_vars[i].typedef).process_stack_size
-                     end;
-            end;
          GenerateCode:
             begin
                current_block := self;
@@ -422,80 +433,82 @@ function TPIC18x_Property.Generate (param1, param2: integer): integer;
       end
    end;
 
+procedure TPIC18x_Routine.AssignAddresses;
+   var
+      addr, i: integer;
+   begin
+      addr := 1 - TPIC18x_DataItemList(local_vars).Size;
+
+      for i := 0 to local_vars.Length-1 do
+         begin
+            local_vars[i].address := addr;
+            addr := addr + TPIC18x_TypeInfo(local_vars[i].TypeDef.info).Size
+         end;
+
+      if parameter_definitions <> nil then
+         for i := parameter_definitions.Length-1 downto 0 do
+            begin
+               if (parameter_definitions[i].descriptor in [rw_var, rw_eeprom])
+                  and
+                  (parameter_definitions[i].typedef.type_kind = string_type)
+               then
+                  addr := addr + 1;   // alloc space for hidden size parameter
+               parameter_definitions[i].address := addr;
+               case parameter_definitions[i].descriptor of
+                  rw_const,
+                  rw_for:
+                     case parameter_definitions[i].ParamMode of
+                        ByValue:
+                           addr := addr + TPIC18x_TypeInfo(parameter_definitions[i].TypeDef.info).Size;
+                        ByAddress:
+                           addr := addr + ram_ptr_size;
+                     else
+                        assert (false)
+                     end;
+                  rw_ioreg:
+                     addr := addr + ram_ptr_size;
+                  rw_var:
+                     addr := addr + ram_ptr_size;
+                  rw_eeprom:
+                     addr := addr + eeprom_ptr_size;
+                  rw_rom:
+                     addr := addr + rom_ptr_size;
+               else
+                  assert (false)
+               end
+            end;
+
+      if entry then
+         begin
+            if TSystemType(context).system_type_kind = monitor_system_type then
+               addr := addr + 1;            // prio
+            addr := addr + ram_ptr_size     // this ptr
+         end;
+
+      case context.definition_kind of
+         program_definition:
+            addr := addr + pc_size;               // return address
+         type_definition:
+            if TSystemType(context).system_type_kind <> interrupt_system_type then
+               addr := addr + pc_size;               // return address
+      else
+         assert (false)
+      end;
+
+      if function_result <> nil then
+         begin
+            if function_result.typedef.type_kind = string_type then
+               addr := addr + 1;
+            function_result.address := addr
+         end
+   end;
+
 function TPIC18x_Routine.Generate (param1, param2: integer): integer;
    var
-      locals_size, param_size, addr, i: integer;
+      locals_size, param_size, i: integer;
    begin
       result := 0;  // to suppress compiler warning
       case param1 of
-         AssignAddresses:
-            begin
-               addr := 1 - TPIC18x_DataItemList(local_vars).Size;
-
-               for i := 0 to local_vars.Length-1 do
-                  begin
-                     local_vars[i].address := addr;
-                     addr := addr + TPIC18x_TypeInfo(local_vars[i].TypeDef.info).Size
-                  end;
-
-               if parameter_definitions <> nil then
-                  for i := parameter_definitions.Length-1 downto 0 do
-                     begin
-                        if (parameter_definitions[i].descriptor in [rw_var, rw_eeprom])
-                           and
-                           (parameter_definitions[i].typedef.type_kind = string_type)
-                        then
-                           addr := addr + 1;   // alloc space for hidden size parameter
-                        parameter_definitions[i].address := addr;
-                        case parameter_definitions[i].descriptor of
-                           rw_const,
-                           rw_for:
-                              case parameter_definitions[i].ParamMode of
-                                 ByValue:
-                                    addr := addr + TPIC18x_TypeInfo(parameter_definitions[i].TypeDef.info).Size;
-                                 ByAddress:
-                                    addr := addr + ram_ptr_size;
-                              else
-                                 assert (false)
-                              end;
-                           rw_ioreg:
-                              addr := addr + ram_ptr_size;
-                           rw_var:
-                              addr := addr + ram_ptr_size;
-                           rw_eeprom:
-                              addr := addr + eeprom_ptr_size;
-                           rw_rom:
-                              addr := addr + rom_ptr_size;
-                        else
-                           assert (false)
-                        end
-                     end;
-
-               if entry then
-                  begin
-                     if TSystemType(context).system_type_kind = monitor_system_type then
-                        addr := addr + 1;            // prio
-                     addr := addr + ram_ptr_size     // this ptr
-                  end;
-
-               case context.definition_kind of
-                  program_definition:
-                     addr := addr + pc_size;               // return address
-                  type_definition:
-                     if TSystemType(context).system_type_kind <> interrupt_system_type then
-                        addr := addr + pc_size;               // return address
-               else
-                  assert (false)
-               end;
-
-               if function_result <> nil then
-                  begin
-                     if function_result.typedef.type_kind = string_type then
-                        addr := addr + 1;
-                     function_result.address := addr
-                  end
-            end;
-
          GenerateCode:
             begin
                TSourceSyncPoint.Create (block_header_end_src_loc);
@@ -633,98 +646,99 @@ destructor TPIC18x_Routine.Destroy;
       inherited
    end;
 
-function TPIC18x_SystemType.Generate (param1, param2: integer): integer;
+procedure TPIC18x_SystemType.AssignAddresses;
    var
       addr, i: integer;
-      lbl: TInstruction;
       typ: TTypeDef;
+   begin
+      // Note: AssignAddresses must yield results compatible with the enumeration of
+      //    initial values for RAM in TPIC18x_CPU.generate_machine_code.
+
+      // assign RAM addresses
+      if system_type_kind = interrupt_system_type then
+         begin
+            for i := 0 to permanent_ram_vars.Length-1 do
+               begin
+                  if system_type_or_array_of_system_type (permanent_ram_vars[i].TypeDef) then
+                     begin
+                        typ := permanent_ram_vars[i].TypeDef;
+                        if typ.type_kind = array_type then
+                           typ := TArrayType(typ).element_typedef;
+                        assert (typ.type_kind = system_type);
+                        if TPIC18x_SystemType(typ).contains_eeprom_vars then
+                           permanent_ram_vars[i].address := sdram_used + $3F
+                        else
+                           permanent_ram_vars[i].address := sdram_used + $3E
+                     end
+                  else
+                     permanent_ram_vars[i].address := sdram_used;
+                  sdram_used := sdram_used + TPIC18x_TypeInfo(permanent_ram_vars[i].TypeDef.info).Size
+               end;
+         end
+      else
+         begin
+            addr := -$3E + control_block_size;
+
+            for i := parameters.Length-1 downto 0 do
+               begin
+                  parameters[i].address := addr;
+                  case parameters[i].descriptor of
+                     rw_const,
+                     rw_for:
+                        case parameters[i].ParamMode of
+                           ByValue:
+                              addr := addr + TPIC18x_TypeInfo(parameters[i].TypeDef.info).Size;
+                           ByAddress:
+                              addr := addr + ram_ptr_size;
+                        else
+                           assert (false)
+                        end;
+                     rw_ioreg,
+                     rw_var:
+                        addr := addr + ram_ptr_size;
+                     rw_eeprom:
+                        addr := addr + eeprom_ptr_size;
+                     rw_rom:
+                        addr := addr + rom_ptr_size;
+                  else
+                     assert (false)
+                  end
+               end;
+
+            for i := 0 to permanent_ram_vars.Length-1 do
+               begin
+                  if system_type_or_array_of_system_type (permanent_ram_vars[i].TypeDef) then
+                     begin
+                        typ := permanent_ram_vars[i].TypeDef;
+                        if typ.type_kind = array_type then
+                           typ := TArrayType(typ).element_typedef;
+                        assert (typ.type_kind = system_type);
+                        if TPIC18x_SystemType(typ).contains_eeprom_vars then
+                           permanent_ram_vars[i].address := addr + $3F
+                        else
+                           permanent_ram_vars[i].address := addr + $3E
+                     end
+                  else
+                     permanent_ram_vars[i].address := addr;
+                  addr := addr + TPIC18x_TypeInfo(permanent_ram_vars[i].TypeDef.info).Size
+               end;
+
+            // assign eeprom addresses
+            addr := 0;
+            for i := 0 to permanent_eeprom_vars.Length-1 do
+               begin
+                  permanent_eeprom_vars[i].address := addr;
+                  addr := addr + TPIC18x_TypeInfo(permanent_eeprom_vars[i].TypeDef.info).Size
+               end
+         end
+   end;
+
+function TPIC18x_SystemType.Generate (param1, param2: integer): integer;
+   var
+      lbl: TInstruction;
    begin
       result := 0;  // to suppress compiler warning
       case param1 of
-         AssignAddresses:
-            begin
-               // Note: AssignAddresses must yield results compatible with the enumeration of
-               //    initial values for RAM in TPIC18x_CPU.generate_machine_code.
-
-               // assign RAM addresses
-               if system_type_kind = interrupt_system_type then
-                  begin
-                     for i := 0 to permanent_ram_vars.Length-1 do
-                        begin
-                           if system_type_or_array_of_system_type (permanent_ram_vars[i].TypeDef) then
-                              begin
-                                 typ := permanent_ram_vars[i].TypeDef;
-                                 if typ.type_kind = array_type then
-                                    typ := TArrayType(typ).element_typedef;
-                                 assert (typ.type_kind = system_type);
-                                 if TPIC18x_SystemType(typ).contains_eeprom_vars then
-                                    permanent_ram_vars[i].address := sdram_used + $3F
-                                 else
-                                    permanent_ram_vars[i].address := sdram_used + $3E
-                              end
-                           else
-                              permanent_ram_vars[i].address := sdram_used;
-                           sdram_used := sdram_used + TPIC18x_TypeInfo(permanent_ram_vars[i].TypeDef.info).Size
-                        end;
-                  end
-               else
-                  begin
-                     addr := -$3E + control_block_size;
-
-                     for i := parameters.Length-1 downto 0 do
-                        begin
-                           parameters[i].address := addr;
-                           case parameters[i].descriptor of
-                              rw_const,
-                              rw_for:
-                                 case parameters[i].ParamMode of
-                                    ByValue:
-                                       addr := addr + TPIC18x_TypeInfo(parameters[i].TypeDef.info).Size;
-                                    ByAddress:
-                                       addr := addr + ram_ptr_size;
-                                 else
-                                    assert (false)
-                                 end;
-                              rw_ioreg,
-                              rw_var:
-                                 addr := addr + ram_ptr_size;
-                              rw_eeprom:
-                                 addr := addr + eeprom_ptr_size;
-                              rw_rom:
-                                 addr := addr + rom_ptr_size;
-                           else
-                              assert (false)
-                           end
-                        end;
-
-                     for i := 0 to permanent_ram_vars.Length-1 do
-                        begin
-                           if system_type_or_array_of_system_type (permanent_ram_vars[i].TypeDef) then
-                              begin
-                                 typ := permanent_ram_vars[i].TypeDef;
-                                 if typ.type_kind = array_type then
-                                    typ := TArrayType(typ).element_typedef;
-                                 assert (typ.type_kind = system_type);
-                                 if TPIC18x_SystemType(typ).contains_eeprom_vars then
-                                    permanent_ram_vars[i].address := addr + $3F
-                                 else
-                                    permanent_ram_vars[i].address := addr + $3E
-                              end
-                           else
-                              permanent_ram_vars[i].address := addr;
-                           addr := addr + TPIC18x_TypeInfo(permanent_ram_vars[i].TypeDef.info).Size
-                        end;
-
-                     // assign eeprom addresses
-                     addr := 0;
-                     for i := 0 to permanent_eeprom_vars.Length-1 do
-                        begin
-                           permanent_eeprom_vars[i].address := addr;
-                           addr := addr + TPIC18x_TypeInfo(permanent_eeprom_vars[i].TypeDef.info).Size
-                        end
-                  end
-            end;
-
          GenerateCode:
             begin    // inital statement
                current_block := self;
@@ -848,6 +862,9 @@ destructor TPIC18x_SystemType.Destroy;
       inherited
    end;
 
+procedure TPIC18x_DataItemList.AssignAddresses;
+   begin
+   end;
 
 function TPIC18x_DataItemList.Generate (param1, param2: integer): integer;
    var
@@ -855,8 +872,6 @@ function TPIC18x_DataItemList.Generate (param1, param2: integer): integer;
    begin
       result := 0;  // to suppress compiler warning
       case param1 of
-         AssignAddresses:
-            {nop};
          GenerateCode:
             if descriptor = rw_rom then
                for i := 0 to Length-1 do

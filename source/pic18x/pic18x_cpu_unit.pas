@@ -237,7 +237,6 @@ type
 // TDefinition.Generate param values
 const
    GenerateCode                     = 1;
-   AssignAddresses                  = 2;
    GenerateCodeToCopyToRAMString    = 3;
    GenerateCodeToCopyToEEPROMString = 4;
 
@@ -1165,7 +1164,7 @@ procedure TPIC18x_CPU.generate_machine_code (_prog: TProgram);
          // assign ram addresses for all except non-interrupt global variables
          for i := 0 to Length(prog.CodeBlockList)-1 do
             if i <> initial_statement_block_idx then
-               prog.CodeBlockList[i].Generate (AssignAddresses, 0);
+               prog.CodeBlockList[i].AssignAddresses;
 
          // fill in address for interrupt variables from just calculated addresses
          for i := 0 to prog.program_vars.Length-1 do
@@ -1209,7 +1208,7 @@ procedure TPIC18x_CPU.generate_machine_code (_prog: TProgram);
 
          // at this point all process stack sizes are known except for initial statement stack size
 
-         prog.CodeBlockList[initial_statement_block_idx].Generate (AssignAddresses, 0);
+         prog.CodeBlockList[initial_statement_block_idx].AssignAddresses;
          prog.CodeBlockList[initial_statement_block_idx].Generate(GenerateCode, 0);
          // now initial statement stack size is known
          kernel_stack_size := max (TSetErrorCodeRoutine.stack_usage, kernel_interrupt_handler_stack_allowance);
