@@ -237,8 +237,6 @@ type
 // TDefinition.Generate param values
 const
    GenerateCode                     = 1;
-   GenerateCodeToCopyToRAMString    = 3;
-   GenerateCodeToCopyToEEPROMString = 4;
 
 const
    rom_data_pointer_size = 2;

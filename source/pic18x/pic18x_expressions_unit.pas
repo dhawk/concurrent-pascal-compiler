@@ -31,6 +31,7 @@ type
             override;
          procedure PushRealConstant;
          procedure PushIEEESingleConstant;
+         procedure GenerateCodeToCopyToRAMString;
       end;
    TPIC18x_FunctionAccessPrimary =
       class (TFunctionAccessPrimary)
@@ -103,6 +104,8 @@ type
       public
          function Generate (param1, param2: integer): integer;
             override;
+         procedure GenerateCodeToCopyToRAMString;
+         procedure GenerateCodeToCopyToEEPROMString;
       end;
 
 function tos_size_description (signed: boolean; significant_bytes: integer): string;
@@ -707,7 +710,7 @@ function TPIC18x_ChrTypeConversionPrimary.Generate (param1, param2: integer): in
 function TPIC18x_ConstantPrimary.Generate (param1, param2: integer): integer;
    var
       annotation: string;
-      i, rom_addr: integer;
+      i: integer;
    begin
       result := 0;  // to suppress compiler warning
       case param1 of
@@ -771,18 +774,21 @@ function TPIC18x_ConstantPrimary.Generate (param1, param2: integer): integer;
             else
                assert (false)
             end;
-         GenerateCodeToCopyToRAMString:
-            begin
-               rom_addr := TPIC18x_CPU(target_cpu).anonymous_string_constant_rom_addr (constant.s);
-               set_absolute (TBLPTRL, lsb(rom_addr));
-               set_absolute (TBLPTRH, msb(rom_addr));
-               TPIC18x_TBLRD.Create (tblrd_post_inc);
-               TPIC18x_MOVF.Create (TABLAT, dest_w, access_mode);  // get length and set Z if 0
-               AssignROMStrToRAMStr.Call (src_loc)
-            end;
       else
          assert (false, 'TPIC18x_ConstantPrimary.Generate(' + IntToStr(param1) + ') not implemented')
       end
+   end;
+
+procedure TPIC18x_ConstantPrimary.GenerateCodeToCopyToRAMString;
+   var
+      rom_addr: integer;
+   begin
+      rom_addr := TPIC18x_CPU(target_cpu).anonymous_string_constant_rom_addr (constant.s);
+      set_absolute (TBLPTRL, lsb(rom_addr));
+      set_absolute (TBLPTRH, msb(rom_addr));
+      TPIC18x_TBLRD.Create (tblrd_post_inc);
+      TPIC18x_MOVF.Create (TABLAT, dest_w, access_mode);  // get length and set Z if 0
+      AssignROMStrToRAMStr.Call (src_loc)
    end;
 
 procedure TPIC18x_ConstantPrimary.PushRealConstant;
@@ -2759,65 +2765,68 @@ function TPIC18x_VariableAccessPrimary.Generate (param1, param2: integer): integ
                      assert (false)
                   end
             end;
-
-         GenerateCodeToCopyToRAMString:
-            case access.base_variable.descriptor of
-               rw_var,
-               rw_const:
-                  begin
-                     TPIC18x_Access(access).Generate_Load_Ptr2_Code (pFSR1, 0);
-                     TPIC18x_MOVF.Create (POSTINC1, dest_w, access_mode);   // get length & set Z if 0
-                     AssignRAMStrToRAMStr.Call (src_loc)
-                  end;
-               rw_rom:
-                  begin
-                     TPIC18x_Access(access).Generate_Load_Ptr2_Code (pTBLPTR, 0);
-                     TPIC18x_TBLRD.Create (tblrd_post_inc);
-                     TPIC18x_MOVF.Create (TABLAT, dest_w, access_mode);  // get length and set Z if 0
-                     AssignROMStrToRAMStr.Call (src_loc)
-                  end;
-               rw_eeprom:
-                  begin
-                     TPIC18x_Access(access).Generate_Load_Ptr1_Code (pFSR1, 0);
-                     GetEEPROMByte.Call;    // decrements FSR1
-                     TPIC18x_ADDFSR.Create (1, 2);     // net result is increment FSR1
-                     AssignEEPROMStrToRAMStr.Call (src_loc)
-                  end;
-            else
-               assert (false)
-            end;
-
-         GenerateCodeToCopyToEEPROMString:
-            case access.base_variable.descriptor of
-               rw_var,
-               rw_const:
-                  begin
-                     TPIC18x_Access(access).Generate_Load_Ptr2_Code (pFSR1, 0);
-                     TPIC18x_MOVF.Create (POSTINC1, dest_w, access_mode);   // get length & set Z if 0
-                     AssignRAMStrToEEPROMStr.Call (src_loc)
-                  end;
-               rw_rom:
-                  begin
-                     TPIC18x_Access(access).Generate_Load_Ptr2_Code (pTBLPTR, 0);
-                     TPIC18x_TBLRD.Create (tblrd_post_inc);
-                     TPIC18x_MOVF.Create (TABLAT, dest_w, access_mode);  // get length and set Z if 0
-                     AssignROMStrToEEPROMStr.Call (src_loc)
-                  end;
-               rw_eeprom:
-                  begin
-                     TPIC18x_Access(access).Generate_Load_Ptr1_Code (pFSR1, 0);
-                     GetEEPROMByte.Call;    // decrements FSR1
-                     TPIC18x_ADDFSR.Create (1, 2);     // net result is increment FSR1
-                     AssignEEPROMStrToEEPROMStr.Call (src_loc)
-                  end;
-            else
-               assert (false)
-            end;
-
       else
          assert (false, 'TPIC18x_VariableAccessPrimary.Generate(' + IntToStr(param1) + ') not implemented')
       end
    end;      // TPIC18x_VariableAccessPrimary.Generate
+
+procedure TPIC18x_VariableAccessPrimary.GenerateCodeToCopyToRAMString;
+   begin
+      case access.base_variable.descriptor of
+         rw_var,
+         rw_const:
+            begin
+               TPIC18x_Access(access).Generate_Load_Ptr2_Code (pFSR1, 0);
+               TPIC18x_MOVF.Create (POSTINC1, dest_w, access_mode);   // get length & set Z if 0
+               AssignRAMStrToRAMStr.Call (src_loc)
+            end;
+         rw_rom:
+            begin
+               TPIC18x_Access(access).Generate_Load_Ptr2_Code (pTBLPTR, 0);
+               TPIC18x_TBLRD.Create (tblrd_post_inc);
+               TPIC18x_MOVF.Create (TABLAT, dest_w, access_mode);  // get length and set Z if 0
+               AssignROMStrToRAMStr.Call (src_loc)
+            end;
+         rw_eeprom:
+            begin
+               TPIC18x_Access(access).Generate_Load_Ptr1_Code (pFSR1, 0);
+               GetEEPROMByte.Call;    // decrements FSR1
+               TPIC18x_ADDFSR.Create (1, 2);     // net result is increment FSR1
+               AssignEEPROMStrToRAMStr.Call (src_loc)
+            end;
+      else
+         assert (false)
+      end
+   end;
+
+procedure TPIC18x_VariableAccessPrimary.GenerateCodeToCopyToEEPROMString;
+   begin
+      case access.base_variable.descriptor of
+         rw_var,
+         rw_const:
+            begin
+               TPIC18x_Access(access).Generate_Load_Ptr2_Code (pFSR1, 0);
+               TPIC18x_MOVF.Create (POSTINC1, dest_w, access_mode);   // get length & set Z if 0
+               AssignRAMStrToEEPROMStr.Call (src_loc)
+            end;
+         rw_rom:
+            begin
+               TPIC18x_Access(access).Generate_Load_Ptr2_Code (pTBLPTR, 0);
+               TPIC18x_TBLRD.Create (tblrd_post_inc);
+               TPIC18x_MOVF.Create (TABLAT, dest_w, access_mode);  // get length and set Z if 0
+               AssignROMStrToEEPROMStr.Call (src_loc)
+            end;
+         rw_eeprom:
+            begin
+               TPIC18x_Access(access).Generate_Load_Ptr1_Code (pFSR1, 0);
+               GetEEPROMByte.Call;    // decrements FSR1
+               TPIC18x_ADDFSR.Create (1, 2);     // net result is increment FSR1
+               AssignEEPROMStrToEEPROMStr.Call (src_loc)
+            end;
+      else
+         assert (false)
+      end
+   end;
 
 procedure PushRealExpression (expr: TExpression);
    begin

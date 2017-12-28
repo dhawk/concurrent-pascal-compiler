@@ -1289,26 +1289,29 @@ function TPIC18x_AssignmentStatement.Generate (param1, param2: integer): integer
             string_expression:
                case assignee.base_variable.descriptor of
                   rw_var:
-                     if expression is TPIC18x_FunctionAccessPrimary then
-                        begin
-                           TPIC18x_Access(assignee).Generate_Push_Address2_Code (0, true);
-                           expression.Generate (GenerateCode, 0);
-                           TPIC18x_ADDFSR.Create (2, 3);
-                           StackUsageCounter.Pop (3)
-                        end
-                     else
-                        begin
-                           TPIC18x_Access(assignee).Generate_Push_Address2_Code (0, true);
-                           expression.Generate (GenerateCodeToCopyToRAMString, 0)
-                        end;
+                     begin
+                        TPIC18x_Access(assignee).Generate_Push_Address2_Code (0, true);
+                        if expression is TPIC18x_FunctionAccessPrimary then
+                           begin
+                              expression.Generate (GenerateCode, 0);
+                              TPIC18x_ADDFSR.Create (2, 3);
+                              StackUsageCounter.Pop (3)
+                           end
+                        else if expression is TPIC18x_ConstantPrimary then
+                           (expression as TPIC18x_ConstantPrimary).GenerateCodeToCopyToRAMString
+                        else if expression is TVariableAccessPrimary then
+                           (expression as TPIC18x_VariableAccessPrimary).GenerateCodeToCopyToRAMString
+                        else
+                           assert (false)
+                     end;
                   rw_eeprom:
                      begin
-                        assert (not (expression is TPIC18x_FunctionAccessPrimary));
+                        assert (expression is TPIC18x_VariableAccessPrimary);
                         // push base address
                         TPIC18x_Access(assignee).Generate_Push_Address1_Code (0, true);
                         TPIC18x_MOVF.Create (2, dest_w, access_mode);   // convert size to limit
                         TPIC18x_ADDWF.Create (1, dest_f, access_mode);  //
-                        expression.Generate (GenerateCodeToCopyToEEPROMString, 0)
+                        (expression as TPIC18x_VariableAccessPrimary).GenerateCodeToCopyToEEPROMString
                      end;
                else
                   assert (false)
