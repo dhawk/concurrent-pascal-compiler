@@ -12,7 +12,7 @@ uses
 type
    TPIC18x_Term =
       class (TTerm)
-         function GenerateCode (param1, param2: integer): integer;
+         function GenerateCode (param2: integer): integer;
             override;
       end;
 
@@ -161,7 +161,7 @@ destructor TOperationSchedule.Destroy;
       inherited
    end;
 
-function TPIC18x_Term.GenerateCode (param1, param2: integer): integer;
+function TPIC18x_Term.GenerateCode (param2: integer): integer;
 
    procedure generate_numeric_term_code;
       var
@@ -245,7 +245,7 @@ function TPIC18x_Term.GenerateCode (param1, param2: integer): integer;
             mulop_mask,
             mulop_shl,
             mulop_shr:
-               first_factor.GenerateCode (666, intermediate_calculation_info[0].a_size);
+               first_factor.GenerateCode (intermediate_calculation_info[0].a_size);
             mulop_mult_flt_by_flt,
             mulop_divide_flt_by_flt:
                PushRealExpression (first_factor);
@@ -274,7 +274,7 @@ function TPIC18x_Term.GenerateCode (param1, param2: integer): integer;
                               TPIC18x_SUBFSR.Create (2, intermediate_calculation_info[idx].result_size-intermediate_calculation_info[idx].a_size);
                               StackUsageCounter.Push (intermediate_calculation_info[idx].result_size-intermediate_calculation_info[idx].a_size)
                            end;
-                        additional_factors[idx].factor.GenerateCode (666, intermediate_calculation_info[idx].b_size);
+                        additional_factors[idx].factor.GenerateCode (intermediate_calculation_info[idx].b_size);
                         GenerateMultiplyCode (intermediate_calculation_info[idx].result_size,
                                               intermediate_calculation_info[idx].a_integer_info,
                                               intermediate_calculation_info[idx].b_info
@@ -282,7 +282,7 @@ function TPIC18x_Term.GenerateCode (param1, param2: integer): integer;
                      end;
                   mulop_integer_div:
                      begin
-                        additional_factors[idx].factor.GenerateCode (666, intermediate_calculation_info[idx].b_size);
+                        additional_factors[idx].factor.GenerateCode (intermediate_calculation_info[idx].b_size);
                         GenerateZeroDivideCheckCode (additional_factors[idx].factor);
                         GenerateDivideCode (intermediate_calculation_info[idx].result_size,
                                             intermediate_calculation_info[idx].a_integer_info,
@@ -332,7 +332,7 @@ function TPIC18x_Term.GenerateCode (param1, param2: integer): integer;
                         end;
                   mulop_integer_mod:
                      begin
-                        additional_factors[idx].factor.GenerateCode (666, intermediate_calculation_info[idx].b_size);
+                        additional_factors[idx].factor.GenerateCode (intermediate_calculation_info[idx].b_size);
                         GenerateZeroDivideCheckCode (additional_factors[idx].factor);
                         GenerateRemainderCode (intermediate_calculation_info[idx].result_size,
                                                intermediate_calculation_info[idx].a_integer_info,
@@ -422,7 +422,7 @@ function TPIC18x_Term.GenerateCode (param1, param2: integer): integer;
                GenerateCodeForConditionalSkip (factor, skip_sense)
             else
                begin
-                  factor.GenerateCode (666, 1);
+                  factor.GenerateCode (1);
                   if skip_sense then
                      TPIC18x_BTFSS.Create (PREINC2, 0, access_mode)
                   else
@@ -474,12 +474,12 @@ function TPIC18x_Term.GenerateCode (param1, param2: integer): integer;
          idx,i: integer;
          annotation: string;
       begin
-         first_factor.GenerateCode (666, param2);
+         first_factor.GenerateCode (param2);
          for idx := 0 to Length(additional_factors)-1 do
             begin
                annotation := 'set intersection(*) of tos*' + IntToStr(param2) + ' with (tos-1)*' + IntToStr(param2) + ', pop tos*' + IntToStr(param2);
                assert (additional_factors[idx].mulop = mulop_set_intersection);
-               additional_factors[idx].factor.GenerateCode (666, param2);
+               additional_factors[idx].factor.GenerateCode (param2);
                for i := 1 to param2 do
                   begin
                      TPIC18x_MOVF.Create (PREINC2, dest_w, access_mode).annotation := annotation;

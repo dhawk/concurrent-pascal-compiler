@@ -17,17 +17,17 @@ uses
 type
    TPIC18x_AbsFunctionPrimary =
       class (TAbsFunctionPrimary)
-         function GenerateCode (param1, param2: integer): integer;
+         function GenerateCode (param2: integer): integer;
             override;
       end;
    TPIC18x_ChrTypeConversionPrimary =
       class (TChrTypeConversionPrimary)
-         function GenerateCode (param1, param2: integer): integer;
+         function GenerateCode (param2: integer): integer;
             override;
       end;
    TPIC18x_ConstantPrimary =
       class (TConstantPrimary)
-         function GenerateCode (param1, param2: integer): integer;
+         function GenerateCode (param2: integer): integer;
             override;
          procedure PushRealConstant;
          procedure PushIEEESingleConstant;
@@ -37,24 +37,24 @@ type
       class (TFunctionAccessPrimary)
          expr: TExpression;
          constructor CreateFromSourceTokens (_access: TAccess);
-         function GenerateCode (param1, param2: integer): integer;
+         function GenerateCode (param2: integer): integer;
             override;
          destructor Destroy;
             override;
       end;
    TPIC18x_NotPrimary =
       class (TNotPrimary)
-         function GenerateCode (param1, param2: integer): integer;
+         function GenerateCode (param2: integer): integer;
             override;
       end;
    TPIC18x_PredFunctionPrimary =
       class (TPredFunctionPrimary)
-         function GenerateCode (param1, param2: integer): integer;
+         function GenerateCode (param2: integer): integer;
             override;
       end;
    TPIC18x_RelationalExpression =
       class (TRelationalExpression)
-         function GenerateCode (param1, param2: integer): integer;
+         function GenerateCode (param2: integer): integer;
             override;
       end;
    TPIC18x_RoundFunctionPrimary =
@@ -62,27 +62,27 @@ type
       end;
    TPIC18x_SetConstructorPrimary =
       class (TSetConstructorPrimary)
-         function GenerateCode (param1, param2: integer): integer;
+         function GenerateCode (param2: integer): integer;
             override;
       end;
    TPIC18x_StrPosPrimary =
       class (TstrPosPrimary)
-         function GenerateCode (param1, param2: integer): integer;
+         function GenerateCode (param2: integer): integer;
             override;
       end;
    TPIC18x_SuccFunctionPrimary =
       class (TSuccFunctionPrimary)
-         function GenerateCode (param1, param2: integer): integer;
+         function GenerateCode (param2: integer): integer;
             override;
       end;
    TPIC18x_TruncFunctionPrimary =
       class (TTruncFunctionPrimary)
-         function GenerateCode (param1, param2: integer): integer;
+         function GenerateCode (param2: integer): integer;
             override;
       end;
    TPIC18x_UnaryMinusPrimary =
       class (TUnaryMinusPrimary)
-         function GenerateCode (param1, param2: integer): integer;
+         function GenerateCode (param2: integer): integer;
             override;
       end;
    TPIC18x_VariableAccessPrimary =
@@ -102,7 +102,7 @@ type
          function load_next_rom_byte_packed (do_post_ptr_adjust: boolean): TInstruction;
          function load_next_eeprom_byte_packed (do_post_ptr_adjust: boolean): TInstruction;
       public
-         function GenerateCode (param1, param2: integer): integer;
+         function GenerateCode (param2: integer): integer;
             override;
          procedure GenerateCodeToCopyToRAMString;
          procedure GenerateCodeToCopyToEEPROMString;
@@ -407,7 +407,7 @@ procedure GenerateCodeForConditionalSkip (boolean_expression: TExpression; skip_
          end;
 
       // if no exit by now, then full evaluation required
-      boolean_expression.GenerateCode (666, 1);
+      boolean_expression.GenerateCode (1);
       gen_skip_instruction (skip_sense, PREINC2, 0, access_mode);
       StackUsageCounter.Pop(1)
    end;
@@ -624,7 +624,7 @@ procedure generate_stack_fix_and_sign_extend_code
          end
    end;
 
-function TPIC18x_AbsFunctionPrimary.GenerateCode (param1, param2: integer): integer;
+function TPIC18x_AbsFunctionPrimary.GenerateCode (param2: integer): integer;
    const
       ARGB0 = 2;
       REAL_SIGN_BIT = 7;
@@ -638,7 +638,7 @@ function TPIC18x_AbsFunctionPrimary.GenerateCode (param1, param2: integer): inte
          integer_expression:
             begin
                result_size := TPIC18x_TypeInfo(info).Size;
-               expr.GenerateCode (666, result_size);
+               expr.GenerateCode (result_size);
                annotation := 'tos := iabs(tos)';
                if TPIC18x_TypeInfo(expr.info).IntegerRange <> irAlwaysNonNegative then
                   begin
@@ -675,13 +675,13 @@ function TPIC18x_AbsFunctionPrimary.GenerateCode (param1, param2: integer): inte
       end
    end;
 
-function TPIC18x_ChrTypeConversionPrimary.GenerateCode (param1, param2: integer): integer;
+function TPIC18x_ChrTypeConversionPrimary.GenerateCode (param2: integer): integer;
    var
       expr_size: integer;
    begin
       result := 0;  // to suppress compiler warning
       expr_size := TPIC18x_TypeInfo(expr.info).Size;
-      expr.GenerateCode (666, expr_size);
+      expr.GenerateCode (expr_size);
       GenerateRangeCheckCode (TOrdinalDataType(target_cpu.get_supported_data_type('char')),
                               expr_size,
                               expr.info,
@@ -695,7 +695,7 @@ function TPIC18x_ChrTypeConversionPrimary.GenerateCode (param1, param2: integer)
          end
    end;
 
-function TPIC18x_ConstantPrimary.GenerateCode (param1, param2: integer): integer;
+function TPIC18x_ConstantPrimary.GenerateCode (param2: integer): integer;
    var
       annotation: string;
       i: integer;
@@ -870,7 +870,7 @@ constructor TPIC18x_FunctionAccessPrimary.CreateFromSourceTokens (_access: TAcce
          inherited
    end;
 
-function TPIC18x_FunctionAccessPrimary.GenerateCode (param1, param2: integer): integer;
+function TPIC18x_FunctionAccessPrimary.GenerateCode (param2: integer): integer;
 
    procedure generate_function_call_code (routine: TPIC18x_Routine);
       var
@@ -951,22 +951,22 @@ function TPIC18x_FunctionAccessPrimary.GenerateCode (param1, param2: integer): i
          end
       else if access.node_routine = TPIC18x_CPU (target_cpu).Round24 then
          begin
-            expr.GenerateCode (666, real_size);
+            expr.GenerateCode (real_size);
             FPRound24.Call (expr.src_loc)
          end
       else if access.node_routine = TPIC18x_CPU (target_cpu).Round32 then
          begin
-            expr.GenerateCode (666, real_size);
+            expr.GenerateCode (real_size);
             FPRound32.Call (expr.src_loc)
          end
       else if access.node_routine = TPIC18x_CPU (target_cpu).Trunc24 then
          begin
-            expr.GenerateCode (666, real_size);
+            expr.GenerateCode (real_size);
             FPTrunc24.Call (expr.src_loc)
          end
       else if access.node_routine = TPIC18x_CPU (target_cpu).Trunc32 then
          begin
-            expr.GenerateCode (666, real_size);
+            expr.GenerateCode (real_size);
             FPTrunc32.Call (expr.src_loc)
          end
       else if access.node_routine <> nil then
@@ -983,20 +983,20 @@ destructor TPIC18x_FunctionAccessPrimary.Destroy;
       inherited
    end;
 
-function TPIC18x_NotPrimary.GenerateCode (param1, param2: integer): integer;
+function TPIC18x_NotPrimary.GenerateCode (param2: integer): integer;
    begin
       result := 0;  // to suppress compiler warning
-      boolean_expr.GenerateCode (666, 1);
+      boolean_expr.GenerateCode (1);
       TPIC18x_BTG.Create (1, 0, access_mode).annotation := 'tos := not tos'
    end;
 
-function TPIC18x_PredFunctionPrimary.GenerateCode (param1, param2: integer): integer;
+function TPIC18x_PredFunctionPrimary.GenerateCode (param2: integer): integer;
    var
       result_size, i: integer;
    begin
       result := 0;  // to suppress compiler warning
       result_size := TPIC18x_TypeInfo(info).Size;
-      expr.GenerateCode (666, result_size);
+      expr.GenerateCode (result_size);
       TPIC18x_DECF.Create (result_size, dest_f, access_mode).annotation := 'tos := pred(tos)';
       if result_size > 1 then
          begin
@@ -1006,7 +1006,7 @@ function TPIC18x_PredFunctionPrimary.GenerateCode (param1, param2: integer): int
          end
    end;
 
-function TPIC18x_RelationalExpression.GenerateCode (param1, param2: integer): integer;
+function TPIC18x_RelationalExpression.GenerateCode (param2: integer): integer;
 
    procedure generate_ordinal_relational_expression_code;
 
@@ -1022,7 +1022,7 @@ function TPIC18x_RelationalExpression.GenerateCode (param1, param2: integer): in
                (left_simple_expression.info.max_value.AsInteger = 1)
             then
                begin
-                  left_simple_expression.GenerateCode (666, 1);
+                  left_simple_expression.GenerateCode (1);
                   if right_simple_expression.constant.AsOrdinal = 0 then
                      TPIC18x_BTG.Create (1, 0, access_mode)
                end
@@ -1033,7 +1033,7 @@ function TPIC18x_RelationalExpression.GenerateCode (param1, param2: integer): in
                     (left_simple_expression.info.max_value.AsInteger = 0)
                  then
                     begin
-                       left_simple_expression.GenerateCode (666, 1);
+                       left_simple_expression.GenerateCode (1);
                        TPIC18x_MOVLW.Create ($01);
                        TPIC18x_ANDWF.Create (1, dest_f, access_mode);
                        if right_simple_expression.constant.AsOrdinal = 0 then
@@ -1046,7 +1046,7 @@ function TPIC18x_RelationalExpression.GenerateCode (param1, param2: integer): in
                     (right_simple_expression.info.max_value.AsInteger = 1)
                  then
                     begin
-                       right_simple_expression.GenerateCode (666, 1);
+                       right_simple_expression.GenerateCode (1);
                        if left_simple_expression.constant.AsOrdinal = 0 then
                           TPIC18x_BTG.Create (1, 0, access_mode)
                     end
@@ -1057,7 +1057,7 @@ function TPIC18x_RelationalExpression.GenerateCode (param1, param2: integer): in
                     (right_simple_expression.info.max_value.AsInteger = 0)
                  then
                     begin
-                       right_simple_expression.GenerateCode (666, 1);
+                       right_simple_expression.GenerateCode (1);
                        TPIC18x_MOVLW.Create ($01);
                        TPIC18x_ANDWF.Create (1, dest_f, access_mode);
                        if left_simple_expression.constant.AsOrdinal = 0 then
@@ -1065,8 +1065,8 @@ function TPIC18x_RelationalExpression.GenerateCode (param1, param2: integer): in
                     end
             else  // general case
                begin
-                  left_simple_expression.GenerateCode (666, 1);
-                  right_simple_expression.GenerateCode (666, 1);
+                  left_simple_expression.GenerateCode (1);
+                  right_simple_expression.GenerateCode (1);
                   TPIC18x_MOVF.Create (PREINC2, dest_w, access_mode);
                   StackUsageCounter.Pop (1);
                   TPIC18x_SUBWF.Create (1, dest_f, access_mode);    // sets N,Z status
@@ -1121,8 +1121,8 @@ function TPIC18x_RelationalExpression.GenerateCode (param1, param2: integer): in
                            a_size := TPIC18x_TypeInfo(left_simple_expression.info).Size;
                            b_size := TPIC18x_TypeInfo(right_simple_expression.info).Size;
                            result_size := a_size;
-                           left_simple_expression.GenerateCode (666, result_size);
-                           right_simple_expression.GenerateCode (666, b_size);
+                           left_simple_expression.GenerateCode (result_size);
+                           right_simple_expression.GenerateCode (b_size);
                            b_info := right_simple_expression.info
                         end
                      else
@@ -1130,8 +1130,8 @@ function TPIC18x_RelationalExpression.GenerateCode (param1, param2: integer): in
                            a_size := TPIC18x_TypeInfo(right_simple_expression.info).Size;
                            b_size := TPIC18x_TypeInfo(left_simple_expression.info).Size;
                            result_size := a_size;
-                           right_simple_expression.GenerateCode (666, result_size);
-                           left_simple_expression.GenerateCode (666, b_size);
+                           right_simple_expression.GenerateCode (result_size);
+                           left_simple_expression.GenerateCode (b_size);
                            b_info := left_simple_expression.info
                         end;
                   relop_lt,
@@ -1140,8 +1140,8 @@ function TPIC18x_RelationalExpression.GenerateCode (param1, param2: integer): in
                         result_size := TPIC18x_TypeInfo(comparison_info).Size;
                         // a_size := min (TPIC18x_TypeInfo(left_simple_expression.info).Size, result_size);
                         b_size := TPIC18x_TypeInfo(right_simple_expression.info).Size;
-                        left_simple_expression.GenerateCode (666, result_size);
-                        right_simple_expression.GenerateCode (666, b_size);
+                        left_simple_expression.GenerateCode (result_size);
+                        right_simple_expression.GenerateCode (b_size);
                         b_info := right_simple_expression.info
                      end;
                   relop_le,
@@ -1150,8 +1150,8 @@ function TPIC18x_RelationalExpression.GenerateCode (param1, param2: integer): in
                         result_size := TPIC18x_TypeInfo(comparison_info).Size;
                         // a_size := min (TPIC18x_TypeInfo(right_simple_expression.info).Size, result_size);
                         b_size := TPIC18x_TypeInfo(left_simple_expression.info).Size;
-                        right_simple_expression.GenerateCode (666, result_size);
-                        left_simple_expression.GenerateCode (666, b_size);
+                        right_simple_expression.GenerateCode (result_size);
+                        left_simple_expression.GenerateCode (b_size);
                         b_info := left_simple_expression.info
                      end;
                else
@@ -1262,10 +1262,10 @@ function TPIC18x_RelationalExpression.GenerateCode (param1, param2: integer): in
       begin
          a_size := 1;
          // do full evaluation or only one byte????
-         left_simple_expression.GenerateCode (666, a_size);
+         left_simple_expression.GenerateCode (a_size);
          // do range check????       if out of range will only read a random bit (no trashing anything), but no error code...
          b_size := TPIC18x_TypeInfo(right_simple_expression.info).Size;
-         right_simple_expression.GenerateCode (666, b_size);
+         right_simple_expression.GenerateCode (b_size);
          a_addr := b_size + a_size;
          TPIC18x_SWAPF.Create (a_addr, dest_w, access_mode).annotation := format ('tos*1 := tos*%d@[%d] in tos*%d', [a_size, a_addr, b_size]);
          TPIC18x_RLNCF.Create (WREG, dest_w, access_mode);
@@ -1290,7 +1290,7 @@ function TPIC18x_RelationalExpression.GenerateCode (param1, param2: integer): in
 
       procedure compare_string_to_char_expression (a: TPIC18x_VariableAccessPrimary; b: TExpression);
          begin
-            b.GenerateCode (666, 1);
+            b.GenerateCode (1);
             case TPIC18x_Access(a.access).base_variable.descriptor of
                rw_const,
                rw_var:
@@ -1535,7 +1535,7 @@ function TPIC18x_RelationalExpression.GenerateCode (param1, param2: integer): in
                assert (false);
             real_expression:
                begin
-                  left_simple_expression.GenerateCode (666, 4);
+                  left_simple_expression.GenerateCode (4);
                   if TPIC18x_Expression_TypeInfo (left_simple_expression.info).is_ieee_single then
                      convert_tos_from_ieee_to_pic
                end;
@@ -1548,7 +1548,7 @@ function TPIC18x_RelationalExpression.GenerateCode (param1, param2: integer): in
                assert (false);
             real_expression:
                begin
-                  right_simple_expression.GenerateCode (666, 4);
+                  right_simple_expression.GenerateCode (4);
                   if TPIC18x_Expression_TypeInfo (right_simple_expression.info).is_ieee_single then
                      convert_tos_from_ieee_to_pic
                end;
@@ -1596,7 +1596,7 @@ function TPIC18x_RelationalExpression.GenerateCode (param1, param2: integer): in
          assert (false)
    end;
 
-function TPIC18x_SetConstructorPrimary.GenerateCode (param1, param2: integer): integer;
+function TPIC18x_SetConstructorPrimary.GenerateCode (param2: integer): integer;
 
    procedure handle_single_bit_insertion (expr: TExpression);
       var
@@ -1620,7 +1620,7 @@ function TPIC18x_SetConstructorPrimary.GenerateCode (param1, param2: integer): i
          end;
       begin
          a_size := TPIC18x_TypeInfo(expr.info).Size;
-         expr.GenerateCode (666, a_size);
+         expr.GenerateCode (a_size);
          bn1 := nil;
          if (a_size = 1)
             and
@@ -1708,7 +1708,7 @@ function TPIC18x_SetConstructorPrimary.GenerateCode (param1, param2: integer): i
          else   // not a constant
             begin
                first_size := TPIC18x_TypeInfo(first.info).Size;
-               first.GenerateCode (666, first_size);
+               first.GenerateCode (first_size);
 
                // clamp lower bound at 0
                if first.info.Signed then
@@ -1738,7 +1738,7 @@ function TPIC18x_SetConstructorPrimary.GenerateCode (param1, param2: integer): i
             end
          else
             begin
-               last.GenerateCode (666, last_size);
+               last.GenerateCode (last_size);
 
                b_signed := last.info.Signed;
                if b_signed or last.info.max_value.gt ((param2*8)-1) then
@@ -1883,7 +1883,7 @@ function TPIC18x_SetConstructorPrimary.GenerateCode (param1, param2: integer): i
             handle_ranged_bits_insertion (variable_members[i].first, variable_members[i].last)
    end;
 
-function TPIC18x_StrPosPrimary.GenerateCode (param1, param2: integer): integer;
+function TPIC18x_StrPosPrimary.GenerateCode (param2: integer): integer;
    var
       substr: TPIC18x_VariableAccessPrimary;
       rom_addr: integer;
@@ -1896,7 +1896,7 @@ function TPIC18x_StrPosPrimary.GenerateCode (param1, param2: integer): integer;
       case access.node_strpos_substr_expression.expression_kind of
          char_expression:
             begin
-               access.node_strpos_substr_expression.GenerateCode (666, 1);
+               access.node_strpos_substr_expression.GenerateCode (1);
                case TPIC18x_Access(access).base_variable.descriptor of
                   rw_var,
                   rw_const:
@@ -2039,13 +2039,13 @@ function TPIC18x_StrPosPrimary.GenerateCode (param1, param2: integer): integer;
       end
    end;
 
-function TPIC18x_SuccFunctionPrimary.GenerateCode (param1, param2: integer): integer;
+function TPIC18x_SuccFunctionPrimary.GenerateCode (param2: integer): integer;
    var
       result_size, i: integer;
    begin
       result := 0;  // to suppress compiler warning
       result_size := TPIC18x_TypeInfo(info).Size;
-      expr.GenerateCode (666, result_size);
+      expr.GenerateCode (result_size);
       TPIC18x_INCF.Create (result_size, dest_f, access_mode).annotation := 'tos := succ(tos)';
       if result_size > 1 then
          begin
@@ -2055,13 +2055,13 @@ function TPIC18x_SuccFunctionPrimary.GenerateCode (param1, param2: integer): int
          end
    end;
 
-function TPIC18x_TruncFunctionPrimary.GenerateCode (param1, param2: integer): integer;
+function TPIC18x_TruncFunctionPrimary.GenerateCode (param2: integer): integer;
    begin
       result := 0;  // to suppress compiler warning
       raise compile_error.Create (err_use_trunc24_or_trunc32, src_loc)
    end;
 
-function TPIC18x_UnaryMinusPrimary.GenerateCode (param1, param2: integer): integer;
+function TPIC18x_UnaryMinusPrimary.GenerateCode (param2: integer): integer;
    const
       ARGB0 = 2;
       REAL_SIGN_BIT = 7;
@@ -2074,7 +2074,7 @@ function TPIC18x_UnaryMinusPrimary.GenerateCode (param1, param2: integer): integ
          integer_expression:
             begin
                result_size := TPIC18x_TypeInfo(info).Size;
-               primary.GenerateCode (666, result_size);
+               primary.GenerateCode (result_size);
                annotation := 'tos := -tos';
                for i := 1 to result_size-1 do
                   begin
@@ -2365,7 +2365,7 @@ function TPIC18x_VariableAccessPrimary.load_next_eeprom_byte_packed (do_post_ptr
          TPIC18x_ADDFSR.Create(1, 2)          // net result is increment FSR1
    end;
 
-function TPIC18x_VariableAccessPrimary.GenerateCode (param1, param2: integer): integer;
+function TPIC18x_VariableAccessPrimary.GenerateCode (param2: integer): integer;
    var
       annotation: string;
 
@@ -2759,7 +2759,7 @@ procedure PushRealExpression (expr: TExpression);
                generate_integer_expression_to_real_code (expr);
             real_expression:
                begin
-                  expr.GenerateCode (666, real_size);
+                  expr.GenerateCode (real_size);
                   if TPIC18x_Expression_TypeInfo(expr.info).is_ieee_single then
                      convert_tos_from_ieee_to_pic
                end

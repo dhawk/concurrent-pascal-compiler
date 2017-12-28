@@ -32,7 +32,7 @@ type
          config_bits: TStructuredConstant;
          destructor Destroy;
             override;
-         function GenerateCode (param1, param2: integer): integer;
+         function GenerateCode (param2: integer): integer;
             override;
          procedure AssignAddresses;
             override;
@@ -57,7 +57,7 @@ type
          inline_code: TInstructionArray;     // only used for signaled function in interrupt variables
          procedure AssignAddresses;
             override;
-         function GenerateCode (param1, param2: integer): integer;
+         function GenerateCode (param2: integer): integer;
             override;
          procedure PushDefaultResultValue;
          destructor Destroy;
@@ -72,7 +72,7 @@ type
          inline_code: TInstructionArray;     // only used for initial statement of interrupt variables
          procedure AssignAddresses;
             override;
-         function GenerateCode (param1, param2: integer): integer;
+         function GenerateCode (param2: integer): integer;
             override;
          function process_stack_size: integer;
          function control_block_size: integer;
@@ -96,7 +96,7 @@ type
          procedure InitializeEEPROMValues (system_type_name: string);
          procedure AssignAddresses;
             override;
-         function GenerateCode (param1, param2: integer): integer;
+         function GenerateCode (param2: integer): integer;
             override;
       end;
 
@@ -240,7 +240,7 @@ procedure TPIC18x_ParamList.PushParameters (actual_parameters: TArrayOfTDefiniti
                            end;
                         real_expression:
                            begin
-                              TExpression(actual_parameters[i]).GenerateCode (666, 4);
+                              TExpression(actual_parameters[i]).GenerateCode (4);
                               if (parameter_definitions[i].typedef = target_cpu.get_supported_data_type (ieee_single_type_name))
                                  and
                                  (not TPIC18x_Expression_TypeInfo(TExpression(actual_parameters[i]).info).is_ieee_single) then
@@ -256,7 +256,7 @@ procedure TPIC18x_ParamList.PushParameters (actual_parameters: TArrayOfTDefiniti
                else  // parameter is unreal
                   begin
                      expression_result_size := TPIC18x_TypeInfo(parameter_definitions[i].TypeDef.info).Size;
-                     TExpression(actual_parameters[i]).GenerateCode (666, expression_result_size);
+                     TExpression(actual_parameters[i]).GenerateCode (expression_result_size);
                      if TExpression(actual_parameters[i]).expression_kind in ordinal_expression_kinds then
                         GenerateRangeCheckCode (TOrdinalDataType(parameter_definitions[i].typedef),
                                                 expression_result_size,
@@ -348,7 +348,7 @@ procedure TPIC18x_Program.AssignAddresses;
             end
    end;
 
-function TPIC18x_Program.GenerateCode (param1, param2: integer): integer;
+function TPIC18x_Program.GenerateCode (param2: integer): integer;
    var
       i: integer;
    begin
@@ -358,7 +358,7 @@ function TPIC18x_Program.GenerateCode (param1, param2: integer): integer;
       initial_statement_label := TAssemblyLabel.Create;
       StackUsageCounter.Clear;
       TSourceSyncPoint.Create (begin_src_loc);
-      initial_statement.GenerateCode (666, 1);
+      initial_statement.GenerateCode (1);
       TSourceSyncPoint.Create (end_src_loc);
       TAssemblySourceBlankLine.Create;
       // initialize any reachable uninitialized interrupt variables
@@ -484,7 +484,7 @@ procedure TPIC18x_Routine.AssignAddresses;
          end
    end;
 
-function TPIC18x_Routine.GenerateCode (param1, param2: integer): integer;
+function TPIC18x_Routine.GenerateCode (param2: integer): integer;
    var
       locals_size, param_size, i: integer;
    begin
@@ -519,7 +519,7 @@ function TPIC18x_Routine.GenerateCode (param1, param2: integer): integer;
 
       TSourceSyncPoint.Create (block_begin_src_loc);
 
-      statement_list.GenerateCode (666, 0);
+      statement_list.GenerateCode (0);
 
       TSourceSyncPoint.Create (block_end_src_loc);
 
@@ -707,7 +707,7 @@ procedure TPIC18x_SystemType.AssignAddresses;
          end
    end;
 
-function TPIC18x_SystemType.GenerateCode (param1, param2: integer): integer;
+function TPIC18x_SystemType.GenerateCode (param2: integer): integer;
    var
       lbl: TInstruction;
    begin
@@ -735,7 +735,7 @@ function TPIC18x_SystemType.GenerateCode (param1, param2: integer): integer;
          end;
 
       StackUsageCounter.Clear;
-      initial_statement.GenerateCode (666, 0);
+      initial_statement.GenerateCode (0);
       assert (StackUsageCounter.current = 0);
       initial_stmt_stack_usage := StackUsageCounter.max;
 
@@ -834,7 +834,7 @@ procedure TPIC18x_DataItemList.AssignAddresses;
    begin
    end;
 
-function TPIC18x_DataItemList.GenerateCode (param1, param2: integer): integer;
+function TPIC18x_DataItemList.GenerateCode (param2: integer): integer;
    var
       i: integer;
    begin
