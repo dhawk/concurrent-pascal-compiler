@@ -32,7 +32,7 @@ type
          config_bits: TStructuredConstant;
          destructor Destroy;
             override;
-         function Generate (param1, param2: integer): integer;
+         function GenerateCode (param1, param2: integer): integer;
             override;
          procedure AssignAddresses;
             override;
@@ -42,8 +42,6 @@ type
 
    TPIC18x_Property =
       class (TProperty)
-         function Generate (param1, param2: integer): integer;
-            override;
       end;
 
    TPIC18x_Routine =
@@ -59,7 +57,7 @@ type
          inline_code: TInstructionArray;     // only used for signaled function in interrupt variables
          procedure AssignAddresses;
             override;
-         function Generate (param1, param2: integer): integer;
+         function GenerateCode (param1, param2: integer): integer;
             override;
          procedure PushDefaultResultValue;
          destructor Destroy;
@@ -74,7 +72,7 @@ type
          inline_code: TInstructionArray;     // only used for initial statement of interrupt variables
          procedure AssignAddresses;
             override;
-         function Generate (param1, param2: integer): integer;
+         function GenerateCode (param1, param2: integer): integer;
             override;
          function process_stack_size: integer;
          function control_block_size: integer;
@@ -98,7 +96,7 @@ type
          procedure InitializeEEPROMValues (system_type_name: string);
          procedure AssignAddresses;
             override;
-         function Generate (param1, param2: integer): integer;
+         function GenerateCode (param1, param2: integer): integer;
             override;
       end;
 
@@ -242,7 +240,7 @@ procedure TPIC18x_ParamList.PushParameters (actual_parameters: TArrayOfTDefiniti
                            end;
                         real_expression:
                            begin
-                              TExpression(actual_parameters[i]).Generate (GenerateCode, 4);
+                              TExpression(actual_parameters[i]).GenerateCode (666, 4);
                               if (parameter_definitions[i].typedef = target_cpu.get_supported_data_type (ieee_single_type_name))
                                  and
                                  (not TPIC18x_Expression_TypeInfo(TExpression(actual_parameters[i]).info).is_ieee_single) then
@@ -258,7 +256,7 @@ procedure TPIC18x_ParamList.PushParameters (actual_parameters: TArrayOfTDefiniti
                else  // parameter is unreal
                   begin
                      expression_result_size := TPIC18x_TypeInfo(parameter_definitions[i].TypeDef.info).Size;
-                     TExpression(actual_parameters[i]).Generate (GenerateCode, expression_result_size);
+                     TExpression(actual_parameters[i]).GenerateCode (666, expression_result_size);
                      if TExpression(actual_parameters[i]).expression_kind in ordinal_expression_kinds then
                         GenerateRangeCheckCode (TOrdinalDataType(parameter_definitions[i].typedef),
                                                 expression_result_size,
@@ -350,44 +348,37 @@ procedure TPIC18x_Program.AssignAddresses;
             end
    end;
 
-function TPIC18x_Program.Generate (param1, param2: integer): integer;
+function TPIC18x_Program.GenerateCode (param1, param2: integer): integer;
    var
       i: integer;
    begin
       result := 0;  // to suppress compiler warning
-      case param1 of
-         GenerateCode:
+      current_block := self;
+      TSourceSyncPoint.Create (last_var_declaration_src_loc);
+      initial_statement_label := TAssemblyLabel.Create;
+      StackUsageCounter.Clear;
+      TSourceSyncPoint.Create (begin_src_loc);
+      initial_statement.GenerateCode (666, 1);
+      TSourceSyncPoint.Create (end_src_loc);
+      TAssemblySourceBlankLine.Create;
+      // initialize any reachable uninitialized interrupt variables
+      for i := 0 to program_vars.Length-1 do
+         if (program_vars[i].typedef.IsInterruptType)
+            and
+            (program_vars[i].reachable)
+            and
+            (not program_vars[i].init_statement_called)
+         then
             begin
-               current_block := self;
-               TSourceSyncPoint.Create (last_var_declaration_src_loc);
-               initial_statement_label := TAssemblyLabel.Create;
-               StackUsageCounter.Clear;
-               TSourceSyncPoint.Create (begin_src_loc);
-               initial_statement.Generate (GenerateCode, 1);
-               TSourceSyncPoint.Create (end_src_loc);
-               TAssemblySourceBlankLine.Create;
-               // initialize any reachable uninitialized interrupt variables
-               for i := 0 to program_vars.Length-1 do
-                  if (program_vars[i].typedef.IsInterruptType)
-                     and
-                     (program_vars[i].reachable)
-                     and
-                     (not program_vars[i].init_statement_called)
-                  then
-                     begin
-                        TSourceLine.Create ('init ' + program_vars[i].name + ';');
-                        ProgramCode.AppendInlineCode (TPIC18x_SystemType(program_vars[i].typedef).inline_code);
-                        StackUsageCounter.PushPop (TPIC18x_SystemType(program_vars[i].typedef).initial_stmt_stack_usage);
-                     end;
-               GenerateKernelStartupCode;
-               GenerateInterruptsOffCodeSegmentsAsSubroutines;
-               assert (StackUsageCounter.Current = 0);
-               initial_statement_stack_usage := StackUsageCounter.Max;
-               current_block := nil
+               TSourceLine.Create ('init ' + program_vars[i].name + ';');
+               ProgramCode.AppendInlineCode (TPIC18x_SystemType(program_vars[i].typedef).inline_code);
+               StackUsageCounter.PushPop (TPIC18x_SystemType(program_vars[i].typedef).initial_stmt_stack_usage);
             end;
-      else
-         assert (false, 'TPIC18x_Program.Generate(' + IntToStr(param1) + ') not implemented')
-      end
+      GenerateKernelStartupCode;
+      GenerateInterruptsOffCodeSegmentsAsSubroutines;
+      assert (StackUsageCounter.Current = 0);
+      initial_statement_stack_usage := StackUsageCounter.Max;
+      current_block := nil
    end;
 
 procedure TPIC18x_Program.global_declarations_examination_hook;
@@ -421,16 +412,6 @@ procedure TPIC18x_Program.global_declarations_examination_hook;
 
       config_bits := TStructuredConstant(defc);
       config_bits.AddRef
-   end;
-
-function TPIC18x_Property.Generate (param1, param2: integer): integer;
-   begin
-      result := 0;  // to suppress compiler warning
-      case param1 of
-         0: assert (false, 'TPIC18x_Property.Generate(0) not implemented');
-      else
-         assert (false, 'TPIC18x_Property.Generate(' + IntToStr(param1) + ') not implemented')
-      end
    end;
 
 procedure TPIC18x_Routine.AssignAddresses;
@@ -503,104 +484,97 @@ procedure TPIC18x_Routine.AssignAddresses;
          end
    end;
 
-function TPIC18x_Routine.Generate (param1, param2: integer): integer;
+function TPIC18x_Routine.GenerateCode (param1, param2: integer): integer;
    var
       locals_size, param_size, i: integer;
    begin
       result := 0;  // to suppress compiler warning
-      case param1 of
-         GenerateCode:
-            begin
-               TSourceSyncPoint.Create (block_header_end_src_loc);
-               current_block := self;
-               StackUsageCounter.Clear;
+      TSourceSyncPoint.Create (block_header_end_src_loc);
+      current_block := self;
+      StackUsageCounter.Clear;
 
-               if (context.definition_kind = type_definition)
-                  and
-                  (TSystemType(context).system_type_kind = interrupt_system_type)
-               then
-                  ProgramCode.StartRecordingInlineCode (inline_code)
-               else
-                  entry_point_label := TAssemblyLabel.Create;
-
-               if (context.definition_kind = type_definition)
-                  and
-                  (TSystemType(context).system_type_kind = monitor_system_type)
-                  and
-                  entry
-               then
-                  EnterMonitor (TSystemType(context).priority);
-
-               TSourceSyncPoint.Create (last_var_declaration_src_loc);
-               locals_size := TPIC18x_DataItemList(local_vars).Size;
-               if parameter_definitions = nil then
-                  param_size := 0
-               else
-                  param_size := TPIC18x_ParamList(parameter_definitions).Size;
-               TPIC18x_DataItemList(local_vars).PushInitialValues;
-
-               TSourceSyncPoint.Create (block_begin_src_loc);
-
-               statement_list.Generate (GenerateCode, 0);
-
-               TSourceSyncPoint.Create (block_end_src_loc);
-
-               if locals_size > 0 then
-                  if param_size = 0 then
-                     adjust_fsr (pFSR2, locals_size).annotation := 'pop local vars'
-                  else
-                     adjust_fsr (pFSR2, locals_size + param_size).annotation := 'pop local vars and parameters'
-               else
-                  if param_size > 0 then
-                     adjust_fsr (pFSR2, param_size).annotation := 'pop parameters';
-
-               if (context.definition_kind = type_definition)
-                  and
-                  (TSystemType(context).system_type_kind = monitor_system_type)
-                  and
-                  entry
-               then
-                  begin
-                     i := Length(TStatementList(statement_list).stmts);
-                     if (i = 0)
-                        or
-                        (TStatementList(statement_list).stmts[i-1].statement_kind <> continue_statement)
-                     then
-                        LeaveMonitor (TSystemType(context).priority, locals_size + param_size)
-                  end
-               else
-                  begin
-                     if entry then
-                        begin
-                           TPIC18x_MOVFF.Create (PREINC2, this_ptrH).annotation := 'restore caller''s this pointer';
-                           TPIC18x_MOVFF.Create (PREINC2, this_ptrL)
-                        end;
-
-                     if (context.definition_kind = type_definition)
-                        and
-                        (TSystemType(context).system_type_kind = interrupt_system_type)
-                     then
-                        ProgramCode.StopRecordingInlineCode
-                     else
-                        begin
-                           // pop return address into program counter & return
-                           TPIC18x_MOVF.Create (PREINC2, dest_w, access_mode).annotation := 'pop return address';
-                           TPIC18x_MOVWF.Create (PCLATU, access_mode);
-                           TPIC18x_MOVF.Create (PREINC2, dest_w, access_mode);
-                           TPIC18x_MOVWF.Create (PCLATH, access_mode);
-                           TPIC18x_MOVF.Create (PREINC2, dest_w, access_mode);
-                           TPIC18x_MOVWF.Create (PCL, access_mode)
-                        end
-                  end;
-
-               stack_usage := StackUsageCounter.Max;
-               current_block := nil;
-
-               GenerateInterruptsOffCodeSegmentsAsSubroutines
-            end;
+      if (context.definition_kind = type_definition)
+         and
+         (TSystemType(context).system_type_kind = interrupt_system_type)
+      then
+         ProgramCode.StartRecordingInlineCode (inline_code)
       else
-         assert (false, 'TPIC18x_Routine.Generate(' + IntToStr(param1) + ') not implemented')
-      end
+         entry_point_label := TAssemblyLabel.Create;
+
+      if (context.definition_kind = type_definition)
+         and
+         (TSystemType(context).system_type_kind = monitor_system_type)
+         and
+         entry
+      then
+         EnterMonitor (TSystemType(context).priority);
+
+      TSourceSyncPoint.Create (last_var_declaration_src_loc);
+      locals_size := TPIC18x_DataItemList(local_vars).Size;
+      if parameter_definitions = nil then
+         param_size := 0
+      else
+         param_size := TPIC18x_ParamList(parameter_definitions).Size;
+      TPIC18x_DataItemList(local_vars).PushInitialValues;
+
+      TSourceSyncPoint.Create (block_begin_src_loc);
+
+      statement_list.GenerateCode (666, 0);
+
+      TSourceSyncPoint.Create (block_end_src_loc);
+
+      if locals_size > 0 then
+         if param_size = 0 then
+            adjust_fsr (pFSR2, locals_size).annotation := 'pop local vars'
+         else
+            adjust_fsr (pFSR2, locals_size + param_size).annotation := 'pop local vars and parameters'
+      else
+         if param_size > 0 then
+            adjust_fsr (pFSR2, param_size).annotation := 'pop parameters';
+
+      if (context.definition_kind = type_definition)
+         and
+         (TSystemType(context).system_type_kind = monitor_system_type)
+         and
+         entry
+      then
+         begin
+            i := Length(TStatementList(statement_list).stmts);
+            if (i = 0)
+               or
+               (TStatementList(statement_list).stmts[i-1].statement_kind <> continue_statement)
+            then
+               LeaveMonitor (TSystemType(context).priority, locals_size + param_size)
+         end
+      else
+         begin
+            if entry then
+               begin
+                  TPIC18x_MOVFF.Create (PREINC2, this_ptrH).annotation := 'restore caller''s this pointer';
+                  TPIC18x_MOVFF.Create (PREINC2, this_ptrL)
+               end;
+
+            if (context.definition_kind = type_definition)
+               and
+               (TSystemType(context).system_type_kind = interrupt_system_type)
+            then
+               ProgramCode.StopRecordingInlineCode
+            else
+               begin
+                  // pop return address into program counter & return
+                  TPIC18x_MOVF.Create (PREINC2, dest_w, access_mode).annotation := 'pop return address';
+                  TPIC18x_MOVWF.Create (PCLATU, access_mode);
+                  TPIC18x_MOVF.Create (PREINC2, dest_w, access_mode);
+                  TPIC18x_MOVWF.Create (PCLATH, access_mode);
+                  TPIC18x_MOVF.Create (PREINC2, dest_w, access_mode);
+                  TPIC18x_MOVWF.Create (PCL, access_mode)
+               end
+         end;
+
+      stack_usage := StackUsageCounter.Max;
+      current_block := nil;
+
+      GenerateInterruptsOffCodeSegmentsAsSubroutines
    end;
 
 procedure TPIC18x_Routine.enum_bytes (b: byte; i: integer; path, value: string; initialization_unnecessary: boolean);
@@ -733,72 +707,66 @@ procedure TPIC18x_SystemType.AssignAddresses;
          end
    end;
 
-function TPIC18x_SystemType.Generate (param1, param2: integer): integer;
+function TPIC18x_SystemType.GenerateCode (param1, param2: integer): integer;
    var
       lbl: TInstruction;
    begin
       result := 0;  // to suppress compiler warning
-      case param1 of
-         GenerateCode:
-            begin    // inital statement
-               current_block := self;
-               TSourceSyncPoint.Create (block_begin_src_loc);
+      // inital statement
+      current_block := self;
+      TSourceSyncPoint.Create (block_begin_src_loc);
 
-               if system_type_kind = interrupt_system_type then
-                  ProgramCode.StartRecordingInlineCode (inline_code)
-               else
-                  init_stmt_entry_point_label := TAssemblyLabel.Create;
+      if system_type_kind = interrupt_system_type then
+         ProgramCode.StartRecordingInlineCode (inline_code)
+      else
+         init_stmt_entry_point_label := TAssemblyLabel.Create;
 
-               if (system_type_kind <> process_system_type)
-                  and
-                  (parameters.Length > 0) then
-                  begin
-                     TPIC18x_MOVFF.Create (this_ptrL, FSR1L).annotation := 'copy parameters';
-                     TPIC18x_MOVFF.Create (this_ptrH, FSR1H);
-                     adjust_fsr (pFSR1, -$3E + control_block_size);
-                     TPIC18x_MOVLW.Create (TPIC18x_ParamList(parameters).Size);
-                     lbl := TPIC18x_MOVFF.Create (PREINC2, POSTINC1);
-                     TPIC18x_DECFSZ.Create (WREG, dest_w, access_mode);
-                     TPIC18x_BRA.Create.dest := lbl
-                  end;
+      if (system_type_kind <> process_system_type)
+         and
+         (parameters.Length > 0) then
+         begin
+            TPIC18x_MOVFF.Create (this_ptrL, FSR1L).annotation := 'copy parameters';
+            TPIC18x_MOVFF.Create (this_ptrH, FSR1H);
+            adjust_fsr (pFSR1, -$3E + control_block_size);
+            TPIC18x_MOVLW.Create (TPIC18x_ParamList(parameters).Size);
+            lbl := TPIC18x_MOVFF.Create (PREINC2, POSTINC1);
+            TPIC18x_DECFSZ.Create (WREG, dest_w, access_mode);
+            TPIC18x_BRA.Create.dest := lbl
+         end;
 
-               StackUsageCounter.Clear;
-               initial_statement.Generate (GenerateCode, 0);
-               assert (StackUsageCounter.current = 0);
-               initial_stmt_stack_usage := StackUsageCounter.max;
+      StackUsageCounter.Clear;
+      initial_statement.GenerateCode (666, 0);
+      assert (StackUsageCounter.current = 0);
+      initial_stmt_stack_usage := StackUsageCounter.max;
 
-               TSourceSyncPoint.Create (block_end_src_loc);
+      TSourceSyncPoint.Create (block_end_src_loc);
 
-               case system_type_kind of
-                  interrupt_system_type:
-                     ProgramCode.StopRecordingInlineCode;
-                  process_system_type:
-                     { will suspend then return via kernel dispatch };
-                  class_system_type,
-                  monitor_system_type:
-                     begin
-                        TPIC18x_MOVFF.Create (PREINC2, this_ptrH).annotation := 'restore caller''s this pointer';
-                        TPIC18x_MOVFF.Create (PREINC2, this_ptrL);
+      case system_type_kind of
+         interrupt_system_type:
+            ProgramCode.StopRecordingInlineCode;
+         process_system_type:
+            { will suspend then return via kernel dispatch };
+         class_system_type,
+         monitor_system_type:
+            begin
+               TPIC18x_MOVFF.Create (PREINC2, this_ptrH).annotation := 'restore caller''s this pointer';
+               TPIC18x_MOVFF.Create (PREINC2, this_ptrL);
 
-                        // pop return address into program counter & return
-                        TPIC18x_MOVF.Create (PREINC2, dest_w, access_mode).annotation := 'pop return address';
-                        TPIC18x_MOVWF.Create (PCLATU, access_mode);
-                        TPIC18x_MOVF.Create (PREINC2, dest_w, access_mode);
-                        TPIC18x_MOVWF.Create (PCLATH, access_mode);
-                        TPIC18x_MOVF.Create (PREINC2, dest_w, access_mode);
-                        TPIC18x_MOVWF.Create (PCL, access_mode)
-                     end;
-               else
-                  assert (false)
-               end;
-
-               current_block := nil;
-
-               GenerateInterruptsOffCodeSegmentsAsSubroutines
+               // pop return address into program counter & return
+               TPIC18x_MOVF.Create (PREINC2, dest_w, access_mode).annotation := 'pop return address';
+               TPIC18x_MOVWF.Create (PCLATU, access_mode);
+               TPIC18x_MOVF.Create (PREINC2, dest_w, access_mode);
+               TPIC18x_MOVWF.Create (PCLATH, access_mode);
+               TPIC18x_MOVF.Create (PREINC2, dest_w, access_mode);
+               TPIC18x_MOVWF.Create (PCL, access_mode)
             end;
       else
-         assert (false, 'TPIC18x_SystemType.Generate(' + IntToStr(param1) + ') not implemented')
-      end
+         assert (false)
+      end;
+
+      current_block := nil;
+
+      GenerateInterruptsOffCodeSegmentsAsSubroutines
    end;
 
 function TPIC18x_SystemType.control_block_size: integer;
@@ -866,40 +834,35 @@ procedure TPIC18x_DataItemList.AssignAddresses;
    begin
    end;
 
-function TPIC18x_DataItemList.Generate (param1, param2: integer): integer;
+function TPIC18x_DataItemList.GenerateCode (param1, param2: integer): integer;
    var
       i: integer;
    begin
       result := 0;  // to suppress compiler warning
-      case param1 of
-         GenerateCode:
-            if descriptor = rw_rom then
-               for i := 0 to Length-1 do
-                  if Self[i].initial_value = nil then
-                     TPIC18x_Data_Initialization.Create ('initialize ' + Self[i].name,
-                                                         TPIC18x_TypeInfo(Self[i].typedef.info).DefaultValue,
-                                                         Self[i].decl_end_src_loc
-                                                        )
-                  else
-                     TPIC18x_Data_Initialization.Create ('initialize ' + Self[i].name,
-                                                         Self[i].initial_value,
-                                                         Self[i].decl_end_src_loc
-                                                        )
-            else if descriptor = rw_eeprom then
-               for i := 0 to Length-1 do
-                  if Self[i].initial_value = nil then
-                     TPIC18x_Data_Initialization.Create ('initialize ' + Self[i].name,
-                                                         TPIC18x_TypeInfo(Self[i].typedef.info).DefaultValue,
-                                                         Self[i].decl_end_src_loc
-                                                        )
-                  else
-                     TPIC18x_Data_Initialization.Create ('initialize ' + Self[i].name,
-                                                         Self[i].initial_value,
-                                                         Self[i].decl_end_src_loc
-                                                        );
-      else
-         assert (false, 'TPIC18x_DataItemList.Generate(' + IntToStr(param1) + ') not implemented')
-      end
+      if descriptor = rw_rom then
+         for i := 0 to Length-1 do
+            if Self[i].initial_value = nil then
+               TPIC18x_Data_Initialization.Create ('initialize ' + Self[i].name,
+                                                   TPIC18x_TypeInfo(Self[i].typedef.info).DefaultValue,
+                                                   Self[i].decl_end_src_loc
+                                                  )
+            else
+               TPIC18x_Data_Initialization.Create ('initialize ' + Self[i].name,
+                                                   Self[i].initial_value,
+                                                   Self[i].decl_end_src_loc
+                                                  )
+      else if descriptor = rw_eeprom then
+         for i := 0 to Length-1 do
+            if Self[i].initial_value = nil then
+               TPIC18x_Data_Initialization.Create ('initialize ' + Self[i].name,
+                                                   TPIC18x_TypeInfo(Self[i].typedef.info).DefaultValue,
+                                                   Self[i].decl_end_src_loc
+                                                  )
+            else
+               TPIC18x_Data_Initialization.Create ('initialize ' + Self[i].name,
+                                                   Self[i].initial_value,
+                                                   Self[i].decl_end_src_loc
+                                                  )
    end;
 
 procedure TPIC18x_DataItemList.EnumerateInitialValues (proc: TByteParamProcedureOfObject);

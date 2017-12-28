@@ -17,7 +17,7 @@ uses
 type
    TPIC18x_AssertStatement =
       class (TAssertStatement)
-         function Generate (param1, param2: integer): integer;
+         function GenerateCode (param1, param2: integer): integer;
             override;
       end;
 
@@ -35,7 +35,7 @@ type
          selection_expression_size: integer;
          come_from_list: array of TBranchTarget;
          br_otherwise_list: TBranchTarget;
-         function Generate (param1, param2: integer): integer;
+         function GenerateCode (param1, param2: integer): integer;
             override;
       end;
 
@@ -43,31 +43,31 @@ type
       class (TCycleStatement)
          start_loop_label: TInstruction;
          initial_stack_level: integer;
-         function Generate (param1, param2: integer): integer;
+         function GenerateCode (param1, param2: integer): integer;
             override;
       end;
 
    TPIC18x_ExitLoopStatement =
       class (TExitLoopStatement)
-         function Generate (param1, param2: integer): integer;
+         function GenerateCode (param1, param2: integer): integer;
             override;
       end;
 
    TPIC18x_ForStatement =
       class (TForStatement)
-         function Generate (param1, param2: integer): integer;
+         function GenerateCode (param1, param2: integer): integer;
             override;
       end;
 
    TPIC18x_IfStatement =
       class (TIfStatement)
-         function Generate (param1, param2: integer): integer;
+         function GenerateCode (param1, param2: integer): integer;
             override;
       end;
 
    TPIC18x_InitStatement =
       class (TInitStatement)
-         function Generate (param1, param2: integer): integer;
+         function GenerateCode (param1, param2: integer): integer;
             override;
       end;
 
@@ -76,19 +76,19 @@ type
          initial_stack_level: integer;
          start_loop_label: TInstruction;
          end_loop: TBranchTarget;
-         function Generate (param1, param2: integer): integer;
+         function GenerateCode (param1, param2: integer): integer;
             override;
       end;
 
    TPIC18x_ReCycleStatement =
       class (TReCycleStatement)
-         function Generate (param1, param2: integer): integer;
+         function GenerateCode (param1, param2: integer): integer;
             override;
       end;
 
    TPIC18x_ReLoopStatement =
       class (TReLoopStatement)
-         function Generate (param1, param2: integer): integer;
+         function GenerateCode (param1, param2: integer): integer;
             override;
       end;
 
@@ -100,25 +100,25 @@ type
             (acc: TAccess
             );
          constructor Create (acc: TAccess; exp: TExpression; _src_loc: TSourceLocation);
-         function Generate (param1, param2: integer): integer;
+         function GenerateCode (param1, param2: integer): integer;
             override;
       end;
 
    TPIC18x_StatementList =
       class (TStatementList)
-         function Generate (param1, param2: integer): integer;
+         function GenerateCode (param1, param2: integer): integer;
             override;
       end;
 
    TPIC18x_UntilStatement =
       class (TUntilStatement)
-         function Generate (param1, param2: integer): integer;
+         function GenerateCode (param1, param2: integer): integer;
             override;
       end;
 
     TPIC18x_WhileStatement =
       class (TWhileStatement)
-         function Generate (param1, param2: integer): integer;
+         function GenerateCode (param1, param2: integer): integer;
             override;
       end;
 
@@ -133,7 +133,7 @@ type
    TPIC18x_WithStatement =
       class (TWithStatement)
          address: integer;
-         function Generate (param1, param2: integer): integer;
+         function GenerateCode (param1, param2: integer): integer;
             override;
       end;
 
@@ -225,7 +225,7 @@ function GenerateCodeForConditionalBranch (boolean_expression: TExpression; bran
 
             if accessB <> nil then
                begin
-                  term_expr.first_factor.Generate (GenerateCode, 1);
+                  term_expr.first_factor.GenerateCode (666, 1);
                   if branch_on_sense then
                      TPIC18x_BTFSS.Create (PREINC2, 0, access_mode)
                   else
@@ -350,7 +350,7 @@ function GenerateCodeForConditionalBranch (boolean_expression: TExpression; bran
          end;
 
       // if no exit by now, then full evaluation required
-      boolean_expression.Generate (GenerateCode, 1);
+      boolean_expression.GenerateCode (666, 1);
       if branch_on_sense then
          TPIC18x_BTFSC.Create(PREINC2, 0, access_mode)
       else
@@ -363,33 +363,26 @@ function GenerateCodeForConditionalBranch (boolean_expression: TExpression; bran
 //==========================
 //  TPIC18x_AssertStatement
 
-function TPIC18x_AssertStatement.Generate (param1, param2: integer): integer;
+function TPIC18x_AssertStatement.GenerateCode (param1, param2: integer): integer;
    begin
       result := 0;  // to suppress compiler warning
-      case param1 of
-         GenerateCode:
-            begin
-               TSourceSyncPoint.Create (end_src_loc);
-               if boolean_expression.contains_constant then
-                  case boolean_expression.boolean_constant_value of
-                     true:
-                        {do nothing};
-                     false:
-                        begin
-                           set_errorcode_routine.Call;
-                           RecordRunTimeErrorLocation (TAssemblyLabel.Create, 'assertion failed: ' + assertion_message, src_loc)
-                        end
-                  end
-               else
-                  begin
-                     GenerateCodeForConditionalSkip (boolean_expression, true);
-                     set_errorcode_routine.Call;
-                     RecordRunTimeErrorLocation (TAssemblyLabel.Create, 'assertion failed: ' + assertion_message, src_loc)
-                  end;
-            end;
+      TSourceSyncPoint.Create (end_src_loc);
+      if boolean_expression.contains_constant then
+         case boolean_expression.boolean_constant_value of
+            true:
+               {do nothing};
+            false:
+               begin
+                  set_errorcode_routine.Call;
+                  RecordRunTimeErrorLocation (TAssemblyLabel.Create, 'assertion failed: ' + assertion_message, src_loc)
+               end
+         end
       else
-         assert (false, 'TPIC18x_AssertStatement.Generate(' + IntToStr(param1) + ') not implemented')
-      end
+         begin
+            GenerateCodeForConditionalSkip (boolean_expression, true);
+            set_errorcode_routine.Call;
+            RecordRunTimeErrorLocation (TAssemblyLabel.Create, 'assertion failed: ' + assertion_message, src_loc)
+         end
    end;
 
 function TPIC18x_CaseStatement.TPIC18x_CaseEntry.GenerateCode: TInstruction;
@@ -480,75 +473,68 @@ function TPIC18x_CaseStatement.TPIC18x_CaseEntry.GenerateCode: TInstruction;
          end
    end;
 
-function TPIC18x_CaseStatement.Generate (param1, param2: integer): integer;
+function TPIC18x_CaseStatement.GenerateCode (param1, param2: integer): integer;
    var
       i: integer;
       br_end_list: TBranchTarget;
    begin
       result := 0;  // to suppress compiler warning
-      case param1 of
-         GenerateCode:
-            begin
-               SetLength (come_from_list, Length(labeled_statements));
-               for i := 0 to Length(labeled_statements)-1 do
-                  come_from_list[i] := TBranchTarget.Create;
-               br_end_list := TBranchTarget.Create;
-               br_otherwise_list := TBranchTarget.Create;
+      SetLength (come_from_list, Length(labeled_statements));
+      for i := 0 to Length(labeled_statements)-1 do
+         come_from_list[i] := TBranchTarget.Create;
+      br_end_list := TBranchTarget.Create;
+      br_otherwise_list := TBranchTarget.Create;
 
-               TSourceSyncPoint.Create (of_src_loc);
+      TSourceSyncPoint.Create (of_src_loc);
 
-               selection_expression_size := TPIC18x_TypeInfo(selection_expression.info).Size;
-               selection_expression.Generate (GenerateCode, selection_expression_size);
-               if selection_expression.info.Signed then
-                  TPIC18x_BTG.Create (1, 7, access_mode);    // flip sign bit to upshift signed to unsigned
+      selection_expression_size := TPIC18x_TypeInfo(selection_expression.info).Size;
+      selection_expression.GenerateCode (666, selection_expression_size);
+      if selection_expression.info.Signed then
+         TPIC18x_BTG.Create (1, 7, access_mode);    // flip sign bit to upshift signed to unsigned
 
-               TPIC18x_CaseEntry(case_label_range_tree.root).GenerateCode.annotation := 'do case branching';
+      TPIC18x_CaseEntry(case_label_range_tree.root).GenerateCode.annotation := 'do case branching';
 
-               for i := 0 to Length(labeled_statements)-1 do
-                  begin
-                     TSourceSyncPoint.Create (labeled_statements[i].colon_src_loc);
-                     come_from_list[i].target_label := TAssemblyLabel.Create;
-                     labeled_statements[i].statement.Generate (GenerateCode, 0);
-                     if not ((i = Length(labeled_statements)-1)
-                             and
-                             (not br_otherwise_list.has_clients)
-                            ) then
-                        br_end_list.ComeFrom (TGotoMacro.Create)
-                  end;
+      for i := 0 to Length(labeled_statements)-1 do
+         begin
+            TSourceSyncPoint.Create (labeled_statements[i].colon_src_loc);
+            come_from_list[i].target_label := TAssemblyLabel.Create;
+            labeled_statements[i].statement.GenerateCode (666, 0);
+            if not ((i = Length(labeled_statements)-1)
+                    and
+                    (not br_otherwise_list.has_clients)
+                   ) then
+               br_end_list.ComeFrom (TGotoMacro.Create)
+         end;
 
-               if otherwise_statement <> nil then
-                  TSourceSyncPoint.Create (otherwise_src_loc)
-               else
-                  TSourceSyncPoint.Create (end_src_loc);
-               if br_otherwise_list.has_clients then
-                  begin
-                     br_otherwise_list.target_label := TAssemblyLabel.Create;
-                     if otherwise_statement <> nil then
-                        otherwise_statement.Generate (GenerateCode, 0)
-                     else
-                        begin
-                           set_errorcode_routine.Call.annotation := rterr_bad_case_index;
-                           RecordRunTimeErrorLocation (TAssemblyLabel.Create, rterr_bad_case_index, selection_expression.src_loc)
-                        end
-                  end;
-
-               TSourceSyncPoint.Create (end_src_loc);
-               br_end_list.target_label := TPIC18x_ADDFSR.Create (2, selection_expression_size);
-               StackUsageCounter.Pop (selection_expression_size);
-
-               for i := 0 to Length(labeled_statements)-1 do
-                  come_from_list[i].set_client_destinations;
-               br_otherwise_list.set_client_destinations;
-               br_end_list.set_client_destinations;
-
-               for i := 0 to Length(labeled_statements)-1 do
-                  come_from_list[i].Free;
-               br_otherwise_list.Free;
-               br_end_list.Free
-            end;
+      if otherwise_statement <> nil then
+         TSourceSyncPoint.Create (otherwise_src_loc)
       else
-         assert (false, 'TPIC18x_CaseStatement.Generate(' + IntToStr(param1) + ') not implemented')
-      end
+         TSourceSyncPoint.Create (end_src_loc);
+      if br_otherwise_list.has_clients then
+         begin
+            br_otherwise_list.target_label := TAssemblyLabel.Create;
+            if otherwise_statement <> nil then
+               otherwise_statement.GenerateCode (666, 0)
+            else
+               begin
+                  set_errorcode_routine.Call.annotation := rterr_bad_case_index;
+                  RecordRunTimeErrorLocation (TAssemblyLabel.Create, rterr_bad_case_index, selection_expression.src_loc)
+               end
+         end;
+
+      TSourceSyncPoint.Create (end_src_loc);
+      br_end_list.target_label := TPIC18x_ADDFSR.Create (2, selection_expression_size);
+      StackUsageCounter.Pop (selection_expression_size);
+
+      for i := 0 to Length(labeled_statements)-1 do
+         come_from_list[i].set_client_destinations;
+      br_otherwise_list.set_client_destinations;
+      br_end_list.set_client_destinations;
+
+      for i := 0 to Length(labeled_statements)-1 do
+         come_from_list[i].Free;
+      br_otherwise_list.Free;
+      br_end_list.Free
    end;
 
 function TPIC18x_CaseStatement.create_case_entry (_case_stmt: TCaseStatement; _labeled_statement_idx, _first_of_range, _last_of_range: integer): TCaseStatement.TCaseLabelRangeEntry;
@@ -556,56 +542,44 @@ function TPIC18x_CaseStatement.create_case_entry (_case_stmt: TCaseStatement; _l
       result := TPIC18x_CaseEntry.create (_case_stmt, _labeled_statement_idx, _first_of_range, _last_of_range)
    end;
 
-function TPIC18x_CycleStatement.Generate (param1, param2: integer): integer;
+function TPIC18x_CycleStatement.GenerateCode (param1, param2: integer): integer;
    begin
       result := 0;  // to suppress compiler warning
-      case param1 of
-         GenerateCode:
-            if not is_empty_loop_at_end_of_program_initial_statement then
-               begin
-                  TSourceSyncPoint.Create (src_loc);
-                  start_loop_label := TAssemblyLabel.Create;
-                  initial_stack_level := StackUsageCounter.Current;
-                  statement_list.Generate (GenerateCode, 0);
-                  TSourceSyncPoint.Create (repeat_token_src_loc);
-                  TGOTOMacro.Create.dest := start_loop_label
-               end;
-      else
-         assert (false, 'TPIC18x_CycleStatement.Generate(' + IntToStr(param1) + ') not implemented')
-      end
+      if not is_empty_loop_at_end_of_program_initial_statement then
+         begin
+            TSourceSyncPoint.Create (src_loc);
+            start_loop_label := TAssemblyLabel.Create;
+            initial_stack_level := StackUsageCounter.Current;
+            statement_list.GenerateCode (666, 0);
+            TSourceSyncPoint.Create (repeat_token_src_loc);
+            TGOTOMacro.Create.dest := start_loop_label
+         end
    end;
 
-function TPIC18x_ExitLoopStatement.Generate (param1, param2: integer): integer;
+function TPIC18x_ExitLoopStatement.GenerateCode (param1, param2: integer): integer;
    var
       br: TInstruction;
    begin
       result := 0;  // to suppress compiler warning
-      case param1 of
-         GenerateCode:
-            begin
-               TSourceSyncPoint.Create (src_loc);
-               if exitloop_condition = nil then
-                  begin
-                     if StackUsageCounter.Current > TPIC18x_LoopStatement(containing_loop_statement).initial_stack_level then
-                        TPIC18x_ADDFSR.Create (2, StackUsageCounter.Current - TPIC18x_LoopStatement (containing_loop_statement).initial_stack_level);
-                     TPIC18x_LoopStatement(containing_loop_statement).end_loop.ComeFrom (TGOTOMacro.Create)
-                  end
-               else if StackUsageCounter.Current = TPIC18x_LoopStatement (containing_loop_statement).initial_stack_level then
-                  TPIC18x_LoopStatement(containing_loop_statement).end_loop.ComeFrom (GenerateCodeForConditionalBranch (exitloop_condition, true))
-               else
-                  begin
-                     br := GenerateCodeForConditionalBranch (exitloop_condition, false);
-                     TPIC18x_ADDFSR.Create (2, StackUsageCounter.Current - TPIC18x_LoopStatement(containing_loop_statement).initial_stack_level);
-                     TPIC18x_LoopStatement(containing_loop_statement).end_loop.ComeFrom (TGOTOMacro.Create);
-                     br.dest := TAssemblyLabel.Create
-                  end
-            end;
+      TSourceSyncPoint.Create (src_loc);
+      if exitloop_condition = nil then
+         begin
+            if StackUsageCounter.Current > TPIC18x_LoopStatement(containing_loop_statement).initial_stack_level then
+               TPIC18x_ADDFSR.Create (2, StackUsageCounter.Current - TPIC18x_LoopStatement (containing_loop_statement).initial_stack_level);
+            TPIC18x_LoopStatement(containing_loop_statement).end_loop.ComeFrom (TGOTOMacro.Create)
+         end
+      else if StackUsageCounter.Current = TPIC18x_LoopStatement (containing_loop_statement).initial_stack_level then
+         TPIC18x_LoopStatement(containing_loop_statement).end_loop.ComeFrom (GenerateCodeForConditionalBranch (exitloop_condition, true))
       else
-         assert (false, 'TPIC18x_ExitLoopStatement.Generate(' + IntToStr(param1) + ') not implemented')
-      end
+         begin
+            br := GenerateCodeForConditionalBranch (exitloop_condition, false);
+            TPIC18x_ADDFSR.Create (2, StackUsageCounter.Current - TPIC18x_LoopStatement(containing_loop_statement).initial_stack_level);
+            TPIC18x_LoopStatement(containing_loop_statement).end_loop.ComeFrom (TGOTOMacro.Create);
+            br.dest := TAssemblyLabel.Create
+         end
    end;
 
-function TPIC18x_ForStatement.Generate (param1, param2: integer): integer;
+function TPIC18x_ForStatement.GenerateCode (param1, param2: integer): integer;
 
    procedure clamp_to_range_of_control_variable (range: TTypeInfo);
       begin
@@ -634,457 +608,450 @@ function TPIC18x_ForStatement.Generate (param1, param2: integer): integer;
    begin   // TPIC18x_ForStatement.Generate
       result := 0;  // to suppress compiler warning
 
-      case param1 of
-         GenerateCode:
+      comparison_range := nil;  // to suppress compiler warning
+      temp_range := nil;        // to suppress compiler warning
+      be1 := nil;               // to suppress compiler warning
+
+      TSourceSyncPoint.Create (do_src_loc);
+
+      case step of
+         increment_control_variable:
             begin
-               comparison_range := nil;  // to suppress compiler warning
-               temp_range := nil;        // to suppress compiler warning
-               be1 := nil;               // to suppress compiler warning
-
-               TSourceSyncPoint.Create (do_src_loc);
-
-               case step of
-                  increment_control_variable:
-                     begin
-                        comparison_range := TPIC18x_TypeInfo (target_cpu.TTypeInfo_Create (final_value_expression.info));
-                        clamp_to_range_of_control_variable (comparison_range);  // this will be done by bounds check of final val expression
-                        temp_range := TPIC18x_TypeInfo (target_cpu.TTypeInfo_Create (initial_value_expression.info));
-                        clamp_to_range_of_control_variable (temp_range);  // this will be done by bounds check of initial val expression
-                        comparison_range.max_value.Subtract (temp_range.min_value);
-                        comparison_range.min_value.Subtract (temp_range.max_value)
-                     end;
-                  decrement_control_variable:
-                     begin
-                        comparison_range := TPIC18x_TypeInfo (target_cpu.TTypeInfo_Create (initial_value_expression.info));
-                        clamp_to_range_of_control_variable (comparison_range);  // this will be done by bounds check of final val expression
-                        temp_range := TPIC18x_TypeInfo (target_cpu.TTypeInfo_Create (final_value_expression.info));
-                        clamp_to_range_of_control_variable (temp_range);  // this will be done by bounds check of initial val expression
-                        comparison_range.max_value.Subtract (temp_range.min_value);
-                        comparison_range.min_value.Subtract (temp_range.max_value)
-                     end
-               end;
-               if (statement = nil)
-                  or
-                  comparison_range.max_value.lt(0) then
-                  begin    // loop is nop, exit without emitting any code
-                     comparison_range.Release;
-                     temp_range.Release;
-                     exit
-                  end;
-
-               control_variable_access := TPIC18x_Access.CreateFromVariable (control_variable);
-               control_variable_size := TPIC18x_TypeInfo(control_variable.typedef.info).Size;
-               comparison_size := max (control_variable_size, comparison_range.Size);
-
-               case control_variable.address_mode of
-                  absolute_address_mode:
-                     if control_variable.address + control_variable_size < $100 then
-                        loop_control_mode := lcm_bank0
-                     else if control_variable_size = 1 then
-                        loop_control_mode := lcm_indirect_single_byte
-                     else
-                        loop_control_mode := lcm_indirect_multi_byte;
-                  local_address_mode:
-                     if (final_value_expression.contains_constant)
-                        and
-                        (control_variable.address + (control_variable_size-1) + StackUsageCounter.Current <= $5F)
-                     then
-                        loop_control_mode := lcm_near_stack
-                     else if (not final_value_expression.contains_constant)
-                             and
-                             (control_variable.address + (control_variable_size-1) + StackUsageCounter.Current + (2*comparison_size) <= $5F)
-                          then
-                             loop_control_mode := lcm_near_stack
-                     else if control_variable_size = 1 then
-                        loop_control_mode := lcm_indirect_single_byte
-                     else
-                        loop_control_mode := lcm_indirect_multi_byte;
-               else
-                  if control_variable_size = 1 then
-                     loop_control_mode := lcm_indirect_single_byte
-                  else
-                     loop_control_mode := lcm_indirect_multi_byte;
-               end;
-
-               if loop_control_mode in [lcm_indirect_single_byte, lcm_indirect_multi_byte] then
-                  begin
-                     control_variable_access.Generate_Push_Address2_Code (control_variable_size-1, false);
-                     if final_value_expression.contains_constant then
-                        control_variable_pointer_address := 1
-                     else
-                        control_variable_pointer_address := control_variable_size + 1
-                  end
-               else
-                  control_variable_pointer_address := maxint;    // shouldn't be used
-
-               if ((step = increment_control_variable)
-                   and
-                   initial_value_expression.info.max_value.le (final_value_expression.info.min_value)
-                  )
-                  or
-                  ((step = decrement_control_variable)
-                   and
-                   initial_value_expression.info.min_value.ge (final_value_expression.info.max_value)
-                  )
-               then  // loop will always execute at least once, no need for loop-at-least-once test
-                  begin
-                     stmt := TPIC18x_AssignmentStatement.Create (control_variable_access, initial_value_expression, initial_value_expression.src_loc);
-                     stmt.last_token_src_loc := to_or_downto_src_loc;
-                     stmt.Generate (GenerateCode, 0);
-                     stmt.Release;
-
-                     if not final_value_expression.contains_constant then
-                        begin
-                           final_value_expression_size := TPIC18x_TypeInfo (final_value_expression.info).Size;
-                           final_value_expression.Generate (GenerateCode, final_value_expression_size);
-                           GenerateRangeCheckCode (TOrdinalDataType(control_variable.TypeDef),
-                                                   final_value_expression_size,
-                                                   final_value_expression.info,
-                                                   final_value_expression.src_loc,
-                                                   'range error'
-                                                  );
-                           generate_stack_fix_and_sign_extend_code (final_value_expression_size, 0, control_variable_size, final_value_expression.info.IntegerRange)
-                        end
-                  end
-               else  // loop-at-least-once test needed
-                  begin
-                     final_value_expression_size := TPIC18x_TypeInfo (final_value_expression.info).Size;
-                     final_value_expression.Generate (GenerateCode, final_value_expression_size);
-                     GenerateRangeCheckCode (TOrdinalDataType(control_variable.TypeDef),
-                                             final_value_expression_size,
-                                             final_value_expression.info,
-                                             final_value_expression.src_loc,
-                                             'range error'
-                                            );
-                     generate_stack_fix_and_sign_extend_code (final_value_expression_size, 0, comparison_size, final_value_expression.info.IntegerRange);
-
-                     initial_value_expression_size := TPIC18x_TypeInfo (initial_value_expression.info).Size;
-                     initial_value_expression.Generate (GenerateCode, initial_value_expression_size);
-                     GenerateRangeCheckCode (TOrdinalDataType(control_variable.TypeDef),
-                                             initial_value_expression_size,
-                                             initial_value_expression.info,
-                                             initial_value_expression.src_loc,
-                                             'range error'
-                                            );
-                     generate_stack_fix_and_sign_extend_code (initial_value_expression_size, 0, comparison_size, initial_value_expression.info.IntegerRange);
-
-                     if loop_control_mode in [lcm_indirect_single_byte, lcm_indirect_multi_byte] then
-                        begin
-                           TPIC18x_MOVSF.Create ((2*comparison_size)+1, FSR1H).annotation := 'FSR1 := @' + control_variable.name + '.b0';
-                           TPIC18x_MOVSF.Create ((2*comparison_size)+2, FSR1L)
-                        end;
-
-                     annotation := 'set initial value';
-                     for i := control_variable_size-1 downto 0 do
-                        begin
-                           TPIC18x_MOVF.Create (i + 1 + comparison_size - control_variable_size, dest_w, access_mode).annotation := annotation;
-                           annotation := '';
-
-                           case loop_control_mode of
-                              lcm_bank0:
-                                 TPIC18x_MOVWF.Create (control_variable.address + i, bank_mode);
-                              lcm_near_stack:
-                                 TPIC18x_MOVWF.Create (control_variable.address + StackUsageCounter.Current + i, access_mode);
-                              lcm_indirect_single_byte:
-                                 TPIC18x_MOVWF.Create (INDF1, access_mode);
-                              lcm_indirect_multi_byte:
-                                 TPIC18x_MOVWF.Create (POSTDEC1, access_mode);
-                           else
-                              assert (false)
-                           end
-                        end;
-
-                     annotation := 'check for no-loop initial conditons';
-                     case step of
-                        increment_control_variable:
-                           if comparison_size = 1 then
-                              begin
-                                 TPIC18x_MOVF.Create (PREINC2, dest_w, access_mode).annotation := annotation;
-                                 StackUsageCounter.Pop (1);
-                                 if final_value_expression.contains_constant then
-                                    begin  // clear TOS
-                                       TPIC18x_SUBWF.Create (PREINC2, dest_w, access_mode);
-                                       StackUsageCounter.Pop (1)
-                                    end
-                                 else   // leave final value on stack sized same as control variable
-                                    TPIC18x_SUBWF.Create (1, dest_w, access_mode)
-                              end
-                           else  // comparison_size > 1
-                              begin
-                                 TPIC18x_MOVF.Create (comparison_size, dest_w, access_mode).annotation := annotation;
-                                 TPIC18x_SUBWF.Create (2*comparison_size, dest_w, access_mode);
-                                 for i := comparison_size-1 downto 1 do
-                                    begin
-                                       TPIC18x_MOVF.Create (i, dest_w, access_mode);
-                                       TPIC18x_SUBWFB.Create (comparison_size + i, dest_w, access_mode)
-                                    end;
-                                 if final_value_expression.contains_constant then
-                                    begin  // clear TOS
-                                       TPIC18x_ADDFSR.Create (2, 2*comparison_size);
-                                       StackUsageCounter.Pop (2*comparison_size)
-                                    end
-                                 else
-                                    begin  // leave final value on stack sized same as control variable
-                                       TPIC18x_ADDFSR.Create (2, comparison_size + (comparison_size - control_variable_size));
-                                       StackUsageCounter.Pop (comparison_size + (comparison_size - control_variable_size))
-                                    end
-                              end;
-                        decrement_control_variable:
-                           if (comparison_size = 1)
-                              and
-                              (not final_value_expression.contains_constant) then
-                              begin
-                                 TPIC18x_MOVF.Create (2, dest_w, access_mode).annotation := annotation;
-                                 TPIC18x_SUBWF.Create (PREINC2, dest_w, access_mode);
-                                 StackUsageCounter.Pop (1)
-                                 // leave final value on stack sized same as control variable
-                              end
-                           else  // comparison_size > 1  or  final_value_expression.contains_constant
-                              begin
-                                 TPIC18x_MOVF.Create (2*comparison_size, dest_w, access_mode).annotation := annotation;
-                                 TPIC18x_SUBWF.Create (comparison_size, dest_w, access_mode);
-                                 for i := comparison_size-1 downto 1 do
-                                    begin
-                                       TPIC18x_MOVF.Create (comparison_size + i, dest_w, access_mode);
-                                       TPIC18x_SUBWFB.Create (i, dest_w, access_mode)
-                                    end;
-                                 if final_value_expression.contains_constant then
-                                    begin  // clear TOS
-                                       TPIC18x_ADDFSR.Create (2, 2*comparison_size);
-                                       StackUsageCounter.Pop (2*comparison_size)
-                                    end
-                                 else
-                                    begin  // leave final value on stack sized same as control variable
-                                       TPIC18x_ADDFSR.Create (2, comparison_size + (comparison_size - control_variable_size));
-                                       StackUsageCounter.Pop (comparison_size + (comparison_size - control_variable_size))
-                                    end
-                              end
-                     end;
-
-                     be1 := TBranchOnNegativeStatusMacro.Create;
-                     be1.annotation := 'branch if loop will never execute'
-                  end;   // at least one loop limit is a variable
-
-               loop := TAssemblyLabel.Create;
-               statement.Generate (GenerateCode, 0);
-               TSourceSyncPoint.Create (last_src_loc);
-
-               if loop_control_mode in [lcm_indirect_single_byte, lcm_indirect_multi_byte] then
-                  begin
-                     TPIC18x_MOVSF.Create (control_variable_pointer_address, FSR1H).annotation := 'FSR1 := @' + control_variable.name + '.b0';
-                     TPIC18x_MOVSF.Create (control_variable_pointer_address+1, FSR1L)
-                  end;
-               annotation := 'test for ' + control_variable.name + ' = final value';
-               SetLength (br_array, control_variable_size);
-               for i := control_variable_size-1 downto 0 do
-                  begin
-                     if final_value_expression.contains_constant then
-                        case final_value_expression.constant.ordinal_value.AsByte(control_variable_size - 1 - i) of
-                           0: case loop_control_mode of
-                                 lcm_bank0:
-                                    TPIC18x_MOVF.Create (control_variable.address + i, dest_w, bank_mode).annotation := annotation;
-                                 lcm_near_stack:
-                                    TPIC18x_MOVF.Create (control_variable.address + StackUsageCounter.Current + i, dest_w, access_mode).annotation := annotation;
-                                 lcm_indirect_single_byte:
-                                    TPIC18x_MOVF.Create (INDF1, dest_w, access_mode).annotation := annotation;
-                                 lcm_indirect_multi_byte:
-                                    TPIC18x_MOVF.Create (POSTDEC1, dest_w, access_mode).annotation := annotation;
-                              else
-                                 assert (false)
-                              end;
-                           1: case loop_control_mode of
-                                 lcm_bank0:
-                                    TPIC18x_DECF.Create (control_variable.address + i, dest_w, bank_mode).annotation := annotation;
-                                 lcm_near_stack:
-                                    TPIC18x_DECF.Create (control_variable.address + StackUsageCounter.Current + i, dest_w, access_mode).annotation := annotation;
-                                 lcm_indirect_single_byte:
-                                    TPIC18x_DECF.Create (INDF1, dest_w, access_mode).annotation := annotation;
-                                 lcm_indirect_multi_byte:
-                                    TPIC18x_DECF.Create (POSTDEC1, dest_w, access_mode).annotation := annotation;
-                              else
-                                 assert (false)
-                              end;
-                         $FF: case loop_control_mode of
-                                 lcm_bank0:
-                                    TPIC18x_INCF.Create (control_variable.address + i, dest_w, bank_mode).annotation := annotation;
-                                 lcm_near_stack:
-                                    TPIC18x_INCF.Create (control_variable.address + StackUsageCounter.Current + i, dest_w, access_mode).annotation := annotation;
-                                 lcm_indirect_single_byte:
-                                    TPIC18x_INCF.Create (INDF1, dest_w, access_mode).annotation := annotation;
-                                 lcm_indirect_multi_byte:
-                                    TPIC18x_INCF.Create (POSTDEC1, dest_w, access_mode).annotation := annotation;
-                              else
-                                 assert (false)
-                              end;
-                         else  // not 0, 1 or $FF
-                              begin
-                                 case loop_control_mode of
-                                    lcm_bank0:
-                                       TPIC18x_MOVF.Create (control_variable.address + i, dest_w, bank_mode).annotation := annotation;
-                                    lcm_near_stack:
-                                       TPIC18x_MOVF.Create (control_variable.address + StackUsageCounter.Current + i, dest_w, access_mode).annotation := annotation;
-                                    lcm_indirect_single_byte:
-                                       TPIC18x_MOVF.Create (INDF1, dest_w, access_mode).annotation := annotation;
-                                    lcm_indirect_multi_byte:
-                                       TPIC18x_MOVF.Create (POSTDEC1, dest_w, access_mode).annotation := annotation;
-                                 else
-                                    assert (false)
-                                 end;
-                                 TPIC18x_SUBLW.Create (final_value_expression.constant.ordinal_value.AsByte(control_variable_size - 1 - i))
-                              end
-                         end
-                     else  // final value is not a constant, is on tos
-                        begin
-                           case loop_control_mode of
-                              lcm_bank0:
-                                 TPIC18x_MOVF.Create (control_variable.address + i, dest_w, bank_mode).annotation := annotation;
-                              lcm_near_stack:
-                                 TPIC18x_MOVF.Create (control_variable.address + StackUsageCounter.Current + i, dest_w, access_mode).annotation := annotation;
-                              lcm_indirect_single_byte:
-                                 TPIC18x_MOVF.Create (INDF1, dest_w, access_mode).annotation := annotation;
-                              lcm_indirect_multi_byte:
-                                 TPIC18x_MOVF.Create (POSTDEC1, dest_w, access_mode).annotation := annotation;
-                           else
-                              assert (false)
-                           end;
-                           TPIC18x_SUBWF.Create (i + 1, dest_w, access_mode)
-                        end;
-                     annotation := '';
-                     if i > 0 then
-                        br_array[i] := TPIC18x_BNZ.Create
-                  end;
-               be2 := TPIC18x_BZ.Create;
-               lbl := TAssemblyLabel.Create;
-               for i := 1 to control_variable_size-1 do
-                  br_array[i].dest := lbl;
-
-               if loop_control_mode = lcm_indirect_multi_byte then
-                  begin
-                     TPIC18x_MOVSF.Create (control_variable_pointer_address, FSR1H).annotation := 'FSR1 := @' + control_variable.name + '.b0';
-                     TPIC18x_MOVSF.Create (control_variable_pointer_address+1, FSR1L)
-                  end;
-               case step of
-                  increment_control_variable:
-                     case loop_control_mode of
-                        lcm_bank0:
-                           begin
-                              TPIC18x_INCF.Create (control_variable.address + control_variable_size - 1, dest_f, bank_mode).annotation := 'increment loop control variable';
-                              if control_variable_size > 1 then
-                                 begin
-                                    TPIC18x_MOVLW.Create (0);
-                                    for i := control_variable_size-2 downto 0 do
-                                       TPIC18x_ADDWFC.Create (control_variable.address + i, dest_f, bank_mode)
-                                 end
-                           end;
-                        lcm_near_stack:
-                           begin
-                              TPIC18x_INCF.Create (control_variable.address + control_variable_size - 1 + StackUsageCounter.Current, dest_f, access_mode).annotation := 'increment loop control variable';
-                              if control_variable_size > 1 then
-                                 begin
-                                    TPIC18x_MOVLW.Create (0);
-                                    for i := control_variable_size-2 downto 0 do
-                                       TPIC18x_ADDWFC.Create (control_variable.address + i + StackUsageCounter.Current, dest_f, access_mode)
-                                 end
-                           end;
-                        lcm_indirect_single_byte:
-                           TPIC18x_INCF.Create (INDF1, dest_f, access_mode).annotation := 'increment loop control variable';
-                        lcm_indirect_multi_byte:
-                           begin
-                              TPIC18x_INCF.Create (POSTDEC1, dest_f, access_mode).annotation := 'increment loop control variable';
-                              if control_variable_size > 1 then
-                                 begin
-                                    TPIC18x_MOVLW.Create (0);
-                                    for i := control_variable_size-2 downto 0 do
-                                       TPIC18x_ADDWFC.Create (POSTDEC1, dest_f, access_mode)
-                                 end
-                           end;
-                     else
-                        assert (false)
-                     end;
-                  decrement_control_variable:
-                     case loop_control_mode of
-                        lcm_bank0:
-                           begin
-                              TPIC18x_DECF.Create (control_variable.address + control_variable_size - 1, dest_f, bank_mode).annotation := 'increment loop control variable';
-                              if control_variable_size > 1 then
-                                 begin
-                                    TPIC18x_MOVLW.Create (0);
-                                    for i := control_variable_size-2 downto 0 do
-                                       TPIC18x_SUBWFB.Create (control_variable.address + i, dest_f, bank_mode)
-                                 end
-                           end;
-                        lcm_near_stack:
-                           begin
-                              TPIC18x_DECF.Create (control_variable.address + control_variable_size - 1 + StackUsageCounter.Current, dest_f, access_mode).annotation := 'increment loop control variable';
-                              if control_variable_size > 1 then
-                                 begin
-                                    TPIC18x_MOVLW.Create (0);
-                                    for i := control_variable_size-2 downto 0 do
-                                       TPIC18x_SUBWFB.Create (control_variable.address + i + StackUsageCounter.Current, dest_f, access_mode)
-                                 end
-                           end;
-                        lcm_indirect_single_byte:
-                           TPIC18x_DECF.Create (INDF1, dest_f, access_mode).annotation := 'increment loop control variable';
-                        lcm_indirect_multi_byte:
-                           begin
-                              TPIC18x_DECF.Create (POSTDEC1, dest_f, access_mode).annotation := 'increment loop control variable';
-                              if control_variable_size > 1 then
-                                 begin
-                                    TPIC18x_MOVLW.Create (0);
-                                    for i := control_variable_size-2 downto 0 do
-                                       TPIC18x_SUBWFB.Create (POSTDEC1, dest_f, access_mode)
-                                 end
-                           end;
-                     else
-                        assert (false)
-                     end;
-               end;
-
-               go2 := TGOTOMacro.Create;
-               go2.dest := loop;
-               go2.annotation := 'repeat for loop';
-
-               end_loop := nil;  // suppress compiler warning
-               case loop_control_mode of
-                  lcm_bank0,
-                  lcm_near_stack:
-                     if final_value_expression.contains_constant then
-                        end_loop := TAssemblyLabel.Create
-                     else
-                        begin
-                           end_loop := TPIC18x_ADDFSR.Create (2, control_variable_size);
-                           StackUsageCounter.Pop (control_variable_size)
-                        end;
-                  lcm_indirect_single_byte,
-                  lcm_indirect_multi_byte:
-                     if final_value_expression.contains_constant then
-                        begin
-                           end_loop := TPIC18x_ADDFSR.Create (2, ram_ptr_size);
-                           StackUsageCounter.Pop (ram_ptr_size)
-                        end
-                     else
-                        begin
-                           end_loop := TPIC18x_ADDFSR.Create (2, control_variable_size + ram_ptr_size);
-                           StackUsageCounter.Pop (control_variable_size + ram_ptr_size)
-                        end;
-               else
-                  assert (false)
-               end;
-               end_loop.annotation := 'end of for loop';
-               if be1 <> nil then
-                  be1.dest := end_loop;
-               be2.dest := end_loop;
-
-               control_variable_access.Release;
-               comparison_range.Release;
-               temp_range.Release
+               comparison_range := TPIC18x_TypeInfo (target_cpu.TTypeInfo_Create (final_value_expression.info));
+               clamp_to_range_of_control_variable (comparison_range);  // this will be done by bounds check of final val expression
+               temp_range := TPIC18x_TypeInfo (target_cpu.TTypeInfo_Create (initial_value_expression.info));
+               clamp_to_range_of_control_variable (temp_range);  // this will be done by bounds check of initial val expression
+               comparison_range.max_value.Subtract (temp_range.min_value);
+               comparison_range.min_value.Subtract (temp_range.max_value)
             end;
+         decrement_control_variable:
+            begin
+               comparison_range := TPIC18x_TypeInfo (target_cpu.TTypeInfo_Create (initial_value_expression.info));
+               clamp_to_range_of_control_variable (comparison_range);  // this will be done by bounds check of final val expression
+               temp_range := TPIC18x_TypeInfo (target_cpu.TTypeInfo_Create (final_value_expression.info));
+               clamp_to_range_of_control_variable (temp_range);  // this will be done by bounds check of initial val expression
+               comparison_range.max_value.Subtract (temp_range.min_value);
+               comparison_range.min_value.Subtract (temp_range.max_value)
+            end
+      end;
+      if (statement = nil)
+         or
+         comparison_range.max_value.lt(0) then
+         begin    // loop is nop, exit without emitting any code
+            comparison_range.Release;
+            temp_range.Release;
+            exit
+         end;
+
+      control_variable_access := TPIC18x_Access.CreateFromVariable (control_variable);
+      control_variable_size := TPIC18x_TypeInfo(control_variable.typedef.info).Size;
+      comparison_size := max (control_variable_size, comparison_range.Size);
+
+      case control_variable.address_mode of
+         absolute_address_mode:
+            if control_variable.address + control_variable_size < $100 then
+               loop_control_mode := lcm_bank0
+            else if control_variable_size = 1 then
+               loop_control_mode := lcm_indirect_single_byte
+            else
+               loop_control_mode := lcm_indirect_multi_byte;
+         local_address_mode:
+            if (final_value_expression.contains_constant)
+               and
+               (control_variable.address + (control_variable_size-1) + StackUsageCounter.Current <= $5F)
+            then
+               loop_control_mode := lcm_near_stack
+            else if (not final_value_expression.contains_constant)
+                    and
+                    (control_variable.address + (control_variable_size-1) + StackUsageCounter.Current + (2*comparison_size) <= $5F)
+                 then
+                    loop_control_mode := lcm_near_stack
+            else if control_variable_size = 1 then
+               loop_control_mode := lcm_indirect_single_byte
+            else
+               loop_control_mode := lcm_indirect_multi_byte;
+      else
+         if control_variable_size = 1 then
+            loop_control_mode := lcm_indirect_single_byte
+         else
+            loop_control_mode := lcm_indirect_multi_byte;
+      end;
+
+      if loop_control_mode in [lcm_indirect_single_byte, lcm_indirect_multi_byte] then
+         begin
+            control_variable_access.Generate_Push_Address2_Code (control_variable_size-1, false);
+            if final_value_expression.contains_constant then
+               control_variable_pointer_address := 1
+            else
+               control_variable_pointer_address := control_variable_size + 1
+         end
+      else
+         control_variable_pointer_address := maxint;    // shouldn't be used
+
+      if ((step = increment_control_variable)
+          and
+          initial_value_expression.info.max_value.le (final_value_expression.info.min_value)
+         )
+         or
+         ((step = decrement_control_variable)
+          and
+          initial_value_expression.info.min_value.ge (final_value_expression.info.max_value)
+         )
+      then  // loop will always execute at least once, no need for loop-at-least-once test
+         begin
+            stmt := TPIC18x_AssignmentStatement.Create (control_variable_access, initial_value_expression, initial_value_expression.src_loc);
+            stmt.last_token_src_loc := to_or_downto_src_loc;
+            stmt.GenerateCode (666, 0);
+            stmt.Release;
+
+            if not final_value_expression.contains_constant then
+               begin
+                  final_value_expression_size := TPIC18x_TypeInfo (final_value_expression.info).Size;
+                  final_value_expression.GenerateCode (666, final_value_expression_size);
+                  GenerateRangeCheckCode (TOrdinalDataType(control_variable.TypeDef),
+                                          final_value_expression_size,
+                                          final_value_expression.info,
+                                          final_value_expression.src_loc,
+                                          'range error'
+                                         );
+                  generate_stack_fix_and_sign_extend_code (final_value_expression_size, 0, control_variable_size, final_value_expression.info.IntegerRange)
+               end
+         end
+      else  // loop-at-least-once test needed
+         begin
+            final_value_expression_size := TPIC18x_TypeInfo (final_value_expression.info).Size;
+            final_value_expression.GenerateCode (666, final_value_expression_size);
+            GenerateRangeCheckCode (TOrdinalDataType(control_variable.TypeDef),
+                                    final_value_expression_size,
+                                    final_value_expression.info,
+                                    final_value_expression.src_loc,
+                                    'range error'
+                                   );
+            generate_stack_fix_and_sign_extend_code (final_value_expression_size, 0, comparison_size, final_value_expression.info.IntegerRange);
+
+            initial_value_expression_size := TPIC18x_TypeInfo (initial_value_expression.info).Size;
+            initial_value_expression.GenerateCode (666, initial_value_expression_size);
+            GenerateRangeCheckCode (TOrdinalDataType(control_variable.TypeDef),
+                                    initial_value_expression_size,
+                                    initial_value_expression.info,
+                                    initial_value_expression.src_loc,
+                                    'range error'
+                                   );
+            generate_stack_fix_and_sign_extend_code (initial_value_expression_size, 0, comparison_size, initial_value_expression.info.IntegerRange);
+
+            if loop_control_mode in [lcm_indirect_single_byte, lcm_indirect_multi_byte] then
+               begin
+                  TPIC18x_MOVSF.Create ((2*comparison_size)+1, FSR1H).annotation := 'FSR1 := @' + control_variable.name + '.b0';
+                  TPIC18x_MOVSF.Create ((2*comparison_size)+2, FSR1L)
+               end;
+
+            annotation := 'set initial value';
+            for i := control_variable_size-1 downto 0 do
+               begin
+                  TPIC18x_MOVF.Create (i + 1 + comparison_size - control_variable_size, dest_w, access_mode).annotation := annotation;
+                  annotation := '';
+
+                  case loop_control_mode of
+                     lcm_bank0:
+                        TPIC18x_MOVWF.Create (control_variable.address + i, bank_mode);
+                     lcm_near_stack:
+                        TPIC18x_MOVWF.Create (control_variable.address + StackUsageCounter.Current + i, access_mode);
+                     lcm_indirect_single_byte:
+                        TPIC18x_MOVWF.Create (INDF1, access_mode);
+                     lcm_indirect_multi_byte:
+                        TPIC18x_MOVWF.Create (POSTDEC1, access_mode);
+                  else
+                     assert (false)
+                  end
+               end;
+
+            annotation := 'check for no-loop initial conditons';
+            case step of
+               increment_control_variable:
+                  if comparison_size = 1 then
+                     begin
+                        TPIC18x_MOVF.Create (PREINC2, dest_w, access_mode).annotation := annotation;
+                        StackUsageCounter.Pop (1);
+                        if final_value_expression.contains_constant then
+                           begin  // clear TOS
+                              TPIC18x_SUBWF.Create (PREINC2, dest_w, access_mode);
+                              StackUsageCounter.Pop (1)
+                           end
+                        else   // leave final value on stack sized same as control variable
+                           TPIC18x_SUBWF.Create (1, dest_w, access_mode)
+                     end
+                  else  // comparison_size > 1
+                     begin
+                        TPIC18x_MOVF.Create (comparison_size, dest_w, access_mode).annotation := annotation;
+                        TPIC18x_SUBWF.Create (2*comparison_size, dest_w, access_mode);
+                        for i := comparison_size-1 downto 1 do
+                           begin
+                              TPIC18x_MOVF.Create (i, dest_w, access_mode);
+                              TPIC18x_SUBWFB.Create (comparison_size + i, dest_w, access_mode)
+                           end;
+                        if final_value_expression.contains_constant then
+                           begin  // clear TOS
+                              TPIC18x_ADDFSR.Create (2, 2*comparison_size);
+                              StackUsageCounter.Pop (2*comparison_size)
+                           end
+                        else
+                           begin  // leave final value on stack sized same as control variable
+                              TPIC18x_ADDFSR.Create (2, comparison_size + (comparison_size - control_variable_size));
+                              StackUsageCounter.Pop (comparison_size + (comparison_size - control_variable_size))
+                           end
+                     end;
+               decrement_control_variable:
+                  if (comparison_size = 1)
+                     and
+                     (not final_value_expression.contains_constant) then
+                     begin
+                        TPIC18x_MOVF.Create (2, dest_w, access_mode).annotation := annotation;
+                        TPIC18x_SUBWF.Create (PREINC2, dest_w, access_mode);
+                        StackUsageCounter.Pop (1)
+                        // leave final value on stack sized same as control variable
+                     end
+                  else  // comparison_size > 1  or  final_value_expression.contains_constant
+                     begin
+                        TPIC18x_MOVF.Create (2*comparison_size, dest_w, access_mode).annotation := annotation;
+                        TPIC18x_SUBWF.Create (comparison_size, dest_w, access_mode);
+                        for i := comparison_size-1 downto 1 do
+                           begin
+                              TPIC18x_MOVF.Create (comparison_size + i, dest_w, access_mode);
+                              TPIC18x_SUBWFB.Create (i, dest_w, access_mode)
+                           end;
+                        if final_value_expression.contains_constant then
+                           begin  // clear TOS
+                              TPIC18x_ADDFSR.Create (2, 2*comparison_size);
+                              StackUsageCounter.Pop (2*comparison_size)
+                           end
+                        else
+                           begin  // leave final value on stack sized same as control variable
+                              TPIC18x_ADDFSR.Create (2, comparison_size + (comparison_size - control_variable_size));
+                              StackUsageCounter.Pop (comparison_size + (comparison_size - control_variable_size))
+                           end
+                     end
+            end;
+
+            be1 := TBranchOnNegativeStatusMacro.Create;
+            be1.annotation := 'branch if loop will never execute'
+         end;   // at least one loop limit is a variable
+
+      loop := TAssemblyLabel.Create;
+      statement.GenerateCode (666, 0);
+      TSourceSyncPoint.Create (last_src_loc);
+
+      if loop_control_mode in [lcm_indirect_single_byte, lcm_indirect_multi_byte] then
+         begin
+            TPIC18x_MOVSF.Create (control_variable_pointer_address, FSR1H).annotation := 'FSR1 := @' + control_variable.name + '.b0';
+            TPIC18x_MOVSF.Create (control_variable_pointer_address+1, FSR1L)
+         end;
+      annotation := 'test for ' + control_variable.name + ' = final value';
+      SetLength (br_array, control_variable_size);
+      for i := control_variable_size-1 downto 0 do
+         begin
+            if final_value_expression.contains_constant then
+               case final_value_expression.constant.ordinal_value.AsByte(control_variable_size - 1 - i) of
+                  0: case loop_control_mode of
+                        lcm_bank0:
+                           TPIC18x_MOVF.Create (control_variable.address + i, dest_w, bank_mode).annotation := annotation;
+                        lcm_near_stack:
+                           TPIC18x_MOVF.Create (control_variable.address + StackUsageCounter.Current + i, dest_w, access_mode).annotation := annotation;
+                        lcm_indirect_single_byte:
+                           TPIC18x_MOVF.Create (INDF1, dest_w, access_mode).annotation := annotation;
+                        lcm_indirect_multi_byte:
+                           TPIC18x_MOVF.Create (POSTDEC1, dest_w, access_mode).annotation := annotation;
+                     else
+                        assert (false)
+                     end;
+                  1: case loop_control_mode of
+                        lcm_bank0:
+                           TPIC18x_DECF.Create (control_variable.address + i, dest_w, bank_mode).annotation := annotation;
+                        lcm_near_stack:
+                           TPIC18x_DECF.Create (control_variable.address + StackUsageCounter.Current + i, dest_w, access_mode).annotation := annotation;
+                        lcm_indirect_single_byte:
+                           TPIC18x_DECF.Create (INDF1, dest_w, access_mode).annotation := annotation;
+                        lcm_indirect_multi_byte:
+                           TPIC18x_DECF.Create (POSTDEC1, dest_w, access_mode).annotation := annotation;
+                     else
+                        assert (false)
+                     end;
+                $FF: case loop_control_mode of
+                        lcm_bank0:
+                           TPIC18x_INCF.Create (control_variable.address + i, dest_w, bank_mode).annotation := annotation;
+                        lcm_near_stack:
+                           TPIC18x_INCF.Create (control_variable.address + StackUsageCounter.Current + i, dest_w, access_mode).annotation := annotation;
+                        lcm_indirect_single_byte:
+                           TPIC18x_INCF.Create (INDF1, dest_w, access_mode).annotation := annotation;
+                        lcm_indirect_multi_byte:
+                           TPIC18x_INCF.Create (POSTDEC1, dest_w, access_mode).annotation := annotation;
+                     else
+                        assert (false)
+                     end;
+                else  // not 0, 1 or $FF
+                     begin
+                        case loop_control_mode of
+                           lcm_bank0:
+                              TPIC18x_MOVF.Create (control_variable.address + i, dest_w, bank_mode).annotation := annotation;
+                           lcm_near_stack:
+                              TPIC18x_MOVF.Create (control_variable.address + StackUsageCounter.Current + i, dest_w, access_mode).annotation := annotation;
+                           lcm_indirect_single_byte:
+                              TPIC18x_MOVF.Create (INDF1, dest_w, access_mode).annotation := annotation;
+                           lcm_indirect_multi_byte:
+                              TPIC18x_MOVF.Create (POSTDEC1, dest_w, access_mode).annotation := annotation;
+                        else
+                           assert (false)
+                        end;
+                        TPIC18x_SUBLW.Create (final_value_expression.constant.ordinal_value.AsByte(control_variable_size - 1 - i))
+                     end
+                end
+            else  // final value is not a constant, is on tos
+               begin
+                  case loop_control_mode of
+                     lcm_bank0:
+                        TPIC18x_MOVF.Create (control_variable.address + i, dest_w, bank_mode).annotation := annotation;
+                     lcm_near_stack:
+                        TPIC18x_MOVF.Create (control_variable.address + StackUsageCounter.Current + i, dest_w, access_mode).annotation := annotation;
+                     lcm_indirect_single_byte:
+                        TPIC18x_MOVF.Create (INDF1, dest_w, access_mode).annotation := annotation;
+                     lcm_indirect_multi_byte:
+                        TPIC18x_MOVF.Create (POSTDEC1, dest_w, access_mode).annotation := annotation;
+                  else
+                     assert (false)
+                  end;
+                  TPIC18x_SUBWF.Create (i + 1, dest_w, access_mode)
+               end;
+            annotation := '';
+            if i > 0 then
+               br_array[i] := TPIC18x_BNZ.Create
+         end;
+      be2 := TPIC18x_BZ.Create;
+      lbl := TAssemblyLabel.Create;
+      for i := 1 to control_variable_size-1 do
+         br_array[i].dest := lbl;
+
+      if loop_control_mode = lcm_indirect_multi_byte then
+         begin
+            TPIC18x_MOVSF.Create (control_variable_pointer_address, FSR1H).annotation := 'FSR1 := @' + control_variable.name + '.b0';
+            TPIC18x_MOVSF.Create (control_variable_pointer_address+1, FSR1L)
+         end;
+      case step of
+         increment_control_variable:
+            case loop_control_mode of
+               lcm_bank0:
+                  begin
+                     TPIC18x_INCF.Create (control_variable.address + control_variable_size - 1, dest_f, bank_mode).annotation := 'increment loop control variable';
+                     if control_variable_size > 1 then
+                        begin
+                           TPIC18x_MOVLW.Create (0);
+                           for i := control_variable_size-2 downto 0 do
+                              TPIC18x_ADDWFC.Create (control_variable.address + i, dest_f, bank_mode)
+                        end
+                  end;
+               lcm_near_stack:
+                  begin
+                     TPIC18x_INCF.Create (control_variable.address + control_variable_size - 1 + StackUsageCounter.Current, dest_f, access_mode).annotation := 'increment loop control variable';
+                     if control_variable_size > 1 then
+                        begin
+                           TPIC18x_MOVLW.Create (0);
+                           for i := control_variable_size-2 downto 0 do
+                              TPIC18x_ADDWFC.Create (control_variable.address + i + StackUsageCounter.Current, dest_f, access_mode)
+                        end
+                  end;
+               lcm_indirect_single_byte:
+                  TPIC18x_INCF.Create (INDF1, dest_f, access_mode).annotation := 'increment loop control variable';
+               lcm_indirect_multi_byte:
+                  begin
+                     TPIC18x_INCF.Create (POSTDEC1, dest_f, access_mode).annotation := 'increment loop control variable';
+                     if control_variable_size > 1 then
+                        begin
+                           TPIC18x_MOVLW.Create (0);
+                           for i := control_variable_size-2 downto 0 do
+                              TPIC18x_ADDWFC.Create (POSTDEC1, dest_f, access_mode)
+                        end
+                  end;
+            else
+               assert (false)
+            end;
+         decrement_control_variable:
+            case loop_control_mode of
+               lcm_bank0:
+                  begin
+                     TPIC18x_DECF.Create (control_variable.address + control_variable_size - 1, dest_f, bank_mode).annotation := 'increment loop control variable';
+                     if control_variable_size > 1 then
+                        begin
+                           TPIC18x_MOVLW.Create (0);
+                           for i := control_variable_size-2 downto 0 do
+                              TPIC18x_SUBWFB.Create (control_variable.address + i, dest_f, bank_mode)
+                        end
+                  end;
+               lcm_near_stack:
+                  begin
+                     TPIC18x_DECF.Create (control_variable.address + control_variable_size - 1 + StackUsageCounter.Current, dest_f, access_mode).annotation := 'increment loop control variable';
+                     if control_variable_size > 1 then
+                        begin
+                           TPIC18x_MOVLW.Create (0);
+                           for i := control_variable_size-2 downto 0 do
+                              TPIC18x_SUBWFB.Create (control_variable.address + i + StackUsageCounter.Current, dest_f, access_mode)
+                        end
+                  end;
+               lcm_indirect_single_byte:
+                  TPIC18x_DECF.Create (INDF1, dest_f, access_mode).annotation := 'increment loop control variable';
+               lcm_indirect_multi_byte:
+                  begin
+                     TPIC18x_DECF.Create (POSTDEC1, dest_f, access_mode).annotation := 'increment loop control variable';
+                     if control_variable_size > 1 then
+                        begin
+                           TPIC18x_MOVLW.Create (0);
+                           for i := control_variable_size-2 downto 0 do
+                              TPIC18x_SUBWFB.Create (POSTDEC1, dest_f, access_mode)
+                        end
+                  end;
+            else
+               assert (false)
+            end;
+      end;
+
+      go2 := TGOTOMacro.Create;
+      go2.dest := loop;
+      go2.annotation := 'repeat for loop';
+
+      end_loop := nil;  // suppress compiler warning
+      case loop_control_mode of
+         lcm_bank0,
+         lcm_near_stack:
+            if final_value_expression.contains_constant then
+               end_loop := TAssemblyLabel.Create
+            else
+               begin
+                  end_loop := TPIC18x_ADDFSR.Create (2, control_variable_size);
+                  StackUsageCounter.Pop (control_variable_size)
+               end;
+         lcm_indirect_single_byte,
+         lcm_indirect_multi_byte:
+            if final_value_expression.contains_constant then
+               begin
+                  end_loop := TPIC18x_ADDFSR.Create (2, ram_ptr_size);
+                  StackUsageCounter.Pop (ram_ptr_size)
+               end
+            else
+               begin
+                  end_loop := TPIC18x_ADDFSR.Create (2, control_variable_size + ram_ptr_size);
+                  StackUsageCounter.Pop (control_variable_size + ram_ptr_size)
+               end;
       else
          assert (false)
-      end
+      end;
+      end_loop.annotation := 'end of for loop';
+      if be1 <> nil then
+         be1.dest := end_loop;
+      be2.dest := end_loop;
+
+      control_variable_access.Release;
+      comparison_range.Release;
+      temp_range.Release
    end;   // TPIC18x_ForStatement.Generate
 
-function TPIC18x_IfStatement.Generate (param1, param2: integer): integer;
+function TPIC18x_IfStatement.GenerateCode (param1, param2: integer): integer;
    var
       i: integer;
       arr: array of
@@ -1096,222 +1063,189 @@ function TPIC18x_IfStatement.Generate (param1, param2: integer): integer;
       else_label, final_label: TAssemblyLabel;
    begin
       result := 0;  // to suppress compiler warning
-      case param1 of
-         GenerateCode:
-            begin
-               else_label := nil;  // suppress compiler warning
-               SetLength (arr, Length(conditional_statement_list));
-               for i := 0 to Length(conditional_statement_list)-1 do
-                  begin
-                     TSourceSyncPoint.Create (conditional_statement_list[i].last_boolean_expression_token_src_loc);
-                     if i > 0 then
-                        arr[i].start_label := TAssemblyLabel.Create;
+      else_label := nil;  // suppress compiler warning
+      SetLength (arr, Length(conditional_statement_list));
+      for i := 0 to Length(conditional_statement_list)-1 do
+         begin
+            TSourceSyncPoint.Create (conditional_statement_list[i].last_boolean_expression_token_src_loc);
+            if i > 0 then
+               arr[i].start_label := TAssemblyLabel.Create;
 
-                     arr[i].conditional_branch := GenerateCodeForConditionalBranch (conditional_statement_list[i].boolean_expression, false);
+            arr[i].conditional_branch := GenerateCodeForConditionalBranch (conditional_statement_list[i].boolean_expression, false);
 
-                     if conditional_statement_list[i].statement <> nil then
-                        begin
-                           conditional_statement_list[i].statement.Generate (GenerateCode, 0);
-                           TSourceSyncPoint.Create (conditional_statement_list[i].last_statement_token_src_loc)
-                        end;
+            if conditional_statement_list[i].statement <> nil then
+               begin
+                  conditional_statement_list[i].statement.GenerateCode (666, 0);
+                  TSourceSyncPoint.Create (conditional_statement_list[i].last_statement_token_src_loc)
+               end;
 
-                     if (i < Length(conditional_statement_list)-1)
-                        or
-                        (else_statement <> nil) then
-                        arr[i].final_goto := TGOTOMacro.Create
-                  end;
-               if else_statement <> nil then
-                  begin
-                     TSourceSyncPoint.Create (last_else_statement_token_src_loc);
-                     else_label := TAssemblyLabel.Create;
-                     else_statement.Generate (GenerateCode, 0)
-                  end;
-               final_label := TAssemblyLabel.Create;
-               for i := 0 to Length(conditional_statement_list)-2 do
-                  begin
-                     arr[i].conditional_branch.dest := arr[i+1].start_label;
-                     arr[i].final_goto.dest := final_label
-                  end;
-               if else_statement <> nil then
-                  begin
-                     arr[Length(arr)-1].conditional_branch.dest := else_label;
-                     arr[Length(arr)-1].final_goto.dest := final_label
-                  end
-               else
-                  arr[Length(arr)-1].conditional_branch.dest := final_label
-            end;
+            if (i < Length(conditional_statement_list)-1)
+               or
+               (else_statement <> nil) then
+               arr[i].final_goto := TGOTOMacro.Create
+         end;
+      if else_statement <> nil then
+         begin
+            TSourceSyncPoint.Create (last_else_statement_token_src_loc);
+            else_label := TAssemblyLabel.Create;
+            else_statement.GenerateCode (666, 0)
+         end;
+      final_label := TAssemblyLabel.Create;
+      for i := 0 to Length(conditional_statement_list)-2 do
+         begin
+            arr[i].conditional_branch.dest := arr[i+1].start_label;
+            arr[i].final_goto.dest := final_label
+         end;
+      if else_statement <> nil then
+         begin
+            arr[Length(arr)-1].conditional_branch.dest := else_label;
+            arr[Length(arr)-1].final_goto.dest := final_label
+         end
       else
-         assert (false, 'TPIC18x_IfStatement.Generate(' + IntToStr(param1) + ') not implemented')
-      end
+         arr[Length(arr)-1].conditional_branch.dest := final_label
    end;
 
-function TPIC18x_InitStatement.Generate (param1, param2: integer): integer;
+function TPIC18x_InitStatement.GenerateCode (param1, param2: integer): integer;
    var
       i, param_blk_size, stk_base: integer;
       instr, push_return_address_macro: TInstruction;
       dw: TPIC18x_DW;
    begin
       result := 0;  // to suppress compiler warning
-      case param1 of
-         GenerateCode:
-            for i := 0 to Length(initlist)-1 do
-               begin
-                  NoteHWStackUsage (TPIC18x_SystemType(initlist[i].access.node_typedef).initial_statement_hw_stack_usage);
-                  TSourceSyncPoint.Create (initlist[i].src_loc);
-                  case TSystemType(initlist[i].access.node_typedef).system_type_kind of
-                     process_system_type:
-                        begin
-                           param_blk_size := TPIC18x_ParamList(TPIC18x_SystemType(initlist[i].access.node_typedef).parameters).Size;
-                           stk_base := TPIC18x_Variable (initlist[i].access.base_variable).stack_address + TPIC18x_SystemType(initlist[i].access.node_typedef).process_stack_size - 1;
+      for i := 0 to Length(initlist)-1 do
+         begin
+            NoteHWStackUsage (TPIC18x_SystemType(initlist[i].access.node_typedef).initial_statement_hw_stack_usage);
+            TSourceSyncPoint.Create (initlist[i].src_loc);
+            case TSystemType(initlist[i].access.node_typedef).system_type_kind of
+               process_system_type:
+                  begin
+                     param_blk_size := TPIC18x_ParamList(TPIC18x_SystemType(initlist[i].access.node_typedef).parameters).Size;
+                     stk_base := TPIC18x_Variable (initlist[i].access.base_variable).stack_address + TPIC18x_SystemType(initlist[i].access.node_typedef).process_stack_size - 1;
 
-                           TPIC18x_ParamList(TSystemType(initlist[i].access.node_typedef).parameters).PushParameters (initlist[i].parameters);
-                           TPIC18x_Access(initlist[i].access).Generate_Load_Ptr2_Code (pFSR1, 0);
+                     TPIC18x_ParamList(TSystemType(initlist[i].access.node_typedef).parameters).PushParameters (initlist[i].parameters);
+                     TPIC18x_Access(initlist[i].access).Generate_Load_Ptr2_Code (pFSR1, 0);
 
-                           InitProcessSubroutine.Call.annotation := 'call init process';
+                     InitProcessSubroutine.Call.annotation := 'call init process';
 
-                           dw := TPIC18x_DW.Create (0);
-                           dw.lsb := PriorityMapper.ReadyQueueAddr (TSystemType(initlist[i].access.node_typedef).priority);
-                           dw.msb := TPIC18x_Variable(initlist[i].access.base_variable).pcb_address;
-                           dw.annotation := '   - ready_queue_address, pcb_address';
+                     dw := TPIC18x_DW.Create (0);
+                     dw.lsb := PriorityMapper.ReadyQueueAddr (TSystemType(initlist[i].access.node_typedef).priority);
+                     dw.msb := TPIC18x_Variable(initlist[i].access.base_variable).pcb_address;
+                     dw.annotation := '   - ready_queue_address, pcb_address';
 
-                           dw := TPIC18x_DW.Create (0);
-                           dw.lsb := param_blk_size;
-                           dw.msb := stk_base and $ff;
-                           dw.annotation := '   - param_blk_size, stk_base.lsb';
+                     dw := TPIC18x_DW.Create (0);
+                     dw.lsb := param_blk_size;
+                     dw.msb := stk_base and $ff;
+                     dw.annotation := '   - param_blk_size, stk_base.lsb';
 
-                           dw := TPIC18x_DW.Create (0);
-                           dw.lsb := (stk_base and $ff00) shr 8;
-                           dw.msb_from_labelU := TPIC18x_SystemType(initlist[i].access.node_typedef).init_stmt_entry_point_label;
-                           dw.annotation := '   - stk_base.msb, @initial statement entry point';
+                     dw := TPIC18x_DW.Create (0);
+                     dw.lsb := (stk_base and $ff00) shr 8;
+                     dw.msb_from_labelU := TPIC18x_SystemType(initlist[i].access.node_typedef).init_stmt_entry_point_label;
+                     dw.annotation := '   - stk_base.msb, @initial statement entry point';
 
-                           dw := TPIC18x_DW.Create (0);
-                           dw.lsb_from_labelH := TPIC18x_SystemType(initlist[i].access.node_typedef).init_stmt_entry_point_label;
-                           dw.msb_from_labelL := TPIC18x_SystemType(initlist[i].access.node_typedef).init_stmt_entry_point_label;
+                     dw := TPIC18x_DW.Create (0);
+                     dw.lsb_from_labelH := TPIC18x_SystemType(initlist[i].access.node_typedef).init_stmt_entry_point_label;
+                     dw.msb_from_labelL := TPIC18x_SystemType(initlist[i].access.node_typedef).init_stmt_entry_point_label;
 
-                           StackUsageCounter.Pop (param_blk_size);
+                     StackUsageCounter.Pop (param_blk_size);
 
-                           TPIC18x_CallRecord(initlist[i].call_record).caller_relative_stk_ptr_at_call := StackUsageCounter.Current;
-                        end;
-                     class_system_type,
-                     monitor_system_type:
-                        begin
-                           push_return_address_macro := TPushLabelMacro.Create;
-                           push_return_address_macro.annotation := 'push return address';
-                           StackUsageCounter.Push (3);
-                           TPIC18x_MOVFF.Create (this_ptrL, POSTDEC2).annotation := 'save current this pointer';
-                           TPIC18x_MOVFF.Create (this_ptrH, POSTDEC2);
-                           StackUsageCounter.Push(2);
+                     TPIC18x_CallRecord(initlist[i].call_record).caller_relative_stk_ptr_at_call := StackUsageCounter.Current;
+                  end;
+               class_system_type,
+               monitor_system_type:
+                  begin
+                     push_return_address_macro := TPushLabelMacro.Create;
+                     push_return_address_macro.annotation := 'push return address';
+                     StackUsageCounter.Push (3);
+                     TPIC18x_MOVFF.Create (this_ptrL, POSTDEC2).annotation := 'save current this pointer';
+                     TPIC18x_MOVFF.Create (this_ptrH, POSTDEC2);
+                     StackUsageCounter.Push(2);
 
-                           TPIC18x_ParamList(TSystemType(initlist[i].access.node_typedef).parameters).PushParameters (initlist[i].parameters);
-                           TPIC18x_Access(initlist[i].access).Generate_Load_Ptr2_Code (pTHIS, 0);
+                     TPIC18x_ParamList(TSystemType(initlist[i].access.node_typedef).parameters).PushParameters (initlist[i].parameters);
+                     TPIC18x_Access(initlist[i].access).Generate_Load_Ptr2_Code (pTHIS, 0);
 
-                           TPIC18x_CallRecord(initlist[i].call_record).caller_relative_stk_ptr_at_call := StackUsageCounter.Current;
+                     TPIC18x_CallRecord(initlist[i].call_record).caller_relative_stk_ptr_at_call := StackUsageCounter.Current;
 
-                           instr := TGOTOMacro.Create;
-                           instr.dest := TPIC18x_SystemType(initlist[i].access.node_typedef).init_stmt_entry_point_label;
-                           instr.annotation := 'call ' + initlist[i].access.path_src + ' initial statement';
-                           push_return_address_macro.dest := TAssemblyLabel.Create;
+                     instr := TGOTOMacro.Create;
+                     instr.dest := TPIC18x_SystemType(initlist[i].access.node_typedef).init_stmt_entry_point_label;
+                     instr.annotation := 'call ' + initlist[i].access.path_src + ' initial statement';
+                     push_return_address_macro.dest := TAssemblyLabel.Create;
 
-                           StackUsageCounter.Pop (TPIC18x_ParamList(TSystemType(initlist[i].access.node_typedef).parameters).Size);
-                           StackUsageCounter.PushPop (TPIC18x_SystemType(initlist[i].access.node_typedef).initial_stmt_stack_usage);
-                           StackUsageCounter.Pop (2);    // this pointer
-                           StackUsageCounter.Pop (3)     // return address
-                        end;
-                     interrupt_system_type:
-                        begin
-                           ProgramCode.AppendInlineCode (TPIC18x_SystemType(initlist[i].access.node_typedef).inline_code);
-                           StackUsageCounter.PushPop (TPIC18x_SystemType(initlist[i].access.node_typedef).initial_stmt_stack_usage)
-                        end;
-                  else
-                     assert (false)
-                  end
-               end;
-      else
-         assert (false, 'TPIC18x_InitStatement.Generate(' + IntToStr(param1) + ') not implemented')
-      end
+                     StackUsageCounter.Pop (TPIC18x_ParamList(TSystemType(initlist[i].access.node_typedef).parameters).Size);
+                     StackUsageCounter.PushPop (TPIC18x_SystemType(initlist[i].access.node_typedef).initial_stmt_stack_usage);
+                     StackUsageCounter.Pop (2);    // this pointer
+                     StackUsageCounter.Pop (3)     // return address
+                  end;
+               interrupt_system_type:
+                  begin
+                     ProgramCode.AppendInlineCode (TPIC18x_SystemType(initlist[i].access.node_typedef).inline_code);
+                     StackUsageCounter.PushPop (TPIC18x_SystemType(initlist[i].access.node_typedef).initial_stmt_stack_usage)
+                  end;
+            else
+               assert (false)
+            end
+         end
    end;
 
-function TPIC18x_LoopStatement.Generate (param1, param2: integer): integer;
+function TPIC18x_LoopStatement.GenerateCode (param1, param2: integer): integer;
    begin
       result := 0;  // to suppress compiler warning
-      case param1 of
-         GenerateCode:
-            begin
-               end_loop := TBranchTarget.Create;
-               TSourceSyncPoint.Create (src_loc);
-               start_loop_label := TAssemblyLabel.Create;
-               initial_stack_level := StackUsageCounter.Current;
-               statement_list.Generate (GenerateCode, 0);
-               TSourceSyncPoint.Create (repeat_token_src_loc);
-               TGOTOMacro.Create.dest := start_loop_label;
-               end_loop.target_label := TAssemblyLabel.Create;
-               end_loop.set_client_destinations;
-               end_loop.Free;
-               end_loop := nil
-            end;
-      else
-         assert (false, 'TPIC18x_LoopStatement.Generate(' + IntToStr(param1) + ') not implemented')
-      end
+      end_loop := TBranchTarget.Create;
+      TSourceSyncPoint.Create (src_loc);
+      start_loop_label := TAssemblyLabel.Create;
+      initial_stack_level := StackUsageCounter.Current;
+      statement_list.GenerateCode (666, 0);
+      TSourceSyncPoint.Create (repeat_token_src_loc);
+      TGOTOMacro.Create.dest := start_loop_label;
+      end_loop.target_label := TAssemblyLabel.Create;
+      end_loop.set_client_destinations;
+      end_loop.Free;
+      end_loop := nil
    end;
 
-function TPIC18x_ReLoopStatement.Generate (param1, param2: integer): integer;
+function TPIC18x_ReLoopStatement.GenerateCode (param1, param2: integer): integer;
    var
       br: TInstruction;
    begin
       result := 0;  // to suppress compiler warning
-      case param1 of
-         GenerateCode:
-            begin
-               TSourceSyncPoint.Create (src_loc);
-               if reloop_condition = nil then
-                  begin
-                     if StackUsageCounter.Current > TPIC18x_LoopStatement(containing_loop_statement).initial_stack_level then
-                        TPIC18x_ADDFSR.Create (2, StackUsageCounter.Current - TPIC18x_LoopStatement(containing_loop_statement).initial_stack_level);
-                     TGOTOMacro.Create.dest := TPIC18x_LoopStatement(containing_loop_statement).start_loop_label
-                  end
-               else if StackUsageCounter.Current = TPIC18x_LoopStatement(containing_loop_statement).initial_stack_level then
-                  GenerateCodeForConditionalBranch (reloop_condition, true).dest := TPIC18x_LoopStatement(containing_loop_statement).start_loop_label
-               else
-                  begin
-                     br := GenerateCodeForConditionalBranch (reloop_condition, false);
-                     TPIC18x_ADDFSR.Create (2, StackUsageCounter.Current - TPIC18x_LoopStatement(containing_loop_statement).initial_stack_level);
-                     TGOTOMacro.Create.dest := TPIC18x_LoopStatement(containing_loop_statement).start_loop_label;
-                     br.dest := TAssemblyLabel.Create
-                  end
-            end;
+      TSourceSyncPoint.Create (src_loc);
+      if reloop_condition = nil then
+         begin
+            if StackUsageCounter.Current > TPIC18x_LoopStatement(containing_loop_statement).initial_stack_level then
+               TPIC18x_ADDFSR.Create (2, StackUsageCounter.Current - TPIC18x_LoopStatement(containing_loop_statement).initial_stack_level);
+            TGOTOMacro.Create.dest := TPIC18x_LoopStatement(containing_loop_statement).start_loop_label
+         end
+      else if StackUsageCounter.Current = TPIC18x_LoopStatement(containing_loop_statement).initial_stack_level then
+         GenerateCodeForConditionalBranch (reloop_condition, true).dest := TPIC18x_LoopStatement(containing_loop_statement).start_loop_label
       else
-         assert (false, 'TPIC18x_ReLoopStatement.Generate(' + IntToStr(param1) + ') not implemented')
-      end
+         begin
+            br := GenerateCodeForConditionalBranch (reloop_condition, false);
+            TPIC18x_ADDFSR.Create (2, StackUsageCounter.Current - TPIC18x_LoopStatement(containing_loop_statement).initial_stack_level);
+            TGOTOMacro.Create.dest := TPIC18x_LoopStatement(containing_loop_statement).start_loop_label;
+            br.dest := TAssemblyLabel.Create
+         end
    end;
 
-function TPIC18x_ReCycleStatement.Generate (param1, param2: integer): integer;
+function TPIC18x_ReCycleStatement.GenerateCode (param1, param2: integer): integer;
    var
       br: TInstruction;
    begin
       result := 0;  // to suppress compiler warning
-      case param1 of
-         GenerateCode:
-            begin
-               TSourceSyncPoint.Create (src_loc);
-               if recycle_condition = nil then
-                  begin
-                     if StackUsageCounter.Current > TPIC18x_CycleStatement (containing_cycle_stmt).initial_stack_level then
-                        TPIC18x_ADDFSR.Create (2, StackUsageCounter.Current - TPIC18x_CycleStatement (containing_cycle_stmt).initial_stack_level);
-                     TGOTOMacro.Create.dest := TPIC18x_CycleStatement (containing_cycle_stmt).start_loop_label
-                  end
-               else if StackUsageCounter.Current = TPIC18x_CycleStatement (containing_cycle_stmt).initial_stack_level then
-                  GenerateCodeForConditionalBranch (recycle_condition, true).dest := TPIC18x_CycleStatement (containing_cycle_stmt).start_loop_label
-               else
-                  begin
-                     br := GenerateCodeForConditionalBranch (recycle_condition, false);
-                     TPIC18x_ADDFSR.Create (2, StackUsageCounter.Current - TPIC18x_CycleStatement (containing_cycle_stmt).initial_stack_level);
-                     TGOTOMacro.Create.dest := TPIC18x_CycleStatement (containing_cycle_stmt).start_loop_label;
-                     br.dest := TAssemblyLabel.Create
-                  end
-            end;
+      TSourceSyncPoint.Create (src_loc);
+      if recycle_condition = nil then
+         begin
+            if StackUsageCounter.Current > TPIC18x_CycleStatement (containing_cycle_stmt).initial_stack_level then
+               TPIC18x_ADDFSR.Create (2, StackUsageCounter.Current - TPIC18x_CycleStatement (containing_cycle_stmt).initial_stack_level);
+            TGOTOMacro.Create.dest := TPIC18x_CycleStatement (containing_cycle_stmt).start_loop_label
+         end
+      else if StackUsageCounter.Current = TPIC18x_CycleStatement (containing_cycle_stmt).initial_stack_level then
+         GenerateCodeForConditionalBranch (recycle_condition, true).dest := TPIC18x_CycleStatement (containing_cycle_stmt).start_loop_label
       else
-         assert (false, 'TPIC18x_ReCycleStatement.Generate(' + IntToStr(param1) + ') not implemented')
-      end
+         begin
+            br := GenerateCodeForConditionalBranch (recycle_condition, false);
+            TPIC18x_ADDFSR.Create (2, StackUsageCounter.Current - TPIC18x_CycleStatement (containing_cycle_stmt).initial_stack_level);
+            TGOTOMacro.Create.dest := TPIC18x_CycleStatement (containing_cycle_stmt).start_loop_label;
+            br.dest := TAssemblyLabel.Create
+         end
    end;
 
 constructor TPIC18x_RoutineCallStatement.CreateFromSourceTokens (acc: TAccess);
@@ -1464,7 +1398,7 @@ function err_timer_cycle_count_exceeded (timer_number: integer): string;
       result := 'TMR' + IntToStr(timer_number) + ' cycle count exceeded'
    end;
 
-function TPIC18x_RoutineCallStatement.Generate (param1, param2: integer): integer;
+function TPIC18x_RoutineCallStatement.GenerateCode (param1, param2: integer): integer;
 
    function reset_TMR_cycle_procedure_idx: integer;
       begin
@@ -1571,7 +1505,7 @@ function TPIC18x_RoutineCallStatement.Generate (param1, param2: integer): intege
                   case TExpression(access.node_strappend_expression).expression_kind of
                      char_expression:
                         begin
-                           access.node_strappend_expression.Generate (GenerateCode, 1);
+                           access.node_strappend_expression.GenerateCode (666, 1);
                            AppendCharToRAMStr.Call (access.node_strappend_expression.src_loc)
                         end;
                      string_expression:
@@ -1621,7 +1555,7 @@ function TPIC18x_RoutineCallStatement.Generate (param1, param2: integer): intege
                   case TExpression(access.node_strappend_expression).expression_kind of
                      char_expression:
                         begin
-                           access.node_strappend_expression.Generate (GenerateCode, 1);
+                           access.node_strappend_expression.GenerateCode (666, 1);
                            AppendCharToEEPROMString.Call (access.node_strappend_expression.src_loc)
                         end;
                      string_expression:
@@ -1677,152 +1611,117 @@ function TPIC18x_RoutineCallStatement.Generate (param1, param2: integer): intege
 {$endif}
    begin  // TPIC18x_RoutineCallStatement.Generate
       result := 0;  // to suppress compiler warning
-      case param1 of
-         GenerateCode:
-            begin
-               TSourceSyncPoint.Create (src_loc);
-               if access.is_strappend_attribute then
-                  generate_strappend_code
-               else if access.node_routine = TPIC18x_CPU(target_cpu).ClearWatchdogTimer then
-                  TPIC18x_CLRWDT.Create
-               else if reset_TMR_cycle_procedure_idx > -1 then
-                  generate_reset_TMR_cycle_code
-               {$ifdef INCLUDE_SIMULATION}
-               else if access.node_routine = TPIC18x_CPU(target_cpu).Test then
-                  begin
-                     nop := TPIC18x_NOP.Create;
-                     nop.annotation := format ('subtest %d: %s', [subtest, error_message]);
-                     nop.subtest := subtest;
-                     tokens := TStringList.Create;
-                     tokens.Delimiter := ' ';
-                     tokens.DelimitedText := lowercase (error_message);
-                     construct_kernel_test (nop, tokens);
-                     tokens.Free
-                  end
-               {$endif}
-               else if access.node_routine <> nil then
-                  generate_routine_call_code (TPIC18x_Routine(access.node_routine))
-               else if access.node_property <> nil then
-                  generate_routine_call_code (TPIC18x_Routine(access.node_property.set_proc))
-               else
-                  assert (false)
-            end;
+      TSourceSyncPoint.Create (src_loc);
+      if access.is_strappend_attribute then
+         generate_strappend_code
+      else if access.node_routine = TPIC18x_CPU(target_cpu).ClearWatchdogTimer then
+         TPIC18x_CLRWDT.Create
+      else if reset_TMR_cycle_procedure_idx > -1 then
+         generate_reset_TMR_cycle_code
+      {$ifdef INCLUDE_SIMULATION}
+      else if access.node_routine = TPIC18x_CPU(target_cpu).Test then
+         begin
+            nop := TPIC18x_NOP.Create;
+            nop.annotation := format ('subtest %d: %s', [subtest, error_message]);
+            nop.subtest := subtest;
+            tokens := TStringList.Create;
+            tokens.Delimiter := ' ';
+            tokens.DelimitedText := lowercase (error_message);
+            construct_kernel_test (nop, tokens);
+            tokens.Free
+         end
+      {$endif}
+      else if access.node_routine <> nil then
+         generate_routine_call_code (TPIC18x_Routine(access.node_routine))
+      else if access.node_property <> nil then
+         generate_routine_call_code (TPIC18x_Routine(access.node_property.set_proc))
       else
-         assert (false, 'TPIC18x_RoutineCallStatement.Generate(' + IntToStr(param1) + ') not implemented')
-      end
+         assert (false)
    end;   // TPIC18x_RoutineCallStatement.Generate
 
-function TPIC18x_StatementList.Generate (param1, param2: integer): integer;
+function TPIC18x_StatementList.GenerateCode (param1, param2: integer): integer;
    var
       current_stack_level: integer;
       i: integer;
    begin
       result := 0;  // to suppress compiler warning
-      case param1 of
-         GenerateCode:
-            begin
-               current_stack_level := StackUsageCounter.Current;
-               for i := 0 to Length(stmts)-1 do
-                  begin
-                     stmts[i].Generate (GenerateCode, 0);
-                     assert (current_stack_level = StackUsageCounter.Current)
-                  end;
-            end;
-      else
-         assert (false, 'TPIC18x_StatementList.Generate(' + IntToStr(param1) + ') not implemented')
-      end
+      current_stack_level := StackUsageCounter.Current;
+      for i := 0 to Length(stmts)-1 do
+         begin
+            stmts[i].GenerateCode (666, 0);
+            assert (current_stack_level = StackUsageCounter.Current)
+         end
    end;
 
-function TPIC18x_UntilStatement.Generate (param1, param2: integer): integer;
+function TPIC18x_UntilStatement.GenerateCode (param1, param2: integer): integer;
    var
       br: TInstruction;
    begin
       result := 0;  // to suppress compiler warning
-      case param1 of
-         GenerateCode:
-            begin
-               TSourceSyncPoint.Create (boolean_expression.src_loc);
-               if StackUsageCounter.Current = TPIC18x_LoopStatement (containing_loop_statement).initial_stack_level then
-                  TPIC18x_LoopStatement(containing_loop_statement).end_loop.ComeFrom (GenerateCodeForConditionalBranch (boolean_expression, true))
-               else
-                  begin
-                     br := GenerateCodeForConditionalBranch (boolean_expression, false);
-                     TPIC18x_ADDFSR.Create (2, StackUsageCounter.Current - TPIC18x_LoopStatement(containing_loop_statement).initial_stack_level);
-                     TPIC18x_LoopStatement(containing_loop_statement).end_loop.ComeFrom (TGOTOMacro.Create);
-                     br.dest := TAssemblyLabel.Create
-                  end
-            end;
+      TSourceSyncPoint.Create (boolean_expression.src_loc);
+      if StackUsageCounter.Current = TPIC18x_LoopStatement (containing_loop_statement).initial_stack_level then
+         TPIC18x_LoopStatement(containing_loop_statement).end_loop.ComeFrom (GenerateCodeForConditionalBranch (boolean_expression, true))
       else
-         assert (false, 'TPIC18x_WhileStatement.Generate(' + IntToStr(param1) + ') not implemented')
-      end
+         begin
+            br := GenerateCodeForConditionalBranch (boolean_expression, false);
+            TPIC18x_ADDFSR.Create (2, StackUsageCounter.Current - TPIC18x_LoopStatement(containing_loop_statement).initial_stack_level);
+            TPIC18x_LoopStatement(containing_loop_statement).end_loop.ComeFrom (TGOTOMacro.Create);
+            br.dest := TAssemblyLabel.Create
+         end
    end;
 
-function TPIC18x_WhileStatement.Generate (param1, param2: integer): integer;
+function TPIC18x_WhileStatement.GenerateCode (param1, param2: integer): integer;
    var
       br: TInstruction;
    begin
       result := 0;  // to suppress compiler warning
-      case param1 of
-         GenerateCode:
-            begin
-               TSourceSyncPoint.Create (boolean_expression.src_loc);
-               if StackUsageCounter.Current = TPIC18x_LoopStatement (containing_loop_statement).initial_stack_level then
-                  TPIC18x_LoopStatement(containing_loop_statement).end_loop.ComeFrom (GenerateCodeForConditionalBranch (boolean_expression, false))
-               else
-                  begin
-                     br := GenerateCodeForConditionalBranch (boolean_expression, true);
-                     TPIC18x_ADDFSR.Create (2, StackUsageCounter.Current - TPIC18x_LoopStatement(containing_loop_statement).initial_stack_level);
-                     TPIC18x_LoopStatement(containing_loop_statement).end_loop.ComeFrom (TGOTOMacro.Create);
-                     br.dest := TAssemblyLabel.Create
-                  end
-            end;
+      TSourceSyncPoint.Create (boolean_expression.src_loc);
+      if StackUsageCounter.Current = TPIC18x_LoopStatement (containing_loop_statement).initial_stack_level then
+         TPIC18x_LoopStatement(containing_loop_statement).end_loop.ComeFrom (GenerateCodeForConditionalBranch (boolean_expression, false))
       else
-         assert (false, 'TPIC18x_WhileStatement.Generate(' + IntToStr(param1) + ') not implemented')
-      end
+         begin
+            br := GenerateCodeForConditionalBranch (boolean_expression, true);
+            TPIC18x_ADDFSR.Create (2, StackUsageCounter.Current - TPIC18x_LoopStatement(containing_loop_statement).initial_stack_level);
+            TPIC18x_LoopStatement(containing_loop_statement).end_loop.ComeFrom (TGOTOMacro.Create);
+            br.dest := TAssemblyLabel.Create
+         end
    end;
 
-function TPIC18x_WithStatement.Generate (param1, param2: integer): integer;
+function TPIC18x_WithStatement.GenerateCode (param1, param2: integer): integer;
    begin
       result := 0;  // to suppress compiler warning
-      case param1 of
-         GenerateCode:
-            begin
-               TSourceSyncPoint.Create (last_access_src_loc);
-               case access.base_variable.descriptor of
-                  rw_eeprom:
-                     TPIC18x_Access(access).Generate_Push_Address1_Code(0, false);
-                  else
-                     TPIC18x_Access(access).Generate_Push_Address2_Code(0, false)
-               end;
-               address := StackUsageCounter.Current - 1;
-               TSourceSyncPoint.Create (do_src_loc);
-               statement.Generate (GenerateCode, 0);
+      TSourceSyncPoint.Create (last_access_src_loc);
+      case access.base_variable.descriptor of
+         rw_eeprom:
+            TPIC18x_Access(access).Generate_Push_Address1_Code(0, false);
+         else
+            TPIC18x_Access(access).Generate_Push_Address2_Code(0, false)
+      end;
+      address := StackUsageCounter.Current - 1;
+      TSourceSyncPoint.Create (do_src_loc);
+      statement.GenerateCode (666, 0);
 
-               TSourceSyncPoint.Create (last_src_loc);
-               case access.base_variable.descriptor of
-                  rw_const,
-                  rw_ioreg,
-                  rw_var:
-                     begin
-                        TPIC18x_ADDFSR.Create (2, ram_ptr_size);
-                        StackUsageCounter.Pop (ram_ptr_size)
-                     end;
-                  rw_rom:
-                     begin
-                        TPIC18x_ADDFSR.Create (2, rom_ptr_size);
-                        StackUsageCounter.Pop (rom_ptr_size)
-                     end;
-                  rw_eeprom:
-                     begin
-                        TPIC18x_ADDFSR.Create (2, eeprom_ptr_size);
-                        StackUsageCounter.Pop (eeprom_ptr_size)
-                     end;
-               else
-                  assert (false)
-               end
+      TSourceSyncPoint.Create (last_src_loc);
+      case access.base_variable.descriptor of
+         rw_const,
+         rw_ioreg,
+         rw_var:
+            begin
+               TPIC18x_ADDFSR.Create (2, ram_ptr_size);
+               StackUsageCounter.Pop (ram_ptr_size)
+            end;
+         rw_rom:
+            begin
+               TPIC18x_ADDFSR.Create (2, rom_ptr_size);
+               StackUsageCounter.Pop (rom_ptr_size)
+            end;
+         rw_eeprom:
+            begin
+               TPIC18x_ADDFSR.Create (2, eeprom_ptr_size);
+               StackUsageCounter.Pop (eeprom_ptr_size)
             end;
       else
-         assert (false, 'TPIC18x_WithStatement.Generate(' + IntToStr(param1) + ') not implemented')
+         assert (false)
       end
    end;
 

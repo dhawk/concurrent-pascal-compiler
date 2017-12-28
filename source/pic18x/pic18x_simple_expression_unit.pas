@@ -12,7 +12,7 @@ uses
 type
    TPIC18x_SimpleExpression =
       class (TSimpleExpression)
-         function Generate (param1, param2: integer): integer;
+         function GenerateCode (param1, param2: integer): integer;
             override;
       end;
 
@@ -31,7 +31,7 @@ uses
    SysUtils;
 
 
-function TPIC18x_SimpleExpression.Generate (param1, param2: integer): integer;
+function TPIC18x_SimpleExpression.GenerateCode (param1, param2: integer): integer;
 
    procedure generate_simple_numeric_expression_code;
 
@@ -187,7 +187,7 @@ function TPIC18x_SimpleExpression.Generate (param1, param2: integer): integer;
          case additional_terms[0].addop of
             addop_add_int_to_int,
             addop_subtract_int_from_int:
-               first_term.Generate (GenerateCode, intermediate_integer_calculation_info[0].calculation_result_size);
+               first_term.GenerateCode (666, intermediate_integer_calculation_info[0].calculation_result_size);
             addop_add_flt_to_int:
                begin
                   PushRealExpression (first_term);
@@ -215,7 +215,7 @@ function TPIC18x_SimpleExpression.Generate (param1, param2: integer): integer;
                      addop_add_int_to_int,
                      addop_subtract_int_from_int:
                         begin
-                           right_term.Generate (GenerateCode, b_size);
+                           right_term.GenerateCode (666, b_size);
                            result_addr := calculation_result_size + b_size;
                            b_addr := b_size
                         end;
@@ -335,7 +335,7 @@ function TPIC18x_SimpleExpression.Generate (param1, param2: integer): integer;
                GenerateCodeForConditionalSkip (term, skip_sense)
             else
                begin
-                  term.Generate (GenerateCode, 1);
+                  term.GenerateCode (666, 1);
                   if skip_sense then
                      TPIC18x_BTFSS.Create (PREINC2, 0, access_mode)
                   else
@@ -369,10 +369,10 @@ function TPIC18x_SimpleExpression.Generate (param1, param2: integer): integer;
          idx,i: integer;
          annotation: string;
       begin   // generate_simple_set_expression_code
-         first_term.Generate (GenerateCode, param2);
+         first_term.GenerateCode (666, param2);
          for idx := 0 to Length(additional_terms)-1 do
             begin
-               additional_terms[idx].right_term.Generate (GenerateCode, param2);
+               additional_terms[idx].right_term.GenerateCode (666, param2);
                case additional_terms[idx].addop of
                   addop_set_union:
                      begin
@@ -405,21 +405,16 @@ function TPIC18x_SimpleExpression.Generate (param1, param2: integer): integer;
 
    begin
       result := 0;  // to suppress compiler warning
-      case param1 of
-         GenerateCode:
-            case expression_kind of
-               integer_expression,
-               real_expression:
-                  generate_simple_numeric_expression_code;
-               boolean_expression:
-                  generate_simple_boolean_expression_code;
-               set_expression:
-                  generate_simple_set_expression_code;
-            else
-               assert (false)
-            end;
+      case expression_kind of
+         integer_expression,
+         real_expression:
+            generate_simple_numeric_expression_code;
+         boolean_expression:
+            generate_simple_boolean_expression_code;
+         set_expression:
+            generate_simple_set_expression_code;
       else
-         assert (false, 'TPIC18x_SimpleExpression.Generate(' + IntToStr(param1) + ') not implemented')
+         assert (false)
       end
    end;
 

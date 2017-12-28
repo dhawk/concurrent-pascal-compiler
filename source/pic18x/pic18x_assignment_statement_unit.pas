@@ -20,7 +20,7 @@ type
          procedure add_constant_byte (b: byte; byte_no: integer; path, value: string; initialization_unnecessary: boolean);
       public
          constructor Create (_assignee: TAccess; _expression: TExpression; _src_loc: TSourceLocation);
-         function Generate (param1, param2: integer): integer;
+         function GenerateCode (param1, param2: integer): integer;
             override;
        end;
 
@@ -840,7 +840,7 @@ function TSetMultiBitFieldFromTOSInPackedRecordField.generate_code_segment: TIns
 //  TPIC18x_AssignmentStatement.Generate
 //=======================================
 
-function TPIC18x_AssignmentStatement.Generate (param1, param2: integer): integer;
+function TPIC18x_AssignmentStatement.GenerateCode (param1, param2: integer): integer;
 
    procedure load_dest (offset: integer);
       begin
@@ -877,7 +877,7 @@ function TPIC18x_AssignmentStatement.Generate (param1, param2: integer): integer
                else  // single bit, not a constant
                   begin
                      expression_result_size := TPIC18x_TypeInfo (expression.info).Size;
-                     expression.Generate (GenerateCode, expression_result_size);
+                     expression.GenerateCode (666, expression_result_size);
                      GenerateRangeCheckCode (TOrdinalDataType(assignee.node_typedef), expression_result_size, expression.info, assignment_operator_src_loc, rterr_assignment_of_out_of_range_value);
                      generate_stack_fix_and_sign_extend_code (expression_result_size, 0, 1, expression.info.IntegerRange);
                      load_dest (Offset);
@@ -893,7 +893,7 @@ function TPIC18x_AssignmentStatement.Generate (param1, param2: integer): integer
                   begin  // multi-bit field expression is non-constant
                      // stack right-normalized expression in Span bytes
                      expression_result_size := TPIC18x_TypeInfo (expression.info).Size;
-                     expression.Generate (GenerateCode, expression_result_size);
+                     expression.GenerateCode (666, expression_result_size);
                      GenerateRangeCheckCode (TOrdinalDataType(assignee.node_typedef), expression_result_size, expression.info, assignment_operator_src_loc, rterr_assignment_of_out_of_range_value);
                      generate_stack_fix_and_sign_extend_code (expression_result_size, 0, Span, expression.info.IntegerRange);
 
@@ -1259,7 +1259,7 @@ function TPIC18x_AssignmentStatement.Generate (param1, param2: integer): integer
          case expression.expression_kind of
             char_expression:
                begin
-                  expression.Generate (GenerateCode, 1);
+                  expression.GenerateCode (666, 1);
                   case assignee.base_variable.descriptor of
                      rw_var:
                         begin
@@ -1293,7 +1293,7 @@ function TPIC18x_AssignmentStatement.Generate (param1, param2: integer): integer
                         TPIC18x_Access(assignee).Generate_Push_Address2_Code (0, true);
                         if expression is TPIC18x_FunctionAccessPrimary then
                            begin
-                              expression.Generate (GenerateCode, 0);
+                              expression.GenerateCode (666, 0);
                               TPIC18x_ADDFSR.Create (2, 3);
                               StackUsageCounter.Pop (3)
                            end
@@ -1346,7 +1346,7 @@ function TPIC18x_AssignmentStatement.Generate (param1, param2: integer): integer
          else  // non-constant expression
             begin
                expression_result_size := TPIC18x_TypeInfo (expression.info).Size;
-               expression.Generate (GenerateCode, expression_result_size);
+               expression.GenerateCode (666, expression_result_size);
                GenerateRangeCheckCode (TOrdinalDataType(assignee.node_typedef), expression_result_size, expression.info, assignment_operator_src_loc, rterr_assignment_of_out_of_range_value);
                if expression_result_size > 1 then
                   get_and_discard (expression_result_size-1);
@@ -1457,7 +1457,7 @@ function TPIC18x_AssignmentStatement.Generate (param1, param2: integer): integer
                      begin
                         expression_result_size := TPIC18x_TypeInfo (expression.info).Size;
                         assignee_size := TPIC18x_TypeInfo(assignee.node_typedef.info).Size;
-                        expression.Generate (GenerateCode, expression_result_size);
+                        expression.GenerateCode (666, expression_result_size);
                         if assignee.is_strlen_attribute
                         then
                            if assignee.base_variable.address_mode = local_indirect_address_mode
@@ -1505,7 +1505,7 @@ function TPIC18x_AssignmentStatement.Generate (param1, param2: integer): integer
                            end;
                         real_expression:
                            begin
-                              expression.Generate (GenerateCode, real_size);
+                              expression.GenerateCode (666, real_size);
                               if (assignee.node_typedef = target_cpu.get_supported_data_type (ieee_single_type_name))
                                  and
                                  (not TPIC18x_Expression_TypeInfo(expression.info).is_ieee_single)
@@ -1526,7 +1526,7 @@ function TPIC18x_AssignmentStatement.Generate (param1, param2: integer): integer
                begin
                   assignee_size := TPIC18x_TypeInfo(assignee.node_typedef.info).Size;
                   expression_result_size := min (assignee_size, TPIC18x_TypeInfo (expression.info).Size);
-                  expression.Generate (GenerateCode, expression_result_size)
+                  expression.GenerateCode (666, expression_result_size)
                end;
             string_type:
                begin
@@ -1931,24 +1931,17 @@ function TPIC18x_AssignmentStatement.Generate (param1, param2: integer): integer
 
    begin   // TAssignmentStatement.Generate
       result := 0;  // to suppress compiler warning
-      case param1 of
-         GenerateCode:
-            begin
-               copy_from_base_class (assignee, expression);
-                TSourceSyncPoint.Create (last_token_src_loc);
+      copy_from_base_class (assignee, expression);
+       TSourceSyncPoint.Create (last_token_src_loc);
 
-               if assignee.node_property <> nil then
-                  property_setter_routine_call.Generate (GenerateCode, 0)
-               else if assignee.node_typedef.type_kind = string_type then
-                  generate_string_assignment_code
-               else if assignee.base_variable.is_ioreg_1bit_param then
-                  generate_ioreg_1bit_param_assignment_code
-               else
-                  generate_assignment_code
-            end;
+      if assignee.node_property <> nil then
+         property_setter_routine_call.GenerateCode (666, 0)
+      else if assignee.node_typedef.type_kind = string_type then
+         generate_string_assignment_code
+      else if assignee.base_variable.is_ioreg_1bit_param then
+         generate_ioreg_1bit_param_assignment_code
       else
-         assert (false, 'TPIC18x_AssignmentStatement.Generate(' + IntToStr(param1) + ') not implemented')
-      end
+         generate_assignment_code
    end;   // TAssignmentStatement.Generate
 
 INITIALIZATION

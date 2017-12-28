@@ -46,22 +46,22 @@ const
 type
    TPIC18x_AwaitInterruptStatement =
       class (TAwaitInterruptStatement)
-         function Generate (param1, param2: integer): integer;
+         function GenerateCode (param1, param2: integer): integer;
             override;
       end;
    TPIC18x_ContinueStatement =
       class (TContinueStatement)
-         function Generate (param1, param2: integer): integer;
+         function GenerateCode (param1, param2: integer): integer;
             override;
       end;
    TPIC18x_DelayStatement =
       class (TDelayStatement)
-         function Generate (param1, param2: integer): integer;
+         function GenerateCode (param1, param2: integer): integer;
             override;
       end;
    TPIC18x_EmptyFunctionPrimary =
       class (TEmptyFunctionPrimary)
-         function Generate (param1, param2: integer): integer;
+         function GenerateCode (param1, param2: integer): integer;
             override;
       end;
 
@@ -453,79 +453,51 @@ procedure LeaveMonitor (monitor_prio, pop_size: integer);
    end;
 
 
-function TPIC18x_AwaitInterruptStatement.Generate (param1, param2: integer): integer;
+function TPIC18x_AwaitInterruptStatement.GenerateCode (param1, param2: integer): integer;
    begin
       result := 0;  // to suppress compiler warning
-      case param1 of
-         GenerateCode:
-            begin
-               TSourceSyncPoint.Create (src_loc);
-               // fsr1 := addr of process priority queue
-               TPIC18x_LFSR.Create (1, PriorityMapper.ReadyQueueAddr(containing_process.priority)).annotation := format ('fsr1 := @ready[%d]', [containing_process.priority]);
-               TurnInterruptsOff;
-               kernel_await_interrupt.ComeFrom (TCALLMacro.Create);
-               StackUsageCounter.PushPop (5)    // resume addr(3) and this ptr(2)
-            end;
-      else
-         assert (false, 'TPIC18x_AwaitStatement.Generate(' + IntToStr(param1) + ') not implemented')
-      end
+      TSourceSyncPoint.Create (src_loc);
+      // fsr1 := addr of process priority queue
+      TPIC18x_LFSR.Create (1, PriorityMapper.ReadyQueueAddr(containing_process.priority)).annotation := format ('fsr1 := @ready[%d]', [containing_process.priority]);
+      TurnInterruptsOff;
+      kernel_await_interrupt.ComeFrom (TCALLMacro.Create);
+      StackUsageCounter.PushPop (5)    // resume addr(3) and this ptr(2)
    end;
 
-function TPIC18x_ContinueStatement.Generate (param1, param2: integer): integer;
+function TPIC18x_ContinueStatement.GenerateCode (param1, param2: integer): integer;
    begin
       result := 0;  // to suppress compiler warning
-      case param1 of
-         GenerateCode:
-            begin
-               TSourceSyncPoint.Create (src_loc);
-               TPIC18x_Access(queue_access).Generate_Load_Ptr2_Code (pFSR0, 0);
-               if (StackUsageCounter.Current + TPIC18x_ParamList(containing_routine.parameter_definitions).Size) > 0 then
-                  TPIC18x_ADDFSR.Create (2, StackUsageCounter.Current + TPIC18x_ParamList(containing_routine.parameter_definitions).Size);  // don't count stack changes here, continue will exit but it looks like a normal statement
-               // tos is old_prio
-               TurnInterruptsOff;
-               kernel_continue.ComeFrom (TCALLMacro.Create)
-            end;
-      else
-         assert (false, 'TPIC18x_ContinueStatement.Generate(' + IntToStr(param1) + ') not implemented')
-      end
+      TSourceSyncPoint.Create (src_loc);
+      TPIC18x_Access(queue_access).Generate_Load_Ptr2_Code (pFSR0, 0);
+      if (StackUsageCounter.Current + TPIC18x_ParamList(containing_routine.parameter_definitions).Size) > 0 then
+         TPIC18x_ADDFSR.Create (2, StackUsageCounter.Current + TPIC18x_ParamList(containing_routine.parameter_definitions).Size);  // don't count stack changes here, continue will exit but it looks like a normal statement
+      // tos is old_prio
+      TurnInterruptsOff;
+      kernel_continue.ComeFrom (TCALLMacro.Create)
    end;
 
-function TPIC18x_DelayStatement.Generate (param1, param2: integer): integer;
+function TPIC18x_DelayStatement.GenerateCode (param1, param2: integer): integer;
    var
       lbl: TInstruction;
    begin
       result := 0;  // to suppress compiler warning
-      case param1 of
-         GenerateCode:
-            begin
-               TSourceSyncPoint.Create (src_loc);
-               TPIC18x_Access(queue_access).Generate_Load_Ptr2_Code (pFSR0, 0);
-               TurnInterruptsOff;
-               lbl := TCALLMacro.Create;
-               kernel_delay.ComeFrom (lbl);
-               lbl.annotation := 'execute delay';
-               StackUsageCounter.PushPop (5)    // resume addr(3) and this(2)
-            end;
-      else
-         assert (false, 'TPIC18x_DelayStatement.Generate(' + IntToStr(param1) + ') not implemented')
-      end
+      TSourceSyncPoint.Create (src_loc);
+      TPIC18x_Access(queue_access).Generate_Load_Ptr2_Code (pFSR0, 0);
+      TurnInterruptsOff;
+      lbl := TCALLMacro.Create;
+      kernel_delay.ComeFrom (lbl);
+      lbl.annotation := 'execute delay';
+      StackUsageCounter.PushPop (5)    // resume addr(3) and this(2)
    end;
 
-function TPIC18x_EmptyFunctionPrimary.Generate (param1, param2: integer): integer;
+function TPIC18x_EmptyFunctionPrimary.GenerateCode (param1, param2: integer): integer;
    begin
       result := 0;  // to suppress compiler warning
-      case param1 of
-         GenerateCode:
-            begin
-               TPIC18x_Access(access).Generate_Load_Ptr2_Code (pFSR0, 0);
-               TPIC18x_PUSHL.Create (0);
-               StackUsageCounter.Push(1);
-               TPIC18x_TSTFSZ.Create (INDF0, access_mode);
-               TPIC18x_INCF.Create (1, dest_f, access_mode)
-            end;
-      else
-         assert (false, 'TPIC18x_EmptyFunctionPrimary.Generate(' + IntToStr(param1) + ') not implemented')
-      end
+      TPIC18x_Access(access).Generate_Load_Ptr2_Code (pFSR0, 0);
+      TPIC18x_PUSHL.Create (0);
+      StackUsageCounter.Push(1);
+      TPIC18x_TSTFSZ.Create (INDF0, access_mode);
+      TPIC18x_INCF.Create (1, dest_f, access_mode)
    end;
 
 procedure TInitProcessSubroutine.generate_subroutine_code;

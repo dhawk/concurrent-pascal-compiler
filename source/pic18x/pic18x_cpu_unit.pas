@@ -234,10 +234,6 @@ type
          procedure append_initial_value_byte (b: byte; byte_no: integer; path, value: string; initialization_unnecessary: boolean);
       end;
 
-// TDefinition.Generate param values
-const
-   GenerateCode                     = 1;
-
 const
    rom_data_pointer_size = 2;
    pc_size = 3;
@@ -1183,7 +1179,7 @@ procedure TPIC18x_CPU.generate_machine_code (_prog: TProgram);
                begin
       //      if prog.code_generation_list[i].reachable then
                         begin
-                           prog.CodeBlockList[i].Generate(GenerateCode, 0);
+                           prog.CodeBlockList[i].GenerateCode (666, 0);
                            data_item_list := TPIC18x_DataItemList (prog.CodeBlockList[i]);
                            if data_item_list.descriptor = rw_rom then
                               for j := 0 to data_item_list.Length-1 do
@@ -1200,14 +1196,14 @@ procedure TPIC18x_CPU.generate_machine_code (_prog: TProgram);
                      if odd(romaddr)
                      then
                         romaddr := romaddr + 1;
-                     prog.CodeBlockList[i].Generate(GenerateCode, 0);
+                     prog.CodeBlockList[i].GenerateCode (666, 0);
                   end
                end;
 
          // at this point all process stack sizes are known except for initial statement stack size
 
          prog.CodeBlockList[initial_statement_block_idx].AssignAddresses;
-         prog.CodeBlockList[initial_statement_block_idx].Generate(GenerateCode, 0);
+         prog.CodeBlockList[initial_statement_block_idx].GenerateCode (666, 0);
          // now initial statement stack size is known
          kernel_stack_size := max (TSetErrorCodeRoutine.stack_usage, kernel_interrupt_handler_stack_allowance);
          kernel_stack_size := max (kernel_stack_size, TPIC18x_Program(prog).initial_statement_stack_usage);
