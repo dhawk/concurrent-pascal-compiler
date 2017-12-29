@@ -12,6 +12,7 @@ uses
    cpc_core_objects_unit,
    cpc_expressions_unit,
    pic18x_access_unit,
+   pic18x_cpu_unit,
    pic18x_instructions_unit;
 
 type
@@ -26,7 +27,7 @@ type
             override;
       end;
    TPIC18x_ConstantPrimary =
-      class (TConstantPrimary)
+      class (TConstantPrimary, IGenerateCodeToCopyToRAMString)
          function GenerateCode (param2: integer): integer;
             override;
          procedure PushRealConstant;
@@ -86,7 +87,7 @@ type
             override;
       end;
    TPIC18x_VariableAccessPrimary =
-      class (TVariableAccessPrimary)
+      class (TVariableAccessPrimary, IGenerateCodeToCopyToRAMString)
       private
          addr: integer;     // used only for global or local variables with no index calculation
          // load_next_... functions are used for normal (unpacked) variables
@@ -132,7 +133,6 @@ uses
    Math,
    pic18x_blocks_unit,
    pic18x_core_objects_unit,
-   pic18x_cpu_unit,
    pic18x_floating_point_unit,
    pic18x_kernel_unit,
    pic18x_macro_instructions_unit,

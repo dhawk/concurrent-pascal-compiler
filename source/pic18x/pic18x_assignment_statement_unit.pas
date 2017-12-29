@@ -1297,16 +1297,11 @@ function TPIC18x_AssignmentStatement.GenerateCode (param2: integer): integer;
                               TPIC18x_ADDFSR.Create (2, 3);
                               StackUsageCounter.Pop (3)
                            end
-                        else if expression is TPIC18x_ConstantPrimary then
-                           (expression as TPIC18x_ConstantPrimary).GenerateCodeToCopyToRAMString
-                        else if expression is TVariableAccessPrimary then
-                           (expression as TPIC18x_VariableAccessPrimary).GenerateCodeToCopyToRAMString
                         else
-                           assert (false)
+                           (expression as IGenerateCodeToCopyToRAMString).GenerateCodeToCopyToRAMString
                      end;
                   rw_eeprom:
                      begin
-                        assert (expression is TPIC18x_VariableAccessPrimary);
                         // push base address
                         TPIC18x_Access(assignee).Generate_Push_Address1_Code (0, true);
                         TPIC18x_MOVF.Create (2, dest_w, access_mode);   // convert size to limit

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
-    <Version Value="9"/>
+    <Version Value="10"/>
     <PathDelim Value="\"/>
     <General>
       <SessionStorage Value="InProjectDir"/>
@@ -18,9 +18,6 @@
     <i18n>
       <EnableI18N LFM="False"/>
     </i18n>
-    <VersionInfo>
-      <StringTable ProductVersion=""/>
-    </VersionInfo>
     <BuildModes Count="1">
       <Item1 Name="Default" Default="True"/>
       <SharedMatrixOptions Count="2">
@@ -44,7 +41,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="44">
+    <Units Count="48">
       <Unit0>
         <Filename Value="cpc_pic18x_dev.dpr"/>
         <IsPartOfProject Value="True"/>
@@ -225,6 +222,26 @@
         <IsPartOfProject Value="True"/>
         <HasResources Value="True"/>
       </Unit43>
+      <Unit44>
+        <Filename Value="..\..\common\aboutbox_unit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="AboutBoxForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit44>
+      <Unit45>
+        <Filename Value="..\common\pic18x_aboutbox_unit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <HasResources Value="True"/>
+      </Unit45>
+      <Unit46>
+        <Filename Value="..\pic18x_ram_map_unit.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit46>
+      <Unit47>
+        <Filename Value="..\test_pic18x_subroutines_unit.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit47>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

@@ -21,6 +21,16 @@ uses
    SysUtils;
 
 type
+   IAssignAddresses =
+      interface ['{6137CEDB-F4F0-4A4D-918A-B753BF3F8D5A}']
+         procedure AssignAddresses;
+      end;
+
+   IGenerateCodeToCopyToRAMString =
+      interface ['{2BFFB3B6-7FAD-4945-ACC8-47060B1C9DAE}']
+         procedure GenerateCodeToCopyToRAMString;
+      end;
+
    TInitialValueBytes =
       array of
          record
@@ -1158,7 +1168,7 @@ procedure TPIC18x_CPU.generate_machine_code (_prog: TProgram);
          // assign ram addresses for all except non-interrupt global variables
          for i := 0 to Length(prog.CodeBlockList)-1 do
             if i <> initial_statement_block_idx then
-               prog.CodeBlockList[i].AssignAddresses;
+               (prog.CodeBlockList[i] as IAssignAddresses).AssignAddresses;
 
          // fill in address for interrupt variables from just calculated addresses
          for i := 0 to prog.program_vars.Length-1 do
@@ -1202,7 +1212,7 @@ procedure TPIC18x_CPU.generate_machine_code (_prog: TProgram);
 
          // at this point all process stack sizes are known except for initial statement stack size
 
-         prog.CodeBlockList[initial_statement_block_idx].AssignAddresses;
+         (prog.CodeBlockList[initial_statement_block_idx] as IAssignAddresses).AssignAddresses;
          prog.CodeBlockList[initial_statement_block_idx].GenerateCode (0);
          // now initial statement stack size is known
          kernel_stack_size := max (TSetErrorCodeRoutine.stack_usage, kernel_interrupt_handler_stack_allowance);

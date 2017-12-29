@@ -83,9 +83,7 @@ type
             virtual;
          function CheckForProhibitedDelayCall (err_msg: string): boolean;
             virtual;
-         function GenerateCode (param2: integer): integer;
-            virtual;
-         procedure AssignAddresses;
+         function GenerateCode (param2: integer = 0): integer;
             virtual;
          procedure AddCallRecord (call: TCallRecord);
       end;
@@ -241,11 +239,6 @@ function TDefinition.CheckForProhibitedDelayCall (err_msg: string): boolean;
 function TDefinition.GenerateCode (param2: integer): integer;
    begin
       result := 0;  // to suppress compiler warning
-      assert (false, 'not implemented')
-   end;
-
-procedure TDefinition.AssignAddresses;
-   begin
       assert (false, 'not implemented')
    end;
 

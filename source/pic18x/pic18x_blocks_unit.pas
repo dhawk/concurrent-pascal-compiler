@@ -25,7 +25,7 @@ type
       end;
 
    TPIC18x_Program =
-      class (TProgram)
+      class (TProgram, IAssignAddresses)
          initial_statement_label: TInstruction;
          initial_statement_stack_usage: integer;
          initial_statement_hw_stack_usage: integer;
@@ -35,7 +35,6 @@ type
          function GenerateCode (param2: integer): integer;
             override;
          procedure AssignAddresses;
-            override;
          procedure global_declarations_examination_hook;
             override;
       end;
@@ -45,7 +44,7 @@ type
       end;
 
    TPIC18x_Routine =
-      class (TRoutine)
+      class (TRoutine, IAssignAddresses)
       private
          default_result_value: array of byte;
          procedure enum_bytes (b: byte; i: integer; path, value: string; initialization_unnecessary: boolean);
@@ -56,7 +55,6 @@ type
          varlist_initialization: TDynamicByteArray;
          inline_code: TInstructionArray;     // only used for signaled function in interrupt variables
          procedure AssignAddresses;
-            override;
          function GenerateCode (param2: integer): integer;
             override;
          procedure PushDefaultResultValue;
@@ -65,13 +63,12 @@ type
       end;
 
    TPIC18x_SystemType =
-      class (TSystemType)
+      class (TSystemType, IAssignAddresses)
          init_stmt_entry_point_label: TInstruction;
          initial_stmt_stack_usage: integer;
          initial_statement_hw_stack_usage: integer;
          inline_code: TInstructionArray;     // only used for initial statement of interrupt variables
          procedure AssignAddresses;
-            override;
          function GenerateCode (param2: integer): integer;
             override;
          function process_stack_size: integer;
@@ -85,7 +82,7 @@ type
       end;
 
    TPIC18x_DataItemList =
-      class (TDataItemList)
+      class (TDataItemList, IAssignAddresses)
       private
          variable_initial_value:  TInitialValueBytes;
          procedure append_initial_value_byte (b: byte; byte_no: integer; path, value: string; initialization_unnecessary: boolean);
@@ -95,7 +92,6 @@ type
          procedure EnumerateInitialValues (proc: TByteParamProcedureOfObject);
          procedure InitializeEEPROMValues (system_type_name: string);
          procedure AssignAddresses;
-            override;
          function GenerateCode (param2: integer): integer;
             override;
       end;

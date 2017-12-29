@@ -238,7 +238,7 @@ procedure TAboutBoxForm.FormCreate(Sender: TObject);
       adj_top (BuilderLabel2);
       BuilderLabel2.Caption := 'Compiled with ' + GetCompilerInfo;
       adj_top (BuilderLabel3);
-      BuilderLabel3.caption := GetWidgetSet;
+//      BuilderLabel3.caption := GetWidgetSet;
 {$ELSE}
       BuiltUsingGroupBox.Caption := 'Built with Delphi';
       built_using_image.Picture.Bitmap.LoadFromResourceName (HInstance, 'DELPHI_LOGO');

@@ -348,11 +348,15 @@ type
 
 type
    TReferenceCountedObject =
-      class
+      class (TObject, IInterface)
       private
          ref_count: integer;
          obj_num: cardinal;
          class var num_objects: cardinal;
+      protected
+         function QueryInterface(const IID: TGUID; out Obj): HResult; stdcall;
+         function _AddRef: Integer; stdcall;
+         function _Release: Integer; stdcall;
       public
          constructor Create;
          procedure AddRef;
@@ -502,6 +506,26 @@ constructor TReferenceCountedObject.Create;
             dump_stk
          end
 {$endif}
+   end;
+
+function TReferenceCountedObject.QueryInterface (const IID: TGUID; out Obj): HResult; stdcall;
+   begin
+      if GetInterface(IID, Obj) then
+         Result := 0
+      else
+         Result := E_NOINTERFACE
+   end;
+
+function TReferenceCountedObject._AddRef: Integer; stdcall;
+   begin
+      AddRef;
+      result := ref_count
+   end;
+
+function TReferenceCountedObject._Release: Integer; stdcall;
+   begin
+      result := ref_count - 1;
+      Release
    end;
 
 procedure TReferenceCountedObject.AddRef;
