@@ -354,7 +354,11 @@ type
          obj_num: cardinal;
          class var num_objects: cardinal;
       protected
+{$IFDEF FPC}
+         function QueryInterface(constref IID: TGUID; out Obj): HResult; stdcall;
+{$ELSE}
          function QueryInterface(const IID: TGUID; out Obj): HResult; stdcall;
+{$ENDIF}
          function _AddRef: Integer; stdcall;
          function _Release: Integer; stdcall;
       public
@@ -508,7 +512,11 @@ constructor TReferenceCountedObject.Create;
 {$endif}
    end;
 
+{$IFDEF FPC}
+function TReferenceCountedObject.QueryInterface (constref IID: TGUID; out Obj): HResult; stdcall;
+{$ELSE}
 function TReferenceCountedObject.QueryInterface (const IID: TGUID; out Obj): HResult; stdcall;
+{$ENDIF}
    begin
       if GetInterface(IID, Obj) then
          Result := 0

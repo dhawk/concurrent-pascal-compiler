@@ -1,18 +1,18 @@
 UNIT cpc_core_dev_aboutbox_unit;
 
 {$IFDEF FPC}
-  {$MODE Delphi}
+   {$MODE Delphi}
 {$ENDIF}
 
 INTERFACE
 
 uses
-{$IFnDEF FPC}
-  Windows,
+{$IFDEF FPC}
+   LCLIntf, LCLType, LMessages,
 {$ELSE}
-  LCLIntf, LCLType, LMessages,
+   Windows,
 {$ENDIF}
-  Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+   Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
    Dialogs, aboutbox_unit, StdCtrls;
 
 type

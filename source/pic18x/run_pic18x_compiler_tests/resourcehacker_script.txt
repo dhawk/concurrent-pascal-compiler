@@ -4,5 +4,5 @@ Save=..\..\..\bin\run_pic18x_compiler_tests.exe
 Log=ResourceHacker.log
 [COMMANDS]
 -addoverwrite ..\..\common\mainicon.ico, ICONGROUP,MAINICON, 
--add ..\..\common\cp_logo.bmp, BITMAP,CP_LOGO,
--add ..\..\common\delphi_logo.bmp, BITMAP,DELPHI_LOGO,
+-addoverwrite ..\..\common\cp_logo.bmp, BITMAP,CP_LOGO,
+-addoverwrite ..\..\common\delphi_logo.bmp, BITMAP,DELPHI_LOGO,
