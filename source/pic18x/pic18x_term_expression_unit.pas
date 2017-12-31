@@ -12,7 +12,7 @@ uses
 type
    TPIC18x_Term =
       class (TTerm)
-         procedure GenerateCode (param2: integer);
+         procedure GenerateCode (result_stk_size: integer);
             override;
       end;
 
@@ -161,7 +161,7 @@ destructor TOperationSchedule.Destroy;
       inherited
    end;
 
-procedure TPIC18x_Term.GenerateCode (param2: integer);
+procedure TPIC18x_Term.GenerateCode (result_stk_size: integer);
 
    procedure generate_numeric_term_code;
       var
@@ -398,7 +398,7 @@ procedure TPIC18x_Term.GenerateCode (param2: integer);
             end;
 
          if expression_kind = integer_expression then
-            generate_stack_fix_and_sign_extend_code (intermediate_calculation_info[Length(additional_factors)-1].result_size, 0, param2, info.IntegerRange);
+            generate_stack_fix_and_sign_extend_code (intermediate_calculation_info[Length(additional_factors)-1].result_size, 0, result_stk_size, info.IntegerRange);
 
          intermediate_calculation_info.Free
       end;
@@ -474,19 +474,19 @@ procedure TPIC18x_Term.GenerateCode (param2: integer);
          idx,i: integer;
          annotation: string;
       begin
-         first_factor.GenerateCode (param2);
+         first_factor.GenerateCode (result_stk_size);
          for idx := 0 to Length(additional_factors)-1 do
             begin
-               annotation := 'set intersection(*) of tos*' + IntToStr(param2) + ' with (tos-1)*' + IntToStr(param2) + ', pop tos*' + IntToStr(param2);
+               annotation := 'set intersection(*) of tos*' + IntToStr(result_stk_size) + ' with (tos-1)*' + IntToStr(result_stk_size) + ', pop tos*' + IntToStr(result_stk_size);
                assert (additional_factors[idx].mulop = mulop_set_intersection);
-               additional_factors[idx].factor.GenerateCode (param2);
-               for i := 1 to param2 do
+               additional_factors[idx].factor.GenerateCode (result_stk_size);
+               for i := 1 to result_stk_size do
                   begin
                      TPIC18x_MOVF.Create (PREINC2, dest_w, access_mode).annotation := annotation;
                      annotation := '';
-                     TPIC18x_ANDWF.Create (param2, dest_f, access_mode)
+                     TPIC18x_ANDWF.Create (result_stk_size, dest_f, access_mode)
                   end;
-               StackUsageCounter.Pop (param2)
+               StackUsageCounter.Pop (result_stk_size)
             end
       end;
 

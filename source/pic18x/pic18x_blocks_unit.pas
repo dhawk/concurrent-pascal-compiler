@@ -32,7 +32,7 @@ type
          config_bits: TStructuredConstant;
          destructor Destroy;
             override;
-         procedure GenerateCode (param2: integer);
+         procedure GenerateCode (result_stk_size: integer);
             override;
          procedure AssignAddresses;
          procedure global_declarations_examination_hook;
@@ -55,7 +55,7 @@ type
          varlist_initialization: TDynamicByteArray;
          inline_code: TInstructionArray;     // only used for signaled function in interrupt variables
          procedure AssignAddresses;
-         procedure GenerateCode (param2: integer);
+         procedure GenerateCode (result_stk_size: integer);
             override;
          procedure PushDefaultResultValue;
          destructor Destroy;
@@ -69,7 +69,7 @@ type
          initial_statement_hw_stack_usage: integer;
          inline_code: TInstructionArray;     // only used for initial statement of interrupt variables
          procedure AssignAddresses;
-         procedure GenerateCode (param2: integer);
+         procedure GenerateCode (result_stk_size: integer);
             override;
          function process_stack_size: integer;
          function control_block_size: integer;
@@ -92,7 +92,7 @@ type
          procedure EnumerateInitialValues (proc: TByteParamProcedureOfObject);
          procedure InitializeEEPROMValues (system_type_name: string);
          procedure AssignAddresses;
-         procedure GenerateCode (param2: integer);
+         procedure GenerateCode (result_stk_size: integer);
             override;
       end;
 
@@ -344,7 +344,7 @@ procedure TPIC18x_Program.AssignAddresses;
             end
    end;
 
-procedure TPIC18x_Program.GenerateCode (param2: integer);
+procedure TPIC18x_Program.GenerateCode (result_stk_size: integer);
    var
       i: integer;
    begin
@@ -353,7 +353,7 @@ procedure TPIC18x_Program.GenerateCode (param2: integer);
       initial_statement_label := TAssemblyLabel.Create;
       StackUsageCounter.Clear;
       TSourceSyncPoint.Create (begin_src_loc);
-      initial_statement.GenerateCode (1);
+      initial_statement.GenerateCode (0);
       TSourceSyncPoint.Create (end_src_loc);
       TAssemblySourceBlankLine.Create;
       // initialize any reachable uninitialized interrupt variables
@@ -479,7 +479,7 @@ procedure TPIC18x_Routine.AssignAddresses;
          end
    end;
 
-procedure TPIC18x_Routine.GenerateCode (param2: integer);
+procedure TPIC18x_Routine.GenerateCode (result_stk_size: integer);
    var
       locals_size, param_size, i: integer;
    begin
@@ -701,7 +701,7 @@ procedure TPIC18x_SystemType.AssignAddresses;
          end
    end;
 
-procedure TPIC18x_SystemType.GenerateCode (param2: integer);
+procedure TPIC18x_SystemType.GenerateCode (result_stk_size: integer);
    var
       lbl: TInstruction;
    begin
@@ -827,7 +827,7 @@ procedure TPIC18x_DataItemList.AssignAddresses;
    begin
    end;
 
-procedure TPIC18x_DataItemList.GenerateCode (param2: integer);
+procedure TPIC18x_DataItemList.GenerateCode (result_stk_size: integer);
    var
       i: integer;
    begin

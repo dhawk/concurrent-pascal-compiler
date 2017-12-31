@@ -46,22 +46,22 @@ const
 type
    TPIC18x_AwaitInterruptStatement =
       class (TAwaitInterruptStatement)
-         procedure GenerateCode (param2: integer);
+         procedure GenerateCode (result_stk_size: integer);
             override;
       end;
    TPIC18x_ContinueStatement =
       class (TContinueStatement)
-         procedure GenerateCode (param2: integer);
+         procedure GenerateCode (result_stk_size: integer);
             override;
       end;
    TPIC18x_DelayStatement =
       class (TDelayStatement)
-         procedure GenerateCode (param2: integer);
+         procedure GenerateCode (result_stk_size: integer);
             override;
       end;
    TPIC18x_EmptyFunctionPrimary =
       class (TEmptyFunctionPrimary)
-         procedure GenerateCode (param2: integer);
+         procedure GenerateCode (result_stk_size: integer);
             override;
       end;
 
@@ -453,7 +453,7 @@ procedure LeaveMonitor (monitor_prio, pop_size: integer);
    end;
 
 
-procedure TPIC18x_AwaitInterruptStatement.GenerateCode (param2: integer);
+procedure TPIC18x_AwaitInterruptStatement.GenerateCode (result_stk_size: integer);
    begin
       TSourceSyncPoint.Create (src_loc);
       // fsr1 := addr of process priority queue
@@ -463,7 +463,7 @@ procedure TPIC18x_AwaitInterruptStatement.GenerateCode (param2: integer);
       StackUsageCounter.PushPop (5)    // resume addr(3) and this ptr(2)
    end;
 
-procedure TPIC18x_ContinueStatement.GenerateCode (param2: integer);
+procedure TPIC18x_ContinueStatement.GenerateCode (result_stk_size: integer);
    begin
       TSourceSyncPoint.Create (src_loc);
       TPIC18x_Access(queue_access).Generate_Load_Ptr2_Code (pFSR0, 0);
@@ -474,7 +474,7 @@ procedure TPIC18x_ContinueStatement.GenerateCode (param2: integer);
       kernel_continue.ComeFrom (TCALLMacro.Create)
    end;
 
-procedure TPIC18x_DelayStatement.GenerateCode (param2: integer);
+procedure TPIC18x_DelayStatement.GenerateCode (result_stk_size: integer);
    var
       lbl: TInstruction;
    begin
@@ -487,7 +487,7 @@ procedure TPIC18x_DelayStatement.GenerateCode (param2: integer);
       StackUsageCounter.PushPop (5)    // resume addr(3) and this(2)
    end;
 
-procedure TPIC18x_EmptyFunctionPrimary.GenerateCode (param2: integer);
+procedure TPIC18x_EmptyFunctionPrimary.GenerateCode (result_stk_size: integer);
    begin
       TPIC18x_Access(access).Generate_Load_Ptr2_Code (pFSR0, 0);
       TPIC18x_PUSHL.Create (0);

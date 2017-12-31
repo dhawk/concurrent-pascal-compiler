@@ -12,7 +12,7 @@ uses
 type
    TPIC18x_SimpleExpression =
       class (TSimpleExpression)
-         procedure GenerateCode (param2: integer);
+         procedure GenerateCode (result_stk_size: integer);
             override;
       end;
 
@@ -31,7 +31,7 @@ uses
    SysUtils;
 
 
-procedure TPIC18x_SimpleExpression.GenerateCode (param2: integer);
+procedure TPIC18x_SimpleExpression.GenerateCode (result_stk_size: integer);
 
    procedure generate_simple_numeric_expression_code;
 
@@ -109,8 +109,8 @@ procedure TPIC18x_SimpleExpression.GenerateCode (param2: integer);
                for term_idx := 0 to Length(additional_terms)-1 do
                   with intermediate_integer_calculation_info[term_idx] do
                      begin
-                        b_size := min (b_size, param2);
-                        calculation_result_size := min (calculation_result_size, param2)
+                        b_size := min (b_size, result_stk_size);
+                        calculation_result_size := min (calculation_result_size, result_stk_size)
                      end;
 
             // for all but last term...
@@ -135,7 +135,7 @@ procedure TPIC18x_SimpleExpression.GenerateCode (param2: integer);
                case addop of
                   addop_add_int_to_int,
                   addop_subtract_int_from_int:
-                     adjusted_result_size := param2;
+                     adjusted_result_size := result_stk_size;
                   addop_add_flt_to_int,
                   addop_subtract_flt_from_int,
                   addop_add_flt_to_flt,
@@ -369,33 +369,33 @@ procedure TPIC18x_SimpleExpression.GenerateCode (param2: integer);
          idx,i: integer;
          annotation: string;
       begin   // generate_simple_set_expression_code
-         first_term.GenerateCode (param2);
+         first_term.GenerateCode (result_stk_size);
          for idx := 0 to Length(additional_terms)-1 do
             begin
-               additional_terms[idx].right_term.GenerateCode (param2);
+               additional_terms[idx].right_term.GenerateCode (result_stk_size);
                case additional_terms[idx].addop of
                   addop_set_union:
                      begin
-                        annotation := 'set union(+) of tos*' + IntToStr(param2) + ' with (tos-1)*' + IntToStr(param2) + ', pop tos*' + IntToStr(param2);
-                        for i := 1 to param2 do
+                        annotation := 'set union(+) of tos*' + IntToStr(result_stk_size) + ' with (tos-1)*' + IntToStr(result_stk_size) + ', pop tos*' + IntToStr(result_stk_size);
+                        for i := 1 to result_stk_size do
                            begin
                               TPIC18x_MOVF.Create (PREINC2, dest_w, access_mode).annotation := annotation;
                               annotation := '';
-                              TPIC18x_IORWF.Create (param2, dest_f, access_mode)
+                              TPIC18x_IORWF.Create (result_stk_size, dest_f, access_mode)
                            end;
-                        StackUsageCounter.Pop (param2)
+                        StackUsageCounter.Pop (result_stk_size)
                      end;
                   addop_set_difference:
                      begin
-                        annotation := 'set difference(-) of tos*' + IntToStr(param2) + ' with (tos-1)*' + IntToStr(param2) + ', pop tos*' + IntToStr(param2);
-                        for i := 1 to param2 do
+                        annotation := 'set difference(-) of tos*' + IntToStr(result_stk_size) + ' with (tos-1)*' + IntToStr(result_stk_size) + ', pop tos*' + IntToStr(result_stk_size);
+                        for i := 1 to result_stk_size do
                            begin
                               TPIC18x_MOVF.Create (PREINC2, dest_w, access_mode).annotation := annotation;
                               annotation := '';
                               TPIC18x_COMF.Create (WREG, dest_w, access_mode);
-                              TPIC18x_ANDWF.Create (param2, dest_f, access_mode)
+                              TPIC18x_ANDWF.Create (result_stk_size, dest_f, access_mode)
                            end;
-                        StackUsageCounter.Pop (param2)
+                        StackUsageCounter.Pop (result_stk_size)
                      end;
                else
                   assert (false)

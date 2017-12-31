@@ -18,17 +18,17 @@ uses
 type
    TPIC18x_AbsFunctionPrimary =
       class (TAbsFunctionPrimary)
-         procedure GenerateCode (param2: integer);
+         procedure GenerateCode (result_stk_size: integer);
             override;
       end;
    TPIC18x_ChrTypeConversionPrimary =
       class (TChrTypeConversionPrimary)
-         procedure GenerateCode (param2: integer);
+         procedure GenerateCode (result_stk_size: integer);
             override;
       end;
    TPIC18x_ConstantPrimary =
       class (TConstantPrimary, IGenerateCodeToCopyToRAMString)
-         procedure GenerateCode (param2: integer);
+         procedure GenerateCode (result_stk_size: integer);
             override;
          procedure PushRealConstant;
          procedure PushIEEESingleConstant;
@@ -38,24 +38,24 @@ type
       class (TFunctionAccessPrimary)
          expr: TExpression;
          constructor CreateFromSourceTokens (_access: TAccess);
-         procedure GenerateCode (param2: integer);
+         procedure GenerateCode (result_stk_size: integer);
             override;
          destructor Destroy;
             override;
       end;
    TPIC18x_NotPrimary =
       class (TNotPrimary)
-         procedure GenerateCode (param2: integer);
+         procedure GenerateCode (result_stk_size: integer);
             override;
       end;
    TPIC18x_PredFunctionPrimary =
       class (TPredFunctionPrimary)
-         procedure GenerateCode (param2: integer);
+         procedure GenerateCode (result_stk_size: integer);
             override;
       end;
    TPIC18x_RelationalExpression =
       class (TRelationalExpression)
-         procedure GenerateCode (param2: integer);
+         procedure GenerateCode (result_stk_size: integer);
             override;
       end;
    TPIC18x_RoundFunctionPrimary =
@@ -63,27 +63,27 @@ type
       end;
    TPIC18x_SetConstructorPrimary =
       class (TSetConstructorPrimary)
-         procedure GenerateCode (param2: integer);
+         procedure GenerateCode (result_stk_size: integer);
             override;
       end;
    TPIC18x_StrPosPrimary =
       class (TstrPosPrimary)
-         procedure GenerateCode (param2: integer);
+         procedure GenerateCode (result_stk_size: integer);
             override;
       end;
    TPIC18x_SuccFunctionPrimary =
       class (TSuccFunctionPrimary)
-         procedure GenerateCode (param2: integer);
+         procedure GenerateCode (result_stk_size: integer);
             override;
       end;
    TPIC18x_TruncFunctionPrimary =
       class (TTruncFunctionPrimary)
-         procedure GenerateCode (param2: integer);
+         procedure GenerateCode (result_stk_size: integer);
             override;
       end;
    TPIC18x_UnaryMinusPrimary =
       class (TUnaryMinusPrimary)
-         procedure GenerateCode (param2: integer);
+         procedure GenerateCode (result_stk_size: integer);
             override;
       end;
    TPIC18x_VariableAccessPrimary =
@@ -103,7 +103,7 @@ type
          function load_next_rom_byte_packed (do_post_ptr_adjust: boolean): TInstruction;
          function load_next_eeprom_byte_packed (do_post_ptr_adjust: boolean): TInstruction;
       public
-         procedure GenerateCode (param2: integer);
+         procedure GenerateCode (result_stk_size: integer);
             override;
          procedure GenerateCodeToCopyToRAMString;
          procedure GenerateCodeToCopyToEEPROMString;
@@ -624,7 +624,7 @@ procedure generate_stack_fix_and_sign_extend_code
          end
    end;
 
-procedure TPIC18x_AbsFunctionPrimary.GenerateCode (param2: integer);
+procedure TPIC18x_AbsFunctionPrimary.GenerateCode (result_stk_size: integer);
    const
       ARGB0 = 2;
       REAL_SIGN_BIT = 7;
@@ -674,7 +674,7 @@ procedure TPIC18x_AbsFunctionPrimary.GenerateCode (param2: integer);
       end
    end;
 
-procedure TPIC18x_ChrTypeConversionPrimary.GenerateCode (param2: integer);
+procedure TPIC18x_ChrTypeConversionPrimary.GenerateCode (result_stk_size: integer);
    var
       expr_size: integer;
    begin
@@ -693,7 +693,7 @@ procedure TPIC18x_ChrTypeConversionPrimary.GenerateCode (param2: integer);
          end
    end;
 
-procedure TPIC18x_ConstantPrimary.GenerateCode (param2: integer);
+procedure TPIC18x_ConstantPrimary.GenerateCode (result_stk_size: integer);
    var
       annotation: string;
       i: integer;
@@ -702,28 +702,28 @@ procedure TPIC18x_ConstantPrimary.GenerateCode (param2: integer);
          integer_constant:
             begin
                annotation := 'push ' + IntToStr (constant.ordinal_value.AsInteger);
-               for i := 0 to param2-1 do
+               for i := 0 to result_stk_size-1 do
                   begin
                      TPIC18x_PUSHL.Create (constant.ordinal_value.AsByte(i)).annotation := annotation;
                      annotation := ''
                   end;
-               StackUsageCounter.push (param2)
+               StackUsageCounter.push (result_stk_size)
             end;
          boolean_constant:
             begin
-               assert (param2 = 1);
+               assert (result_stk_size = 1);
                if constant.ordinal_value.AsUnsigned = 1 then
                   annotation := 'push true'
                else
                   annotation := 'push false';
                TPIC18x_PUSHL.Create (constant.ordinal_value.AsUnsigned).annotation := annotation;
-               StackUsageCounter.push (param2)
+               StackUsageCounter.push (result_stk_size)
             end;
          enum_constant:
             begin
-               assert (param2 = 1);
+               assert (result_stk_size = 1);
                TPIC18x_PUSHL.Create (constant.ordinal_value.AsUnsigned).annotation := 'push enum';
-               StackUsageCounter.push (param2)
+               StackUsageCounter.push (result_stk_size)
             end;
          real_constant:
             PushRealConstant;
@@ -739,12 +739,12 @@ procedure TPIC18x_ConstantPrimary.GenerateCode (param2: integer);
                            annotation := annotation + IntToStr(i) + ',';
                      annotation[Length(annotation)] := ']'  // replace final comma
                   end;
-               for i := 0 to param2-1 do
+               for i := 0 to result_stk_size-1 do
                   begin
                      TPIC18x_PUSHL.Create (SetByte (constant, i)).annotation := annotation;
                      annotation := ''
                   end;
-               StackUsageCounter.push (param2)
+               StackUsageCounter.push (result_stk_size)
             end;
          string_constant:
             if Length(constant.s) = 1 then
@@ -867,7 +867,7 @@ constructor TPIC18x_FunctionAccessPrimary.CreateFromSourceTokens (_access: TAcce
          inherited
    end;
 
-procedure TPIC18x_FunctionAccessPrimary.GenerateCode (param2: integer);
+procedure TPIC18x_FunctionAccessPrimary.GenerateCode (result_stk_size: integer);
 
    procedure generate_function_call_code (routine: TPIC18x_Routine);
       var
@@ -924,7 +924,7 @@ procedure TPIC18x_FunctionAccessPrimary.GenerateCode (param2: integer);
          if (routine.function_result.typedef.type_kind = basic_data_type)
             and
             (TBasicDataType(routine.function_result.typedef).basic_data_type_kind = ordinal_data_type) then
-            generate_stack_fix_and_sign_extend_code (TPIC18x_TypeInfo(routine.function_result.typedef.info).Size, 0, param2, routine.function_result.typedef.info.IntegerRange)
+            generate_stack_fix_and_sign_extend_code (TPIC18x_TypeInfo(routine.function_result.typedef.info).Size, 0, result_stk_size, routine.function_result.typedef.info.IntegerRange)
       end;
 
    var
@@ -933,16 +933,16 @@ procedure TPIC18x_FunctionAccessPrimary.GenerateCode (param2: integer);
       if access.node_routine = TPIC18x_CPU (target_cpu).ErrorCode then
          begin
             get_errorcode_routine.Call;
-            if param2 < 3 then
+            if result_stk_size < 3 then
                begin
-                  TPIC18x_ADDFSR.Create (2, 3-param2);
-                  StackUsageCounter.pop (3-param2)
+                  TPIC18x_ADDFSR.Create (2, 3-result_stk_size);
+                  StackUsageCounter.pop (3-result_stk_size)
                end
-            else if param2 > 3 then
+            else if result_stk_size > 3 then
                begin
-                  for i := 4 to param2 do
+                  for i := 4 to result_stk_size do
                      TPIC18x_CLRF.Create (POSTDEC2, access_mode);
-                  StackUsageCounter.push (param2-3)
+                  StackUsageCounter.push (result_stk_size-3)
                end
          end
       else if access.node_routine = TPIC18x_CPU (target_cpu).Round24 then
@@ -979,13 +979,13 @@ destructor TPIC18x_FunctionAccessPrimary.Destroy;
       inherited
    end;
 
-procedure TPIC18x_NotPrimary.GenerateCode (param2: integer);
+procedure TPIC18x_NotPrimary.GenerateCode (result_stk_size: integer);
    begin
       boolean_expr.GenerateCode (1);
       TPIC18x_BTG.Create (1, 0, access_mode).annotation := 'tos := not tos'
    end;
 
-procedure TPIC18x_PredFunctionPrimary.GenerateCode (param2: integer);
+procedure TPIC18x_PredFunctionPrimary.GenerateCode (result_stk_size: integer);
    var
       result_size, i: integer;
    begin
@@ -1000,7 +1000,7 @@ procedure TPIC18x_PredFunctionPrimary.GenerateCode (param2: integer);
          end
    end;
 
-procedure TPIC18x_RelationalExpression.GenerateCode (param2: integer);
+procedure TPIC18x_RelationalExpression.GenerateCode (result_stk_size: integer);
 
    procedure generate_ordinal_relational_expression_code;
 
@@ -1589,7 +1589,7 @@ procedure TPIC18x_RelationalExpression.GenerateCode (param2: integer);
          assert (false)
    end;
 
-procedure TPIC18x_SetConstructorPrimary.GenerateCode (param2: integer);
+procedure TPIC18x_SetConstructorPrimary.GenerateCode (result_stk_size: integer);
 
    procedure handle_single_bit_insertion (expr: TExpression);
       var
@@ -1600,7 +1600,7 @@ procedure TPIC18x_SetConstructorPrimary.GenerateCode (param2: integer);
          lbl: TAssemblyLabel;
       function beyond_tos_insertion_possible: boolean;
          begin
-            result := expr.info.max_value.AsInteger >= ((param2+a_size)*8)
+            result := expr.info.max_value.AsInteger >= ((result_stk_size+a_size)*8)
          end;
       function opt_possible: boolean;
          // test for optimization where expr can be popped off stack early and skip ADDFSR instruction at end
@@ -1631,10 +1631,10 @@ procedure TPIC18x_SetConstructorPrimary.GenerateCode (param2: integer);
                   bn1 := TPIC18x_BNZ.Create
                end;
          // if we didn't branch, then [a_size] represents value of expr (0..255)
-         TPIC18x_SWAPF.Create (a_size, dest_w, access_mode).annotation := 'insert tos*1 into set*' + IntToStr(param2);
+         TPIC18x_SWAPF.Create (a_size, dest_w, access_mode).annotation := 'insert tos*1 into set*' + IntToStr(result_stk_size);
          TPIC18x_RLNCF.Create (WREG, dest_w, access_mode);
          TPIC18x_ANDLW.Create ($1F);
-         TPIC18x_SUBLW.Create (param2+a_size-1);
+         TPIC18x_SUBLW.Create (result_stk_size+a_size-1);
 
          bn2 := nil;
          if beyond_tos_insertion_possible then
@@ -1685,7 +1685,7 @@ procedure TPIC18x_SetConstructorPrimary.GenerateCode (param2: integer);
       begin
          if first.contains_constant then
             begin
-               if first.constant.ordinal_value.ge(param2*8) then
+               if first.constant.ordinal_value.ge(result_stk_size*8) then
                   exit;
 
                if last.constant.ordinal_value.lt(0) then
@@ -1724,7 +1724,7 @@ procedure TPIC18x_SetConstructorPrimary.GenerateCode (param2: integer);
          if last.contains_constant then
             begin
                temp.Assign (last.constant.ordinal_value);
-               temp.Min ((param2*8)-1);
+               temp.Min ((result_stk_size*8)-1);
                for i := 0 to last_size-1 do
                   TPIC18x_PUSHL.Create (temp.AsByte(i));
                StackUsageCounter.Push(last_size)
@@ -1734,8 +1734,8 @@ procedure TPIC18x_SetConstructorPrimary.GenerateCode (param2: integer);
                last.GenerateCode (last_size);
 
                b_signed := last.info.Signed;
-               if b_signed or last.info.max_value.gt ((param2*8)-1) then
-                  begin   // may have to clamp at (param2*8)-1
+               if b_signed or last.info.max_value.gt ((result_stk_size*8)-1) then
+                  begin   // may have to clamp at (result_stk_size*8)-1
                      bnz := nil;
                      if b_signed or (last_size > 1) then
                         begin
@@ -1749,15 +1749,15 @@ procedure TPIC18x_SetConstructorPrimary.GenerateCode (param2: integer);
                                  bnz := TPIC18x_BNZ.Create
                               end
                         end;
-                     TPIC18x_MOVLW.Create ((param2*8)-1);
+                     TPIC18x_MOVLW.Create ((result_stk_size*8)-1);
                      TPIC18x_SUBWF.Create (last_size, dest_w, access_mode);
                      bn2 := TPIC18x_BN.Create;
                      if bnz <> nil then
                         bnz.dest := TAssemblyLabel.Create;
-                     // clamp at (param2*8)-1
+                     // clamp at (result_stk_size*8)-1
                      for i := 1 to last_size-1 do
                          TPIC18x_CLRF.Create (i, access_mode);
-                     TPIC18x_MOVLW.Create ((param2*8)-1);
+                     TPIC18x_MOVLW.Create ((result_stk_size*8)-1);
                      TPIC18x_MOVWF.Create (last_size, access_mode);
                      bn2.dest := TAssemblyLabel.Create;
                   end
@@ -1806,7 +1806,7 @@ procedure TPIC18x_SetConstructorPrimary.GenerateCode (param2: integer);
          TPIC18x_SWAPF.Create (last_size+first_size, dest_w, access_mode);
          TPIC18x_RLNCF.Create (WREG, dest_w, access_mode);
          TPIC18x_ANDLW.Create ($1F);
-         TPIC18x_SUBLW.Create (param2+first_size+last_size);
+         TPIC18x_SUBLW.Create (result_stk_size+first_size+last_size);
          TPIC18x_ADDWF.Create (FSR2L, dest_w, access_mode);
          TPIC18x_MOVWF.Create (FSR1L, access_mode);
          TPIC18x_MOVLW.Create (0);
@@ -1851,22 +1851,22 @@ procedure TPIC18x_SetConstructorPrimary.GenerateCode (param2: integer);
                if i in constant.sett then
                   annotation := annotation + IntToStr(i) + ',';
             annotation[Length(annotation)] := ']';  // replace final comma (note: annotation is not used if empty set)
-            for i := 0 to param2-1 do
+            for i := 0 to result_stk_size-1 do
                begin
                   TPIC18x_PUSHL.Create (SetByte (constant, i)).annotation := annotation;
                   annotation := ''
                end;
-            StackUsageCounter.Push (param2)
+            StackUsageCounter.Push (result_stk_size)
          end
       else
          begin
             annotation := 'push set []';
-            for i := 1 to param2 do
+            for i := 1 to result_stk_size do
                begin
                   TPIC18x_PUSHL.Create (0).annotation := annotation;
                   annotation := ''
                end;
-            StackUsageCounter.Push (param2)
+            StackUsageCounter.Push (result_stk_size)
          end;
       for i := 0 to Length(variable_members)-1 do
          if variable_members[i].last = nil then
@@ -1875,7 +1875,7 @@ procedure TPIC18x_SetConstructorPrimary.GenerateCode (param2: integer);
             handle_ranged_bits_insertion (variable_members[i].first, variable_members[i].last)
    end;
 
-procedure TPIC18x_StrPosPrimary.GenerateCode (param2: integer);
+procedure TPIC18x_StrPosPrimary.GenerateCode (result_stk_size: integer);
    var
       substr: TPIC18x_VariableAccessPrimary;
       rom_addr: integer;
@@ -2030,7 +2030,7 @@ procedure TPIC18x_StrPosPrimary.GenerateCode (param2: integer);
       end
    end;
 
-procedure TPIC18x_SuccFunctionPrimary.GenerateCode (param2: integer);
+procedure TPIC18x_SuccFunctionPrimary.GenerateCode (result_stk_size: integer);
    var
       result_size, i: integer;
    begin
@@ -2045,12 +2045,12 @@ procedure TPIC18x_SuccFunctionPrimary.GenerateCode (param2: integer);
          end
    end;
 
-procedure TPIC18x_TruncFunctionPrimary.GenerateCode (param2: integer);
+procedure TPIC18x_TruncFunctionPrimary.GenerateCode (result_stk_size: integer);
    begin
       raise compile_error.Create (err_use_trunc24_or_trunc32, src_loc)
    end;
 
-procedure TPIC18x_UnaryMinusPrimary.GenerateCode (param2: integer);
+procedure TPIC18x_UnaryMinusPrimary.GenerateCode (result_stk_size: integer);
    const
       ARGB0 = 2;
       REAL_SIGN_BIT = 7;
@@ -2353,7 +2353,7 @@ function TPIC18x_VariableAccessPrimary.load_next_eeprom_byte_packed (do_post_ptr
          TPIC18x_ADDFSR.Create(1, 2)          // net result is increment FSR1
    end;
 
-procedure TPIC18x_VariableAccessPrimary.GenerateCode (param2: integer);
+procedure TPIC18x_VariableAccessPrimary.GenerateCode (result_stk_size: integer);
    var
       annotation: string;
 
@@ -2394,22 +2394,22 @@ procedure TPIC18x_VariableAccessPrimary.GenerateCode (param2: integer);
                                        rterr_assignment_range_check_error (TOrdinalDataType(access.node_typedef))
                                       );
                tos_type_info.Release;
-               generate_stack_fix_and_sign_extend_code (tos_size, 0, param2, access.node_typedef.info.IntegerRange)
+               generate_stack_fix_and_sign_extend_code (tos_size, 0, result_stk_size, access.node_typedef.info.IntegerRange)
             end
          else if access.node_typedef.IsOrdinal then
             begin
                for i := 1 to TPIC18x_TypeInfo(access.node_typedef.info).Size do
-                  if i <= param2 then
+                  if i <= result_stk_size then
                      begin
-                        generate_load_next_byte (i < param2).annotation := annotation;
+                        generate_load_next_byte (i < result_stk_size).annotation := annotation;
                         annotation := '';
                         TPIC18x_MOVWF.Create (POSTDEC2, access_mode);
                         StackUsageCounter.Push (1)
                      end;
                if TOrdinalDataType(access.node_typedef).info.min_value.AsInteger >= 0 then
                   begin
-                     for i := TPIC18x_TypeInfo(access.node_typedef.info).Size+1 to param2 do
-                        if i <= param2 then
+                     for i := TPIC18x_TypeInfo(access.node_typedef.info).Size+1 to result_stk_size do
+                        if i <= result_stk_size then
                            begin
                               TPIC18x_CLRF.Create (POSTDEC2, access_mode);
                               StackUsageCounter.Push (1)
@@ -2417,30 +2417,30 @@ procedure TPIC18x_VariableAccessPrimary.GenerateCode (param2: integer);
                   end
                else if TOrdinalDataType(access.node_typedef).info.max_value.AsInteger < 0 then
                   begin
-                     for i := TPIC18x_TypeInfo(access.node_typedef.info).Size+1 to param2 do
-                        if i <= param2 then
+                     for i := TPIC18x_TypeInfo(access.node_typedef.info).Size+1 to result_stk_size do
+                        if i <= result_stk_size then
                            begin
                               TPIC18x_SETF.Create (POSTDEC2, access_mode);
                               StackUsageCounter.Push (1)
                            end
                   end
                else  // value could be pos or neg
-                  if param2 > TPIC18x_TypeInfo(access.node_typedef.info).Size then
+                  if result_stk_size > TPIC18x_TypeInfo(access.node_typedef.info).Size then
                      begin  // extend sign
                         bnn := TPIC18x_BNN.Create;
-                        for i := TPIC18x_TypeInfo(access.node_typedef.info).Size+1 to param2 do
+                        for i := TPIC18x_TypeInfo(access.node_typedef.info).Size+1 to result_stk_size do
                            TPIC18x_SETF.Create (POSTDEC2, access_mode);
                         bra := TPIC18x_BRA.Create;
                         bnn.dest := TPIC18x_CLRF.Create (POSTDEC2, access_mode);
-                        for i := TPIC18x_TypeInfo(access.node_typedef.info).Size+2 to param2 do
+                        for i := TPIC18x_TypeInfo(access.node_typedef.info).Size+2 to result_stk_size do
                            TPIC18x_CLRF.Create (POSTDEC2, access_mode);
                         bra.dest := TAssemblyLabel.Create;
-                        StackUsageCounter.Push (param2 - TPIC18x_TypeInfo(access.node_typedef.info).Size)
+                        StackUsageCounter.Push (result_stk_size - TPIC18x_TypeInfo(access.node_typedef.info).Size)
                      end
             end
          else if access.node_typedef.type_kind = set_type then
             begin
-               last := min(param2, TPIC18x_TypeInfo(access.node_typedef.info).Size);
+               last := min(result_stk_size, TPIC18x_TypeInfo(access.node_typedef.info).Size);
                for i := 1 to last do
                   begin
                      generate_load_next_byte (i < last).annotation := annotation;
@@ -2448,7 +2448,7 @@ procedure TPIC18x_VariableAccessPrimary.GenerateCode (param2: integer);
                      TPIC18x_MOVWF.Create (POSTDEC2, access_mode);
                      StackUsageCounter.Push (1)
                   end;
-               for i := TPIC18x_TypeInfo(access.node_typedef.info).Size+1 to param2 do
+               for i := TPIC18x_TypeInfo(access.node_typedef.info).Size+1 to result_stk_size do
                   begin
                      TPIC18x_CLRF.Create (POSTDEC2, access_mode).annotation := annotation;
                      StackUsageCounter.Push (1);
@@ -2457,10 +2457,10 @@ procedure TPIC18x_VariableAccessPrimary.GenerateCode (param2: integer);
             end
          else
             begin
-               assert (param2 = TPIC18x_TypeInfo(access.node_typedef.info).Size);
-               for i := 1 to param2 do
+               assert (result_stk_size = TPIC18x_TypeInfo(access.node_typedef.info).Size);
+               for i := 1 to result_stk_size do
                   begin
-                     generate_load_next_byte (i < param2).annotation := annotation;
+                     generate_load_next_byte (i < result_stk_size).annotation := annotation;
                      annotation := '';
                      TPIC18x_MOVWF.Create (POSTDEC2, access_mode);
                      StackUsageCounter.Push (1)
@@ -2573,7 +2573,7 @@ procedure TPIC18x_VariableAccessPrimary.GenerateCode (param2: integer);
 
          generate_stack_fix_and_sign_extend_code (tos_size,
                                                   0,
-                                                  param2,
+                                                  result_stk_size,
                                                   TPIC18x_TypeInfo(access.node_typedef.info).IntegerRange
                                                  )
       end;
@@ -2582,7 +2582,7 @@ procedure TPIC18x_VariableAccessPrimary.GenerateCode (param2: integer);
       offset: integer;
 
    begin   // TPIC18x_VariableAccessPrimary.Generate
-      annotation := 'push ' + lex.identifiers[access.node_id_idx] + '*' + IntToStr(param2);
+      annotation := 'push ' + lex.identifiers[access.node_id_idx] + '*' + IntToStr(result_stk_size);
       if access.base_variable.is_ioreg_1bit_param then
          begin
             TPIC18x_Access(access).Generate_Push_Address2_Code (0, false);
