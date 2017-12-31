@@ -11,7 +11,7 @@ uses
   Windows,
 {$ELSE}
 {$ENDIF}
-  Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, pic18x_aboutbox_unit, StdCtrls;
 
 type

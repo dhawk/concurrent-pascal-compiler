@@ -85,9 +85,11 @@ BEGIN
    else if LowerCase(ParamStr(1)) = '-about' then
       begin
          Application.Initialize;
+{$IFDEF MSWINDOWS}           
          Application.MainFormOnTaskbar := True;
+{$ENDIF}
          Application.CreateForm(TRunCPCCoreTestsAboutBoxForm, RunCPCCoreTestsAboutBoxForm);
-  Application.Run
+         Application.Run
       end
    else
       begin

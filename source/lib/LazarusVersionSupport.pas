@@ -42,7 +42,7 @@ Function GetTargetInfo: String;
 Function GetOS: String;
 Function GetCPU: String;
 Function GetLCLVersion: String;
-//Function GetWidgetSet: String;
+Function GetWidgetSet: String;
 
 // Exposing resource and version info compiled into exe
 Function GetResourceStrings(oStringList : TStringList) : Boolean;
@@ -64,20 +64,20 @@ Implementation
 Uses
   resource, versiontypes, versionresource, LCLVersion, InterfaceBase, lclplatformdef;
 
-//Function GetWidgetSet: String;
-//Begin
-//  Case WidgetSet.LCLPlatform Of
-//    lpGtk:   Result := WIDGETSET_GTK;
-//    lpGtk2:  Result := WIDGETSET_GTK2;
-//    lpWin32: Result := WIDGETSET_WIN;
-//    lpWinCE: Result := WIDGETSET_WINCE;
-//    lpCarbon:Result := WIDGETSET_CARBON;
-//    lpQT:    Result := WIDGETSET_QT;
-//    lpfpGUI: Result := WIDGETSET_fpGUI;
-//  Else
-//    Result:=WIDGETSET_OTHER;
-//  End;
-//End;
+Function GetWidgetSet: String;
+Begin
+  Case WidgetSet.LCLPlatform Of
+    lpGtk:   Result := WIDGETSET_GTK;
+    lpGtk2:  Result := WIDGETSET_GTK2;
+    lpWin32: Result := WIDGETSET_WIN;
+    lpWinCE: Result := WIDGETSET_WINCE;
+    lpCarbon:Result := WIDGETSET_CARBON;
+    lpQT:    Result := WIDGETSET_QT;
+    lpfpGUI: Result := WIDGETSET_fpGUI;
+  Else
+    Result:=WIDGETSET_OTHER;
+  End;
+End;
 
 Function GetCompilerInfo: String;
 begin

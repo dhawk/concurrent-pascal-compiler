@@ -2068,8 +2068,6 @@ procedure movsf_test;
    end;
 
 procedure movss_test;
-   const
-      reg2 = $10;
    begin
       start_instr_test ('movss');
       start_test (1);
@@ -2084,8 +2082,6 @@ procedure movss_test;
    end;
 
 procedure pushl_test;
-   const
-      reg2 = $10;
    begin
       start_instr_test ('pushl');
       start_test (1);
