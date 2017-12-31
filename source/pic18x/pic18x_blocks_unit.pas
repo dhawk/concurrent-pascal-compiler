@@ -32,7 +32,7 @@ type
          config_bits: TStructuredConstant;
          destructor Destroy;
             override;
-         function GenerateCode (param2: integer): integer;
+         procedure GenerateCode (param2: integer);
             override;
          procedure AssignAddresses;
          procedure global_declarations_examination_hook;
@@ -55,7 +55,7 @@ type
          varlist_initialization: TDynamicByteArray;
          inline_code: TInstructionArray;     // only used for signaled function in interrupt variables
          procedure AssignAddresses;
-         function GenerateCode (param2: integer): integer;
+         procedure GenerateCode (param2: integer);
             override;
          procedure PushDefaultResultValue;
          destructor Destroy;
@@ -69,7 +69,7 @@ type
          initial_statement_hw_stack_usage: integer;
          inline_code: TInstructionArray;     // only used for initial statement of interrupt variables
          procedure AssignAddresses;
-         function GenerateCode (param2: integer): integer;
+         procedure GenerateCode (param2: integer);
             override;
          function process_stack_size: integer;
          function control_block_size: integer;
@@ -92,7 +92,7 @@ type
          procedure EnumerateInitialValues (proc: TByteParamProcedureOfObject);
          procedure InitializeEEPROMValues (system_type_name: string);
          procedure AssignAddresses;
-         function GenerateCode (param2: integer): integer;
+         procedure GenerateCode (param2: integer);
             override;
       end;
 
@@ -344,11 +344,10 @@ procedure TPIC18x_Program.AssignAddresses;
             end
    end;
 
-function TPIC18x_Program.GenerateCode (param2: integer): integer;
+procedure TPIC18x_Program.GenerateCode (param2: integer);
    var
       i: integer;
    begin
-      result := 0;  // to suppress compiler warning
       current_block := self;
       TSourceSyncPoint.Create (last_var_declaration_src_loc);
       initial_statement_label := TAssemblyLabel.Create;
@@ -480,11 +479,10 @@ procedure TPIC18x_Routine.AssignAddresses;
          end
    end;
 
-function TPIC18x_Routine.GenerateCode (param2: integer): integer;
+procedure TPIC18x_Routine.GenerateCode (param2: integer);
    var
       locals_size, param_size, i: integer;
    begin
-      result := 0;  // to suppress compiler warning
       TSourceSyncPoint.Create (block_header_end_src_loc);
       current_block := self;
       StackUsageCounter.Clear;
@@ -703,11 +701,10 @@ procedure TPIC18x_SystemType.AssignAddresses;
          end
    end;
 
-function TPIC18x_SystemType.GenerateCode (param2: integer): integer;
+procedure TPIC18x_SystemType.GenerateCode (param2: integer);
    var
       lbl: TInstruction;
    begin
-      result := 0;  // to suppress compiler warning
       // inital statement
       current_block := self;
       TSourceSyncPoint.Create (block_begin_src_loc);
@@ -830,11 +827,10 @@ procedure TPIC18x_DataItemList.AssignAddresses;
    begin
    end;
 
-function TPIC18x_DataItemList.GenerateCode (param2: integer): integer;
+procedure TPIC18x_DataItemList.GenerateCode (param2: integer);
    var
       i: integer;
    begin
-      result := 0;  // to suppress compiler warning
       if descriptor = rw_rom then
          for i := 0 to Length-1 do
             if Self[i].initial_value = nil then

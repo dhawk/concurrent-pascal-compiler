@@ -23,17 +23,22 @@ uses
    pic18x_instructions_unit,
    pic18x_macro_instructions_unit,
    pic18x_run_time_error_check_unit,
-   SysUtils;
+   SysUtils,
+   Windows;
 
 function ProgramGenerator: TDefinition;
    var
       i: integer;
       changed: boolean;
       last_instr: TInstruction;
+      fn: string;
    begin
-      DeleteFile (ChangeFileExt(source_file_name, '.hex'));
-      DeleteFile (ChangeFileExt(source_file_name, '.asm'));
-      DeleteFile (ChangeFileExt(source_file_name, '.rterr'));
+      fn := ChangeFileExt(source_file_name, '.hex');
+      DeleteFile (@fn);
+      fn := ChangeFileExt(source_file_name, '.asm');
+      DeleteFile (@fn);
+      fn := ChangeFileExt(source_file_name, '.rterr');
+      DeleteFile (@fn);
 
       result := target_cpu.TProgram_CreateFromSourceTokens;
       ProgramCode.Clear;

@@ -20,7 +20,7 @@ type
          procedure add_constant_byte (b: byte; byte_no: integer; path, value: string; initialization_unnecessary: boolean);
       public
          constructor Create (_assignee: TAccess; _expression: TExpression; _src_loc: TSourceLocation);
-         function GenerateCode (param2: integer): integer;
+         procedure GenerateCode (param2: integer);
             override;
        end;
 
@@ -840,7 +840,7 @@ function TSetMultiBitFieldFromTOSInPackedRecordField.generate_code_segment: TIns
 //  TPIC18x_AssignmentStatement.Generate
 //=======================================
 
-function TPIC18x_AssignmentStatement.GenerateCode (param2: integer): integer;
+procedure TPIC18x_AssignmentStatement.GenerateCode (param2: integer);
 
    procedure load_dest (offset: integer);
       begin
@@ -1925,7 +1925,6 @@ function TPIC18x_AssignmentStatement.GenerateCode (param2: integer): integer;
       end;   // generate_assignement_code
 
    begin   // TAssignmentStatement.Generate
-      result := 0;  // to suppress compiler warning
       copy_from_base_class (assignee, expression);
        TSourceSyncPoint.Create (last_token_src_loc);
 

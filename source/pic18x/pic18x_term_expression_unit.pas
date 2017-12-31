@@ -12,7 +12,7 @@ uses
 type
    TPIC18x_Term =
       class (TTerm)
-         function GenerateCode (param2: integer): integer;
+         procedure GenerateCode (param2: integer);
             override;
       end;
 
@@ -161,7 +161,7 @@ destructor TOperationSchedule.Destroy;
       inherited
    end;
 
-function TPIC18x_Term.GenerateCode (param2: integer): integer;
+procedure TPIC18x_Term.GenerateCode (param2: integer);
 
    procedure generate_numeric_term_code;
       var
@@ -496,7 +496,6 @@ function TPIC18x_Term.GenerateCode (param2: integer): integer;
       end;
 
    begin
-      result := 0;  // suppress compiler warning
       case expression_kind of
          integer_expression,
          real_expression:

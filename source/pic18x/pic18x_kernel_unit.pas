@@ -46,22 +46,22 @@ const
 type
    TPIC18x_AwaitInterruptStatement =
       class (TAwaitInterruptStatement)
-         function GenerateCode (param2: integer): integer;
+         procedure GenerateCode (param2: integer);
             override;
       end;
    TPIC18x_ContinueStatement =
       class (TContinueStatement)
-         function GenerateCode (param2: integer): integer;
+         procedure GenerateCode (param2: integer);
             override;
       end;
    TPIC18x_DelayStatement =
       class (TDelayStatement)
-         function GenerateCode (param2: integer): integer;
+         procedure GenerateCode (param2: integer);
             override;
       end;
    TPIC18x_EmptyFunctionPrimary =
       class (TEmptyFunctionPrimary)
-         function GenerateCode (param2: integer): integer;
+         procedure GenerateCode (param2: integer);
             override;
       end;
 
@@ -453,9 +453,8 @@ procedure LeaveMonitor (monitor_prio, pop_size: integer);
    end;
 
 
-function TPIC18x_AwaitInterruptStatement.GenerateCode (param2: integer): integer;
+procedure TPIC18x_AwaitInterruptStatement.GenerateCode (param2: integer);
    begin
-      result := 0;  // to suppress compiler warning
       TSourceSyncPoint.Create (src_loc);
       // fsr1 := addr of process priority queue
       TPIC18x_LFSR.Create (1, PriorityMapper.ReadyQueueAddr(containing_process.priority)).annotation := format ('fsr1 := @ready[%d]', [containing_process.priority]);
@@ -464,9 +463,8 @@ function TPIC18x_AwaitInterruptStatement.GenerateCode (param2: integer): integer
       StackUsageCounter.PushPop (5)    // resume addr(3) and this ptr(2)
    end;
 
-function TPIC18x_ContinueStatement.GenerateCode (param2: integer): integer;
+procedure TPIC18x_ContinueStatement.GenerateCode (param2: integer);
    begin
-      result := 0;  // to suppress compiler warning
       TSourceSyncPoint.Create (src_loc);
       TPIC18x_Access(queue_access).Generate_Load_Ptr2_Code (pFSR0, 0);
       if (StackUsageCounter.Current + TPIC18x_ParamList(containing_routine.parameter_definitions).Size) > 0 then
@@ -476,11 +474,10 @@ function TPIC18x_ContinueStatement.GenerateCode (param2: integer): integer;
       kernel_continue.ComeFrom (TCALLMacro.Create)
    end;
 
-function TPIC18x_DelayStatement.GenerateCode (param2: integer): integer;
+procedure TPIC18x_DelayStatement.GenerateCode (param2: integer);
    var
       lbl: TInstruction;
    begin
-      result := 0;  // to suppress compiler warning
       TSourceSyncPoint.Create (src_loc);
       TPIC18x_Access(queue_access).Generate_Load_Ptr2_Code (pFSR0, 0);
       TurnInterruptsOff;
@@ -490,9 +487,8 @@ function TPIC18x_DelayStatement.GenerateCode (param2: integer): integer;
       StackUsageCounter.PushPop (5)    // resume addr(3) and this(2)
    end;
 
-function TPIC18x_EmptyFunctionPrimary.GenerateCode (param2: integer): integer;
+procedure TPIC18x_EmptyFunctionPrimary.GenerateCode (param2: integer);
    begin
-      result := 0;  // to suppress compiler warning
       TPIC18x_Access(access).Generate_Load_Ptr2_Code (pFSR0, 0);
       TPIC18x_PUSHL.Create (0);
       StackUsageCounter.Push(1);

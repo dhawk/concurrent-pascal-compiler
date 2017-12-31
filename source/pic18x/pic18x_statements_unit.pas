@@ -17,7 +17,7 @@ uses
 type
    TPIC18x_AssertStatement =
       class (TAssertStatement)
-         function GenerateCode (param2: integer): integer;
+         procedure GenerateCode (param2: integer);
             override;
       end;
 
@@ -35,7 +35,7 @@ type
          selection_expression_size: integer;
          come_from_list: array of TBranchTarget;
          br_otherwise_list: TBranchTarget;
-         function GenerateCode (param2: integer): integer;
+         procedure GenerateCode (param2: integer);
             override;
       end;
 
@@ -43,31 +43,31 @@ type
       class (TCycleStatement)
          start_loop_label: TInstruction;
          initial_stack_level: integer;
-         function GenerateCode (param2: integer): integer;
+         procedure GenerateCode (param2: integer);
             override;
       end;
 
    TPIC18x_ExitLoopStatement =
       class (TExitLoopStatement)
-         function GenerateCode (param2: integer): integer;
+         procedure GenerateCode (param2: integer);
             override;
       end;
 
    TPIC18x_ForStatement =
       class (TForStatement)
-         function GenerateCode (param2: integer): integer;
+         procedure GenerateCode (param2: integer);
             override;
       end;
 
    TPIC18x_IfStatement =
       class (TIfStatement)
-         function GenerateCode (param2: integer): integer;
+         procedure GenerateCode (param2: integer);
             override;
       end;
 
    TPIC18x_InitStatement =
       class (TInitStatement)
-         function GenerateCode (param2: integer): integer;
+         procedure GenerateCode (param2: integer);
             override;
       end;
 
@@ -76,19 +76,19 @@ type
          initial_stack_level: integer;
          start_loop_label: TInstruction;
          end_loop: TBranchTarget;
-         function GenerateCode (param2: integer): integer;
+         procedure GenerateCode (param2: integer);
             override;
       end;
 
    TPIC18x_ReCycleStatement =
       class (TReCycleStatement)
-         function GenerateCode (param2: integer): integer;
+         procedure GenerateCode (param2: integer);
             override;
       end;
 
    TPIC18x_ReLoopStatement =
       class (TReLoopStatement)
-         function GenerateCode (param2: integer): integer;
+         procedure GenerateCode (param2: integer);
             override;
       end;
 
@@ -100,25 +100,25 @@ type
             (acc: TAccess
             );
          constructor Create (acc: TAccess; exp: TExpression; _src_loc: TSourceLocation);
-         function GenerateCode (param2: integer): integer;
+         procedure GenerateCode (param2: integer);
             override;
       end;
 
    TPIC18x_StatementList =
       class (TStatementList)
-         function GenerateCode (param2: integer): integer;
+         procedure GenerateCode (param2: integer);
             override;
       end;
 
    TPIC18x_UntilStatement =
       class (TUntilStatement)
-         function GenerateCode (param2: integer): integer;
+         procedure GenerateCode (param2: integer);
             override;
       end;
 
     TPIC18x_WhileStatement =
       class (TWhileStatement)
-         function GenerateCode (param2: integer): integer;
+         procedure GenerateCode (param2: integer);
             override;
       end;
 
@@ -133,7 +133,7 @@ type
    TPIC18x_WithStatement =
       class (TWithStatement)
          address: integer;
-         function GenerateCode (param2: integer): integer;
+         procedure GenerateCode (param2: integer);
             override;
       end;
 
@@ -363,9 +363,8 @@ function GenerateCodeForConditionalBranch (boolean_expression: TExpression; bran
 //==========================
 //  TPIC18x_AssertStatement
 
-function TPIC18x_AssertStatement.GenerateCode (param2: integer): integer;
+procedure TPIC18x_AssertStatement.GenerateCode (param2: integer);
    begin
-      result := 0;  // to suppress compiler warning
       TSourceSyncPoint.Create (end_src_loc);
       if boolean_expression.contains_constant then
          case boolean_expression.boolean_constant_value of
@@ -473,12 +472,11 @@ function TPIC18x_CaseStatement.TPIC18x_CaseEntry.GenerateCode: TInstruction;
          end
    end;
 
-function TPIC18x_CaseStatement.GenerateCode (param2: integer): integer;
+procedure TPIC18x_CaseStatement.GenerateCode (param2: integer);
    var
       i: integer;
       br_end_list: TBranchTarget;
    begin
-      result := 0;  // to suppress compiler warning
       SetLength (come_from_list, Length(labeled_statements));
       for i := 0 to Length(labeled_statements)-1 do
          come_from_list[i] := TBranchTarget.Create;
@@ -542,9 +540,8 @@ function TPIC18x_CaseStatement.create_case_entry (_case_stmt: TCaseStatement; _l
       result := TPIC18x_CaseEntry.create (_case_stmt, _labeled_statement_idx, _first_of_range, _last_of_range)
    end;
 
-function TPIC18x_CycleStatement.GenerateCode (param2: integer): integer;
+procedure TPIC18x_CycleStatement.GenerateCode (param2: integer);
    begin
-      result := 0;  // to suppress compiler warning
       if not is_empty_loop_at_end_of_program_initial_statement then
          begin
             TSourceSyncPoint.Create (src_loc);
@@ -556,11 +553,10 @@ function TPIC18x_CycleStatement.GenerateCode (param2: integer): integer;
          end
    end;
 
-function TPIC18x_ExitLoopStatement.GenerateCode (param2: integer): integer;
+procedure TPIC18x_ExitLoopStatement.GenerateCode (param2: integer);
    var
       br: TInstruction;
    begin
-      result := 0;  // to suppress compiler warning
       TSourceSyncPoint.Create (src_loc);
       if exitloop_condition = nil then
          begin
@@ -579,7 +575,7 @@ function TPIC18x_ExitLoopStatement.GenerateCode (param2: integer): integer;
          end
    end;
 
-function TPIC18x_ForStatement.GenerateCode (param2: integer): integer;
+procedure TPIC18x_ForStatement.GenerateCode (param2: integer);
 
    procedure clamp_to_range_of_control_variable (range: TTypeInfo);
       begin
@@ -606,8 +602,6 @@ function TPIC18x_ForStatement.GenerateCode (param2: integer): integer;
       loop_control_mode: (lcm_bank0, lcm_near_stack, lcm_indirect_single_byte, lcm_indirect_multi_byte);
       control_variable_pointer_address: integer;
    begin   // TPIC18x_ForStatement.Generate
-      result := 0;  // to suppress compiler warning
-
       comparison_range := nil;  // to suppress compiler warning
       temp_range := nil;        // to suppress compiler warning
       be1 := nil;               // to suppress compiler warning
@@ -1051,7 +1045,7 @@ function TPIC18x_ForStatement.GenerateCode (param2: integer): integer;
       temp_range.Release
    end;   // TPIC18x_ForStatement.Generate
 
-function TPIC18x_IfStatement.GenerateCode (param2: integer): integer;
+procedure TPIC18x_IfStatement.GenerateCode (param2: integer);
    var
       i: integer;
       arr: array of
@@ -1062,7 +1056,6 @@ function TPIC18x_IfStatement.GenerateCode (param2: integer): integer;
               end;
       else_label, final_label: TAssemblyLabel;
    begin
-      result := 0;  // to suppress compiler warning
       else_label := nil;  // suppress compiler warning
       SetLength (arr, Length(conditional_statement_list));
       for i := 0 to Length(conditional_statement_list)-1 do
@@ -1105,13 +1098,12 @@ function TPIC18x_IfStatement.GenerateCode (param2: integer): integer;
          arr[Length(arr)-1].conditional_branch.dest := final_label
    end;
 
-function TPIC18x_InitStatement.GenerateCode (param2: integer): integer;
+procedure TPIC18x_InitStatement.GenerateCode (param2: integer);
    var
       i, param_blk_size, stk_base: integer;
       instr, push_return_address_macro: TInstruction;
       dw: TPIC18x_DW;
    begin
-      result := 0;  // to suppress compiler warning
       for i := 0 to Length(initlist)-1 do
          begin
             NoteHWStackUsage (TPIC18x_SystemType(initlist[i].access.node_typedef).initial_statement_hw_stack_usage);
@@ -1186,9 +1178,8 @@ function TPIC18x_InitStatement.GenerateCode (param2: integer): integer;
          end
    end;
 
-function TPIC18x_LoopStatement.GenerateCode (param2: integer): integer;
+procedure TPIC18x_LoopStatement.GenerateCode (param2: integer);
    begin
-      result := 0;  // to suppress compiler warning
       end_loop := TBranchTarget.Create;
       TSourceSyncPoint.Create (src_loc);
       start_loop_label := TAssemblyLabel.Create;
@@ -1202,11 +1193,10 @@ function TPIC18x_LoopStatement.GenerateCode (param2: integer): integer;
       end_loop := nil
    end;
 
-function TPIC18x_ReLoopStatement.GenerateCode (param2: integer): integer;
+procedure TPIC18x_ReLoopStatement.GenerateCode (param2: integer);
    var
       br: TInstruction;
    begin
-      result := 0;  // to suppress compiler warning
       TSourceSyncPoint.Create (src_loc);
       if reloop_condition = nil then
          begin
@@ -1225,11 +1215,10 @@ function TPIC18x_ReLoopStatement.GenerateCode (param2: integer): integer;
          end
    end;
 
-function TPIC18x_ReCycleStatement.GenerateCode (param2: integer): integer;
+procedure TPIC18x_ReCycleStatement.GenerateCode (param2: integer);
    var
       br: TInstruction;
    begin
-      result := 0;  // to suppress compiler warning
       TSourceSyncPoint.Create (src_loc);
       if recycle_condition = nil then
          begin
@@ -1398,7 +1387,7 @@ function err_timer_cycle_count_exceeded (timer_number: integer): string;
       result := 'TMR' + IntToStr(timer_number) + ' cycle count exceeded'
    end;
 
-function TPIC18x_RoutineCallStatement.GenerateCode (param2: integer): integer;
+procedure TPIC18x_RoutineCallStatement.GenerateCode (param2: integer);
 
    function reset_TMR_cycle_procedure_idx: integer;
       begin
@@ -1610,7 +1599,6 @@ function TPIC18x_RoutineCallStatement.GenerateCode (param2: integer): integer;
       nop: TPIC18x_NOP;
 {$endif}
    begin  // TPIC18x_RoutineCallStatement.Generate
-      result := 0;  // to suppress compiler warning
       TSourceSyncPoint.Create (src_loc);
       if access.is_strappend_attribute then
          generate_strappend_code
@@ -1639,12 +1627,11 @@ function TPIC18x_RoutineCallStatement.GenerateCode (param2: integer): integer;
          assert (false)
    end;   // TPIC18x_RoutineCallStatement.Generate
 
-function TPIC18x_StatementList.GenerateCode (param2: integer): integer;
+procedure TPIC18x_StatementList.GenerateCode (param2: integer);
    var
       current_stack_level: integer;
       i: integer;
    begin
-      result := 0;  // to suppress compiler warning
       current_stack_level := StackUsageCounter.Current;
       for i := 0 to Length(stmts)-1 do
          begin
@@ -1653,11 +1640,10 @@ function TPIC18x_StatementList.GenerateCode (param2: integer): integer;
          end
    end;
 
-function TPIC18x_UntilStatement.GenerateCode (param2: integer): integer;
+procedure TPIC18x_UntilStatement.GenerateCode (param2: integer);
    var
       br: TInstruction;
    begin
-      result := 0;  // to suppress compiler warning
       TSourceSyncPoint.Create (boolean_expression.src_loc);
       if StackUsageCounter.Current = TPIC18x_LoopStatement (containing_loop_statement).initial_stack_level then
          TPIC18x_LoopStatement(containing_loop_statement).end_loop.ComeFrom (GenerateCodeForConditionalBranch (boolean_expression, true))
@@ -1670,11 +1656,10 @@ function TPIC18x_UntilStatement.GenerateCode (param2: integer): integer;
          end
    end;
 
-function TPIC18x_WhileStatement.GenerateCode (param2: integer): integer;
+procedure TPIC18x_WhileStatement.GenerateCode (param2: integer);
    var
       br: TInstruction;
    begin
-      result := 0;  // to suppress compiler warning
       TSourceSyncPoint.Create (boolean_expression.src_loc);
       if StackUsageCounter.Current = TPIC18x_LoopStatement (containing_loop_statement).initial_stack_level then
          TPIC18x_LoopStatement(containing_loop_statement).end_loop.ComeFrom (GenerateCodeForConditionalBranch (boolean_expression, false))
@@ -1687,9 +1672,8 @@ function TPIC18x_WhileStatement.GenerateCode (param2: integer): integer;
          end
    end;
 
-function TPIC18x_WithStatement.GenerateCode (param2: integer): integer;
+procedure TPIC18x_WithStatement.GenerateCode (param2: integer);
    begin
-      result := 0;  // to suppress compiler warning
       TSourceSyncPoint.Create (last_access_src_loc);
       case access.base_variable.descriptor of
          rw_eeprom:

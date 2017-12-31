@@ -18,17 +18,17 @@ uses
 type
    TPIC18x_AbsFunctionPrimary =
       class (TAbsFunctionPrimary)
-         function GenerateCode (param2: integer): integer;
+         procedure GenerateCode (param2: integer);
             override;
       end;
    TPIC18x_ChrTypeConversionPrimary =
       class (TChrTypeConversionPrimary)
-         function GenerateCode (param2: integer): integer;
+         procedure GenerateCode (param2: integer);
             override;
       end;
    TPIC18x_ConstantPrimary =
       class (TConstantPrimary, IGenerateCodeToCopyToRAMString)
-         function GenerateCode (param2: integer): integer;
+         procedure GenerateCode (param2: integer);
             override;
          procedure PushRealConstant;
          procedure PushIEEESingleConstant;
@@ -38,24 +38,24 @@ type
       class (TFunctionAccessPrimary)
          expr: TExpression;
          constructor CreateFromSourceTokens (_access: TAccess);
-         function GenerateCode (param2: integer): integer;
+         procedure GenerateCode (param2: integer);
             override;
          destructor Destroy;
             override;
       end;
    TPIC18x_NotPrimary =
       class (TNotPrimary)
-         function GenerateCode (param2: integer): integer;
+         procedure GenerateCode (param2: integer);
             override;
       end;
    TPIC18x_PredFunctionPrimary =
       class (TPredFunctionPrimary)
-         function GenerateCode (param2: integer): integer;
+         procedure GenerateCode (param2: integer);
             override;
       end;
    TPIC18x_RelationalExpression =
       class (TRelationalExpression)
-         function GenerateCode (param2: integer): integer;
+         procedure GenerateCode (param2: integer);
             override;
       end;
    TPIC18x_RoundFunctionPrimary =
@@ -63,27 +63,27 @@ type
       end;
    TPIC18x_SetConstructorPrimary =
       class (TSetConstructorPrimary)
-         function GenerateCode (param2: integer): integer;
+         procedure GenerateCode (param2: integer);
             override;
       end;
    TPIC18x_StrPosPrimary =
       class (TstrPosPrimary)
-         function GenerateCode (param2: integer): integer;
+         procedure GenerateCode (param2: integer);
             override;
       end;
    TPIC18x_SuccFunctionPrimary =
       class (TSuccFunctionPrimary)
-         function GenerateCode (param2: integer): integer;
+         procedure GenerateCode (param2: integer);
             override;
       end;
    TPIC18x_TruncFunctionPrimary =
       class (TTruncFunctionPrimary)
-         function GenerateCode (param2: integer): integer;
+         procedure GenerateCode (param2: integer);
             override;
       end;
    TPIC18x_UnaryMinusPrimary =
       class (TUnaryMinusPrimary)
-         function GenerateCode (param2: integer): integer;
+         procedure GenerateCode (param2: integer);
             override;
       end;
    TPIC18x_VariableAccessPrimary =
@@ -103,7 +103,7 @@ type
          function load_next_rom_byte_packed (do_post_ptr_adjust: boolean): TInstruction;
          function load_next_eeprom_byte_packed (do_post_ptr_adjust: boolean): TInstruction;
       public
-         function GenerateCode (param2: integer): integer;
+         procedure GenerateCode (param2: integer);
             override;
          procedure GenerateCodeToCopyToRAMString;
          procedure GenerateCodeToCopyToEEPROMString;
@@ -624,7 +624,7 @@ procedure generate_stack_fix_and_sign_extend_code
          end
    end;
 
-function TPIC18x_AbsFunctionPrimary.GenerateCode (param2: integer): integer;
+procedure TPIC18x_AbsFunctionPrimary.GenerateCode (param2: integer);
    const
       ARGB0 = 2;
       REAL_SIGN_BIT = 7;
@@ -633,7 +633,6 @@ function TPIC18x_AbsFunctionPrimary.GenerateCode (param2: integer): integer;
       result_size, i: integer;
       bnn: TPIC18x_BNN;
    begin
-      result := 0;  // to suppress compiler warning
       case expression_kind of
          integer_expression:
             begin
@@ -675,11 +674,10 @@ function TPIC18x_AbsFunctionPrimary.GenerateCode (param2: integer): integer;
       end
    end;
 
-function TPIC18x_ChrTypeConversionPrimary.GenerateCode (param2: integer): integer;
+procedure TPIC18x_ChrTypeConversionPrimary.GenerateCode (param2: integer);
    var
       expr_size: integer;
    begin
-      result := 0;  // to suppress compiler warning
       expr_size := TPIC18x_TypeInfo(expr.info).Size;
       expr.GenerateCode (expr_size);
       GenerateRangeCheckCode (TOrdinalDataType(target_cpu.get_supported_data_type('char')),
@@ -695,12 +693,11 @@ function TPIC18x_ChrTypeConversionPrimary.GenerateCode (param2: integer): intege
          end
    end;
 
-function TPIC18x_ConstantPrimary.GenerateCode (param2: integer): integer;
+procedure TPIC18x_ConstantPrimary.GenerateCode (param2: integer);
    var
       annotation: string;
       i: integer;
    begin
-      result := 0;  // to suppress compiler warning
       case TConstant(the_constant).constant_kind of
          integer_constant:
             begin
@@ -870,7 +867,7 @@ constructor TPIC18x_FunctionAccessPrimary.CreateFromSourceTokens (_access: TAcce
          inherited
    end;
 
-function TPIC18x_FunctionAccessPrimary.GenerateCode (param2: integer): integer;
+procedure TPIC18x_FunctionAccessPrimary.GenerateCode (param2: integer);
 
    procedure generate_function_call_code (routine: TPIC18x_Routine);
       var
@@ -933,7 +930,6 @@ function TPIC18x_FunctionAccessPrimary.GenerateCode (param2: integer): integer;
    var
       i: integer;
    begin
-      result := 0;  // to suppress compiler warning
       if access.node_routine = TPIC18x_CPU (target_cpu).ErrorCode then
          begin
             get_errorcode_routine.Call;
@@ -983,18 +979,16 @@ destructor TPIC18x_FunctionAccessPrimary.Destroy;
       inherited
    end;
 
-function TPIC18x_NotPrimary.GenerateCode (param2: integer): integer;
+procedure TPIC18x_NotPrimary.GenerateCode (param2: integer);
    begin
-      result := 0;  // to suppress compiler warning
       boolean_expr.GenerateCode (1);
       TPIC18x_BTG.Create (1, 0, access_mode).annotation := 'tos := not tos'
    end;
 
-function TPIC18x_PredFunctionPrimary.GenerateCode (param2: integer): integer;
+procedure TPIC18x_PredFunctionPrimary.GenerateCode (param2: integer);
    var
       result_size, i: integer;
    begin
-      result := 0;  // to suppress compiler warning
       result_size := TPIC18x_TypeInfo(info).Size;
       expr.GenerateCode (result_size);
       TPIC18x_DECF.Create (result_size, dest_f, access_mode).annotation := 'tos := pred(tos)';
@@ -1006,7 +1000,7 @@ function TPIC18x_PredFunctionPrimary.GenerateCode (param2: integer): integer;
          end
    end;
 
-function TPIC18x_RelationalExpression.GenerateCode (param2: integer): integer;
+procedure TPIC18x_RelationalExpression.GenerateCode (param2: integer);
 
    procedure generate_ordinal_relational_expression_code;
 
@@ -1575,7 +1569,6 @@ function TPIC18x_RelationalExpression.GenerateCode (param2: integer): integer;
       end;
 
    begin
-      result := 0;  // to suppress compiler warning
       if (left_simple_expression.expression_kind in ordinal_expression_kinds)
          and
          (right_simple_expression.expression_kind in ordinal_expression_kinds) then
@@ -1596,7 +1589,7 @@ function TPIC18x_RelationalExpression.GenerateCode (param2: integer): integer;
          assert (false)
    end;
 
-function TPIC18x_SetConstructorPrimary.GenerateCode (param2: integer): integer;
+procedure TPIC18x_SetConstructorPrimary.GenerateCode (param2: integer);
 
    procedure handle_single_bit_insertion (expr: TExpression);
       var
@@ -1851,7 +1844,6 @@ function TPIC18x_SetConstructorPrimary.GenerateCode (param2: integer): integer;
       annotation: string;
 
    begin
-      result := 0;  // to suppress compiler warning
       if constant_members <> nil then
          begin
             annotation := 'push set [';
@@ -1883,7 +1875,7 @@ function TPIC18x_SetConstructorPrimary.GenerateCode (param2: integer): integer;
             handle_ranged_bits_insertion (variable_members[i].first, variable_members[i].last)
    end;
 
-function TPIC18x_StrPosPrimary.GenerateCode (param2: integer): integer;
+procedure TPIC18x_StrPosPrimary.GenerateCode (param2: integer);
    var
       substr: TPIC18x_VariableAccessPrimary;
       rom_addr: integer;
@@ -1892,7 +1884,6 @@ function TPIC18x_StrPosPrimary.GenerateCode (param2: integer): integer;
       TPIC18x_PUSHL.Create(0);
       StackUsageCounter.Push(1);
 
-      result := 0;  // to suppress compiler warning
       case access.node_strpos_substr_expression.expression_kind of
          char_expression:
             begin
@@ -2039,11 +2030,10 @@ function TPIC18x_StrPosPrimary.GenerateCode (param2: integer): integer;
       end
    end;
 
-function TPIC18x_SuccFunctionPrimary.GenerateCode (param2: integer): integer;
+procedure TPIC18x_SuccFunctionPrimary.GenerateCode (param2: integer);
    var
       result_size, i: integer;
    begin
-      result := 0;  // to suppress compiler warning
       result_size := TPIC18x_TypeInfo(info).Size;
       expr.GenerateCode (result_size);
       TPIC18x_INCF.Create (result_size, dest_f, access_mode).annotation := 'tos := succ(tos)';
@@ -2055,13 +2045,12 @@ function TPIC18x_SuccFunctionPrimary.GenerateCode (param2: integer): integer;
          end
    end;
 
-function TPIC18x_TruncFunctionPrimary.GenerateCode (param2: integer): integer;
+procedure TPIC18x_TruncFunctionPrimary.GenerateCode (param2: integer);
    begin
-      result := 0;  // to suppress compiler warning
       raise compile_error.Create (err_use_trunc24_or_trunc32, src_loc)
    end;
 
-function TPIC18x_UnaryMinusPrimary.GenerateCode (param2: integer): integer;
+procedure TPIC18x_UnaryMinusPrimary.GenerateCode (param2: integer);
    const
       ARGB0 = 2;
       REAL_SIGN_BIT = 7;
@@ -2069,7 +2058,6 @@ function TPIC18x_UnaryMinusPrimary.GenerateCode (param2: integer): integer;
       annotation: string;
       result_size, i: integer;
    begin
-      result := 0;  // to suppress compiler warning
       case expression_kind of
          integer_expression:
             begin
@@ -2365,7 +2353,7 @@ function TPIC18x_VariableAccessPrimary.load_next_eeprom_byte_packed (do_post_ptr
          TPIC18x_ADDFSR.Create(1, 2)          // net result is increment FSR1
    end;
 
-function TPIC18x_VariableAccessPrimary.GenerateCode (param2: integer): integer;
+procedure TPIC18x_VariableAccessPrimary.GenerateCode (param2: integer);
    var
       annotation: string;
 
@@ -2594,7 +2582,6 @@ function TPIC18x_VariableAccessPrimary.GenerateCode (param2: integer): integer;
       offset: integer;
 
    begin   // TPIC18x_VariableAccessPrimary.Generate
-      result := 0;  // to suppress compiler warning
       annotation := 'push ' + lex.identifiers[access.node_id_idx] + '*' + IntToStr(param2);
       if access.base_variable.is_ioreg_1bit_param then
          begin

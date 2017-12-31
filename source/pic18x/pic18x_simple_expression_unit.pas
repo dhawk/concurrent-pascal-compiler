@@ -12,7 +12,7 @@ uses
 type
    TPIC18x_SimpleExpression =
       class (TSimpleExpression)
-         function GenerateCode (param2: integer): integer;
+         procedure GenerateCode (param2: integer);
             override;
       end;
 
@@ -31,7 +31,7 @@ uses
    SysUtils;
 
 
-function TPIC18x_SimpleExpression.GenerateCode (param2: integer): integer;
+procedure TPIC18x_SimpleExpression.GenerateCode (param2: integer);
 
    procedure generate_simple_numeric_expression_code;
 
@@ -404,7 +404,6 @@ function TPIC18x_SimpleExpression.GenerateCode (param2: integer): integer;
       end;    // generate_simple_set_expression_code
 
    begin
-      result := 0;  // to suppress compiler warning
       case expression_kind of
          integer_expression,
          real_expression:
