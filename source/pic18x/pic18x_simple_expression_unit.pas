@@ -7,13 +7,13 @@ UNIT pic18x_simple_expression_unit;
 INTERFACE
 
 uses
-   cpc_simple_expression_unit;
+   cpc_simple_expression_unit,
+   pic18x_cpu_unit;
 
 type
    TPIC18x_SimpleExpression =
-      class (TSimpleExpression)
+      class (TSimpleExpression, IGenerateCode)
          procedure GenerateCode (result_stk_size: integer);
-            override;
       end;
 
 IMPLEMENTATION
@@ -22,7 +22,6 @@ uses
    cpc_core_objects_unit,
    Math,
    pic18x_core_objects_unit,
-   pic18x_cpu_unit,
    pic18x_expressions_unit,
    pic18x_floating_point_unit,
    pic18x_instructions_unit,
@@ -187,7 +186,7 @@ procedure TPIC18x_SimpleExpression.GenerateCode (result_stk_size: integer);
          case additional_terms[0].addop of
             addop_add_int_to_int,
             addop_subtract_int_from_int:
-               first_term.GenerateCode (intermediate_integer_calculation_info[0].calculation_result_size);
+               (first_term as IGenerateCode).GenerateCode (intermediate_integer_calculation_info[0].calculation_result_size);
             addop_add_flt_to_int:
                begin
                   PushRealExpression (first_term);
@@ -215,7 +214,7 @@ procedure TPIC18x_SimpleExpression.GenerateCode (result_stk_size: integer);
                      addop_add_int_to_int,
                      addop_subtract_int_from_int:
                         begin
-                           right_term.GenerateCode (b_size);
+                           (right_term as IGenerateCode).GenerateCode (b_size);
                            result_addr := calculation_result_size + b_size;
                            b_addr := b_size
                         end;
@@ -335,7 +334,7 @@ procedure TPIC18x_SimpleExpression.GenerateCode (result_stk_size: integer);
                GenerateCodeForConditionalSkip (term, skip_sense)
             else
                begin
-                  term.GenerateCode (1);
+                  (term as IGenerateCode).GenerateCode (1);
                   if skip_sense then
                      TPIC18x_BTFSS.Create (PREINC2, 0, access_mode)
                   else
@@ -369,10 +368,10 @@ procedure TPIC18x_SimpleExpression.GenerateCode (result_stk_size: integer);
          idx,i: integer;
          annotation: string;
       begin   // generate_simple_set_expression_code
-         first_term.GenerateCode (result_stk_size);
+         (first_term as IGenerateCode).GenerateCode (result_stk_size);
          for idx := 0 to Length(additional_terms)-1 do
             begin
-               additional_terms[idx].right_term.GenerateCode (result_stk_size);
+               (additional_terms[idx].right_term as IGenerateCode).GenerateCode (result_stk_size);
                case additional_terms[idx].addop of
                   addop_set_union:
                      begin

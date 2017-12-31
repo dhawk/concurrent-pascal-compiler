@@ -7,13 +7,13 @@ UNIT pic18x_term_expression_unit;
 INTERFACE
 
 uses
-   cpc_term_expression_unit;
+   cpc_term_expression_unit,
+   pic18x_cpu_unit;
 
 type
    TPIC18x_Term =
-      class (TTerm)
+      class (TTerm, IGenerateCode)
          procedure GenerateCode (result_stk_size: integer);
-            override;
       end;
 
 IMPLEMENTATION
@@ -23,7 +23,6 @@ uses
    cpc_multi_precision_integer_unit,
    pic18x_access_unit,
    pic18x_core_objects_unit,
-   pic18x_cpu_unit,
    pic18x_expressions_unit,
    pic18x_floating_point_unit,
    pic18x_instructions_unit,
@@ -245,7 +244,7 @@ procedure TPIC18x_Term.GenerateCode (result_stk_size: integer);
             mulop_mask,
             mulop_shl,
             mulop_shr:
-               first_factor.GenerateCode (intermediate_calculation_info[0].a_size);
+               (first_factor as IGenerateCode).GenerateCode (intermediate_calculation_info[0].a_size);
             mulop_mult_flt_by_flt,
             mulop_divide_flt_by_flt:
                PushRealExpression (first_factor);
@@ -274,7 +273,7 @@ procedure TPIC18x_Term.GenerateCode (result_stk_size: integer);
                               TPIC18x_SUBFSR.Create (2, intermediate_calculation_info[idx].result_size-intermediate_calculation_info[idx].a_size);
                               StackUsageCounter.Push (intermediate_calculation_info[idx].result_size-intermediate_calculation_info[idx].a_size)
                            end;
-                        additional_factors[idx].factor.GenerateCode (intermediate_calculation_info[idx].b_size);
+                        (additional_factors[idx].factor as IGenerateCode).GenerateCode (intermediate_calculation_info[idx].b_size);
                         GenerateMultiplyCode (intermediate_calculation_info[idx].result_size,
                                               intermediate_calculation_info[idx].a_integer_info,
                                               intermediate_calculation_info[idx].b_info
@@ -282,7 +281,7 @@ procedure TPIC18x_Term.GenerateCode (result_stk_size: integer);
                      end;
                   mulop_integer_div:
                      begin
-                        additional_factors[idx].factor.GenerateCode (intermediate_calculation_info[idx].b_size);
+                        (additional_factors[idx].factor as IGenerateCode).GenerateCode (intermediate_calculation_info[idx].b_size);
                         GenerateZeroDivideCheckCode (additional_factors[idx].factor);
                         GenerateDivideCode (intermediate_calculation_info[idx].result_size,
                                             intermediate_calculation_info[idx].a_integer_info,
@@ -332,7 +331,7 @@ procedure TPIC18x_Term.GenerateCode (result_stk_size: integer);
                         end;
                   mulop_integer_mod:
                      begin
-                        additional_factors[idx].factor.GenerateCode (intermediate_calculation_info[idx].b_size);
+                        (additional_factors[idx].factor as IGenerateCode).GenerateCode (intermediate_calculation_info[idx].b_size);
                         GenerateZeroDivideCheckCode (additional_factors[idx].factor);
                         GenerateRemainderCode (intermediate_calculation_info[idx].result_size,
                                                intermediate_calculation_info[idx].a_integer_info,
@@ -422,7 +421,7 @@ procedure TPIC18x_Term.GenerateCode (result_stk_size: integer);
                GenerateCodeForConditionalSkip (factor, skip_sense)
             else
                begin
-                  factor.GenerateCode (1);
+                  (factor as IGenerateCode).GenerateCode (1);
                   if skip_sense then
                      TPIC18x_BTFSS.Create (PREINC2, 0, access_mode)
                   else
@@ -474,12 +473,12 @@ procedure TPIC18x_Term.GenerateCode (result_stk_size: integer);
          idx,i: integer;
          annotation: string;
       begin
-         first_factor.GenerateCode (result_stk_size);
+         (first_factor as IGenerateCode).GenerateCode (result_stk_size);
          for idx := 0 to Length(additional_factors)-1 do
             begin
                annotation := 'set intersection(*) of tos*' + IntToStr(result_stk_size) + ' with (tos-1)*' + IntToStr(result_stk_size) + ', pop tos*' + IntToStr(result_stk_size);
                assert (additional_factors[idx].mulop = mulop_set_intersection);
-               additional_factors[idx].factor.GenerateCode (result_stk_size);
+               (additional_factors[idx].factor as IGenerateCode).GenerateCode (result_stk_size);
                for i := 1 to result_stk_size do
                   begin
                      TPIC18x_MOVF.Create (PREINC2, dest_w, access_mode).annotation := annotation;

@@ -363,7 +363,7 @@ procedure TPIC18x_Access.add_total_indexed_offsets (ptr_size: integer);
          annotation: string;
       begin    // push_indexed_offset
          tos_expression_size := TPIC18x_TypeInfo(path_element.index_expression.info).Size;
-         path_element.index_expression.GenerateCode (tos_expression_size);
+         (path_element.index_expression as IGenerateCode).GenerateCode (tos_expression_size);
          if (base_variable.typedef.type_kind = string_type)
             and
             (TStringType(base_variable.typedef).max_length = -1)

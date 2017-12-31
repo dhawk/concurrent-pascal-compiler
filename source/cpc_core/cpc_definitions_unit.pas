@@ -83,8 +83,6 @@ type
             virtual;
          function CheckForProhibitedDelayCall (err_msg: string): boolean;
             virtual;
-         procedure GenerateCode (result_stk_size: integer);
-            virtual;
          procedure AddCallRecord (call: TCallRecord);
       end;
 
@@ -234,11 +232,6 @@ procedure TDefinition.MarkAsReachable;
 function TDefinition.CheckForProhibitedDelayCall (err_msg: string): boolean;
    begin
       result := false
-   end;
-
-procedure TDefinition.GenerateCode (result_stk_size: integer);
-   begin
-      assert (false, 'not implemented')
    end;
 
 class procedure TDefinition.ClearCodeBlockList;

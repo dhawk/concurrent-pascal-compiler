@@ -659,7 +659,7 @@ procedure generate_integer_expression_to_real_code (expr: TExpression);
          expr.info.max_value.le (tint24.info.max_value)
       then  // can use 24 bit conversion without checks
          begin
-            expr.GenerateCode (int24_size);
+            (expr as IGenerateCode).GenerateCode (int24_size);
             FLO2432.Call (expr.src_loc)
          end
       else if expr.info.min_value.ge (tint32.info.min_value)
@@ -667,13 +667,13 @@ procedure generate_integer_expression_to_real_code (expr: TExpression);
               expr.info.max_value.le (tint32.info.max_value)
       then  // can use 32 bit conversion without checks
          begin
-            expr.GenerateCode (int32_size);
+            (expr as IGenerateCode).GenerateCode (int32_size);
             FLO3232.Call (expr.src_loc)
          end
       else  // integer expression can exceed 32 bit integer
          begin
             expression_size := TPIC18x_TypeInfo(expr.info).Size;
-            expr.GenerateCode (expression_size);
+            (expr as IGenerateCode).GenerateCode (expression_size);
             GenerateRangeCheckCode (TOrdinalDataType(tint32), expression_size, expr.info, expr.src_loc, 'integer result exeeds 32 bits');
             if expression_size > 4 then
                begin

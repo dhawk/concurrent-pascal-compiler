@@ -45,24 +45,20 @@ const
 
 type
    TPIC18x_AwaitInterruptStatement =
-      class (TAwaitInterruptStatement)
+      class (TAwaitInterruptStatement, IGenerateCode)
          procedure GenerateCode (result_stk_size: integer);
-            override;
       end;
    TPIC18x_ContinueStatement =
-      class (TContinueStatement)
+      class (TContinueStatement, IGenerateCode)
          procedure GenerateCode (result_stk_size: integer);
-            override;
       end;
    TPIC18x_DelayStatement =
-      class (TDelayStatement)
+      class (TDelayStatement, IGenerateCode)
          procedure GenerateCode (result_stk_size: integer);
-            override;
       end;
    TPIC18x_EmptyFunctionPrimary =
-      class (TEmptyFunctionPrimary)
+      class (TEmptyFunctionPrimary, IGenerateCode)
          procedure GenerateCode (result_stk_size: integer);
-            override;
       end;
 
 type

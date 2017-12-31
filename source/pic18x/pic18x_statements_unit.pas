@@ -12,17 +12,17 @@ uses
    cpc_core_objects_unit,
    cpc_source_analysis_unit,
    cpc_statements_unit,
-   pic18x_instructions_unit;
+   pic18x_instructions_unit,
+   pic18x_cpu_unit;
 
 type
    TPIC18x_AssertStatement =
-      class (TAssertStatement)
+      class (TAssertStatement, IGenerateCode)
          procedure GenerateCode (result_stk_size: integer);
-            override;
       end;
 
    TPIC18x_CaseStatement =
-      class (TCaseStatement)
+      class (TCaseStatement, IGenerateCode)
       private type
          TPIC18x_CaseEntry =
             class (TCaseStatement.TCaseLabelRangeEntry)
@@ -36,64 +36,55 @@ type
          come_from_list: array of TBranchTarget;
          br_otherwise_list: TBranchTarget;
          procedure GenerateCode (result_stk_size: integer);
-            override;
       end;
 
    TPIC18x_CycleStatement =
-      class (TCycleStatement)
+      class (TCycleStatement, IGenerateCode)
          start_loop_label: TInstruction;
          initial_stack_level: integer;
          procedure GenerateCode (result_stk_size: integer);
-            override;
       end;
 
    TPIC18x_ExitLoopStatement =
-      class (TExitLoopStatement)
+      class (TExitLoopStatement, IGenerateCode)
          procedure GenerateCode (result_stk_size: integer);
-            override;
       end;
 
    TPIC18x_ForStatement =
-      class (TForStatement)
+      class (TForStatement, IGenerateCode)
          procedure GenerateCode (result_stk_size: integer);
-            override;
       end;
 
    TPIC18x_IfStatement =
-      class (TIfStatement)
+      class (TIfStatement, IGenerateCode)
          procedure GenerateCode (result_stk_size: integer);
-            override;
       end;
 
    TPIC18x_InitStatement =
-      class (TInitStatement)
+      class (TInitStatement, IGenerateCode)
          procedure GenerateCode (result_stk_size: integer);
-            override;
       end;
 
    TPIC18x_LoopStatement =
-      class (TLoopStatement)
+      class (TLoopStatement, IGenerateCode)
          initial_stack_level: integer;
          start_loop_label: TInstruction;
          end_loop: TBranchTarget;
          procedure GenerateCode (result_stk_size: integer);
-            override;
       end;
 
    TPIC18x_ReCycleStatement =
-      class (TReCycleStatement)
+      class (TReCycleStatement, IGenerateCode)
          procedure GenerateCode (result_stk_size: integer);
-            override;
       end;
 
    TPIC18x_ReLoopStatement =
-      class (TReLoopStatement)
+      class (TReLoopStatement, IGenerateCode)
          procedure GenerateCode (result_stk_size: integer);
-            override;
       end;
 
    TPIC18x_RoutineCallStatement =
-      class (TRoutineCallStatement)
+      class (TRoutineCallStatement, IGenerateCode)
          subtest: integer;  // used by Test
          error_message: string;     // used by SetError and Test
          constructor CreateFromSourceTokens
@@ -101,25 +92,21 @@ type
             );
          constructor Create (acc: TAccess; exp: TExpression; _src_loc: TSourceLocation);
          procedure GenerateCode (result_stk_size: integer);
-            override;
       end;
 
    TPIC18x_StatementList =
-      class (TStatementList)
+      class (TStatementList, IGenerateCode)
          procedure GenerateCode (result_stk_size: integer);
-            override;
       end;
 
    TPIC18x_UntilStatement =
-      class (TUntilStatement)
+      class (TUntilStatement, IGenerateCode)
          procedure GenerateCode (result_stk_size: integer);
-            override;
       end;
 
     TPIC18x_WhileStatement =
-      class (TWhileStatement)
+      class (TWhileStatement, IGenerateCode)
          procedure GenerateCode (result_stk_size: integer);
-            override;
       end;
 
    TPIC18x_WithProperty =
@@ -131,10 +118,9 @@ type
       end;
 
    TPIC18x_WithStatement =
-      class (TWithStatement)
+      class (TWithStatement, IGenerateCode)
          address: integer;
          procedure GenerateCode (result_stk_size: integer);
-            override;
       end;
 
    TPIC18x_WithVariable =
@@ -163,7 +149,6 @@ uses
    pic18x_assignment_statement_unit,
    pic18x_blocks_unit,
    pic18x_core_objects_unit,
-   pic18x_cpu_unit,
    pic18x_expressions_unit,
    pic18x_kernel_unit,
    pic18x_macro_instructions_unit,
@@ -225,7 +210,7 @@ function GenerateCodeForConditionalBranch (boolean_expression: TExpression; bran
 
             if accessB <> nil then
                begin
-                  term_expr.first_factor.GenerateCode (1);
+                  (term_expr.first_factor as IGenerateCode).GenerateCode (1);
                   if branch_on_sense then
                      TPIC18x_BTFSS.Create (PREINC2, 0, access_mode)
                   else
@@ -350,7 +335,7 @@ function GenerateCodeForConditionalBranch (boolean_expression: TExpression; bran
          end;
 
       // if no exit by now, then full evaluation required
-      boolean_expression.GenerateCode (1);
+      (boolean_expression as IGenerateCode).GenerateCode (1);
       if branch_on_sense then
          TPIC18x_BTFSC.Create(PREINC2, 0, access_mode)
       else
@@ -486,7 +471,7 @@ procedure TPIC18x_CaseStatement.GenerateCode (result_stk_size: integer);
       TSourceSyncPoint.Create (of_src_loc);
 
       selection_expression_size := TPIC18x_TypeInfo(selection_expression.info).Size;
-      selection_expression.GenerateCode (selection_expression_size);
+      (selection_expression as IGenerateCode).GenerateCode (selection_expression_size);
       if selection_expression.info.Signed then
          TPIC18x_BTG.Create (1, 7, access_mode);    // flip sign bit to upshift signed to unsigned
 
@@ -496,7 +481,7 @@ procedure TPIC18x_CaseStatement.GenerateCode (result_stk_size: integer);
          begin
             TSourceSyncPoint.Create (labeled_statements[i].colon_src_loc);
             come_from_list[i].target_label := TAssemblyLabel.Create;
-            labeled_statements[i].statement.GenerateCode (0);
+            (labeled_statements[i].statement as IGenerateCode).GenerateCode (0);
             if not ((i = Length(labeled_statements)-1)
                     and
                     (not br_otherwise_list.has_clients)
@@ -512,7 +497,7 @@ procedure TPIC18x_CaseStatement.GenerateCode (result_stk_size: integer);
          begin
             br_otherwise_list.target_label := TAssemblyLabel.Create;
             if otherwise_statement <> nil then
-               otherwise_statement.GenerateCode (0)
+               (otherwise_statement as IGenerateCode).GenerateCode (0)
             else
                begin
                   set_errorcode_routine.Call.annotation := rterr_bad_case_index;
@@ -547,7 +532,7 @@ procedure TPIC18x_CycleStatement.GenerateCode (result_stk_size: integer);
             TSourceSyncPoint.Create (src_loc);
             start_loop_label := TAssemblyLabel.Create;
             initial_stack_level := StackUsageCounter.Current;
-            statement_list.GenerateCode (0);
+            (statement_list as IGenerateCode).GenerateCode (0);
             TSourceSyncPoint.Create (repeat_token_src_loc);
             TGOTOMacro.Create.dest := start_loop_label
          end
@@ -701,7 +686,7 @@ procedure TPIC18x_ForStatement.GenerateCode (result_stk_size: integer);
             if not final_value_expression.contains_constant then
                begin
                   final_value_expression_size := TPIC18x_TypeInfo (final_value_expression.info).Size;
-                  final_value_expression.GenerateCode (final_value_expression_size);
+                  (final_value_expression as IGenerateCode).GenerateCode (final_value_expression_size);
                   GenerateRangeCheckCode (TOrdinalDataType(control_variable.TypeDef),
                                           final_value_expression_size,
                                           final_value_expression.info,
@@ -714,7 +699,7 @@ procedure TPIC18x_ForStatement.GenerateCode (result_stk_size: integer);
       else  // loop-at-least-once test needed
          begin
             final_value_expression_size := TPIC18x_TypeInfo (final_value_expression.info).Size;
-            final_value_expression.GenerateCode (final_value_expression_size);
+            (final_value_expression as IGenerateCode).GenerateCode (final_value_expression_size);
             GenerateRangeCheckCode (TOrdinalDataType(control_variable.TypeDef),
                                     final_value_expression_size,
                                     final_value_expression.info,
@@ -724,7 +709,7 @@ procedure TPIC18x_ForStatement.GenerateCode (result_stk_size: integer);
             generate_stack_fix_and_sign_extend_code (final_value_expression_size, 0, comparison_size, final_value_expression.info.IntegerRange);
 
             initial_value_expression_size := TPIC18x_TypeInfo (initial_value_expression.info).Size;
-            initial_value_expression.GenerateCode (initial_value_expression_size);
+            (initial_value_expression as IGenerateCode).GenerateCode (initial_value_expression_size);
             GenerateRangeCheckCode (TOrdinalDataType(control_variable.TypeDef),
                                     initial_value_expression_size,
                                     initial_value_expression.info,
@@ -831,7 +816,7 @@ procedure TPIC18x_ForStatement.GenerateCode (result_stk_size: integer);
          end;   // at least one loop limit is a variable
 
       loop := TAssemblyLabel.Create;
-      statement.GenerateCode (0);
+      (statement as IGenerateCode).GenerateCode (0);
       TSourceSyncPoint.Create (last_src_loc);
 
       if loop_control_mode in [lcm_indirect_single_byte, lcm_indirect_multi_byte] then
@@ -1068,7 +1053,7 @@ procedure TPIC18x_IfStatement.GenerateCode (result_stk_size: integer);
 
             if conditional_statement_list[i].statement <> nil then
                begin
-                  conditional_statement_list[i].statement.GenerateCode (0);
+                  (conditional_statement_list[i].statement as IGenerateCode).GenerateCode (0);
                   TSourceSyncPoint.Create (conditional_statement_list[i].last_statement_token_src_loc)
                end;
 
@@ -1081,7 +1066,7 @@ procedure TPIC18x_IfStatement.GenerateCode (result_stk_size: integer);
          begin
             TSourceSyncPoint.Create (last_else_statement_token_src_loc);
             else_label := TAssemblyLabel.Create;
-            else_statement.GenerateCode (0)
+            (else_statement as IGenerateCode).GenerateCode (0)
          end;
       final_label := TAssemblyLabel.Create;
       for i := 0 to Length(conditional_statement_list)-2 do
@@ -1184,7 +1169,7 @@ procedure TPIC18x_LoopStatement.GenerateCode (result_stk_size: integer);
       TSourceSyncPoint.Create (src_loc);
       start_loop_label := TAssemblyLabel.Create;
       initial_stack_level := StackUsageCounter.Current;
-      statement_list.GenerateCode (0);
+      (statement_list as IGenerateCode).GenerateCode (0);
       TSourceSyncPoint.Create (repeat_token_src_loc);
       TGOTOMacro.Create.dest := start_loop_label;
       end_loop.target_label := TAssemblyLabel.Create;
@@ -1494,7 +1479,7 @@ procedure TPIC18x_RoutineCallStatement.GenerateCode (result_stk_size: integer);
                   case TExpression(access.node_strappend_expression).expression_kind of
                      char_expression:
                         begin
-                           access.node_strappend_expression.GenerateCode (1);
+                           (access.node_strappend_expression as IGenerateCode).GenerateCode (1);
                            AppendCharToRAMStr.Call (access.node_strappend_expression.src_loc)
                         end;
                      string_expression:
@@ -1544,7 +1529,7 @@ procedure TPIC18x_RoutineCallStatement.GenerateCode (result_stk_size: integer);
                   case TExpression(access.node_strappend_expression).expression_kind of
                      char_expression:
                         begin
-                           access.node_strappend_expression.GenerateCode (1);
+                           (access.node_strappend_expression as IGenerateCode).GenerateCode (1);
                            AppendCharToEEPROMString.Call (access.node_strappend_expression.src_loc)
                         end;
                      string_expression:
@@ -1635,7 +1620,7 @@ procedure TPIC18x_StatementList.GenerateCode (result_stk_size: integer);
       current_stack_level := StackUsageCounter.Current;
       for i := 0 to Length(stmts)-1 do
          begin
-            stmts[i].GenerateCode (0);
+            (stmts[i] as IGenerateCode).GenerateCode (0);
             assert (current_stack_level = StackUsageCounter.Current)
          end
    end;
@@ -1683,7 +1668,7 @@ procedure TPIC18x_WithStatement.GenerateCode (result_stk_size: integer);
       end;
       address := StackUsageCounter.Current - 1;
       TSourceSyncPoint.Create (do_src_loc);
-      statement.GenerateCode (0);
+      (statement as IGenerateCode).GenerateCode (0);
 
       TSourceSyncPoint.Create (last_src_loc);
       case access.base_variable.descriptor of
