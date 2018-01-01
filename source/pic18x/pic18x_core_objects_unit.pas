@@ -206,7 +206,7 @@ function TPIC18x_TypeDef_TypeInfo.Size: integer;
                ordinal_data_type:
                   result := calculate_ordinal_size;
                floating_point_data_type:
-                  result := real_variable_size;
+                  result := real_size;
             else
                assert (false)
             end;

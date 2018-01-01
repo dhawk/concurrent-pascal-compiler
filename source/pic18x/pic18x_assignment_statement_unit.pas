@@ -1258,7 +1258,7 @@ procedure TPIC18x_AssignmentStatement.GenerateCode (result_stk_size: integer);
          case expression.expression_kind of
             char_expression:
                begin
-                  (expression as IGenerateCode).GenerateCode (1);
+                  (expression as IGenerateCode).GenerateCode (char_size);
                   case assignee.base_variable.descriptor of
                      rw_var:
                         begin

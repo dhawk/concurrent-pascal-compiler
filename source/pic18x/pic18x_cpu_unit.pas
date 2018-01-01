@@ -250,9 +250,11 @@ type
       end;
 
 const
+   boolean_size = 1;
+   char_size = 1;
    rom_data_pointer_size = 2;
    pc_size = 3;
-   real_variable_size = 4;
+   real_size = 4;
 
 type
    TDynamicByteArray = array of byte;

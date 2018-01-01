@@ -394,7 +394,8 @@ procedure GenerateCodeForConditionalSkip (boolean_expression: TExpression; skip_
          end;
 
       // if no exit by now, then full evaluation required
-      (boolean_expression as IGenerateCode).GenerateCode (1);
+      (boolean_expression as IGenerateCode).GenerateCode (boolean_size);
+      assert (boolean_size=1);
       gen_skip_instruction (skip_sense, PREINC2, 0, access_mode);
       StackUsageCounter.Pop(1)
    end;
@@ -968,7 +969,7 @@ destructor TPIC18x_FunctionAccessPrimary.Destroy;
 
 procedure TPIC18x_NotPrimary.GenerateCode (result_stk_size: integer);
    begin
-      (boolean_expr as IGenerateCode).GenerateCode (1);
+      (boolean_expr as IGenerateCode).GenerateCode (boolean_size);
       TPIC18x_BTG.Create (1, 0, access_mode).annotation := 'tos := not tos'
    end;
 
@@ -1516,7 +1517,7 @@ procedure TPIC18x_RelationalExpression.GenerateCode (result_stk_size: integer);
                assert (false);
             real_expression:
                begin
-                  (left_simple_expression as IGenerateCode).GenerateCode (4);
+                  (left_simple_expression as IGenerateCode).GenerateCode (real_size);
                   if TPIC18x_Expression_TypeInfo (left_simple_expression.info).is_ieee_single then
                      convert_tos_from_ieee_to_pic
                end;
@@ -1529,7 +1530,7 @@ procedure TPIC18x_RelationalExpression.GenerateCode (result_stk_size: integer);
                assert (false);
             real_expression:
                begin
-                  (right_simple_expression as IGenerateCode).GenerateCode (4);
+                  (right_simple_expression as IGenerateCode).GenerateCode (real_size);
                   if TPIC18x_Expression_TypeInfo (right_simple_expression.info).is_ieee_single then
                      convert_tos_from_ieee_to_pic
                end;
@@ -1874,7 +1875,7 @@ procedure TPIC18x_StrPosPrimary.GenerateCode (result_stk_size: integer);
       case access.node_strpos_substr_expression.expression_kind of
          char_expression:
             begin
-               (access.node_strpos_substr_expression as IGenerateCode).GenerateCode (1);
+               (access.node_strpos_substr_expression as IGenerateCode).GenerateCode (char_size);
                case TPIC18x_Access(access).base_variable.descriptor of
                   rw_var,
                   rw_const:

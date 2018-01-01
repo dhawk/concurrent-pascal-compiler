@@ -15,8 +15,7 @@ uses
    pic18x_run_time_error_check_unit,
    pic18x_statements_unit,
    SysUtils,
-   test_pic18x_subroutines_unit,
-   Windows;
+   test_pic18x_subroutines_unit;
 
 procedure test1;
    // constant assignment and sign extension for constants

@@ -232,7 +232,7 @@ procedure TPIC18x_ParamList.PushParameters (actual_parameters: TArrayOfTDefiniti
                            end;
                         real_expression:
                            begin
-                              (actual_parameters[i] as IGenerateCode).GenerateCode (4);
+                              (actual_parameters[i] as IGenerateCode).GenerateCode (real_size);
                               if (parameter_definitions[i].typedef = target_cpu.get_supported_data_type (ieee_single_type_name))
                                  and
                                  (not TPIC18x_Expression_TypeInfo(TExpression(actual_parameters[i]).info).is_ieee_single) then
