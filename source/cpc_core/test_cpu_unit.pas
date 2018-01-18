@@ -270,6 +270,25 @@ function TTestCPU.supports_ioreg_1bit_params: boolean;
 
 {$include TTestCPU_constructor_functions.inc}
 
+type
+   TTestAddress_Primary =
+      class (TAddressPrimary)
+         procedure set_address_range;
+            override;
+      end;
+
+function TTestCPU.TAddressPrimary_CreateFromSourceTokens: TAddressPrimary;
+   begin
+      result := TTestAddress_Primary.CreateFromSourceTokens
+   end;
+
+procedure TTestAddress_Primary.set_address_range;
+   begin
+      info.min_value.AsInteger := 0;
+      info.max_value.AsInteger := 1023;
+      typedef := target_cpu.get_supported_data_type('uint10')
+   end;
+
 procedure TTestCPU.generate_machine_code (prog: TProgram);
    begin
    end;

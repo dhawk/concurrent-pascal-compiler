@@ -4,6 +4,8 @@
             virtual; abstract;
          function TAccess_CreateFromVariable (v: TVariable): TAccess;
             virtual; abstract;
+         function TAddressPrimary_CreateFromSourceTokens: TAddressPrimary;
+            virtual; abstract;
          function TAssignmentStatement_CreateFromSourceTokens (acc: TAccess): TAssignmentStatement;
             virtual; abstract;
          function TAwaitInterruptStatement_CreateFromSourceTokens: TAwaitInterruptStatement;

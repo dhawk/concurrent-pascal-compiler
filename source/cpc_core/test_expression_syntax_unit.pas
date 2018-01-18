@@ -1936,8 +1936,18 @@ procedure test_TPrimary;
       test_compile_error_generation ('var b: boolean; begin b := pred(false) end.', err_result_will_be_out_of_range, 'pred(false) end.');
       test_compile_error_generation ('var c: char; begin c := succ(chr(255)) end.', err_result_will_be_out_of_range, 'succ(chr(255)) end.');
       test_compile_error_generation ('var c: char; begin c := pred(chr(0)) end.', err_result_will_be_out_of_range, 'pred(chr(0)) end.');
+
+      test_only_for_successful_compilation ('var i: uint16; begin i := @i end.');
+      test_only_for_successful_compilation ('rom r: record i,j: int8 end = (i=4,j=5); var i: uint16; begin i := @r end.');
+      test_only_for_successful_compilation ('rom r: record i,j: int8 end = (i=4,j=5); var i: uint16; begin i := @r.j end.');
+      test_only_for_successful_compilation ('type tc=class eeprom e: int8; var i: uint16; public procedure p; begin end; begin i := @e end; begin end.');
+      test_only_for_successful_compilation ('procedure p (j: int8); var i: uint16; begin i := @j end; begin end.');
+      test_compile_error_generation ('procedure p; begin end; var i: uint16; begin i := @p end.', err_procedure_address_not_alowed, 'p end.');
+      test_compile_error_generation ('type tc=class property p: int8; var i: uint16; begin i := @p end; begin end.', err_property_address_not_alowed, 'p end; begin end.');
+      test_compile_error_generation ('function f: int8; begin end; var i: uint16; begin i := @f end.', err_function_address_not_alowed, 'f end.');
+      test_compile_error_generation ('const c=666; var i: uint16; begin i := @c end.', err_compile_time_constant_address_not_alowed, 'c end.');
       display ('')
    end;
-   
+
 end.
 

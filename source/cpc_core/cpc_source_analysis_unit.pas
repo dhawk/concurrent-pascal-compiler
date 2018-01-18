@@ -55,7 +55,8 @@ type
        sym_left_bracket,
        sym_right_bracket,
        sym_slash,
-       sym_comma
+       sym_comma,
+       sym_at_sign
       );
    TSymbolEnumSet = set of TSymbolEnum;
 
@@ -1514,6 +1515,8 @@ procedure TLexicalAnalysis.DoLexicalAnalysis;
                                        put_operator(sym_slash, 1);
                                     ',':
                                        put_operator(sym_comma, 1);
+                                    '@':
+                                       put_operator (sym_at_sign, 1);
                                     '''':
                                        begin
                                           line_idx := line_idx + 1;

@@ -128,6 +128,8 @@ type
             override;
          function TAccess_CreateFromVariable (v: TVariable): TAccess;
             override;
+         function TAddressPrimary_CreateFromSourceTokens: TAddressPrimary;
+            override;
          function TAssertStatement_CreateFromSourceTokens: TAssertStatement;
             override;
          function TAssignmentStatement_CreateFromSourceTokens (acc: TAccess): TAssignmentStatement;
@@ -544,6 +546,11 @@ function TPIC18x_CPU.TAccess_CreateFromSourceTokens: TAccess;
 function TPIC18x_CPU.TAccess_CreateFromVariable (v: TVariable): TAccess;
    begin
       result := TPIC18x_Access.CreateFromVariable (v)
+   end;
+
+function TPIC18x_CPU.TAddressPrimary_CreateFromSourceTokens: TAddressPrimary;
+   begin
+      result := TPIC18x_AddressPrimary.CreateFromSourceTokens
    end;
 
 function TPIC18x_CPU.TAssertStatement_CreateFromSourceTokens: TAssertStatement;

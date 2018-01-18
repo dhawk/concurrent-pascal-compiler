@@ -16,6 +16,10 @@ const
    err_ambiguous_first_index_base_type_for_anonymous_array = 'ambiguous first index base type for anonymous array';
    err_an_instance_of_this_interrupt_type_already_exists = 'an instance of this interrupt type already exists';
    err_array_may_not_contain_process_variables = 'array may not contain process variables';
+   err_procedure_address_not_alowed = 'procedure address not alowed';
+   err_property_address_not_alowed = 'property address not alowed';
+   err_function_address_not_alowed = 'function address not alowed';
+   err_compile_time_constant_address_not_alowed = 'compile time constant address not alowed';
    err_cant_call_public_routine_of_same_monitor_type_here = 'can''t call public routine of same monitor type here';
    err_assignment_operator_expected = '":=" expected';
    err_at_expected = '"at" expected';

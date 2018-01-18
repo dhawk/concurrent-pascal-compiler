@@ -27,6 +27,17 @@ type
             override;
       end;
 
+   TAddressPrimary =
+      class(TExpression)
+         acc: TAccess;
+         constructor CreateFromSourceTokens;
+         destructor Destroy;
+            override;
+      protected
+         procedure set_address_range;
+            virtual; abstract;
+      end;
+
    TChrTypeConversionPrimary =
       class(TExpression)
          expr: TExpression;
@@ -380,6 +391,8 @@ function CreatePrimaryFromSourceTokens: TExpression;
                   end;
                lex.advance_token
             end
+         else if lex.token_is_symbol(sym_at_sign) then
+            result := target_cpu.TAddressPrimary_CreateFromSourceTokens
          else if lex.token_is_reserved_word(rw_not) then
             result := target_cpu.TNotPrimary_CreateFromSourceTokens
          else if lex.token_is_reserved_word(rw_chr) then
@@ -647,6 +660,41 @@ procedure TAbsFunctionPrimary.MarkAsReachable;
 function TAbsFunctionPrimary.CheckForProhibitedDelayCall (err_msg: string): boolean;
    begin
       result := expr.CheckForProhibitedDelayCall (err_msg)
+   end;
+
+
+// =================
+//  TAddressPrimary
+
+constructor TAddressPrimary.CreateFromSourceTokens;
+   begin
+      inherited Create;
+      assert(lex.token_is_symbol(sym_at_sign));
+      lex.advance_token;
+      expression_kind := integer_expression;
+      acc := target_cpu.TAccess_CreateFromSourceTokens;
+      case acc.node_access_kind of
+         variable_access:
+            {as expected};
+         function_access:
+            raise compile_error.Create (err_function_address_not_alowed, acc.node_id_src_loc);
+         procedure_access:
+            raise compile_error.Create (err_procedure_address_not_alowed, acc.node_id_src_loc);
+         property_access:
+            raise compile_error.Create (err_property_address_not_alowed, acc.node_id_src_loc);
+         constant_access,
+         structured_constant_access:
+            raise compile_error.Create (err_compile_time_constant_address_not_alowed, acc.node_id_src_loc);
+      else
+         assert (false)
+      end;
+      set_address_range
+   end;
+
+destructor TAddressPrimary.Destroy;
+   begin
+      acc.Release;
+      inherited
    end;
 
 

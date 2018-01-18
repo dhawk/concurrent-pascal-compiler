@@ -95,6 +95,13 @@ type
          procedure GenerateCodeToCopyToRAMString;
          procedure GenerateCodeToCopyToEEPROMString;
       end;
+   TPIC18x_AddressPrimary =
+      class (TAddressPrimary, IGenerateCode)
+         procedure set_address_range;
+            override;
+         procedure GenerateCode (result_stk_size: integer);
+      end;
+
 
 function tos_size_description (signed: boolean; significant_bytes: integer): string;
 procedure generate_stack_fix_and_sign_extend_code
@@ -2723,6 +2730,43 @@ procedure TPIC18x_VariableAccessPrimary.GenerateCodeToCopyToEEPROMString;
          assert (false)
       end
    end;
+
+//=============================
+// TPIC18x_TestAddress_Primary
+
+procedure TPIC18x_AddressPrimary.set_address_range;
+   begin
+      case acc.base_variable.descriptor of
+         rw_const,
+         rw_var,
+         rw_ioreg:
+            typedef := target_cpu.get_supported_data_type('uint12');
+         rw_rom:
+            typedef := target_cpu.get_supported_data_type('uint16');
+         rw_eeprom:
+            if pic_info.available_eeprom_memory = 256 then
+               typedef := target_cpu.get_supported_data_type('uint8')
+            else if pic_info.available_eeprom_memory = 1024 then
+               typedef := target_cpu.get_supported_data_type('uint10')
+            else
+               assert (false);
+      else
+         assert (false)
+      end;
+      info.min_value.AsInteger := typedef.info.min_value.AsInteger;
+      info.max_value.AsInteger := typedef.info.max_value.AsInteger
+   end;
+
+procedure TPIC18x_AddressPrimary.GenerateCode (result_stk_size: integer);
+   begin
+      case result_stk_size of
+         1: TPIC18x_Access(acc).Generate_Push_Address1_Code (0, false);
+         2: TPIC18x_Access(acc).Generate_Push_Address2_Code (0, false);
+      else
+         assert (false)
+      end
+   end;
+
 
 procedure PushRealExpression (expr: TExpression);
    begin

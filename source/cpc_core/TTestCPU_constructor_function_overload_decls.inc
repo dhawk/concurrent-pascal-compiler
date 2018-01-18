@@ -4,6 +4,8 @@
             override;
          function TAccess_CreateFromVariable (v: TVariable): TAccess;
             override;
+         function TAddressPrimary_CreateFromSourceTokens: TAddressPrimary;
+            override;
          function TAssignmentStatement_CreateFromSourceTokens (acc: TAccess): TAssignmentStatement;
             override;
          function TAssertStatement_CreateFromSourceTokens: TAssertStatement;
