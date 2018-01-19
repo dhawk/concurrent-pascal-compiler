@@ -2758,15 +2758,36 @@ procedure TPIC18x_AddressPrimary.set_address_range;
    end;
 
 procedure TPIC18x_AddressPrimary.GenerateCode (result_stk_size: integer);
+   procedure adj_result (stk_size: integer);
+      var i: integer;
+      begin
+         if result_stk_size < stk_size then
+            begin
+               TPIC18x_ADDFSR.Create (2, stk_size-result_stk_size);
+               StackUsageCounter.pop (stk_size-result_stk_size)
+            end
+         else if result_stk_size > stk_size then
+            begin
+               for i := stk_size+1 to result_stk_size do
+                  TPIC18x_CLRF.Create (POSTDEC2, access_mode);
+               StackUsageCounter.push (result_stk_size-stk_size)
+            end
+      end;
    begin
-      case result_stk_size of
-         1: TPIC18x_Access(acc).Generate_Push_Address1_Code (0, false);
-         2: TPIC18x_Access(acc).Generate_Push_Address2_Code (0, false);
+      if (acc.base_variable.descriptor = rw_eeprom)
+         and
+         (pic_info.available_eeprom_memory = 256)
+      then
+         begin
+            TPIC18x_Access(acc).Generate_Push_Address1_Code (0, false);
+            adj_result (1)
+         end
       else
-         assert (false)
-      end
+         begin
+            TPIC18x_Access(acc).Generate_Push_Address2_Code (0, false);
+            adj_result (2)
+         end
    end;
-
 
 procedure PushRealExpression (expr: TExpression);
    begin
