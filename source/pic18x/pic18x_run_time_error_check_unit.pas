@@ -76,7 +76,7 @@ var
 
 // run-time error messages
 const
-   rterr_assignment_of_out_of_range_value = 'assignment of out-of-range value';
+   rterr_assignment_of_out_of_range_value = 'out-of-range value assignment';
    rterr_attempted_divide_by_zero = 'integer zero divide';
    rterr_bad_case_index = 'bad case index';
    rterr_dropped_interrupt = '%s interrupt dropped';

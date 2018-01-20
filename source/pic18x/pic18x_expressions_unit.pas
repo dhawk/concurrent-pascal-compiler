@@ -137,6 +137,24 @@ uses
    pic18x_types_unit,
    SysUtils;
 
+function pop_and_zero_check (pop_count: integer; src_loc: TSourceLocation): TInstruction;
+   var
+      i: integer;
+      lbl: TInstruction;
+      bz: TPIC18x_BZ;
+   begin
+      assert (pop_count > 0);
+      result := TPIC18x_MOVF.Create (PREINC2, dest_w, access_mode);
+      for i := 2 to pop_count do
+         TPIC18x_IORWF.Create (PREINC2, dest_w, access_mode);
+      bz := TPIC18x_BZ.Create;
+      set_errorcode_routine.Call;
+      lbl := TAssemblyLabel.Create;
+      RecordRunTimeErrorLocation (TAssemblyLabel.Create, rterr_assignment_of_out_of_range_value, src_loc);
+      bz.dest := lbl;
+      StackUsageCounter.Pop (pop_count)
+   end;
+
 type
    Tpush_ioreg_1bit_param_Subroutine =
       class (TSubroutine)
@@ -929,10 +947,7 @@ procedure TPIC18x_FunctionAccessPrimary.GenerateCode (result_stk_size: integer);
          begin
             get_errorcode_routine.Call;
             if result_stk_size < 3 then
-               begin
-                  TPIC18x_ADDFSR.Create (2, 3-result_stk_size);
-                  StackUsageCounter.pop (3-result_stk_size)
-               end
+               pop_and_zero_check (3-result_stk_size, src_loc)
             else if result_stk_size > 3 then
                begin
                   for i := 4 to result_stk_size do
@@ -2762,10 +2777,7 @@ procedure TPIC18x_AddressPrimary.GenerateCode (result_stk_size: integer);
       var i: integer;
       begin
          if result_stk_size < stk_size then
-            begin
-               TPIC18x_ADDFSR.Create (2, stk_size-result_stk_size);
-               StackUsageCounter.pop (stk_size-result_stk_size)
-            end
+            pop_and_zero_check (stk_size-result_stk_size, src_loc)
          else if result_stk_size > stk_size then
             begin
                for i := stk_size+1 to result_stk_size do
