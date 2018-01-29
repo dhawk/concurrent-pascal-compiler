@@ -423,7 +423,7 @@ procedure TPIC18x_CPU.release_preamble;
 function TPIC18x_CPU.process_compiler_directive (simplified_line: string; src_location: TSourceLocation): boolean;
    const
       processor_directive = '{$processor ';
-      rom_addr_directive = '{$rom_addr ';
+      rom_addr_directive = '{$program_start_addr ';
    var
       processor: string;
       full_path_fn: string;

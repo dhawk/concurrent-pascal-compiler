@@ -641,7 +641,7 @@ function extract_integer_compiler_directive_parameter (compiler_directive, simpl
    var
       i: integer;
    begin
-      // find beginning of param name
+      // find beginning of param 
       i := Length (compiler_directive) + 1;
       while (i <= length(simplified_line)) and CharInSet(simplified_line[i], white_space) do
          i := i + 1;
