@@ -294,7 +294,7 @@ procedure create_pic_info (proc: string);
    const
       include_file_directory = 'pic18x' + PathDelim + 'processor_definition_files' + PathDelim;
    begin
-      assert (f_pic_info = nil);
+      f_pic_info.Free;
       f_pic_info := t_pic_info.Create (ExtractFilePath(ParamStr(0)) + include_file_directory + proc + '.xml');
    end;
 

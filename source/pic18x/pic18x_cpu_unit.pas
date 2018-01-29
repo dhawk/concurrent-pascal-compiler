@@ -69,6 +69,7 @@ type
          Trunc24, Trunc32: TRoutine;
          reset_TMRn_cycle: array of Treset_TMRn_cycle;
          contains_alternate_address_sfrs: boolean;
+         rom_addr: integer;
 {$ifdef INCLUDE_SIMULATION}
          Test: TRoutine;
 {$endif}
@@ -421,14 +422,15 @@ procedure TPIC18x_CPU.release_preamble;
 
 function TPIC18x_CPU.process_compiler_directive (simplified_line: string; src_location: TSourceLocation): boolean;
    const
-      compiler_directive = '{$processor ';
+      processor_directive = '{$processor ';
+      rom_addr_directive = '{$rom_addr ';
    var
       processor: string;
       full_path_fn: string;
    begin
-      if Pos (compiler_directive, simplified_line) = 1 then
+      if Pos (processor_directive, simplified_line) = 1 then
          begin
-            processor := extract_quoted_compiler_directive_parameter (compiler_directive, simplified_line, 'stmt', src_location);
+            processor := extract_quoted_compiler_directive_parameter (processor_directive, simplified_line, 'processor', src_location);
             full_path_fn := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'pic18x' + PathDelim + 'include' + PathDelim + processor + '.inc';
             try
                read_in_file (full_path_fn, true, src_location);
@@ -442,6 +444,11 @@ function TPIC18x_CPU.process_compiler_directive (simplified_line: string; src_lo
                on ECantOpenFile do
                   raise compile_error.Create(format (err_processor_open_source_file, [full_path_fn]), FileErrorSourceLocation)
             end;
+            result := true
+         end
+      else if Pos (rom_addr_directive, simplified_line) = 1 then
+         begin
+            rom_addr := extract_integer_compiler_directive_parameter (rom_addr_directive, simplified_line, src_location);
             result := true
          end
       else

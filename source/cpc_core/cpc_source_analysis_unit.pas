@@ -289,6 +289,7 @@ procedure append_source_up_to (st: TStrings; src_loc: TSourceLocation);
 procedure append_remaining_source (st: TStrings);
 function caret (idx: integer): string;
 function extract_quoted_compiler_directive_parameter (compiler_directive, simplified_line, param_name: string; src_location: TSourceLocation): string;
+function extract_integer_compiler_directive_parameter (compiler_directive, simplified_line: string; src_location: TSourceLocation): integer;
 procedure read_in_file (full_path_fn: string; compiler_directives_allowed: boolean; src_location: TSourceLocation);
 procedure add_line_to_source (line: string; file_list_idx, line_no: integer; var in_preamble: boolean);
 function symbol_id (symbol: string): integer;
@@ -634,6 +635,69 @@ function extract_quoted_compiler_directive_parameter (compiler_directive, simpli
       // remove final '
       SetLength (simplified_line, Length(simplified_line)-1);
       result := Trim(Copy (simplified_line, i, 9999));
+   end;
+
+function extract_integer_compiler_directive_parameter (compiler_directive, simplified_line: string; src_location: TSourceLocation): integer;
+   var
+      i: integer;
+   begin
+      // find beginning of param name
+      i := Length (compiler_directive) + 1;
+      while (i <= length(simplified_line)) and CharInSet(simplified_line[i], white_space) do
+         i := i + 1;
+      if (i > length(simplified_line))
+         or
+         (not (CharInSet (simplified_line[i], ['$', '0'..'9'])))
+      then
+         begin
+            src_location.line_idx := i;
+            raise compile_error.Create (err_integer_expected, src_location)
+         end;
+      src_location.line_idx := i;   // location of integer param value
+      result := 0;
+      if simplified_line[i] = '$' then
+         begin
+            i := i + 1;
+            if (i > length(simplified_line))
+               or
+               (not (CharInSet (simplified_line[i], ['0'..'9', 'A'..'F', 'a'..'f'])))
+            then
+               begin
+                  src_location.line_idx := i;
+                  raise compile_error.Create (err_integer_expected, src_location)
+               end;
+            while (i <= length(simplified_line))
+                  and
+                  CharInSet (simplified_line[i], ['0'..'9', 'A'..'F', 'a'..'f'])
+            do begin
+                  result := result * 16;
+                  case simplified_line[i] of
+                     '0'..'9': result := result + ord(simplified_line[i]) - ord('0');
+                     'A'..'F': result := result + 10 + ord(simplified_line[i]) - ord('A');
+                     'a'..'f': result := result + 10 + ord(simplified_line[i]) - ord('a');
+                  else
+                     assert (false)
+                  end;
+                  i := i + 1;
+               end
+         end
+      else
+         while (i <= length(simplified_line))
+               and
+               CharInSet (simplified_line[i], ['0'..'9'])
+         do begin
+               result := (result * 10) + ord(simplified_line[i]) - ord('0');
+               i := i + 1
+            end;
+      while (i <= length(simplified_line))
+            and
+            CharInSet (simplified_line[i], white_space)
+      do i := i + 1;
+      if i <= length(simplified_line) then
+         begin
+            src_location.line_idx := i;   // location of bad char
+            raise compile_error.Create (err_closing_curly_bracket_required_for_compiler_directive, src_location)
+         end
    end;
 
 procedure handle_compiler_directive (source_idx: integer);
