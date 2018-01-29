@@ -18,11 +18,7 @@ uses
 *)
 
 uses
-{$IFDEF FPC}
-  Interfaces,
-{$ELSE}
   FastMM4,
-{$ENDIF}
   Forms,
   aboutbox_unit in '..\..\common\aboutbox_unit.pas' {AboutBoxForm},
   cpc_access_unit in '..\cpc_access_unit.pas',
@@ -50,7 +46,8 @@ uses
   test_multi_precision_integer_unit in '..\test_multi_precision_integer_unit.pas',
   test_statement_syntax_unit in '..\test_statement_syntax_unit.pas',
   test_subroutines_unit in '..\test_subroutines_unit.pas',
-  test_type_syntax_unit in '..\test_type_syntax_unit.pas';
+  test_type_syntax_unit in '..\test_type_syntax_unit.pas',
+  test_temp_directory_unit in '..\..\common\test_temp_directory_unit.pas';
 
 {$R *.res}
 

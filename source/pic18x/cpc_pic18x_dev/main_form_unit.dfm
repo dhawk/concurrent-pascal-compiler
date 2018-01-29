@@ -29,10 +29,6 @@ object MainForm: TMainForm
     TabOrder = 0
     object TabSheet1: TTabSheet
       Caption = 'Source'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         1188
         731)
@@ -43,7 +39,7 @@ object MainForm: TMainForm
         Height = 13
         Caption = 'Label1'
       end
-      object Memo: TMemo
+      object SourceMemo: TMemo
         Left = 16
         Top = 16
         Width = 1145
@@ -59,6 +55,7 @@ object MainForm: TMainForm
         ParentFont = False
         ScrollBars = ssBoth
         TabOrder = 0
+        OnChange = SourceMemoChange
       end
       object CompileResultsMemo: TMemo
         Left = 16
@@ -140,10 +137,6 @@ object MainForm: TMainForm
     object TabSheet2: TTabSheet
       Caption = 'Assembly'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         1188
         731)
@@ -167,10 +160,6 @@ object MainForm: TMainForm
     object TabSheet3: TTabSheet
       Caption = 'Trace'
       ImageIndex = 4
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Label2: TLabel
         Left = 27
         Top = 27
@@ -206,10 +195,6 @@ object MainForm: TMainForm
     object TabSheet4: TTabSheet
       Caption = 'Compiler Tests'
       ImageIndex = 3
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         1188
         731)
@@ -243,12 +228,40 @@ object MainForm: TMainForm
   end
   object MainMenu1: TMainMenu
     Left = 432
-    object About1: TMenuItem
+    object FileMenu: TMenuItem
+      Caption = 'File'
+      object OpenMenuItem: TMenuItem
+        Caption = 'Open...'
+        OnClick = OpenMenuItemClick
+      end
+      object SaveMenuItem: TMenuItem
+        Caption = 'Save'
+        Enabled = False
+        OnClick = SaveMenuItemClick
+      end
+      object SaveAsMenuItem: TMenuItem
+        Caption = 'Save As...'
+        OnClick = SaveAsMenuItemClick
+      end
+      object ExitMenuItem: TMenuItem
+        Caption = 'Exit'
+        OnClick = ExitMenuItemClick
+      end
+    end
+    object AboutMenuItem: TMenuItem
       Caption = 'About'
       object AboutTestCPCPIC18x1: TMenuItem
         Caption = 'About Test CPC PIC18x'
         OnClick = AboutTestCPCPIC18x1Click
       end
     end
+  end
+  object OpenDialog: TOpenDialog
+    Filter = 'Concurrent Pascal Source File (*.cp)|*.cp|Any File (*.*|*.*'
+    Left = 536
+  end
+  object SaveDialog: TSaveDialog
+    Filter = 'Concurrent Pascal Source File (*.cp)|*c.p|Any File (*.*)|*.*'
+    Left = 624
   end
 end

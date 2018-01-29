@@ -102,7 +102,6 @@ procedure TMainForm.SelectAllButtonClick(Sender: TObject);
 
 procedure TMainForm.RunSelectedTestsButtonClick(Sender: TObject);
    begin
-      CreateTempDir;
       Memo.Clear;
       CompileResultsMemo.Clear;
       Application.ProcessMessages;
@@ -142,8 +141,7 @@ procedure TMainForm.RunSelectedTestsButtonClick(Sender: TObject);
             display ('DEFINITION_OBJNO_TRACE still defined in cpc_common_unit.pas')
          end;
 
-      Memo.Lines.Add (IntToStr(total_tests_run) + ' tests run, ' + IntToStr (tests_failed) + ' failed');
-      DeleteTempFiles
+      Memo.Lines.Add (IntToStr(total_tests_run) + ' tests run, ' + IntToStr (tests_failed) + ' failed')
    end;
 
 INITIALIZATION

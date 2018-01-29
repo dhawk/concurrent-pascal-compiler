@@ -1121,7 +1121,10 @@ procedure TLexicalAnalysis.ReadInSourceFile (source_file_name: string);
    begin
       first_non_preamble_source_idx := Length(source);
       try
-         read_in_file (IncludeTrailingPathDelimiter(GetCurrentDir) + source_file_name, true, NonExistantSourceLocation)
+         if FileExists (source_file_name) then
+            read_in_file (source_file_name, true, NonExistantSourceLocation)
+         else
+            read_in_file (IncludeTrailingPathDelimiter(GetCurrentDir) + source_file_name, true, NonExistantSourceLocation)
       except
          on EFileDoesntExist do
             raise compile_error.Create(format (err_source_file_doesnt_exist, [source_file_name]), FileErrorSourceLocation);

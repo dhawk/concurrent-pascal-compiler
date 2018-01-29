@@ -69,7 +69,5 @@ function ProgramGenerator: TDefinition;
       OutputLinkerFile (ChangeFileExt(source_file_name, '.lkr'))
    end;
 
-INITIALIZATION
-   source_file_name := ExtractFilePath(ParamStr(0)) + 'test.cp'
 
 END.

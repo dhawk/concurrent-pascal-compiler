@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProjectGuid>{2358bff1-c81c-4511-be13-149cb86b9899}</ProjectGuid>
@@ -50,6 +50,7 @@ del run_cpc_core_tests.res</PostBuildEvent>
     <DCCReference Include="..\..\common\aboutbox_unit.pas">
       <Form>AboutBoxForm</Form>
     </DCCReference>
+    <DCCReference Include="..\..\common\test_temp_directory_unit.pas" />
     <DCCReference Include="..\cpc_access_unit.pas" />
     <DCCReference Include="..\cpc_blocks_unit.pas" />
     <DCCReference Include="..\cpc_common_unit.pas" />

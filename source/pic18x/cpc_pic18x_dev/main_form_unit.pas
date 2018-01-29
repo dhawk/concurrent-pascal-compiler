@@ -29,7 +29,7 @@ uses
    pic18x_statements_unit,
    Spin,
    StdCtrls,
-   SysUtils;
+   SysUtils, Dialogs;
 
 type
    TMainForm =
@@ -39,7 +39,7 @@ type
          PageControl1: TPageControl;
          TabSheet1: TTabSheet;
          TabSheet2: TTabSheet;
-         Memo: TMemo;
+         SourceMemo: TMemo;
          CompileResultsMemo: TMemo;
          ClearMemoButton: TButton;
          CompileMemoButton: TButton;
@@ -54,8 +54,15 @@ type
          Label2: TLabel;
          CleanupTestSrcButton: TButton;
          MainMenu1: TMainMenu;
-         About1: TMenuItem;
+         AboutMenuItem: TMenuItem;
          AboutTestCPCPIC18x1: TMenuItem;
+    FileMenu: TMenuItem;
+         OpenMenuItem: TMenuItem;
+         SaveMenuItem: TMenuItem;
+         SaveAsMenuItem: TMenuItem;
+         ExitMenuItem: TMenuItem;
+    OpenDialog: TOpenDialog;
+    SaveDialog: TSaveDialog;
          procedure ClearMemoButtonClick
             (Sender: TObject
             );
@@ -68,7 +75,20 @@ type
          procedure SrcToClipboardForTestButtonClick(Sender: TObject);
          procedure SrcToClipboardButtonClick(Sender: TObject);
          procedure FormCreate(Sender: TObject);
-    procedure AboutTestCPCPIC18x1Click(Sender: TObject);
+         procedure AboutTestCPCPIC18x1Click(Sender: TObject);
+         procedure ExitMenuItemClick(Sender: TObject);
+         procedure OpenMenuItemClick(Sender: TObject);
+         procedure SaveMenuItemClick(Sender: TObject);
+         procedure SaveAsMenuItemClick(Sender: TObject);
+    procedure SourceMemoChange(Sender: TObject);
+      private
+         f_ide_source_file_name: string;
+         f_ide_source_file_changed: boolean;
+         procedure set_caption;
+         procedure set_ide_source_file_name (s: string);
+         procedure set_ide_source_file_changed (b: boolean);
+         property ide_source_file_name: string read f_ide_source_file_name write set_ide_source_file_name;
+         property ide_source_file_changed: boolean read f_ide_source_file_changed write set_ide_source_file_changed;
       end;
 
 var
@@ -99,7 +119,7 @@ uses
    test_pic18x_compiler_unit,
    test_pic18x_kernel_unit,
    test_pic18x_simulator_unit,
-   test_pic18x_subroutines_unit;
+   test_pic18x_subroutines_unit, test_temp_directory_unit;
 
 
 var
@@ -178,9 +198,9 @@ var i,j,k: integer;
  s: string;
  x: boolean;
 begin
-   for i := 0 to memo.Lines.Count-1
+   for i := 0 to SourceMemo.Lines.Count-1
    do begin
-         s := memo.Lines[i];
+         s := SourceMemo.Lines[i];
          j := pos('add (''', s);
          if j > 0 then
             for k := 0 to 5 do
@@ -213,7 +233,7 @@ begin
          if pos('            ', s) = 1 then
             s := Copy(s, 13, 9999);
          s := TrimRight(s);
-         memo.Lines[i] := s
+         SourceMemo.Lines[i] := s
       end
 end;
 
@@ -224,9 +244,9 @@ procedure TMainForm.SrcToClipboardForTestButtonClick(Sender: TObject);
       sl: TStringList;
    begin
       sl := TStringList.Create;
-      for i := 0 to memo.Lines.Count-1 do
+      for i := 0 to SourceMemo.Lines.Count-1 do
          begin
-            s := memo.Lines[i];
+            s := SourceMemo.Lines[i];
             s := StringReplace(s, '''', '''''', [rfReplaceAll]);
             sl.Add ('      add (''' + s + ''');')
          end;
@@ -240,8 +260,8 @@ procedure TMainForm.SrcToClipboardButtonClick(Sender: TObject);
       sl: TStringList;
    begin
       sl := TStringList.Create;
-      for i := 0 to memo.Lines.Count-1 do
-         sl.Add(memo.Lines[i]);
+      for i := 0 to SourceMemo.Lines.Count-1 do
+         sl.Add(SourceMemo.Lines[i]);
       clipboard.AsText := sl.Text;
       sl.Free
    end;
@@ -250,7 +270,7 @@ procedure TMainForm.ClearMemoButtonClick
    (Sender: TObject
    );
    begin
-      Memo.Clear
+      SourceMemo.Clear
    end;
 
 procedure TMainForm.TestCompilerButtonClick(Sender: TObject);
@@ -269,11 +289,13 @@ procedure TMainForm.CompileMemoButtonClick
    var
       compilation: TCompilation;
    begin
+      source_file_name := ide_source_file_name;
+      SourceMemo.Lines.SaveToFile (source_file_name);
       no_sleep_on_idle := true;
       CompileResultsMemo.Clear;
       Application.ProcessMessages;
       ClearRunTimeErrorLists;
-      compilation := TCompilation.CreateFromStrings (MainForm.Memo.Lines, ProgramGenerator, CompileResultsMemo.Lines);
+      compilation := TCompilation.CreateFromFile (source_file_name, ProgramGenerator, CompileResultsMemo.Lines);
       compilation_result := compilation.compilation_result;
       AssemblySourceMemo.Lines.Assign(ProgramCode.assembly_source_code);
       ProgramCode.Clear;
@@ -281,10 +303,10 @@ procedure TMainForm.CompileMemoButtonClick
 {$IFDEF MSWINDOWS}
       if compilation_result = compile_error_in_source then
          begin
-            Memo.SetFocus;
-            Memo.SelStart := Memo.Perform (EM_LINEINDEX, compilation.compiler_error_source_location.line_no-1, 0) + compilation.compiler_error_source_location.line_idx-1;
-            Memo.SelLength := 0;
-            Memo.Perform (EM_SCROLLCARET, 0, 0)
+            SourceMemo.SetFocus;
+            SourceMemo.SelStart := SourceMemo.Perform (EM_LINEINDEX, compilation.compiler_error_source_location.line_no-1, 0) + compilation.compiler_error_source_location.line_idx-1;
+            SourceMemo.SelLength := 0;
+            SourceMemo.Perform (EM_SCROLLCARET, 0, 0)
          end;
 {$ENDIF}
       compilation.Free;
@@ -306,7 +328,7 @@ procedure TMainForm.RunButtonClick(Sender: TObject);
       test_program := nil;  // suppress compiler warning
       CompileResultsMemo.Clear;
       ClearRunTimeErrorLists;
-      compilation := TCompilation.CreateFromStrings (MainForm.Memo.Lines, ProgramGenerator, CompileResultsMemo.Lines);
+      compilation := TCompilation.CreateFromStrings (MainForm.SourceMemo.Lines, ProgramGenerator, CompileResultsMemo.Lines);
       ok := compilation.compilation_result = compiled_ok;
       if ok then
          begin
@@ -377,7 +399,68 @@ procedure TMainForm.RunButtonClick(Sender: TObject);
 
 procedure TMainForm.FormCreate(Sender: TObject);
    begin
-      PageControl1.ActivePageIndex := 0
+      PageControl1.ActivePageIndex := 0;
+      ide_source_file_name := temp_dir_for_tests + 'unnamed.cp';
    end;
+
+procedure TMainForm.OpenMenuItemClick(Sender: TObject);
+   begin
+      if OpenDialog.Execute then
+         begin
+            ide_source_file_name := OpenDialog.FileName;
+            SourceMemo.Lines.LoadFromFile (ide_source_file_name);
+            ide_source_file_changed := false;
+            SaveMenuItem.Enabled := true
+         end
+   end;
+
+procedure TMainForm.SaveMenuItemClick(Sender: TObject);
+   begin
+      SourceMemo.Lines.SaveToFile (ide_source_file_name);
+      ide_source_file_changed := false
+   end;
+
+procedure TMainForm.SaveAsMenuItemClick(Sender: TObject);
+   begin
+      if SaveDialog.Execute then
+         begin
+            ide_source_file_name := SaveDialog.FileName;
+            SourceMemo.Lines.SaveToFile (ide_source_file_name);
+            ide_source_file_changed := false;
+            SaveMenuItem.Enabled := true
+         end
+   end;
+
+procedure TMainForm.ExitMenuItemClick(Sender: TObject);
+   begin
+      Close
+   end;
+
+procedure TMainForm.set_caption;
+   begin
+      Caption := 'PIC18x Concurrent Pascal Compiler Dev - ' + ExtractFileName(ide_source_file_name);
+      if ide_source_file_changed then
+         Caption := Caption + '*'
+   end;
+
+procedure TMainForm.set_ide_source_file_name (s: string);
+   begin
+      f_ide_source_file_name := s;
+      if ExtractFileExt (f_ide_source_file_name) = '' then
+         f_ide_source_file_name := f_ide_source_file_name + '.cp';
+      set_caption
+   end;
+
+procedure TMainForm.set_ide_source_file_changed (b: boolean);
+   begin
+      f_ide_source_file_changed := b;
+      set_caption
+   end;
+
+procedure TMainForm.SourceMemoChange(Sender: TObject);
+   begin
+      ide_source_file_changed := true
+   end;
+
 
 END.

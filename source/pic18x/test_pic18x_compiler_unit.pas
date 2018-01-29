@@ -15,7 +15,8 @@ uses
    pic18x_run_time_error_check_unit,
    pic18x_statements_unit,
    SysUtils,
-   test_pic18x_subroutines_unit;
+   test_pic18x_subroutines_unit, pic18x_main_compiler_unit, 
+  test_temp_directory_unit;
 
 procedure test1;
    // constant assignment and sign extension for constants
@@ -7481,6 +7482,7 @@ procedure test143;
 
 procedure RunTests;
    begin
+      source_file_name := temp_dir_for_tests + 'test.cp';
       test1;
       test2;
       test3;

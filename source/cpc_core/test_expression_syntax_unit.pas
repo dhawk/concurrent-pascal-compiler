@@ -16,17 +16,20 @@ procedure test_TRelationalExpression;
 implementation
 
 uses
+   Classes,
+   Math,
+   SysUtils,
    cpc_common_unit,
    cpc_core_objects_unit,
    cpc_definitions_unit,
    cpc_expressions_unit,
    cpc_simple_expression_unit,
+   cpc_source_analysis_unit,
    cpc_target_cpu_unit,
    cpc_term_expression_unit,
-   Math,
-   SysUtils,
    test_cpu_unit,
-   test_subroutines_unit, Classes, cpc_source_analysis_unit;
+   test_subroutines_unit,
+   test_temp_directory_unit;
 
 function approximately_equal 
    (r1,r2: real
@@ -37,9 +40,9 @@ function approximately_equal
       result := round(r1*c) = round(r2*c)
    end;
    
-   //=============
-   //  Generators
-   
+//=============
+//  Generators
+
 procedure test_constant_reduction 
    (expr: TExpression
    );
@@ -1657,21 +1660,21 @@ procedure test_compiler_flags;
    procedure write_temp_test_files;
       var f: TextFile;
       begin
-         AssignFile (f, temp_dir + pathdelim + 'test_flag_1.inc');
+         AssignFile (f, temp_dir_for_tests + 'test_flag_1.inc');
          Rewrite (f);
          writeln (f, '{$mark 2}');
          writeln (f, '{$push test_flag_1 off}');
          writeln (f, '{$mark 3}');
          CloseFile (f);
 
-         AssignFile (f, temp_dir + pathdelim + 'test_flag_2.inc');
+         AssignFile (f, temp_dir_for_tests + 'test_flag_2.inc');
          Rewrite (f);
          writeln (f, '{$mark 5}');
          writeln (f, '{$push test_flag_1 on}');
          writeln (f, '{$mark 6}');
          CloseFile (f);
 
-         AssignFile (f, temp_dir + pathdelim + 'test_flag_3.inc');
+         AssignFile (f, temp_dir_for_tests + 'test_flag_3.inc');
          Rewrite (f);
          writeln (f, '{$push test_flag_1 on}');
          writeln (f, '{$pop test_flag_1}');
@@ -1764,10 +1767,10 @@ procedure test_compiler_flags;
          SetLength (marked_src_locations, 0);
          src.Add ('begin');
          src.Add ('{$mark 1}');
-         src.Add ('{$include ''' + temp_dir + pathdelim + 'test_flag_1.inc''}');
+         src.Add ('{$include ''' + temp_dir_for_tests + 'test_flag_1.inc''}');
          src.Add ('{$mark 4}');
          src.Add ('{$push test_flag_1 off}');
-         src.Add ('{$include ''' + temp_dir + pathdelim + 'test_flag_2.inc''}');
+         src.Add ('{$include ''' + temp_dir_for_tests + 'test_flag_2.inc''}');
          src.Add ('{$mark 7}');
          src.Add ('end.');
          test_only_for_successful_compilation (src);
@@ -1807,7 +1810,7 @@ procedure test_compiler_flags;
          src := TStringList.Create;
          src.Add ('begin');
          src.Add ('{$push test_flag_2 on}');
-         src.Add ('{$include ''' + temp_dir + pathdelim + 'test_flag_3.inc''}');
+         src.Add ('{$include ''' + temp_dir_for_tests + 'test_flag_3.inc''}');
          src.Add ('end.');
          test_compile_error_generation (src, err_stack_underflow, 'pop  test_flag_1');
          src.Free
@@ -1818,7 +1821,7 @@ procedure test_compiler_flags;
       begin
          src := TStringList.Create;
          src.Add ('begin');
-         src.Add ('{$include ''' + temp_dir + pathdelim + 'test_flag_1.inc''}');
+         src.Add ('{$include ''' + temp_dir_for_tests + 'test_flag_1.inc''}');
          src.Add ('{$pop test_flag_1}');
          src.Add ('end.');
          test_compile_error_generation (src, err_stack_underflow, 'pop test_flag_1');

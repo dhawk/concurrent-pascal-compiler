@@ -20,7 +20,11 @@ uses
 *)
 
 uses
+{$IFDEF FPC}
+  Interfaces,
+{$ELSE}
   FastMM4,
+{$ENDIF}
   Forms,
   SysUtils,
   Classes,
@@ -49,7 +53,8 @@ uses
   test_type_syntax_unit in '..\test_type_syntax_unit.pas',
   test_subroutines_unit in '..\test_subroutines_unit.pas',
   aboutbox_unit in '..\..\common\aboutbox_unit.pas' {AboutBoxForm},
-  run_cpc_core_tests_aboutbox_unit in 'run_cpc_core_tests_aboutbox_unit.pas' {RunCPCCoreTestsAboutBoxForm};
+  run_cpc_core_tests_aboutbox_unit in 'run_cpc_core_tests_aboutbox_unit.pas' {RunCPCCoreTestsAboutBoxForm},
+  test_temp_directory_unit in '..\..\common\test_temp_directory_unit.pas';
 
 {$R *.res}
 
@@ -58,7 +63,6 @@ BEGIN
       begin
          tests_failed := 0;
          try
-            CreateTempDir;
             test_lex_analysis;
             test_constant_syntax_unit;
             test_type_syntax;
@@ -72,7 +76,6 @@ BEGIN
             test_TSimpleExpression;
             test_TRelationalExpression;
             test_TAccess;
-            DeleteTempFiles
          except
             on E:Exception do
                begin
@@ -89,7 +92,7 @@ BEGIN
          Application.MainFormOnTaskbar := True;
 {$ENDIF}
          Application.CreateForm(TRunCPCCoreTestsAboutBoxForm, RunCPCCoreTestsAboutBoxForm);
-         Application.Run
+  Application.Run
       end
    else
       begin

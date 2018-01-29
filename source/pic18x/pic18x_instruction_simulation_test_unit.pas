@@ -19,7 +19,8 @@ uses
    SysUtils,
    test_pic18x_kernel_unit,
    test_pic18x_simulator_unit,
-   test_pic18x_subroutines_unit;
+   test_pic18x_subroutines_unit,
+   test_temp_directory_unit;
 
 var
    current_test: string;
@@ -2495,6 +2496,8 @@ procedure fsr_plusw_w_test;
 
 procedure run_instruction_simulation_tests;
    begin
+      compiler_out_hex_files_path := temp_dir_for_tests + 'hex_tests' + PathDelim;
+      compiler_out_asm_files_path := temp_dir_for_tests + 'asm_tests' + PathDelim;
       ForceDirectories (compiler_out_hex_files_path);
       ForceDirectories (compiler_out_asm_files_path);
       movlw_test;
@@ -2586,9 +2589,5 @@ procedure run_instruction_simulation_tests;
       fsr_plusw_w_test;
       display_test_result ('pic18x instruction simulator: ' + IntToStr (number_of_tests) + ' tests completed, ' + IntToStr(number_of_errors) + ' number_of_errors.')
    end;
-
-INITIALIZATION
-   compiler_out_hex_files_path := ExtractFileDir(ParamStr(0)) + PathDelim + 'temp' + PathDelim + 'pic18x_simulator_test_cases' + PathDelim + 'hex_tests' + PathDelim;
-   compiler_out_asm_files_path := ExtractFileDir(ParamStr(0)) + PathDelim + 'temp' + PathDelim + 'pic18x_simulator_test_cases' + PathDelim + 'asm_tests' + PathDelim;
 
 END.
