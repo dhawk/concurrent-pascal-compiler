@@ -69,7 +69,7 @@ type
          Trunc24, Trunc32: TRoutine;
          reset_TMRn_cycle: array of Treset_TMRn_cycle;
          contains_alternate_address_sfrs: boolean;
-         rom_addr: integer;
+         program_start_addr: integer;
 {$ifdef INCLUDE_SIMULATION}
          Test: TRoutine;
 {$endif}
@@ -448,7 +448,7 @@ function TPIC18x_CPU.process_compiler_directive (simplified_line: string; src_lo
          end
       else if Pos (rom_addr_directive, simplified_line) = 1 then
          begin
-            rom_addr := extract_integer_compiler_directive_parameter (rom_addr_directive, simplified_line, src_location);
+            program_start_addr := extract_integer_compiler_directive_parameter (rom_addr_directive, simplified_line, src_location);
             result := true
          end
       else
@@ -1094,14 +1094,14 @@ procedure TPIC18x_CPU.generate_machine_code (_prog: TProgram);
             rcon_bit7:
                with TPIC18x_BSF.Create (pic_info.RCON, 7, access_mode) do
                   begin
-                     rom_addr := 0;
+                     rom_addr := program_start_addr + 0;
                      annotation := 'reset vector';
                      instruction_kind := reset_vector_instruction
                   end;
             intcon_bit5:
                with TPIC18x_BSF.Create (INTCON, 5, access_mode) do
                   begin
-                     rom_addr := 0;
+                     rom_addr := program_start_addr + 0;
                      annotation := 'reset vector';
                      instruction_kind := reset_vector_instruction
                   end;
@@ -1111,7 +1111,7 @@ procedure TPIC18x_CPU.generate_machine_code (_prog: TProgram);
          reset_vector_goto := TPIC18x_GOTO.Create;
          with reset_vector_goto do
             begin
-               rom_addr := 2;
+               rom_addr := program_start_addr + 2;
                instruction_kind := reset_vector_instruction
             end;
 
@@ -1120,7 +1120,7 @@ procedure TPIC18x_CPU.generate_machine_code (_prog: TProgram);
                hi_priority_interrupt_vector_goto := TGOTOMacro.Create;
                with hi_priority_interrupt_vector_goto do
                   begin
-                     rom_addr := $0008;
+                     rom_addr := program_start_addr + $0008;
                      annotation := 'high priority interrupt vector';
                      instruction_kind := hi_pri_interrupt_vector_instruction
                   end
@@ -1153,7 +1153,7 @@ procedure TPIC18x_CPU.generate_machine_code (_prog: TProgram);
          TPIC18x_RETLW.Create ($80);
 
          // assign kernel rom addresses
-         romaddr := $0018;
+         romaddr := program_start_addr + $0018;
          for i := 0 to ProgramCode.NumberOfInstructions-1 do
             with ProgramCode.instr_arr[i] do
                if instruction_kind = executable_instruction then

@@ -1398,7 +1398,7 @@ procedure TProgramCode.WriteHexFile (fn: string);
                   write_hex_byte (offset shr 8);
                   write_hex_byte (offset and $ff);
                   write_hex_byte (0);  // data tag
-                  for j := 0 to Length(instr_hex) - 1 do
+                  for j := 0 to Length(instr_hex)-1 do
                      write_hex_byte(instr_hex[j]);
                   write_hex_byte ((-chksum) and $ff);
                   writeln (f);
