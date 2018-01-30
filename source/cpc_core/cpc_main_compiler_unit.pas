@@ -64,7 +64,6 @@ procedure TCompilation.run_compiler (ReadinSource: TProc; Generator: TDefinition
             CurrentDefinitionTable := TCurrentDefinitionTable.Create;
             CurrentDefinitionTable.DefineCPUBasicDataTypesForCurrentScope;
 
-
             compiled_object := Generator;
             compilation_result := compiled_ok;
             ResultsListing.Add ('Compiled Ok');

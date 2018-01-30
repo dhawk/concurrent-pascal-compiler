@@ -444,9 +444,8 @@ constructor t_pic_info.Create (xml_fn: string);
       xmlscanner.Free;
       if Length(data_regions) = 0 then
          available_SRAM := 0
-      else
+      else  // for now the compiler doesn't use additonal GRP regions beyond the first one
          available_SRAM := data_regions[0].end_addr;
-         // for now the compiler doesn't use additonal GRP regions beyond the first one
 {$ifdef INCLUDE_SIMULATION}
       TMR3L := SFR_Address('TMR3L');
       TMR3H := SFR_Address('TMR3H');

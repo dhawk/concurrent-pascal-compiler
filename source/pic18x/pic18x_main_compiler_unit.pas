@@ -14,6 +14,9 @@ var
 
 function ProgramGenerator: TDefinition;
 
+const
+   err_program_memory_exceeded = 'PIC18x program memory exceeded (%d bytes over the %d available)';
+
 IMPLEMENTATION
 
 uses
@@ -23,13 +26,16 @@ uses
    pic18x_instructions_unit,
    pic18x_macro_instructions_unit,
    pic18x_run_time_error_check_unit,
-   SysUtils;
+   pic18x_microprocessor_information_unit,
+   SysUtils, cpc_common_unit, cpc_blocks_unit, cpc_source_analysis_unit;
 
 function ProgramGenerator: TDefinition;
    var
       i: integer;
       changed: boolean;
       last_instr: TInstruction;
+      err_msg: string;
+      end_src_loc: TSourceLocation;
    begin
       DeleteFile (ChangeFileExt(source_file_name, '.hex'));
       DeleteFile (ChangeFileExt(source_file_name, '.asm'));
@@ -59,6 +65,14 @@ function ProgramGenerator: TDefinition;
          i := i - 1;
       last_instr := ProgramCode.instr_arr[i];
       program_memory_used := last_instr.rom_addr + last_instr.size;
+
+      if program_memory_used > pic_info.available_program_memory then
+         begin
+            err_msg := format (err_program_memory_exceeded, [program_memory_used - pic_info.available_program_memory, pic_info.available_program_memory]);
+            end_src_loc := TProgram(result).end_src_loc;
+            result.Free;
+            raise compile_error.Create (err_msg, end_src_loc);
+         end;
 
       ProgramCode.AssignEEPROMAddresses;
       ProgramCode.AssignConfigByteAddresses;
