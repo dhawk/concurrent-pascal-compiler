@@ -159,12 +159,6 @@ type
 
 This is similar to a variant record in traditional Pascal or a union in C.  All variants within the overlay occupy the same memory space and the size of an overlay variable is determined by the size of the largest variant.  Writing to one of the variants overwrites all the other variants.  Overlays are usually used for unchecked type conversions but may also be useful to reduce memory usage.
 
-# Structured Constants
-
-## ROM constants
-
-# System Component Types
-
 ## Class Types
 
 ~~~
@@ -201,6 +195,85 @@ The initial statement of an instance of a class is only executed once at system 
 
 A class does not provide concurrent access and is therefore only useful within a single process (or rarely in the program initial statement).
 
+# Structured Constants
+
+A structured constant is specified with a type definition and simple constants for each element of the type.  A structured constant must be fully specified.
+
+For example, a structured constant based on a record type is specified as follows:
+
+~~~
+type
+   tRecordType =
+      record
+         i: int8;
+         c: char
+      end;
+const
+   RecordConstant: TRecordType = (i=5, c='a');
+~~~
+
+A structured constant based on an array constant is specified as follows.  Each element of the array needs to be specified along with its index:
+
+~~~
+type
+   tArrayType = array [1..3] of int8;
+
+const
+   ArrayConst: tArrayType = ([1]=5, [2]=3, [3]=7);
+~~~
+
+More complex structured constants can be specified such as the following:
+
+~~~
+type
+   tStructuredType =
+      array [1..3] of 
+         record
+            i: int8;
+            c: char
+         end;
+
+const
+   StructuredConstant: 
+      tStructuredType =
+         ([1] = (i=5, c='a'),
+          [2] = (i=5, c='a'),
+          [3] = (i=5, c='a')
+         );
+~~~
+
+## ROM constants
+
+Structured constants as shown above can only be used at compile time - array constants can only be indexed with a constant index.  Frequently it will be useful to place structured constants in ROM.  A ROM constant array can be indexed with a variable expression.
+
+~~~
+type
+   tStructuredType =
+      array [1..3] of 
+         record
+            i: int8;
+            c: char
+         end;
+rom
+   StructuredConstant: 
+      tStructuredType =
+         ([1] = (i=5, c='a'),
+          [2] = (i=5, c='a'),
+          [3] = (i=5, c='a')
+         );
+~~~ 
+
+
+
+
+
+
+
+
+# System Component Types
+
+A Concurrent Pascal program will consist of a connected set of system components.  Each of these commponents will be either a **process** or a **monitor**.  Each process is a cyclic sequential algorithm and represents a site of concurrent activity.  A monitor is a shared data structure used for inter-process communication.
+
 ## Monitor Types
 
 A monitor is similar to a class but it does support concurrent access.  The declaration is  similar except that the keyword monitor is used.  
@@ -226,19 +299,37 @@ type
       end;
 ~~~
 
+A key feature of monitors is that each public procedure implements an *atomic critical section*.  The kernel guarantees that only one process is executing within the critical section at a time.  This key feature is what allows Concurrent Pascal to safely implement concurrent data sharing since this is the *only* mechanism by which data can be shared between concurrent processes.
+
+### Queue Variables
+
+A queue is a special data type that can only be declared as a private variable in a monitor. It can be used by a process to programmatically block itself using a **delay** call.  Later that process can be resumed by a different process with a **continue** call.
+
+~~~
+producer consumer example
+~~~ 
+
 ## Process Types
  
 
  
+# Memory Layout
+
+An embedded system implemented in Concurrent Pascal might be intended to run for decades without failure or rebooting.  To achieve this it is helpful to utilize as simple a memory layout as possible. This results in some restrictions that hopefully cause only minor inconvience to the programmer.
+
+The Concurrent Pascal compiler determines the entire memory layout at compile time.  The compiler calculates exact memory requirements and allocates space for the kernel, system components, process stacks, and global variables (if any). 
+
+One restriction is that procedures cannot be recursive.  This ensures that process stacks cannot overflow.  It also allows exact stack sizes to be calculated at compile time.
+
+Another restriction is that there is no heap mechanism.  With a heap mechanism there can be memory-leaks and/or fragmentation that eventually clog up the system to the point where it cannot continue to function.
 
 
-
-# ErrorCode 
+# Error Reporting 
 
 Embedded microcontrollers do not normally operate in an environment conducive to extensive run-time error reporting such as blue screens or crash dumps, so instead Concurrent Pascal provides a rudimentary error reporting capability in the form of an ErrorCode variable that is set when a run-time error occurs.  The ErrorCode variable is used extensively by the compiler and kernel to report run-time errors and can also be used by the programmer to report errors via the assert statement:
 
 ~~~
-assert (<boolean expression>, 'Error Message')
+assert (<boolean expression>, <error message string constant>)
 ~~~
 
 The global ErrorCode variable is assigned a unique value for each reportable run-time error.  The Error Message string itself is not embedded anywhere in the Microcontroller’s ROM but is instead saved in a file named <program_name>.err produced with each successful compilation.  The file lists all possible error codes and the associated error messages as well as the location in the source file where the error occurred. 
@@ -263,7 +354,7 @@ Your compiler may define a set of compiler flags for controlling aspects of code
 
 The initial value of the flags at the beginning of the program might be set by the build environment.  For example the flags may initially be turned on when compiled for debug and turned off for release.  Consult the documentation for your compiler for details.
 
-The programmer may specify flag settings for specific sections of the program by adding push and pop directives to the source.  The push directive pushes the current value of a flag onto a stack and then turns it on or off.  The pop directive restores the previous value of the flag.
+The programmer may specify flag settings for specific sections of the program by adding push and pop directives to the source.  The push directive pushes the current value of a flag onto a stack and then turns it on or off.  The pop directive restores the previous value of the flag:
 
 ~~~
 {$PUSH RANGE_CHECK ON}
@@ -271,7 +362,7 @@ The programmer may specify flag settings for specific sections of the program by
 {$POP RANGE_CHECK}
 ~~~
  
-The value of flags carry into include files.  If a flag is **ON** before an include directive, the flag will be **ON** at the beginning of the include file.  Include files may also contain their own push and pop directives.
+The value of flags carry into include files.  If a flag is **ON** before an include directive the flag will be **ON** at the beginning of the include file.  Include files may also contain their own push and pop directives.
 
 The value of a flag after an include directive is the same as it was before the include directive no matter what changes to the flag were made by the include file.  For example, if a flag is **ON** before the include directive, and the include file turns the flag **OFF**, the flag will revert to **ON** immediately after the include directive: 
 
@@ -283,7 +374,7 @@ The value of a flag after an include directive is the same as it was before the 
 
 The compiler internally maintains a separate set of flag stacks for each source or include file.  The compiler automatically empties each flag stack at the end of the file by popping all un-popped flags pushed within that file.  Therefore the compiler does not require that each push flag directive be matched with a subsequent pop within that same file.
 
-On the other hand, flag stack underflow is not allowed. Therefore each pop flag directive must be preceded by a push for that same flag within the same file.
+On the other hand, we all know that stack underflow is not a good thing. Therefore each pop flag directive must be preceded by a matching push within the same file.
 
 # Reserved Words
 
