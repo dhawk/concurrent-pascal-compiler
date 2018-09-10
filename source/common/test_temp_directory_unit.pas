@@ -15,7 +15,7 @@ procedure CreateTempDirForTests;
       guid: TGUID;
       bufFolder: array [0..MAX_PATH] of Char;
    begin
-      GetTempPath(SizeOf(bufFolder), bufFolder);
+      GetTempPath(Length(bufFolder), bufFolder);
       temp_dir_for_tests := IncludeTrailingPathDelimiter(String(bufFolder));
       CreateGUID (guid);
       temp_dir_for_tests := temp_dir_for_tests + GUIDToString (guid) + PathDelim;
