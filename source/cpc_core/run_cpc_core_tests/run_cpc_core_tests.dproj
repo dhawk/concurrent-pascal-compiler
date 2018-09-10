@@ -26,10 +26,10 @@
     <DCC_DcuOutput>.\$(Platform)\$(Config)</DCC_DcuOutput>
     <DCC_ObjOutput>.\$(Platform)\$(Config)</DCC_ObjOutput>
     <DCC_HppOutput>.\$(Platform)\$(Config)</DCC_HppOutput>
-    <DCC_UnitSearchPath>..\..\lib;..\..\lib\mparith;..\..\lib\fastmm</DCC_UnitSearchPath>
-    <DCC_ResourcePath>..\..\lib;..\..\lib\mparith;..\..\lib\fastmm</DCC_ResourcePath>
-    <DCC_ObjPath>..\..\lib;..\..\lib\mparith;..\..\lib\fastmm</DCC_ObjPath>
-    <DCC_IncludePath>..\..\lib;..\..\lib\mparith;..\..\lib\fastmm</DCC_IncludePath>
+    <DCC_UnitSearchPath>..\..\lib;..\..\lib\mparith;..\..\lib\fastmm;$(BDS)\lib\debug;$(BDS)\lib</DCC_UnitSearchPath>
+    <DCC_ResourcePath>..\..\lib;..\..\lib\mparith;..\..\lib\fastmm;$(BDS)\lib\debug;$(BDS)\lib</DCC_ResourcePath>
+    <DCC_ObjPath>..\..\lib;..\..\lib\mparith;..\..\lib\fastmm;$(BDS)\lib\debug;$(BDS)\lib</DCC_ObjPath>
+    <DCC_IncludePath>..\..\lib;..\..\lib\mparith;..\..\lib\fastmm;$(BDS)\lib\debug;$(BDS)\lib</DCC_IncludePath>
   </PropertyGroup>
   <ProjectExtensions>
     <Borland.Personality>Delphi.Personality</Borland.Personality>
