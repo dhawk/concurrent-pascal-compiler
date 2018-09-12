@@ -6493,7 +6493,7 @@ var
   w: longint;
   str: pchar8;
   {$ifndef RESULT}
-    Result: ansistring;
+//    Result: ansistring;       // removed DRH 9/11/18, won't compile with Delphi 10.2.2
   {$endif}
   rmap: TRadixCMap;
   pad: boolean;
